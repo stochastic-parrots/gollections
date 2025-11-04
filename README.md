@@ -1,0 +1,2 @@
+# gollections
+Golang Collections Library
