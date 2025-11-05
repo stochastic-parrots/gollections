@@ -1,6 +1,8 @@
 package array
 
-import "github.com/stochastic-parrots/gollections"
+import (
+	"github.com/stochastic-parrots/gollections/pkg"
+)
 
 type arrayListIterator[T any] struct {
 	index  int
@@ -8,7 +10,7 @@ type arrayListIterator[T any] struct {
 	data   *[]T
 }
 
-func newArrayListIterator[T any](array ArrayList[T]) gollections.Iterator[T] {
+func newArrayListIterator[T any](array ArrayList[T]) pkg.Iterator[T] {
 	return &arrayListIterator[T]{
 		index:  0,
 		length: array.length,

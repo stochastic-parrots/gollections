@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections/internal/lists"
+	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 type LinkedList[T any] struct {
@@ -26,6 +27,34 @@ func (list LinkedList[T]) Length() int {
 
 func (list LinkedList[T]) IsEmpty() bool {
 	return list.length == 0
+}
+
+func (list LinkedList[T]) Get(index int) (T, error) {
+	if index < 0 || index >= list.Length() {
+		var zero T
+		return zero, lists.NewIndexOutOfBoundError(index, list.Length()-1)
+	}
+
+	current := list.first
+	for range index {
+		current = current.Next()
+	}
+
+	return current.Value(), nil
+}
+
+func (list LinkedList[T]) Set(index int, x T) error {
+	if index < 0 || index >= list.Length() {
+		return lists.NewIndexOutOfBoundError(index, list.Length()-1)
+	}
+
+	current := list.first
+	for range index {
+		current = current.Next()
+	}
+
+	current.value = x
+	return nil
 }
 
 func (list *LinkedList[T]) append(x T) {
@@ -74,7 +103,7 @@ func (list *LinkedList[T]) Reverse() {
 	list.last = tmp
 }
 
-func (list LinkedList[T]) Iterator() gollections.Iterator[T] {
+func (list LinkedList[T]) Iterator() pkg.Iterator[T] {
 	return newIterator(list.first)
 }
 

@@ -4,55 +4,83 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections/internal/lists"
+	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 type DoubleLinkedList[T any] struct {
-	First    *DoubleLinkedNode[T]
-	Last     *DoubleLinkedNode[T]
-	Len      int
-	reversed bool
+	first, last *DoubleLinkedNode[T]
+	length      int
+	reversed    bool
 }
 
 func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 	return &DoubleLinkedList[T]{
-		First:    nil,
-		Last:     nil,
-		Len:      0,
+		first:    nil,
+		last:     nil,
+		length:   0,
 		reversed: false,
 	}
 }
 
 func (list DoubleLinkedList[T]) Length() int {
-	return list.Len
+	return list.length
 }
 
 func (list DoubleLinkedList[T]) IsEmpty() bool {
-	return list.Len == 0
+	return list.length == 0
+}
+
+func (list DoubleLinkedList[T]) Get(index int) (T, error) {
+	if index < 0 || index >= list.Length() {
+		var zero T
+		return zero, lists.NewIndexOutOfBoundError(index, list.Length()-1)
+	}
+
+	current := list.first
+	for range index {
+		current = current.Next()
+	}
+
+	return current.Value(), nil
+}
+
+func (list DoubleLinkedList[T]) Set(index int, x T) error {
+	if index < 0 || index >= list.Length() {
+		return lists.NewIndexOutOfBoundError(index, list.Length()-1)
+	}
+
+	current := list.first
+	for range index {
+		current = current.Next()
+	}
+
+	current.value = x
+	return nil
 }
 
 func (list *DoubleLinkedList[T]) append(x T) {
 	if list.IsEmpty() {
-		list.First = NewDoubleLinkedNode(x)
-		list.Last = list.First
-		list.Len++
+		list.first = NewDoubleLinkedNode(x)
+		list.last = list.first
+		list.length++
 		return
 	}
 
 	if !list.reversed {
 		new := NewDoubleLinkedNode(x)
-		list.Last.next = new
-		new.previous = list.Last
-		list.Last = new
-		list.Len++
+		list.last.next = new
+		new.previous = list.last
+		list.last = new
+		list.length++
 		return
 	}
 
 	new := NewDoubleLinkedNode(x)
-	list.Last.previous = new
-	new.next = list.Last
-	list.Last = new
-	list.Len++
+	list.last.previous = new
+	new.next = list.last
+	list.last = new
+	list.length++
 }
 
 func (list *DoubleLinkedList[T]) Append(xs ...T) {
@@ -62,14 +90,14 @@ func (list *DoubleLinkedList[T]) Append(xs ...T) {
 }
 
 func (list *DoubleLinkedList[T]) Reverse() {
-	temp := list.First
-	list.First = list.Last
-	list.Last = temp
+	temp := list.first
+	list.first = list.last
+	list.last = temp
 	list.reversed = !list.reversed
 }
 
-func (list DoubleLinkedList[T]) Iterator() gollections.Iterator[T] {
-	return newDoubleLinkedListIterator(list.First, list.reversed)
+func (list DoubleLinkedList[T]) Iterator() pkg.Iterator[T] {
+	return newDoubleLinkedListIterator(list.first, list.reversed)
 }
 
 func (list DoubleLinkedList[T]) String() string {

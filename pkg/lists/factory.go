@@ -1,7 +1,7 @@
 package lists
 
 import (
-	lists "github.com/stochastic-parrots/gollections/internal/lists"
+	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stochastic-parrots/gollections/internal/lists/array"
 	"github.com/stochastic-parrots/gollections/internal/lists/doublelinked"
 	"github.com/stochastic-parrots/gollections/internal/lists/linked"
@@ -11,13 +11,15 @@ type List[T any] = lists.List[T]
 
 // NewArrayList creates and returns a new empty array list.
 //
-// Its a wrapper for golang slices, returns the list as a List[T] interface.
+// It is a wrapper for golang slices, returns the list as a List[T] interface.
 //
 // Performance Summary (Time Complexity):
 //
 //	Operation                    Time Complexity
 //	--------------------------   ---------------
 //	Append(xs...T)               O(xs) Amortized
+//	Get(index int)               O(1)
+//	Set(index int, x T)          O(1)
 //	Reverse()                    O(N)
 //	Length()                     O(1)
 //	IsEmpty()                    O(1)
@@ -36,6 +38,8 @@ func NewArrayList[T any](size int) List[T] {
 //	Operation                    Time Complexity
 //	--------------------------   ---------------
 //	Append(xs...T)               O(xs)
+//	Get(index int)               O(N)
+//	Set(index int, x T)          O(N)
 //	Reverse()                    O(N)
 //	Length()                     O(1)
 //	IsEmpty()                    O(1)
@@ -54,6 +58,8 @@ func NewLinkedList[T any]() List[T] {
 //	Operation                    Time Complexity
 //	--------------------------   ---------------
 //	Append(xs...T)               O(xs)
+//	Get(index int)               O(N)
+//	Set(index int, x T)          O(N)
 //	Reverse()                    O(1)
 //	Length()                     O(1)
 //	IsEmpty()                    O(1)

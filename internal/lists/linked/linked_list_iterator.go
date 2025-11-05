@@ -1,12 +1,14 @@
 package linked
 
-import "github.com/stochastic-parrots/gollections"
+import (
+	"github.com/stochastic-parrots/gollections/pkg"
+)
 
 type linkedListIterator[T any] struct {
 	current *Node[T]
 }
 
-func newIterator[T any](first *Node[T]) gollections.Iterator[T] {
+func newIterator[T any](first *Node[T]) pkg.Iterator[T] {
 	return &linkedListIterator[T]{current: first}
 }
 

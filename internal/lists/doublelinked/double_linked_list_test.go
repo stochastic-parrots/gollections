@@ -3,6 +3,7 @@ package doublelinked
 import (
 	"testing"
 
+	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,8 +12,8 @@ func TestNewDoubleLinkedList(t *testing.T) {
 
 	assert.Equal(t, 0, list.Length())
 	assert.True(t, list.IsEmpty())
-	assert.Nil(t, list.First)
-	assert.Nil(t, list.Last)
+	assert.Nil(t, list.first)
+	assert.Nil(t, list.last)
 }
 
 func TestDoubleLinkedListLength(t *testing.T) {
@@ -29,6 +30,63 @@ func TestDoubleLinkedListIsEmpty(t *testing.T) {
 	assert.True(t, list.IsEmpty())
 	list.Append(1, 2, 3)
 	assert.False(t, list.IsEmpty())
+}
+
+func TestDoubleLinkedListGet(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for i := range 4 {
+		x, err := list.Get(i)
+		assert.Equal(t, values[i], x)
+		assert.Nil(t, err)
+	}
+}
+
+func TestDoubleLinkedListGetInvalidIndex(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	list.Append(10, 1, 9, 100)
+
+	for _, i := range []int{-1, 4, 5} {
+		_, err := list.Get(i)
+		target := lists.NewIndexOutOfBoundError(i, list.length)
+		template := "index %d is out of bounds; maximum valid index is %d"
+		assert.ErrorAsf(t, err, &target, template, i, list.length)
+		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+	}
+}
+
+func TestDoubleLinkedListSet(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for i := range 4 {
+		err := list.Set(i, values[i]+1)
+		x, _ := list.Get(i)
+		assert.Equal(t, values[i]+1, x)
+		assert.Nil(t, err)
+	}
+}
+
+func TestDoubleLinkedListSetInvalidIndex(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for _, i := range []int{-1, 4, 5} {
+		err := list.Set(i, 0)
+		target := lists.NewIndexOutOfBoundError(i, list.length)
+		template := "index %d is out of bounds; maximum valid index is %d"
+		assert.ErrorAsf(t, err, &target, template, i, list.length)
+		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+	}
+
+	for i := range list.length {
+		x, _ := list.Get(i)
+		assert.Equal(t, values[i], x)
+	}
 }
 
 func TestDoubleLinkedListAppend(t *testing.T) {
@@ -56,8 +114,8 @@ func TestEmptyDoubleLinkedListReverse(t *testing.T) {
 
 	assert.Equal(t, 0, list.Length())
 	assert.True(t, list.IsEmpty())
-	assert.Nil(t, list.First)
-	assert.Nil(t, list.Last)
+	assert.Nil(t, list.first)
+	assert.Nil(t, list.last)
 }
 
 func TestDoubleLinkedListIterator(t *testing.T) {
@@ -96,7 +154,7 @@ func TestLinkedListString(t *testing.T) {
 }
 
 func DoubleLinkedListContains[T any](t *testing.T, items []T, list *DoubleLinkedList[T]) {
-	current := list.First
+	current := list.first
 	for index, x := range items {
 		assert.Equal(t, x, current.value)
 

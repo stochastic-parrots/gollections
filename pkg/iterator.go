@@ -1,4 +1,4 @@
-package gollections
+package pkg
 
 type Iterator[T any] interface {
 	HasNext() bool

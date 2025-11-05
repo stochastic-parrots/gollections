@@ -3,6 +3,7 @@ package array
 import (
 	"testing"
 
+	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,6 +27,62 @@ func TestArrayListLength(t *testing.T) {
 
 	assert.False(t, list.IsEmpty())
 	assert.Equal(t, 4, list.Length())
+}
+
+func TestArrayListGet(t *testing.T) {
+	list := NewArrayList[int](100)
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for i := range 4 {
+		x, err := list.Get(i)
+		assert.Equal(t, values[i], x)
+		assert.Nil(t, err)
+	}
+}
+
+func TestArrayListGetInvalidIndex(t *testing.T) {
+	list := NewArrayList[int](100)
+	list.Append(10, 1, 9, 100)
+
+	for _, i := range []int{-1, 4, 5} {
+		_, err := list.Get(i)
+		target := lists.NewIndexOutOfBoundError(i, list.length)
+		template := "index %d is out of bounds; maximum valid index is %d"
+		assert.ErrorAsf(t, err, &target, template, i, list.length)
+		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+	}
+}
+
+func TestArrayListSet(t *testing.T) {
+	list := NewArrayList[int](100)
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for i := range 4 {
+		err := list.Set(i, values[i]+1)
+		assert.Equal(t, values[i]+1, list.data[i])
+		assert.Nil(t, err)
+	}
+}
+
+func TestArrayListSetInvalidIndex(t *testing.T) {
+	list := NewArrayList[int](100)
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for _, i := range []int{-1, 4, 5} {
+		err := list.Set(i, 0)
+		target := lists.NewIndexOutOfBoundError(i, list.length)
+		template := "index %d is out of bounds; maximum valid index is %d"
+		assert.ErrorAsf(t, err, &target, template, i, list.length)
+		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+	}
+
+	for i := range list.length {
+
+		assert.Equal(t, values[i], list.data[i])
+	}
 }
 
 func TestArrayListAppend(t *testing.T) {

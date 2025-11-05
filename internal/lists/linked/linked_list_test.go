@@ -3,6 +3,7 @@ package linked
 import (
 	"testing"
 
+	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,6 +30,63 @@ func TestLinkedListIsEmpty(t *testing.T) {
 	assert.True(t, list.IsEmpty())
 	list.Append(1, 2, 3)
 	assert.False(t, list.IsEmpty())
+}
+
+func TestLinkedListGet(t *testing.T) {
+	list := NewLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for i := range 4 {
+		x, err := list.Get(i)
+		assert.Equal(t, values[i], x)
+		assert.Nil(t, err)
+	}
+}
+
+func TestLinkedListGetInvalidIndex(t *testing.T) {
+	list := NewLinkedList[int]()
+	list.Append(10, 1, 9, 100)
+
+	for _, i := range []int{-1, 4, 5} {
+		_, err := list.Get(i)
+		target := lists.NewIndexOutOfBoundError(i, list.length)
+		template := "index %d is out of bounds; maximum valid index is %d"
+		assert.ErrorAsf(t, err, &target, template, i, list.length)
+		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+	}
+}
+
+func TestLinkedListSet(t *testing.T) {
+	list := NewLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for i := range 4 {
+		err := list.Set(i, values[i]+1)
+		x, _ := list.Get(i)
+		assert.Equal(t, values[i]+1, x)
+		assert.Nil(t, err)
+	}
+}
+
+func TestLinkedListSetInvalidIndex(t *testing.T) {
+	list := NewLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+
+	for _, i := range []int{-1, 4, 5} {
+		err := list.Set(i, 0)
+		target := lists.NewIndexOutOfBoundError(i, list.length)
+		template := "index %d is out of bounds; maximum valid index is %d"
+		assert.ErrorAsf(t, err, &target, template, i, list.length)
+		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+	}
+
+	for i := range list.length {
+		x, _ := list.Get(i)
+		assert.Equal(t, values[i], x)
+	}
 }
 
 func TestLinkedListAdd(t *testing.T) {

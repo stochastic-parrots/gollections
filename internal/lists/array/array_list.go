@@ -5,7 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections/internal/lists"
+	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 type ArrayList[T any] struct {
@@ -27,6 +28,24 @@ func (array ArrayList[T]) IsEmpty() bool {
 	return array.length == 0
 }
 
+func (array ArrayList[T]) Get(index int) (T, error) {
+	if index < 0 || index >= array.Length() {
+		var zero T
+		return zero, lists.NewIndexOutOfBoundError(index, array.Length()-1)
+	}
+
+	return array.data[index], nil
+}
+
+func (array *ArrayList[T]) Set(index int, x T) error {
+	if index < 0 || index >= array.Length() {
+		return lists.NewIndexOutOfBoundError(index, array.Length()-1)
+	}
+
+	array.data[index] = x
+	return nil
+}
+
 func (array *ArrayList[T]) Append(xs ...T) {
 	for _, x := range xs {
 		array.data = append(array.data, x)
@@ -34,15 +53,15 @@ func (array *ArrayList[T]) Append(xs ...T) {
 	}
 }
 
-func (array ArrayList[T]) Iterator() gollections.Iterator[T] {
-	return newArrayListIterator(array)
+func (array ArrayList[T]) Iterator() pkg.Iterator[T] {
+	return newArrayListIterator[T](array)
 }
 
 func (array *ArrayList[T]) Reverse() {
 	slices.Reverse(array.data)
 }
 
-func (array *ArrayList[T]) String() string {
+func (array ArrayList[T]) String() string {
 	var builder strings.Builder
 	builder.WriteRune('[')
 	for i := range array.length {
