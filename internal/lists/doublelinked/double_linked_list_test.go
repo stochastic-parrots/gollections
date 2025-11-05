@@ -44,6 +44,21 @@ func TestDoubleLinkedListGet(t *testing.T) {
 	}
 }
 
+func TestReversedDoubleLinkedListGet(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+	list.Reverse()
+
+	inversedIndex := 3
+	for i := range 4 {
+		x, err := list.Get(i)
+		assert.Equal(t, values[inversedIndex], x)
+		assert.Nil(t, err)
+		inversedIndex--
+	}
+}
+
 func TestDoubleLinkedListGetInvalidIndex(t *testing.T) {
 	list := NewDoubleLinkedList[int]()
 	list.Append(10, 1, 9, 100)
@@ -66,6 +81,21 @@ func TestDoubleLinkedListSet(t *testing.T) {
 		err := list.Set(i, values[i]+1)
 		x, _ := list.Get(i)
 		assert.Equal(t, values[i]+1, x)
+		assert.Nil(t, err)
+	}
+}
+
+func TestReversedDoubleLinkedListSet(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	values := []int{10, 1, 9, 100}
+	list.Append(values...)
+	list.Reverse()
+
+	inversedIndex := 3
+	for i := range 4 {
+		err := list.Set(i, values[inversedIndex]+1)
+		x, _ := list.Get(i)
+		assert.Equal(t, values[inversedIndex]+1, x)
 		assert.Nil(t, err)
 	}
 }

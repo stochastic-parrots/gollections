@@ -39,6 +39,10 @@ func (list DoubleLinkedList[T]) Get(index int) (T, error) {
 
 	current := list.first
 	for range index {
+		if list.reversed {
+			current = current.Previous()
+			continue
+		}
 		current = current.Next()
 	}
 
@@ -52,6 +56,10 @@ func (list DoubleLinkedList[T]) Set(index int, x T) error {
 
 	current := list.first
 	for range index {
+		if list.reversed {
+			current = current.Previous()
+			continue
+		}
 		current = current.Next()
 	}
 
