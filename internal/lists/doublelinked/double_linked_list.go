@@ -2,10 +2,10 @@ package doublelinked
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 
 	"github.com/stochastic-parrots/gollections/internal/lists"
-	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 type DoubleLinkedList[T any] struct {
@@ -104,23 +104,53 @@ func (list *DoubleLinkedList[T]) Reverse() {
 	list.reversed = !list.reversed
 }
 
-func (list DoubleLinkedList[T]) Iterator() pkg.Iterator[T] {
-	return newDoubleLinkedListIterator(list.first, list.reversed)
+func (list DoubleLinkedList[T]) Iterator() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		current := list.first
+		for current != nil {
+			if !yield(current.value) {
+				return
+			}
+
+			if !list.reversed {
+				current = current.next
+			} else {
+				current = current.previous
+			}
+		}
+	}
+}
+
+func (list DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
+	return func(yield func(int, T) bool) {
+		current := list.first
+		for index := 0; current != nil; index++ {
+			if !yield(index, current.value) {
+				return
+			}
+
+			if !list.reversed {
+				current = current.next
+			} else {
+				current = current.previous
+			}
+		}
+	}
 }
 
 func (list DoubleLinkedList[T]) String() string {
+	if list.IsEmpty() {
+		return "[]"
+	}
+
 	var sb strings.Builder
-	var index int
 	sb.WriteRune('[')
 
-	for it := list.Iterator(); it.HasNext(); {
-		if index+1 < list.Length() {
-			sb.WriteString(fmt.Sprintf("%v, ", it.Next()))
-			index++
-			continue
+	for i, val := range list.Enumerate() {
+		if i > 0 {
+			sb.WriteString(", ")
 		}
-		sb.WriteString(fmt.Sprintf("%v", it.Next()))
-		index++
+		fmt.Fprintf(&sb, "%v", val)
 	}
 
 	sb.WriteRune(']')

@@ -1,6 +1,7 @@
 package doublelinked
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/lists"
@@ -153,9 +154,10 @@ func TestDoubleLinkedListIterator(t *testing.T) {
 	items := []int{1, 2, 3}
 	list.Append(items...)
 
-	index := 0
-	for it := list.Iterator(); it.HasNext(); index++ {
-		assert.Equal(t, items[index], it.Next())
+	idx := 0
+	for value := range list.Iterator() {
+		assert.Equal(t, items[idx], value)
+		idx++
 	}
 }
 
@@ -164,10 +166,34 @@ func TestDoubleLinkedListReversedIterator(t *testing.T) {
 	items := []int{1, 2, 3}
 	list.Append(items...)
 	list.Reverse()
+	slices.Reverse(items)
 
-	index := len(items) - 1
-	for it := list.Iterator(); it.HasNext(); index-- {
-		assert.Equal(t, items[index], it.Next())
+	idx := 0
+	for value := range list.Iterator() {
+		assert.Equal(t, items[idx], value)
+		idx++
+	}
+}
+
+func TestDoubleLinkedListEnumerate(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	items := []int{1, 2, 3}
+	list.Append(items...)
+
+	for idx, value := range list.Enumerate() {
+		assert.Equal(t, items[idx], value)
+	}
+}
+
+func TestDoubleLinkedListReversedEnumerate(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	items := []int{1, 2, 3}
+	list.Append(items...)
+	list.Reverse()
+	slices.Reverse(items)
+
+	for idx, value := range list.Enumerate() {
+		assert.Equal(t, items[idx], value)
 	}
 }
 

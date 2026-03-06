@@ -2,10 +2,10 @@ package linked
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 
 	"github.com/stochastic-parrots/gollections/internal/lists"
-	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 type LinkedList[T any] struct {
@@ -65,15 +65,10 @@ func (list *LinkedList[T]) append(x T) {
 		list.last = new
 		list.length++
 		return
+	} else {
+		list.last.next = new
+		list.last = new
 	}
-
-	current := list.first
-	for current.HasNext() {
-		current = current.Next()
-	}
-
-	current.next = new
-	list.last = new
 	list.length++
 }
 
@@ -103,24 +98,40 @@ func (list *LinkedList[T]) Reverse() {
 	list.last = tmp
 }
 
-func (list LinkedList[T]) Iterator() pkg.Iterator[T] {
-	return newIterator(list.first)
+func (list LinkedList[T]) Iterator() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for current := list.first; current != nil; current = current.next {
+			if !yield(current.value) {
+				return
+			}
+		}
+	}
+}
+
+func (list LinkedList[T]) Enumerate() iter.Seq2[int, T] {
+	return func(yield func(int, T) bool) {
+		for current, index := list.first, 0; current != nil; current = current.next {
+			if !yield(index, current.value) {
+				return
+			}
+			index++
+		}
+	}
 }
 
 func (list LinkedList[T]) String() string {
+	if list.IsEmpty() {
+		return "[]"
+	}
+
 	var sb strings.Builder
-	var index int
-
 	sb.WriteRune('[')
-	for it := list.Iterator(); it.HasNext(); {
-		if index+1 < list.Length() {
-			sb.WriteString(fmt.Sprintf("%v, ", it.Next()))
-			index++
-			continue
-		}
 
-		sb.WriteString(fmt.Sprintf("%v", it.Next()))
-		index++
+	for i, val := range list.Enumerate() {
+		if i > 0 {
+			sb.WriteString(", ")
+		}
+		fmt.Fprintf(&sb, "%v", val)
 	}
 
 	sb.WriteRune(']')

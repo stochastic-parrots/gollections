@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"iter"
 )
 
 // Collection defines the basic operations for a generic data structure.
@@ -16,7 +17,7 @@ type Collection[T any] interface {
 	Reverse()
 
 	// Iterator Returns an iterator for the collection.
-	Iterator() Iterator[T]
+	Iterator() iter.Seq[T]
 
 	fmt.Stringer
 }
