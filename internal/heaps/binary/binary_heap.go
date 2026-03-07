@@ -7,21 +7,30 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/formatters"
 )
 
+// BinaryHeap represents a priority queue implemented as a binary tree in a contiguous slice.
+// It is generic over type T and requires a 'less' function to define priority.
 type BinaryHeap[T any] struct {
 	data []T
 	less func(a, b T) bool
 }
 
+// NewBinaryHeap creates an empty BinaryHeap with the specified initial capacity.
+// The 'less' function determines if 'a' has higher priority than 'b' (e.g., a < b for a Min-Heap).
 func NewBinaryHeap[T any](capacity int, less func(a, b T) bool) *BinaryHeap[T] {
 	data := make([]T, 0, capacity)
 	return &BinaryHeap[T]{data, less}
 }
+
+// NewBinaryHeapFromSlice creates a BinaryHeap using the provided slice directly as its storage.
+// Warning: This method modifies the original slice in-place to satisfy the heap property (O(n)).
 func NewBinaryHeapFromSlice[T any](data []T, less func(a, b T) bool) *BinaryHeap[T] {
 	heap := &BinaryHeap[T]{data, less}
 	heap.heapify()
 	return heap
 }
 
+// NewBinaryHeapCloneSlice creates a BinaryHeap by cloning the provided slice.
+// The original slice remains unchanged. The new heap is built in O(n) time.
 func NewBinaryHeapCloneSlice[T any](src []T, less func(a, b T) bool) *BinaryHeap[T] {
 	data := make([]T, len(src))
 	copy(data, src)
@@ -87,6 +96,10 @@ func (heap *BinaryHeap[T]) fixup(idx int) {
 	heap.data[i] = target
 }
 
+// Pop removes and returns the element with the highest priority.
+//
+// Complexity: O(log n).
+// Returns the zero value of T and false if the heap is empty.
 func (heap *BinaryHeap[T]) Pop() (T, bool) {
 	var zero T
 	length := len(heap.data)
@@ -108,6 +121,10 @@ func (heap *BinaryHeap[T]) Pop() (T, bool) {
 	return root, true
 }
 
+// Peek returns the element with the highest priority without removing it.
+//
+// Complexity: O(1).
+// Returns the zero value of T and false if the heap is empty.
 func (heap *BinaryHeap[T]) Peek() (T, bool) {
 	if len(heap.data) == 0 {
 		var zero T
@@ -117,6 +134,11 @@ func (heap *BinaryHeap[T]) Peek() (T, bool) {
 	return heap.data[0], true
 }
 
+// Push inserts one or more elements into the heap.
+//
+// Complexity: O(log n) per element inserted.
+// If multiple elements are provided and the heap is small or empty,
+// it uses an optimized O(n) heapify approach.
 func (heap *BinaryHeap[T]) Push(xs ...T) {
 	k := len(xs)
 	if k == 0 {
@@ -136,14 +158,24 @@ func (heap *BinaryHeap[T]) Push(xs ...T) {
 	}
 }
 
+// IsEmpty returns true if the heap contains no elements.
+//
+// Complexity: O(1).
 func (heap *BinaryHeap[T]) IsEmpty() bool {
 	return len(heap.data) == 0
 }
 
+// Length returns the current number of elements in the heap.
+//
+// Complexity: O(1).
 func (heap *BinaryHeap[T]) Length() int {
 	return len(heap.data)
 }
 
+// Iterator returns a sequence that yields elements in the underlying slice order.
+//
+// Complexity: O(n) for a full traversal, O(1) per step.
+// Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (heap *BinaryHeap[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range heap.data {
@@ -154,6 +186,11 @@ func (heap *BinaryHeap[T]) Iterator() iter.Seq[T] {
 	}
 }
 
+// Enumerate returns a sequence that yields the index and value of elements
+// as stored in the underlying slice.
+//
+// Complexity: O(n) for a full traversal, O(1) per step.
+// Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (heap *BinaryHeap[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		for idx, value := range heap.data {
@@ -164,6 +201,10 @@ func (heap *BinaryHeap[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
+// Drain returns a destructive iterator that removes and yields elements
+// in priority order (highest to lowest).
+//
+// Complexity: O(n log n) for a full traversal.
 func (heap *BinaryHeap[T]) Drain() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		index := 0
@@ -180,10 +221,13 @@ func (heap *BinaryHeap[T]) Drain() iter.Seq2[int, T] {
 	}
 }
 
+// Format implements the fmt.Formatter interface, allowing custom formatting
+// with verbs like %v, %+v, and %#v.
 func (heap *BinaryHeap[T]) Format(s fmt.State, verb rune) {
 	formatters.Format(s, verb, heap, cap(heap.data))
 }
 
+// String returns a string representation of the heap.
 func (heap *BinaryHeap[T]) String() string {
 	return fmt.Sprint(heap)
 }
