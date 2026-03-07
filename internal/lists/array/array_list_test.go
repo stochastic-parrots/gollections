@@ -1,6 +1,7 @@
 package array
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/lists"
@@ -96,26 +97,51 @@ func TestArrayListAppend(t *testing.T) {
 	assert.Equal(t, 4, cap(list.data))
 }
 
-func TestDoubleLinkedListIterator(t *testing.T) {
+func TestArrayListListIterator(t *testing.T) {
 	list := NewArrayList[int](3)
 	items := []int{1, 2, 3}
 	list.Append(items...)
 
-	index := 0
-	for it := list.Iterator(); it.HasNext(); index++ {
-		assert.Equal(t, items[index], it.Next())
+	idx := 0
+	for value := range list.Iterator() {
+		assert.Equal(t, items[idx], value)
+		idx++
 	}
 }
 
-func TestDoubleLinkedListReversedIterator(t *testing.T) {
+func TestArrayListListReversedIterator(t *testing.T) {
 	list := NewArrayList[int](3)
 	items := []int{1, 2, 3}
 	list.Append(items...)
 	list.Reverse()
+	slices.Reverse(items)
 
-	index := len(items) - 1
-	for it := list.Iterator(); it.HasNext(); index-- {
-		assert.Equal(t, items[index], it.Next())
+	idx := 0
+	for value := range list.Iterator() {
+		assert.Equal(t, items[idx], value)
+		idx++
+	}
+}
+
+func TestArrayListEnumerate(t *testing.T) {
+	list := NewArrayList[int](3)
+	items := []int{1, 2, 3}
+	list.Append(items...)
+
+	for idx, value := range list.Enumerate() {
+		assert.Equal(t, items[idx], value)
+	}
+}
+
+func TestArrayListReversedEnumerate(t *testing.T) {
+	list := NewArrayList[int](3)
+	items := []int{1, 2, 3}
+	list.Append(items...)
+	list.Reverse()
+	slices.Reverse(items)
+
+	for idx, value := range list.Enumerate() {
+		assert.Equal(t, items[idx], value)
 	}
 }
 

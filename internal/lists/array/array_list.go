@@ -2,11 +2,11 @@ package array
 
 import (
 	"fmt"
+	"iter"
 	"slices"
 	"strings"
 
 	"github.com/stochastic-parrots/gollections/internal/lists"
-	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 type ArrayList[T any] struct {
@@ -53,8 +53,24 @@ func (array *ArrayList[T]) Append(xs ...T) {
 	}
 }
 
-func (array ArrayList[T]) Iterator() pkg.Iterator[T] {
-	return newArrayListIterator[T](array)
+func (list ArrayList[T]) Iterator() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, value := range list.data {
+			if !yield(value) {
+				return
+			}
+		}
+	}
+}
+
+func (list ArrayList[T]) Enumerate() iter.Seq2[int, T] {
+	return func(yield func(int, T) bool) {
+		for idx, value := range list.data {
+			if !yield(idx, value) {
+				return
+			}
+		}
+	}
 }
 
 func (array *ArrayList[T]) Reverse() {

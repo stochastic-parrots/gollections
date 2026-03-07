@@ -1,6 +1,7 @@
 package linked
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/lists"
@@ -122,9 +123,46 @@ func TestLinkedListIterator(t *testing.T) {
 	items := []int{1, 2, 3}
 	list.Append(items...)
 
-	index := 0
-	for it := list.Iterator(); it.HasNext(); index++ {
-		assert.Equal(t, items[index], it.Next())
+	idx := 0
+	for value := range list.Iterator() {
+		assert.Equal(t, items[idx], value)
+		idx++
+	}
+}
+
+func TestLinkedListReversedIterator(t *testing.T) {
+	list := NewLinkedList[int]()
+	items := []int{1, 2, 3}
+	list.Append(items...)
+	list.Reverse()
+	slices.Reverse(items)
+
+	idx := 0
+	for value := range list.Iterator() {
+		assert.Equal(t, items[idx], value)
+		idx++
+	}
+}
+
+func TestLinkedListEnumerate(t *testing.T) {
+	list := NewLinkedList[int]()
+	items := []int{1, 2, 3}
+	list.Append(items...)
+
+	for idx, value := range list.Enumerate() {
+		assert.Equal(t, items[idx], value)
+	}
+}
+
+func TestLinkedListReversedEnumerate(t *testing.T) {
+	list := NewLinkedList[int]()
+	items := []int{1, 2, 3}
+	list.Append(items...)
+	list.Reverse()
+	slices.Reverse(items)
+
+	for idx, value := range list.Enumerate() {
+		assert.Equal(t, items[idx], value)
 	}
 }
 
