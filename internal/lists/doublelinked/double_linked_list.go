@@ -23,15 +23,15 @@ func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 	}
 }
 
-func (list DoubleLinkedList[T]) Length() int {
+func (list *DoubleLinkedList[T]) Length() int {
 	return list.length
 }
 
-func (list DoubleLinkedList[T]) IsEmpty() bool {
+func (list *DoubleLinkedList[T]) IsEmpty() bool {
 	return list.length == 0
 }
 
-func (list DoubleLinkedList[T]) Get(index int) (T, error) {
+func (list *DoubleLinkedList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= list.Length() {
 		var zero T
 		return zero, lists.NewIndexOutOfBoundError(index, list.Length()-1)
@@ -49,7 +49,7 @@ func (list DoubleLinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
-func (list DoubleLinkedList[T]) Set(index int, x T) error {
+func (list *DoubleLinkedList[T]) Set(index int, x T) error {
 	if index < 0 || index >= list.Length() {
 		return lists.NewIndexOutOfBoundError(index, list.Length()-1)
 	}
@@ -104,7 +104,7 @@ func (list *DoubleLinkedList[T]) Reverse() {
 	list.reversed = !list.reversed
 }
 
-func (list DoubleLinkedList[T]) Iterator() iter.Seq[T] {
+func (list *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := list.first
 		for current != nil {
@@ -121,7 +121,7 @@ func (list DoubleLinkedList[T]) Iterator() iter.Seq[T] {
 	}
 }
 
-func (list DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
+func (list *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		current := list.first
 		for index := 0; current != nil; index++ {
@@ -138,7 +138,7 @@ func (list DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-func (list DoubleLinkedList[T]) String() string {
+func (list *DoubleLinkedList[T]) String() string {
 	if list.IsEmpty() {
 		return "[]"
 	}

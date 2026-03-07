@@ -31,5 +31,8 @@ type List[T any] interface {
 	//   - [ErrIndexOutOfBound](IndexOutOfBound): Returned if 'index' is negative or greater than or equal to Length().
 	Set(index int, x T) error
 
+	// Reverse the list in place.
+	Reverse()
+
 	pkg.Collection[T]
 }

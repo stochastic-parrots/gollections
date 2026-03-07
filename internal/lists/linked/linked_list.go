@@ -21,15 +21,15 @@ func NewLinkedList[T any]() *LinkedList[T] {
 	}
 }
 
-func (list LinkedList[T]) Length() int {
+func (list *LinkedList[T]) Length() int {
 	return list.length
 }
 
-func (list LinkedList[T]) IsEmpty() bool {
+func (list *LinkedList[T]) IsEmpty() bool {
 	return list.length == 0
 }
 
-func (list LinkedList[T]) Get(index int) (T, error) {
+func (list *LinkedList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= list.Length() {
 		var zero T
 		return zero, lists.NewIndexOutOfBoundError(index, list.Length()-1)
@@ -43,7 +43,7 @@ func (list LinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
-func (list LinkedList[T]) Set(index int, x T) error {
+func (list *LinkedList[T]) Set(index int, x T) error {
 	if index < 0 || index >= list.Length() {
 		return lists.NewIndexOutOfBoundError(index, list.Length()-1)
 	}
@@ -98,7 +98,7 @@ func (list *LinkedList[T]) Reverse() {
 	list.last = tmp
 }
 
-func (list LinkedList[T]) Iterator() iter.Seq[T] {
+func (list *LinkedList[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for current := list.first; current != nil; current = current.next {
 			if !yield(current.value) {
@@ -108,7 +108,7 @@ func (list LinkedList[T]) Iterator() iter.Seq[T] {
 	}
 }
 
-func (list LinkedList[T]) Enumerate() iter.Seq2[int, T] {
+func (list *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		for current, index := list.first, 0; current != nil; current = current.next {
 			if !yield(index, current.value) {
@@ -119,7 +119,7 @@ func (list LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-func (list LinkedList[T]) String() string {
+func (list *LinkedList[T]) String() string {
 	if list.IsEmpty() {
 		return "[]"
 	}
