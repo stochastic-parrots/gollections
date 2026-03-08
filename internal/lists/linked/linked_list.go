@@ -3,8 +3,8 @@ package linked
 import (
 	"fmt"
 	"iter"
-	"strings"
 
+	"github.com/stochastic-parrots/gollections/internal/formatters"
 	"github.com/stochastic-parrots/gollections/internal/lists"
 )
 
@@ -21,21 +21,21 @@ func NewLinkedList[T any]() *LinkedList[T] {
 	}
 }
 
-func (list *LinkedList[T]) Length() int {
-	return list.length
+func (l *LinkedList[T]) Length() int {
+	return l.length
 }
 
-func (list *LinkedList[T]) IsEmpty() bool {
-	return list.length == 0
+func (l *LinkedList[T]) IsEmpty() bool {
+	return l.length == 0
 }
 
-func (list *LinkedList[T]) Get(index int) (T, error) {
-	if index < 0 || index >= list.Length() {
+func (l *LinkedList[T]) Get(index int) (T, error) {
+	if index < 0 || index >= l.Length() {
 		var zero T
-		return zero, lists.NewIndexOutOfBoundError(index, list.Length()-1)
+		return zero, lists.NewIndexOutOfBoundError(index, l.Length()-1)
 	}
 
-	current := list.first
+	current := l.first
 	for range index {
 		current = current.Next()
 	}
@@ -43,12 +43,12 @@ func (list *LinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
-func (list *LinkedList[T]) Set(index int, x T) error {
-	if index < 0 || index >= list.Length() {
-		return lists.NewIndexOutOfBoundError(index, list.Length()-1)
+func (l *LinkedList[T]) Set(index int, x T) error {
+	if index < 0 || index >= l.Length() {
+		return lists.NewIndexOutOfBoundError(index, l.Length()-1)
 	}
 
-	current := list.first
+	current := l.first
 	for range index {
 		current = current.Next()
 	}
@@ -57,34 +57,34 @@ func (list *LinkedList[T]) Set(index int, x T) error {
 	return nil
 }
 
-func (list *LinkedList[T]) append(x T) {
+func (l *LinkedList[T]) append(x T) {
 	new := NewNode(x)
 
-	if list.IsEmpty() {
-		list.first = new
-		list.last = new
-		list.length++
+	if l.IsEmpty() {
+		l.first = new
+		l.last = new
+		l.length++
 		return
 	} else {
-		list.last.next = new
-		list.last = new
+		l.last.next = new
+		l.last = new
 	}
-	list.length++
+	l.length++
 }
 
-func (list *LinkedList[T]) Append(xs ...T) {
+func (l *LinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
-		list.append(x)
+		l.append(x)
 	}
 }
 
-func (list *LinkedList[T]) Reverse() {
-	if list.Length() <= 1 {
+func (l *LinkedList[T]) Reverse() {
+	if l.Length() <= 1 {
 		return
 	}
 
 	var previous *Node[T]
-	current := list.first
+	current := l.first
 
 	for current != nil {
 		next := current.next
@@ -93,14 +93,14 @@ func (list *LinkedList[T]) Reverse() {
 		current = next
 	}
 
-	tmp := list.first
-	list.first = previous
-	list.last = tmp
+	tmp := l.first
+	l.first = previous
+	l.last = tmp
 }
 
-func (list *LinkedList[T]) Iterator() iter.Seq[T] {
+func (l *LinkedList[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for current := list.first; current != nil; current = current.next {
+		for current := l.first; current != nil; current = current.next {
 			if !yield(current.value) {
 				return
 			}
@@ -108,9 +108,9 @@ func (list *LinkedList[T]) Iterator() iter.Seq[T] {
 	}
 }
 
-func (list *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
+func (l *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
-		for current, index := list.first, 0; current != nil; current = current.next {
+		for current, index := l.first, 0; current != nil; current = current.next {
 			if !yield(index, current.value) {
 				return
 			}
@@ -119,21 +119,10 @@ func (list *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-func (list *LinkedList[T]) String() string {
-	if list.IsEmpty() {
-		return "[]"
-	}
+func (l *LinkedList[T]) Format(s fmt.State, verb rune) {
+	formatters.Format(s, verb, l, l.Length())
+}
 
-	var sb strings.Builder
-	sb.WriteRune('[')
-
-	for i, val := range list.Enumerate() {
-		if i > 0 {
-			sb.WriteString(", ")
-		}
-		fmt.Fprintf(&sb, "%v", val)
-	}
-
-	sb.WriteRune(']')
-	return sb.String()
+func (l *LinkedList[T]) String() string {
+	return fmt.Sprint(l)
 }

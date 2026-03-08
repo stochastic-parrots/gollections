@@ -1,17 +1,22 @@
 package lists
 
 import (
-	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stochastic-parrots/gollections/internal/lists/array"
 	"github.com/stochastic-parrots/gollections/internal/lists/doublelinked"
 	"github.com/stochastic-parrots/gollections/internal/lists/linked"
 )
 
-type List[T any] = lists.List[T]
+type ArrayList[T any] = *array.ArrayList[T]
+type LinkedList[T any] = *linked.LinkedList[T]
+type DoubleLinkedList[T any] = *doublelinked.DoubleLinkedList[T]
+
+var _ List[any] = &array.ArrayList[any]{}
+var _ List[any] = &linked.LinkedList[any]{}
+var _ List[any] = &doublelinked.DoubleLinkedList[any]{}
 
 // NewArrayList creates and returns a new empty array list.
 //
-// It is a wrapper for golang slices, returns the list as a List[T] interface.
+// It is a wrapper for golang slices.
 //
 // Performance Summary (Time Complexity):
 //
@@ -25,13 +30,11 @@ type List[T any] = lists.List[T]
 //	IsEmpty()                    O(1)
 //	String()                     O(N)
 //	Iterator()                   O(1)
-func NewArrayList[T any](size int) List[T] {
+func NewArrayList[T any](size int) ArrayList[T] {
 	return array.NewArrayList[T](size)
 }
 
 // NewLinkedList creates and returns a new empty linked list.
-//
-// It returns the list as a List[T] interface.
 //
 // Performance Summary (Time Complexity):
 //
@@ -45,13 +48,11 @@ func NewArrayList[T any](size int) List[T] {
 //	IsEmpty()                    O(1)
 //	String()                     O(N)
 //	Iterator()                   O(1)
-func NewLinkedList[T any]() List[T] {
+func NewLinkedList[T any]() LinkedList[T] {
 	return linked.NewLinkedList[T]()
 }
 
 // NewDoubleLinkedList creates and returns a new empty double linked list.
-//
-// It returns the list as a List[T] interface.
 //
 // Performance Summary (Time Complexity):
 //
@@ -65,6 +66,6 @@ func NewLinkedList[T any]() List[T] {
 //	IsEmpty()                    O(1)
 //	String()                     O(N)
 //	Iterator()                   O(1)
-func NewDoubleLinkedList[T any]() List[T] {
+func NewDoubleLinkedList[T any]() DoubleLinkedList[T] {
 	return doublelinked.NewDoubleLinkedList[T]()
 }

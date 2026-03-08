@@ -3,8 +3,8 @@ package doublelinked
 import (
 	"fmt"
 	"iter"
-	"strings"
 
+	"github.com/stochastic-parrots/gollections/internal/formatters"
 	"github.com/stochastic-parrots/gollections/internal/lists"
 )
 
@@ -23,23 +23,23 @@ func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 	}
 }
 
-func (list *DoubleLinkedList[T]) Length() int {
-	return list.length
+func (l *DoubleLinkedList[T]) Length() int {
+	return l.length
 }
 
-func (list *DoubleLinkedList[T]) IsEmpty() bool {
-	return list.length == 0
+func (l *DoubleLinkedList[T]) IsEmpty() bool {
+	return l.length == 0
 }
 
-func (list *DoubleLinkedList[T]) Get(index int) (T, error) {
-	if index < 0 || index >= list.Length() {
+func (l *DoubleLinkedList[T]) Get(index int) (T, error) {
+	if index < 0 || index >= l.Length() {
 		var zero T
-		return zero, lists.NewIndexOutOfBoundError(index, list.Length()-1)
+		return zero, lists.NewIndexOutOfBoundError(index, l.Length()-1)
 	}
 
-	current := list.first
+	current := l.first
 	for range index {
-		if list.reversed {
+		if l.reversed {
 			current = current.Previous()
 			continue
 		}
@@ -49,14 +49,14 @@ func (list *DoubleLinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
-func (list *DoubleLinkedList[T]) Set(index int, x T) error {
-	if index < 0 || index >= list.Length() {
-		return lists.NewIndexOutOfBoundError(index, list.Length()-1)
+func (l *DoubleLinkedList[T]) Set(index int, x T) error {
+	if index < 0 || index >= l.Length() {
+		return lists.NewIndexOutOfBoundError(index, l.Length()-1)
 	}
 
-	current := list.first
+	current := l.first
 	for range index {
-		if list.reversed {
+		if l.reversed {
 			current = current.Previous()
 			continue
 		}
@@ -67,52 +67,52 @@ func (list *DoubleLinkedList[T]) Set(index int, x T) error {
 	return nil
 }
 
-func (list *DoubleLinkedList[T]) append(x T) {
-	if list.IsEmpty() {
-		list.first = NewDoubleLinkedNode(x)
-		list.last = list.first
-		list.length++
+func (l *DoubleLinkedList[T]) append(x T) {
+	if l.IsEmpty() {
+		l.first = NewDoubleLinkedNode(x)
+		l.last = l.first
+		l.length++
 		return
 	}
 
-	if !list.reversed {
+	if !l.reversed {
 		new := NewDoubleLinkedNode(x)
-		list.last.next = new
-		new.previous = list.last
-		list.last = new
-		list.length++
+		l.last.next = new
+		new.previous = l.last
+		l.last = new
+		l.length++
 		return
 	}
 
 	new := NewDoubleLinkedNode(x)
-	list.last.previous = new
-	new.next = list.last
-	list.last = new
-	list.length++
+	l.last.previous = new
+	new.next = l.last
+	l.last = new
+	l.length++
 }
 
-func (list *DoubleLinkedList[T]) Append(xs ...T) {
+func (l *DoubleLinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
-		list.append(x)
+		l.append(x)
 	}
 }
 
-func (list *DoubleLinkedList[T]) Reverse() {
-	temp := list.first
-	list.first = list.last
-	list.last = temp
-	list.reversed = !list.reversed
+func (l *DoubleLinkedList[T]) Reverse() {
+	temp := l.first
+	l.first = l.last
+	l.last = temp
+	l.reversed = !l.reversed
 }
 
-func (list *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
+func (l *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		current := list.first
+		current := l.first
 		for current != nil {
 			if !yield(current.value) {
 				return
 			}
 
-			if !list.reversed {
+			if !l.reversed {
 				current = current.next
 			} else {
 				current = current.previous
@@ -121,15 +121,15 @@ func (list *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
 	}
 }
 
-func (list *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
+func (l *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
-		current := list.first
+		current := l.first
 		for index := 0; current != nil; index++ {
 			if !yield(index, current.value) {
 				return
 			}
 
-			if !list.reversed {
+			if !l.reversed {
 				current = current.next
 			} else {
 				current = current.previous
@@ -138,21 +138,10 @@ func (list *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-func (list *DoubleLinkedList[T]) String() string {
-	if list.IsEmpty() {
-		return "[]"
-	}
+func (l *DoubleLinkedList[T]) Format(s fmt.State, verb rune) {
+	formatters.Format(s, verb, l, l.Length())
+}
 
-	var sb strings.Builder
-	sb.WriteRune('[')
-
-	for i, val := range list.Enumerate() {
-		if i > 0 {
-			sb.WriteString(", ")
-		}
-		fmt.Fprintf(&sb, "%v", val)
-	}
-
-	sb.WriteRune(']')
-	return sb.String()
+func (l *DoubleLinkedList[T]) String() string {
+	return fmt.Sprint(l)
 }

@@ -1,6 +1,7 @@
 package linked
 
 import (
+	"fmt"
 	"slices"
 	"testing"
 
@@ -166,16 +167,48 @@ func TestLinkedListReversedEnumerate(t *testing.T) {
 	}
 }
 
-func TestEmptyLinkedListString(t *testing.T) {
-	list := NewLinkedList[int]()
-	assert.Equal(t, "[]", list.String())
+func TestLinkedListString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		list := NewLinkedList[int]()
+		list.Append(30, 10, 20)
+		got := list.String()
+		want := "[30 10 20]"
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("String Many Elements", func(t *testing.T) {
+		list := NewLinkedList[int]()
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := list.String()
+		want := "[30 10 20 40 1 ...(+5 more)]"
+		assert.Equal(t, want, got)
+	})
 }
 
-func TestLinkedListString(t *testing.T) {
-	list := NewLinkedList[int]()
-	list.Append(1, 10, 11)
+func TestLinkedListFormat(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		list := NewLinkedList[int]()
+		list.Append(30, 10, 20)
+		got := fmt.Sprintf("%v", list)
+		want := "[30 10 20]"
+		assert.Equal(t, want, got)
+	})
 
-	assert.Equal(t, "[1, 10, 11]", list.String())
+	t.Run("Verbose", func(t *testing.T) {
+		list := NewLinkedList[int]()
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := fmt.Sprintf("%#v", list)
+		want := "*linked.LinkedList[int]{size:10, cap:10}"
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("Verbose + String", func(t *testing.T) {
+		list := NewLinkedList[int]()
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := fmt.Sprintf("%+v", list)
+		want := "*linked.LinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		assert.Equal(t, want, got)
+	})
 }
 
 func LinkedListContains[T any](t *testing.T, items []T, list *LinkedList[T]) {

@@ -1,6 +1,7 @@
 package doublelinked
 
 import (
+	"fmt"
 	"slices"
 	"testing"
 
@@ -197,16 +198,48 @@ func TestDoubleLinkedListReversedEnumerate(t *testing.T) {
 	}
 }
 
-func TestEmptyLinkedListString(t *testing.T) {
-	list := NewDoubleLinkedList[int]()
-	assert.Equal(t, "[]", list.String())
+func TestDoubleLinkedListString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		list := NewDoubleLinkedList[int]()
+		list.Append(30, 10, 20)
+		got := list.String()
+		want := "[30 10 20]"
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("String Many Elements", func(t *testing.T) {
+		list := NewDoubleLinkedList[int]()
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := list.String()
+		want := "[30 10 20 40 1 ...(+5 more)]"
+		assert.Equal(t, want, got)
+	})
 }
 
-func TestLinkedListString(t *testing.T) {
-	list := NewDoubleLinkedList[int]()
-	list.Append(1, 10, 11)
+func TestDoubleLinkedListFormat(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		list := NewDoubleLinkedList[int]()
+		list.Append(30, 10, 20)
+		got := fmt.Sprintf("%v", list)
+		want := "[30 10 20]"
+		assert.Equal(t, want, got)
+	})
 
-	assert.Equal(t, "[1, 10, 11]", list.String())
+	t.Run("Verbose", func(t *testing.T) {
+		list := NewDoubleLinkedList[int]()
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := fmt.Sprintf("%#v", list)
+		want := "*doublelinked.DoubleLinkedList[int]{size:10, cap:10}"
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("Verbose + String", func(t *testing.T) {
+		list := NewDoubleLinkedList[int]()
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := fmt.Sprintf("%+v", list)
+		want := "*doublelinked.DoubleLinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		assert.Equal(t, want, got)
+	})
 }
 
 func DoubleLinkedListContains[T any](t *testing.T, items []T, list *DoubleLinkedList[T]) {

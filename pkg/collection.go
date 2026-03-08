@@ -20,4 +20,6 @@ type Collection[T any] interface {
 	Enumerate() iter.Seq2[int, T]
 
 	fmt.Stringer
+
+	fmt.Formatter
 }

@@ -1,6 +1,7 @@
 package array
 
 import (
+	"fmt"
 	"slices"
 	"testing"
 
@@ -12,7 +13,7 @@ func TestNewArrayList(t *testing.T) {
 	list := NewArrayList[int](100)
 
 	assert.True(t, list.IsEmpty())
-	assert.Equal(t, 0, list.Length())
+	assert.Equal(t, 0, len(list.data))
 	assert.Equal(t, 0, len(list.data))
 	assert.Equal(t, 100, cap(list.data))
 }
@@ -27,7 +28,7 @@ func TestArrayListLength(t *testing.T) {
 	list.Append(10, 1, 9, 100)
 
 	assert.False(t, list.IsEmpty())
-	assert.Equal(t, 4, list.Length())
+	assert.Equal(t, 4, len(list.data))
 }
 
 func TestArrayListGet(t *testing.T) {
@@ -48,10 +49,10 @@ func TestArrayListGetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		_, err := list.Get(i)
-		target := lists.NewIndexOutOfBoundError(i, list.length)
+		target := lists.NewIndexOutOfBoundError(i, len(list.data))
 		template := "index %d is out of bounds; maximum valid index is %d"
-		assert.ErrorAsf(t, err, &target, template, i, list.length)
-		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+		assert.ErrorAsf(t, err, &target, template, i, len(list.data))
+		assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
 	}
 }
 
@@ -74,13 +75,13 @@ func TestArrayListSetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		err := list.Set(i, 0)
-		target := lists.NewIndexOutOfBoundError(i, list.length)
+		target := lists.NewIndexOutOfBoundError(i, len(list.data))
 		template := "index %d is out of bounds; maximum valid index is %d"
-		assert.ErrorAsf(t, err, &target, template, i, list.length)
-		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+		assert.ErrorAsf(t, err, &target, template, i, len(list.data))
+		assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
 	}
 
-	for i := range list.length {
+	for i := range len(list.data) {
 
 		assert.Equal(t, values[i], list.data[i])
 	}
@@ -91,10 +92,7 @@ func TestArrayListAppend(t *testing.T) {
 	list.Append(1, 2, 3)
 
 	assert.False(t, list.IsEmpty())
-	assert.Equal(t, 3, list.Length())
 	assert.Equal(t, 3, len(list.data))
-	// Golang Slice Growth Strategy
-	assert.Equal(t, 4, cap(list.data))
 }
 
 func TestArrayListListIterator(t *testing.T) {
@@ -151,20 +149,52 @@ func TestArrayListReverse(t *testing.T) {
 	list.Append(items...)
 	list.Reverse()
 
-	assert.Equal(t, 3, list.Length())
+	assert.Equal(t, 3, len(list.data))
 	assert.False(t, list.IsEmpty())
 	ArrayListContains(t, []int{3, 2, 1}, list)
 }
+func TestArrayListString(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		array := NewArrayList[int](3)
+		array.Append(30, 10, 20)
+		got := array.String()
+		want := "[30 10 20]"
+		assert.Equal(t, want, got)
+	})
 
-func TestEmptyArrayListString(t *testing.T) {
-	list := NewArrayList[int](3)
-	assert.Equal(t, "[]", list.String())
+	t.Run("String Many Elements", func(t *testing.T) {
+		array := NewArrayList[int](10)
+		array.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := array.String()
+		want := "[30 10 20 40 1 ...(+5 more)]"
+		assert.Equal(t, want, got)
+	})
 }
 
-func TestArrayListString(t *testing.T) {
-	list := NewArrayList[string](3)
-	list.Append("a", "b", "c")
-	assert.Equal(t, "[a, b, c]", list.String())
+func TestArrayListFormat(t *testing.T) {
+	t.Run("String", func(t *testing.T) {
+		array := NewArrayList[int](3)
+		array.Append(30, 10, 20)
+		got := fmt.Sprintf("%v", array)
+		want := "[30 10 20]"
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("Verbose", func(t *testing.T) {
+		array := NewArrayList[int](10)
+		array.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := fmt.Sprintf("%#v", array)
+		want := "*array.ArrayList[int]{size:10, cap:10}"
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("Verbose + String", func(t *testing.T) {
+		array := NewArrayList[int](10)
+		array.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		got := fmt.Sprintf("%+v", array)
+		want := "*array.ArrayList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		assert.Equal(t, want, got)
+	})
 }
 
 func ArrayListContains[T any](t *testing.T, items []T, list *ArrayList[T]) {
