@@ -8,12 +8,16 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/lists"
 )
 
+// DoubleLinkedList represents a doubly linked list data structure.
+// It stores elements in a series of nodes where each node points to both
+// its predecessor and its successor, allowing for efficient bi-directional traversal.
 type DoubleLinkedList[T any] struct {
 	first, last *DoubleLinkedNode[T]
 	length      int
 	reversed    bool
 }
 
+// NewDoubleLinkedList creates an empty DoubleLinkedList ready for use.
 func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 	return &DoubleLinkedList[T]{
 		first:    nil,
@@ -23,14 +27,24 @@ func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 	}
 }
 
+// Length returns the current number of elements in the list.
+//
+// Complexity: O(1).
 func (l *DoubleLinkedList[T]) Length() int {
 	return l.length
 }
 
+// IsEmpty returns true if the list contains no elements.
+//
+// Complexity: O(1).
 func (l *DoubleLinkedList[T]) IsEmpty() bool {
 	return l.length == 0
 }
 
+// Get retrieves the value at the specified index.
+//
+// Complexity: O(n).
+// Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= l.Length() {
 		var zero T
@@ -49,6 +63,10 @@ func (l *DoubleLinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
+// Set updates the value at the specified index.
+//
+// Complexity: O(n).
+// Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Set(index int, x T) error {
 	if index < 0 || index >= l.Length() {
 		return lists.NewIndexOutOfBoundError(index, l.Length()-1)
@@ -91,12 +109,18 @@ func (l *DoubleLinkedList[T]) append(x T) {
 	l.length++
 }
 
+// Append inserts one or more elements at the end of the list.
+//
+// Complexity: O(k) where k is the number of elements provided.
 func (l *DoubleLinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
 		l.append(x)
 	}
 }
 
+// Reverse inverts the logical order of the list in O(1) time.
+// Instead of physically rearranging nodes, it toggles an internal flag
+// that affects traversal and insertion logic.
 func (l *DoubleLinkedList[T]) Reverse() {
 	temp := l.first
 	l.first = l.last
@@ -104,6 +128,9 @@ func (l *DoubleLinkedList[T]) Reverse() {
 	l.reversed = !l.reversed
 }
 
+// Iterator returns a sequence that yields elements in their logical order.
+//
+// Complexity: O(n) for a full traversal, O(1) per step.
 func (l *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.first
@@ -121,6 +148,10 @@ func (l *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
 	}
 }
 
+// Enumerate returns a sequence that yields the index and value of elements
+// in their logical order.
+//
+// Complexity: O(n) for a full traversal, O(1) per step.
 func (l *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		current := l.first
@@ -138,10 +169,13 @@ func (l *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
+// Format implements the fmt.Formatter interface, allowing custom formatting
+// with verbs like %v, %+v, and %#v.
 func (l *DoubleLinkedList[T]) Format(s fmt.State, verb rune) {
 	formatters.Format(s, verb, l, l.Length())
 }
 
+// String returns a string representation of the list.
 func (l *DoubleLinkedList[T]) String() string {
 	return fmt.Sprint(l)
 }

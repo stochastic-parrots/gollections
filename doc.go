@@ -47,6 +47,7 @@
 //		Length() int
 //		Iterator() iter.Seq[T]
 //		fmt.Stringer
+//		fmt.Formatter
 //	}
 //
 // Additional operations like Reverse and Sort are available on specific implementations

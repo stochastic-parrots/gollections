@@ -8,11 +8,15 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/lists"
 )
 
+// LinkedList represents a singly linked list data structure.
+// It consists of nodes where each element points to the next, making it efficient
+// for sequential insertion and deletion at the ends, but requiring O(n) for random access.
 type LinkedList[T any] struct {
 	first, last *Node[T]
 	length      int
 }
 
+// NewLinkedList creates an empty LinkedList.
 func NewLinkedList[T any]() *LinkedList[T] {
 	return &LinkedList[T]{
 		first:  nil,
@@ -21,14 +25,24 @@ func NewLinkedList[T any]() *LinkedList[T] {
 	}
 }
 
+// Length returns the current number of elements in the list.
+//
+// Complexity: O(1).
 func (l *LinkedList[T]) Length() int {
 	return l.length
 }
 
+// IsEmpty returns true if the list contains no elements.
+//
+// Complexity: O(1).
 func (l *LinkedList[T]) IsEmpty() bool {
 	return l.length == 0
 }
 
+// Get retrieves the value at the specified index by traversing the list from the start.
+//
+// Complexity: O(n).
+// Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= l.Length() {
 		var zero T
@@ -43,6 +57,10 @@ func (l *LinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
+// Set updates the value at the specified index.
+//
+// Complexity: O(n).
+// Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Set(index int, x T) error {
 	if index < 0 || index >= l.Length() {
 		return lists.NewIndexOutOfBoundError(index, l.Length()-1)
@@ -72,12 +90,19 @@ func (l *LinkedList[T]) append(x T) {
 	l.length++
 }
 
+// Append adds one or more elements to the end of the list.
+//
+// Complexity: O(k) where k is the number of elements provided.
 func (l *LinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
 		l.append(x)
 	}
 }
 
+// Reverse inverts the order of the elements in the list in-place.
+//
+// Complexity: O(n).
+// Note: Unlike DoubleLinkedList, this requires a full traversal to update pointers.
 func (l *LinkedList[T]) Reverse() {
 	if l.Length() <= 1 {
 		return
@@ -98,6 +123,9 @@ func (l *LinkedList[T]) Reverse() {
 	l.last = tmp
 }
 
+// Iterator returns a sequence that yields elements from the first to the last node.
+//
+// Complexity: O(n) for a full traversal, O(1) per step.
 func (l *LinkedList[T]) Iterator() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for current := l.first; current != nil; current = current.next {
@@ -108,6 +136,9 @@ func (l *LinkedList[T]) Iterator() iter.Seq[T] {
 	}
 }
 
+// Enumerate returns a sequence that yields the index and value of each element.
+//
+// Complexity: O(n) for a full traversal, O(1) per step.
 func (l *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		for current, index := l.first, 0; current != nil; current = current.next {
@@ -119,10 +150,12 @@ func (l *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
+// Format implements the fmt.Formatter interface for custom string formatting.
 func (l *LinkedList[T]) Format(s fmt.State, verb rune) {
 	formatters.Format(s, verb, l, l.Length())
 }
 
+// String returns a string representation of the list.
 func (l *LinkedList[T]) String() string {
 	return fmt.Sprint(l)
 }
