@@ -1,7 +1,6 @@
 package skip
 
 import (
-	"errors"
 	"math"
 )
 
@@ -33,37 +32,19 @@ type SkipList[T any] struct {
 	maxLevel     int               // Absolute maximum height allowed
 }
 
-func NewSkipList[T any](hasPriority func(T, T) bool) (*SkipList[T], error) {
-	if hasPriority == nil {
-		return nil, errors.New("skiplist: hasPriority function cannot be nil")
-	}
-
+func NewSkipList[T any](hasPriority func(T, T) bool) *SkipList[T] {
 	var zero T
 	first := NewNode(zero, defaultMaxLevel)
-	return &SkipList[T]{first, hasPriority, 0, defaultMaxLevel}, nil
+	return &SkipList[T]{first, hasPriority, 0, defaultMaxLevel}
 }
 
-func NewSkipListWithExpectedSize[T any](expectedSize int, hasPriority func(T, T) bool) (*SkipList[T], error) {
-	if hasPriority == nil {
-		return nil, errors.New("skiplist: hasPriority function cannot be nil")
-	}
-
-	if expectedSize < 0 {
-		return nil, errors.New("skiplist: expected size cannot be negative")
-	}
-
-	if expectedSize > math.MaxUint32 {
-		return nil, errors.New("skiplist: expected size cannot be greater than 4 Billion")
-	}
-
+func NewSkipListWithExpectedSize[T any](expectedSize int, hasPriority func(T, T) bool) *SkipList[T] {
 	var zero T
-	calculatedLevel := max(int(math.Ceil(math.Log2(float64(expectedSize)))), minLevel)
-	if calculatedLevel > maxLevel {
-		calculatedLevel = maxLevel
-	}
+	maxLevelByExpectedSize := int(math.Ceil(math.Log2(float64(expectedSize))))
+	calculatedLevel := min(max(maxLevelByExpectedSize, minLevel), maxLevel)
 
 	first := NewNode(zero, calculatedLevel)
-	return &SkipList[T]{first, hasPriority, 0, calculatedLevel}, nil
+	return &SkipList[T]{first, hasPriority, 0, calculatedLevel}
 }
 
 /*func (l *SkipList[T]) append(x T) {
