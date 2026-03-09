@@ -13,8 +13,8 @@ type Collection[T any] interface {
 	// Length Returns the collection length (number of elements).
 	Length() int
 
-	// Iterator Returns an iterator for the collection.
-	Iterator() iter.Seq[T]
+	// All Returns an iterator for the collection.
+	All() iter.Seq[T]
 
 	// Iterator Returns an indexed iterator for the collection.
 	Enumerate() iter.Seq2[int, T]

@@ -128,10 +128,10 @@ func (l *DoubleLinkedList[T]) Reverse() {
 	l.reversed = !l.reversed
 }
 
-// Iterator returns a sequence that yields elements in their logical order.
+// All returns a sequence that yields elements in their logical order.
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
-func (l *DoubleLinkedList[T]) Iterator() iter.Seq[T] {
+func (l *DoubleLinkedList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.first
 		for current != nil {

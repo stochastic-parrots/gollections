@@ -15,7 +15,7 @@ func ExampleNewArrayList() {
 
 	_ = list.Set(1, 25)
 
-	for v := range list.Iterator() {
+	for v := range list.All() {
 		fmt.Printf("%d ", v)
 	}
 
@@ -47,7 +47,7 @@ func ExampleNewDoubleLinkedList() {
 	list.Reverse()
 	list.Append(4)
 
-	for v := range list.Iterator() {
+	for v := range list.All() {
 		fmt.Printf("%d ", v)
 	}
 

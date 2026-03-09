@@ -100,12 +100,12 @@ func TestBinaryHeapDrain(t *testing.T) {
 	assert.True(t, heap.IsEmpty())
 }
 
-func TestBinaryHeapIterator(t *testing.T) {
+func TestBinaryHeapAll(t *testing.T) {
 	items := []int{1, 2, 3}
 	heap := NewBinaryHeapFromSlice(items, heaps.MinFunc[int]())
 
 	var collected []int
-	for val := range heap.Iterator() {
+	for val := range heap.All() {
 		collected = append(collected, val)
 	}
 

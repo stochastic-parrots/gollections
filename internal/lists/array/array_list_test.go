@@ -95,19 +95,19 @@ func TestArrayListAppend(t *testing.T) {
 	assert.Equal(t, 3, len(list.data))
 }
 
-func TestArrayListListIterator(t *testing.T) {
+func TestArrayListListAll(t *testing.T) {
 	list := NewArrayList[int](3)
 	items := []int{1, 2, 3}
 	list.Append(items...)
 
 	idx := 0
-	for value := range list.Iterator() {
+	for value := range list.All() {
 		assert.Equal(t, items[idx], value)
 		idx++
 	}
 }
 
-func TestArrayListListReversedIterator(t *testing.T) {
+func TestArrayListListReversedAll(t *testing.T) {
 	list := NewArrayList[int](3)
 	items := []int{1, 2, 3}
 	list.Append(items...)
@@ -115,7 +115,7 @@ func TestArrayListListReversedIterator(t *testing.T) {
 	slices.Reverse(items)
 
 	idx := 0
-	for value := range list.Iterator() {
+	for value := range list.All() {
 		assert.Equal(t, items[idx], value)
 		idx++
 	}

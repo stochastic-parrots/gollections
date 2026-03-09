@@ -78,10 +78,10 @@ func (l *ArrayList[T]) Append(xs ...T) {
 	l.data = append(l.data, xs...)
 }
 
-// Iterator returns a sequence that yields elements in order from index 0 to length-1.
+// All returns a sequence that yields elements in order from index 0 to length-1.
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
-func (l *ArrayList[T]) Iterator() iter.Seq[T] {
+func (l *ArrayList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range l.data {
 			if !yield(value) {

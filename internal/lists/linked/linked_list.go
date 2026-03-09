@@ -123,10 +123,10 @@ func (l *LinkedList[T]) Reverse() {
 	l.last = tmp
 }
 
-// Iterator returns a sequence that yields elements from the first to the last node.
+// All returns a sequence that yields elements from the first to the last node.
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
-func (l *LinkedList[T]) Iterator() iter.Seq[T] {
+func (l *LinkedList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for current := l.first; current != nil; current = current.next {
 			if !yield(current.value) {

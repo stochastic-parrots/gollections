@@ -28,7 +28,7 @@ func (fake *FakeCollection[T]) IsEmpty() bool {
 	return len(fake.data) == 0
 }
 
-func (fake *FakeCollection[T]) Iterator() iter.Seq[T] {
+func (fake *FakeCollection[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range fake.data {
 			if !yield(value) {

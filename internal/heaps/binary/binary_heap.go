@@ -172,11 +172,11 @@ func (heap *BinaryHeap[T]) Length() int {
 	return len(heap.data)
 }
 
-// Iterator returns a sequence that yields elements in the underlying slice order.
+// All returns a sequence that yields elements in the underlying slice order.
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
-func (heap *BinaryHeap[T]) Iterator() iter.Seq[T] {
+func (heap *BinaryHeap[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range heap.data {
 			if !yield(value) {

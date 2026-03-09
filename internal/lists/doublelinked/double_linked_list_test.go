@@ -150,19 +150,19 @@ func TestEmptyDoubleLinkedListReverse(t *testing.T) {
 	assert.Nil(t, list.last)
 }
 
-func TestDoubleLinkedListIterator(t *testing.T) {
+func TestDoubleLinkedListAll(t *testing.T) {
 	list := NewDoubleLinkedList[int]()
 	items := []int{1, 2, 3}
 	list.Append(items...)
 
 	idx := 0
-	for value := range list.Iterator() {
+	for value := range list.All() {
 		assert.Equal(t, items[idx], value)
 		idx++
 	}
 }
 
-func TestDoubleLinkedListReversedIterator(t *testing.T) {
+func TestDoubleLinkedListReversedAll(t *testing.T) {
 	list := NewDoubleLinkedList[int]()
 	items := []int{1, 2, 3}
 	list.Append(items...)
@@ -170,7 +170,7 @@ func TestDoubleLinkedListReversedIterator(t *testing.T) {
 	slices.Reverse(items)
 
 	idx := 0
-	for value := range list.Iterator() {
+	for value := range list.All() {
 		assert.Equal(t, items[idx], value)
 		idx++
 	}
