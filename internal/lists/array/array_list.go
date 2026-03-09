@@ -29,7 +29,6 @@ func NewArrayList[T any](size int) *ArrayList[T] {
 //
 // Complexity: O(1).
 //
-//go:inline
 func (l *ArrayList[T]) Length() int {
 	return len(l.data)
 }
@@ -38,7 +37,6 @@ func (l *ArrayList[T]) Length() int {
 //
 // Complexity: O(1).
 //
-//go:inline
 func (l *ArrayList[T]) IsEmpty() bool {
 	return len(l.data) == 0
 }
