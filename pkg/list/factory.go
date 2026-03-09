@@ -1,18 +1,16 @@
-package lists
+package list
 
 import (
-	"github.com/stochastic-parrots/gollections/internal/lists/array"
-	"github.com/stochastic-parrots/gollections/internal/lists/doublelinked"
-	"github.com/stochastic-parrots/gollections/internal/lists/linked"
+	"github.com/stochastic-parrots/gollections/internal/list"
 )
 
-type ArrayList[T any] = *array.ArrayList[T]
-type LinkedList[T any] = *linked.LinkedList[T]
-type DoubleLinkedList[T any] = *doublelinked.DoubleLinkedList[T]
+type ArrayList[T any] = *list.ArrayList[T]
+type LinkedList[T any] = *list.LinkedList[T]
+type DoubleLinkedList[T any] = *list.DoubleLinkedList[T]
 
-var _ List[any] = &array.ArrayList[any]{}
-var _ List[any] = &linked.LinkedList[any]{}
-var _ List[any] = &doublelinked.DoubleLinkedList[any]{}
+var _ List[any] = &list.ArrayList[any]{}
+var _ List[any] = &list.LinkedList[any]{}
+var _ List[any] = &list.DoubleLinkedList[any]{}
 
 // NewArrayList creates and returns a new empty array list.
 //
@@ -31,7 +29,7 @@ var _ List[any] = &doublelinked.DoubleLinkedList[any]{}
 //	String()                     O(N)
 //	Iterator()                   O(1)
 func NewArrayList[T any](size int) ArrayList[T] {
-	return array.NewArrayList[T](size)
+	return list.NewArrayList[T](size)
 }
 
 // NewLinkedList creates and returns a new empty linked list.
@@ -49,7 +47,7 @@ func NewArrayList[T any](size int) ArrayList[T] {
 //	String()                     O(N)
 //	Iterator()                   O(1)
 func NewLinkedList[T any]() LinkedList[T] {
-	return linked.NewLinkedList[T]()
+	return list.NewLinkedList[T]()
 }
 
 // NewDoubleLinkedList creates and returns a new empty double linked list.
@@ -67,5 +65,5 @@ func NewLinkedList[T any]() LinkedList[T] {
 //	String()                     O(N)
 //	Iterator()                   O(1)
 func NewDoubleLinkedList[T any]() DoubleLinkedList[T] {
-	return doublelinked.NewDoubleLinkedList[T]()
+	return list.NewDoubleLinkedList[T]()
 }

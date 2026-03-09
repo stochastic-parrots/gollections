@@ -1,13 +1,13 @@
-package lists_test
+package list_test
 
 import (
 	"fmt"
 
-	"github.com/stochastic-parrots/gollections/pkg/lists"
+	"github.com/stochastic-parrots/gollections/pkg/list"
 )
 
 func ExampleNewArrayList() {
-	list := lists.NewArrayList[int](5)
+	list := list.NewArrayList[int](5)
 	list.Append(10, 20, 30)
 
 	val, _ := list.Get(1)
@@ -25,7 +25,7 @@ func ExampleNewArrayList() {
 }
 
 func ExampleNewLinkedList() {
-	list := lists.NewLinkedList[string]()
+	list := list.NewLinkedList[string]()
 	list.Append("Go", "is", "fast")
 
 	// O(n)
@@ -40,7 +40,7 @@ func ExampleNewLinkedList() {
 }
 
 func ExampleNewDoubleLinkedList() {
-	list := lists.NewDoubleLinkedList[int]()
+	list := list.NewDoubleLinkedList[int]()
 	list.Append(1, 2, 3)
 
 	// O(1)

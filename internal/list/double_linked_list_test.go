@@ -1,13 +1,117 @@
-package doublelinked
+package list
 
 import (
 	"fmt"
 	"slices"
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewDoubleLinkedNode(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+
+	assert.Equal(t, 5, node.Value())
+	assert.Nil(t, node.Next())
+	assert.False(t, node.HasNext())
+}
+
+func TestDoubleLinkedNodeHasNext(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	next := node.Append(6)
+
+	assert.True(t, node.HasNext())
+	assert.False(t, next.HasNext())
+}
+
+func TestDoubleLinkedNodeAppend(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	next := node.Append(6)
+
+	assert.Same(t, next, node.Next())
+	assert.Same(t, node, next.Previous())
+	assert.Nil(t, next.Next())
+	assert.Nil(t, node.Previous())
+	assert.Equal(t, 6, next.Value())
+	assert.Equal(t, 5, node.Value())
+}
+
+func TestDoubleLinkedNodeUnlinkAfterAppend(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	next := node.Append(6)
+	node.Unlink()
+
+	assert.Nil(t, node.Previous())
+	assert.Nil(t, node.Next())
+	assert.Nil(t, next.Previous())
+	assert.Nil(t, next.Next())
+	assert.Equal(t, 5, node.Value())
+	assert.Equal(t, 6, next.Value())
+}
+
+func TestDoubleLinkedNodeNext(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	next := node.Append(6)
+
+	assert.Same(t, next, node.Next())
+	assert.Nil(t, next.Next())
+}
+
+func TestDoubleLinkedNodeHasPrevious(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	next := node.PreAppend(4)
+
+	assert.True(t, node.HasPrevious())
+	assert.False(t, next.HasPrevious())
+}
+
+func TestDoubleLinkedNodePreAppend(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	previous := node.PreAppend(4)
+	node.Unlink()
+
+	assert.Nil(t, node.Next())
+	assert.Nil(t, previous.Previous())
+	assert.Equal(t, 5, node.Value())
+}
+
+func TestDoubleLinkedNodeUnlinkAfterPreAppend(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	previous := node.PreAppend(4)
+	node.Unlink()
+
+	assert.Nil(t, node.Previous())
+	assert.Nil(t, node.Next())
+	assert.Equal(t, 5, node.Value())
+	assert.Nil(t, previous.Previous())
+	assert.Nil(t, previous.Next())
+	assert.Equal(t, 4, previous.Value())
+}
+
+func TestDoubleLinkedNodeUnlink(t *testing.T) {
+	node := NewDoubleLinkedNode(5)
+	previous := node.PreAppend(4)
+	next := node.Append(6)
+	node.Unlink()
+
+	assert.Nil(t, node.Next())
+	assert.Nil(t, node.Previous())
+	assert.Equal(t, 5, node.Value())
+	assert.Same(t, next, previous.Next())
+	assert.Nil(t, previous.Previous())
+	assert.Equal(t, 4, previous.Value())
+	assert.Nil(t, next.Next())
+	assert.Same(t, previous, next.Previous())
+	assert.Equal(t, 6, next.Value())
+}
+
+func TestDoubleLinkedNodeValue(t *testing.T) {
+	node := NewDoubleLinkedNode(10)
+	other := NewDoubleLinkedNode("some")
+
+	assert.Equal(t, 10, node.Value())
+	assert.Equal(t, "some", other.Value())
+}
 
 func TestNewDoubleLinkedList(t *testing.T) {
 	list := NewDoubleLinkedList[any]()
@@ -67,7 +171,7 @@ func TestDoubleLinkedListGetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		_, err := list.Get(i)
-		target := lists.NewIndexOutOfBoundError(i, list.length)
+		target := NewIndexOutOfBoundError(i, list.length)
 		template := "index %d is out of bounds; maximum valid index is %d"
 		assert.ErrorAsf(t, err, &target, template, i, list.length)
 		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
@@ -109,7 +213,7 @@ func TestDoubleLinkedListSetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		err := list.Set(i, 0)
-		target := lists.NewIndexOutOfBoundError(i, list.length)
+		target := NewIndexOutOfBoundError(i, list.length)
 		template := "index %d is out of bounds; maximum valid index is %d"
 		assert.ErrorAsf(t, err, &target, template, i, list.length)
 		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
@@ -229,7 +333,7 @@ func TestDoubleLinkedListFormat(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", list)
-		want := "*doublelinked.DoubleLinkedList[int]{size:10, cap:10}"
+		want := "*list.DoubleLinkedList[int]{size:10, cap:10}"
 		assert.Equal(t, want, got)
 	})
 
@@ -237,7 +341,7 @@ func TestDoubleLinkedListFormat(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", list)
-		want := "*doublelinked.DoubleLinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		want := "*list.DoubleLinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
 	})
 }

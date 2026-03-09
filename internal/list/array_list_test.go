@@ -1,11 +1,10 @@
-package array
+package list
 
 import (
 	"fmt"
 	"slices"
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,7 +48,7 @@ func TestArrayListGetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		_, err := list.Get(i)
-		target := lists.NewIndexOutOfBoundError(i, len(list.data))
+		target := NewIndexOutOfBoundError(i, len(list.data))
 		template := "index %d is out of bounds; maximum valid index is %d"
 		assert.ErrorAsf(t, err, &target, template, i, len(list.data))
 		assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
@@ -75,7 +74,7 @@ func TestArrayListSetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		err := list.Set(i, 0)
-		target := lists.NewIndexOutOfBoundError(i, len(list.data))
+		target := NewIndexOutOfBoundError(i, len(list.data))
 		template := "index %d is out of bounds; maximum valid index is %d"
 		assert.ErrorAsf(t, err, &target, template, i, len(list.data))
 		assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
@@ -184,7 +183,7 @@ func TestArrayListFormat(t *testing.T) {
 		array := NewArrayList[int](10)
 		array.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", array)
-		want := "*array.ArrayList[int]{size:10, cap:10}"
+		want := "*list.ArrayList[int]{size:10, cap:10}"
 		assert.Equal(t, want, got)
 	})
 
@@ -192,7 +191,7 @@ func TestArrayListFormat(t *testing.T) {
 		array := NewArrayList[int](10)
 		array.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", array)
-		want := "*array.ArrayList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		want := "*list.ArrayList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
 	})
 }

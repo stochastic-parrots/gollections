@@ -1,13 +1,53 @@
-package linked
+package list
 
 import (
 	"fmt"
 	"slices"
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/lists"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewLinkedNode(t *testing.T) {
+	node := NewLinkedNode(5)
+
+	assert.Equal(t, 5, node.Value())
+	assert.Nil(t, node.Next())
+	assert.False(t, node.HasNext())
+}
+
+func TestLinkedNodeHasNext(t *testing.T) {
+	node := NewLinkedNode(5)
+	next := node.Append(6)
+
+	assert.True(t, node.HasNext())
+	assert.False(t, next.HasNext())
+}
+
+func TestLinkedNodeAppend(t *testing.T) {
+	node := NewLinkedNode(5)
+	next := node.Append(6)
+
+	assert.Same(t, next, node.Next())
+	assert.Nil(t, next.Next())
+	assert.Equal(t, 6, next.Value())
+}
+
+func TestLinkedNodeNext(t *testing.T) {
+	node := NewLinkedNode(5)
+	next := node.Append(6)
+
+	assert.Same(t, next, node.Next())
+	assert.Nil(t, next.Next())
+}
+
+func TestLinkedNodeValue(t *testing.T) {
+	node := NewLinkedNode(10)
+	other := NewLinkedNode("some")
+
+	assert.Equal(t, 10, node.Value())
+	assert.Equal(t, "some", other.Value())
+}
 
 func TestNewLinkedList(t *testing.T) {
 	list := NewLinkedList[any]()
@@ -52,7 +92,7 @@ func TestLinkedListGetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		_, err := list.Get(i)
-		target := lists.NewIndexOutOfBoundError(i, list.length)
+		target := NewIndexOutOfBoundError(i, list.length)
 		template := "index %d is out of bounds; maximum valid index is %d"
 		assert.ErrorAsf(t, err, &target, template, i, list.length)
 		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
@@ -79,7 +119,7 @@ func TestLinkedListSetInvalidIndex(t *testing.T) {
 
 	for _, i := range []int{-1, 4, 5} {
 		err := list.Set(i, 0)
-		target := lists.NewIndexOutOfBoundError(i, list.length)
+		target := NewIndexOutOfBoundError(i, list.length)
 		template := "index %d is out of bounds; maximum valid index is %d"
 		assert.ErrorAsf(t, err, &target, template, i, list.length)
 		assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
@@ -198,7 +238,7 @@ func TestLinkedListFormat(t *testing.T) {
 		list := NewLinkedList[int]()
 		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", list)
-		want := "*linked.LinkedList[int]{size:10, cap:10}"
+		want := "*list.LinkedList[int]{size:10, cap:10}"
 		assert.Equal(t, want, got)
 	})
 
@@ -206,7 +246,7 @@ func TestLinkedListFormat(t *testing.T) {
 		list := NewLinkedList[int]()
 		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", list)
-		want := "*linked.LinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		want := "*list.LinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
 	})
 }

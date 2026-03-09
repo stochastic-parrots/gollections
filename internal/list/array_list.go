@@ -1,4 +1,4 @@
-package array
+package list
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"slices"
 
 	"github.com/stochastic-parrots/gollections/internal/formatters"
-	"github.com/stochastic-parrots/gollections/internal/lists"
 )
 
 // ArrayList represents a dynamic array (slice-backed) data structure.
@@ -28,7 +27,6 @@ func NewArrayList[T any](size int) *ArrayList[T] {
 // Length returns the current number of elements in the list.
 //
 // Complexity: O(1).
-//
 func (l *ArrayList[T]) Length() int {
 	return len(l.data)
 }
@@ -36,7 +34,6 @@ func (l *ArrayList[T]) Length() int {
 // IsEmpty returns true if the list contains no elements.
 //
 // Complexity: O(1).
-//
 func (l *ArrayList[T]) IsEmpty() bool {
 	return len(l.data) == 0
 }
@@ -48,7 +45,7 @@ func (l *ArrayList[T]) IsEmpty() bool {
 func (l *ArrayList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= len(l.data) {
 		var zero T
-		return zero, lists.NewIndexOutOfBoundError(index, len(l.data)-1)
+		return zero, NewIndexOutOfBoundError(index, len(l.data)-1)
 	}
 
 	return l.data[index], nil
@@ -60,7 +57,7 @@ func (l *ArrayList[T]) Get(index int) (T, error) {
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *ArrayList[T]) Set(index int, x T) error {
 	if index < 0 || index >= len(l.data) {
-		return lists.NewIndexOutOfBoundError(index, len(l.data)-1)
+		return NewIndexOutOfBoundError(index, len(l.data)-1)
 	}
 
 	l.data[index] = x

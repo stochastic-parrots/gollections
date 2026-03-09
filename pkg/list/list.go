@@ -1,4 +1,4 @@
-package lists
+package list
 
 import "github.com/stochastic-parrots/gollections/pkg"
 

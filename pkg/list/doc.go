@@ -1,4 +1,4 @@
-// Package lists provides high-performance, generic linear collection implementations.
+// Package list provides high-performance, generic linear collection implementations.
 //
 // The package offers a modern, type-safe suite of list structures, ranging from
 // contiguous memory ArrayLists to flexible Linked Lists. It leverages Go Generics (1.18+)
@@ -41,4 +41,4 @@
 //
 // All collections in this package implement the fmt.Formatter interface, providing
 // clean, customizable output when using the fmt package's verbs (%v, %+v, %#v).
-package lists
+package list

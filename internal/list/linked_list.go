@@ -1,18 +1,44 @@
-package linked
+package list
 
 import (
 	"fmt"
 	"iter"
 
 	"github.com/stochastic-parrots/gollections/internal/formatters"
-	"github.com/stochastic-parrots/gollections/internal/lists"
 )
+
+type LinkedNode[T any] struct {
+	value T
+	next  *LinkedNode[T]
+}
+
+func NewLinkedNode[T any](value T) *LinkedNode[T] {
+	return &LinkedNode[T]{value: value, next: nil}
+}
+
+func (node LinkedNode[T]) Value() T {
+	return node.value
+}
+
+func (node LinkedNode[T]) Next() *LinkedNode[T] {
+	return node.next
+}
+
+func (node LinkedNode[T]) HasNext() bool {
+	return node.next != nil
+}
+
+func (node *LinkedNode[T]) Append(x T) *LinkedNode[T] {
+	new := NewLinkedNode(x)
+	node.next = new
+	return new
+}
 
 // LinkedList represents a singly linked list data structure.
 // It consists of nodes where each element points to the next, making it efficient
 // for sequential insertion and deletion at the ends, but requiring O(n) for random access.
 type LinkedList[T any] struct {
-	first, last *Node[T]
+	first, last *LinkedNode[T]
 	length      int
 }
 
@@ -46,7 +72,7 @@ func (l *LinkedList[T]) IsEmpty() bool {
 func (l *LinkedList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= l.Length() {
 		var zero T
-		return zero, lists.NewIndexOutOfBoundError(index, l.Length()-1)
+		return zero, NewIndexOutOfBoundError(index, l.Length()-1)
 	}
 
 	current := l.first
@@ -63,7 +89,7 @@ func (l *LinkedList[T]) Get(index int) (T, error) {
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Set(index int, x T) error {
 	if index < 0 || index >= l.Length() {
-		return lists.NewIndexOutOfBoundError(index, l.Length()-1)
+		return NewIndexOutOfBoundError(index, l.Length()-1)
 	}
 
 	current := l.first
@@ -76,7 +102,7 @@ func (l *LinkedList[T]) Set(index int, x T) error {
 }
 
 func (l *LinkedList[T]) append(x T) {
-	new := NewNode(x)
+	new := NewLinkedNode(x)
 
 	if l.IsEmpty() {
 		l.first = new
@@ -108,7 +134,7 @@ func (l *LinkedList[T]) Reverse() {
 		return
 	}
 
-	var previous *Node[T]
+	var previous *LinkedNode[T]
 	current := l.first
 
 	for current != nil {
