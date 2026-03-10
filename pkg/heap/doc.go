@@ -1,4 +1,4 @@
-// Package heaps provides high-performance, generic binary heap implementations.
+// Package heap provides high-performance, generic binary heap implementations.
 //
 // The package offers a modern alternative to the standard library's container/heap,
 // leveraging Go Generics (1.18+) for type safety and the new iterators (1.23+)
@@ -19,10 +19,10 @@
 //
 // One of the standout features is the Drain method:
 //
-//	h := heaps.MinFromSlice([]int{3, 1, 2})
+//	h := heap.MinFromSlice([]int{3, 1, 2})
 //	for i, val := range h.Drain() {
 //	    fmt.Printf("Rank %d: %v\n", i, val)
 //	}
 //
 // After this loop, h is empty.
-package heaps
+package heap

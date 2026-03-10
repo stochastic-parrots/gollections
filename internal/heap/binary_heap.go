@@ -1,4 +1,4 @@
-package binary
+package heap
 
 import (
 	"fmt"
@@ -134,7 +134,16 @@ func (heap *BinaryHeap[T]) Peek() (T, bool) {
 	return heap.data[0], true
 }
 
-// Push inserts one or more elements into the heap.
+// PushAll inserts one or more elements into the heap.
+//
+// Complexity: O(log n).
+func (heap *BinaryHeap[T]) Push_(x T) {
+	heap.data = append(heap.data, x)
+	heap.fixup(len(heap.data) - 1)
+
+}
+
+// PushAll inserts one or more elements into the heap.
 //
 // Complexity: O(log n) per element inserted.
 // If multiple elements are provided and the heap is small or empty,

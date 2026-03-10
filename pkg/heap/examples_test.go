@@ -1,13 +1,13 @@
-package heaps_test
+package heap_test
 
 import (
 	"fmt"
 
-	"github.com/stochastic-parrots/gollections/pkg/heaps"
+	"github.com/stochastic-parrots/gollections/pkg/heap"
 )
 
-func ExampleMin() {
-	h := heaps.Min[int](5)
+func ExampleNewMinBinary() {
+	h := heap.NewMinBinary[int](5)
 
 	h.Push(10, 50, 5, 1)
 
@@ -20,10 +20,10 @@ func ExampleMin() {
 	// 1 5 10 50
 }
 
-func ExampleMinFromSlice() {
+func ExampleMinBinaryFrom() {
 	data := []int{42, 7, 13, 1, 99}
 
-	h := heaps.MinFromSlice(data)
+	h := heap.MinBinaryFrom(data)
 
 	val, _ := h.Pop()
 	fmt.Printf("Pop: %d\n", val)
@@ -34,10 +34,10 @@ func ExampleMinFromSlice() {
 	// Slice: [7 42 13 99]
 }
 
-func ExampleMinCloneSlice() {
+func ExampleMinBinaryClone() {
 	data := []int{42, 7, 13, 1, 99}
 
-	h := heaps.MinCloneSlice(data)
+	h := heap.MinBinaryClone(data)
 	h.Pop()
 
 	fmt.Printf("Length: %d\n", h.Length())
@@ -48,8 +48,8 @@ func ExampleMinCloneSlice() {
 	// Data: [42 7 13 1 99]
 }
 
-func ExampleMax() {
-	h := heaps.Max[float64](0)
+func ExampleNewMaxBinary() {
+	h := heap.NewMaxBinary[float64](0)
 	h.Push(1.5, 10.2, 3.7)
 
 	top, _ := h.Peek()
@@ -59,10 +59,10 @@ func ExampleMax() {
 	// 10.2
 }
 
-func ExampleMaxFromSlice() {
+func ExampleMaxBinaryFrom() {
 	data := []int{1, 13, 7, 42, 99}
 
-	h := heaps.MaxFromSlice(data)
+	h := heap.MaxBinaryFrom(data)
 
 	val, _ := h.Pop()
 	fmt.Printf("Pop: %d\n", val)
@@ -73,10 +73,10 @@ func ExampleMaxFromSlice() {
 	// Slice: [42 13 7 1]
 }
 
-func ExampleMaxCloneSlice() {
+func ExampleMaxBinaryClone() {
 	data := []int{1, 13, 7, 42, 99}
 
-	h := heaps.MaxCloneSlice(data)
+	h := heap.MaxBinaryClone(data)
 	h.Pop()
 
 	fmt.Printf("Length: %d\n", h.Length())
@@ -87,12 +87,12 @@ func ExampleMaxCloneSlice() {
 	// Data: [1 13 7 42 99]
 }
 
-func ExampleNew() {
+func ExampleNewBinary() {
 	byLength := func(a, b string) bool {
 		return len(a) < len(b)
 	}
 
-	h := heaps.New(0, byLength)
+	h := heap.NewBinary(0, byLength)
 	h.Push("apple", "kiwi", "banana", "pear")
 
 	for !h.IsEmpty() {
