@@ -3,7 +3,7 @@ package heap
 import (
 	"iter"
 
-	"github.com/stochastic-parrots/gollections/pkg"
+	pkg "github.com/stochastic-parrots/gollections"
 )
 
 // Heap defines a priority queue structure where elements are ordered

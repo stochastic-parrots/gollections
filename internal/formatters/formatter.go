@@ -5,7 +5,7 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/stochastic-parrots/gollections/pkg"
+	pkg "github.com/stochastic-parrots/gollections"
 )
 
 const displayLimit = 5

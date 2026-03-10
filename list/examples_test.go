@@ -3,7 +3,7 @@ package list_test
 import (
 	"fmt"
 
-	"github.com/stochastic-parrots/gollections/pkg/list"
+	"github.com/stochastic-parrots/gollections/list"
 )
 
 func ExampleNewArray() {

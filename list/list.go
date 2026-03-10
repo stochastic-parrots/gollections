@@ -1,6 +1,6 @@
 package list
 
-import "github.com/stochastic-parrots/gollections/pkg"
+import pkg "github.com/stochastic-parrots/gollections"
 
 // List defines the operations for an ordered, indexable collection of elements.
 // It extends the basic functionalities provided by the gollections.Collection interface.

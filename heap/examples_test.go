@@ -3,7 +3,7 @@ package heap_test
 import (
 	"fmt"
 
-	"github.com/stochastic-parrots/gollections/pkg/heap"
+	"github.com/stochastic-parrots/gollections/heap"
 )
 
 func ExampleNewMinBinary() {

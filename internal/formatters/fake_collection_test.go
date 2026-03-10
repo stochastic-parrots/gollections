@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"iter"
 
+	pkg "github.com/stochastic-parrots/gollections"
 	"github.com/stochastic-parrots/gollections/internal/formatters"
-	"github.com/stochastic-parrots/gollections/pkg"
 )
 
 var _ pkg.Collection[int] = &FakeCollection[int]{}

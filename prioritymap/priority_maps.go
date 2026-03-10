@@ -1,6 +1,6 @@
 package prioritymap
 
-import "github.com/stochastic-parrots/gollections/pkg"
+import pkg "github.com/stochastic-parrots/gollections"
 
 // PriorityMap defines a structure that combines a map (key-based access) with a heap (priority ordering).
 // It allows efficient insertion, update, and removal of key-priority pairs, as well as extraction of the minimum priority element.
