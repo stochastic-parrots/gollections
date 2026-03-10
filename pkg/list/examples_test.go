@@ -6,8 +6,8 @@ import (
 	"github.com/stochastic-parrots/gollections/pkg/list"
 )
 
-func ExampleNewArrayList() {
-	list := list.NewArrayList[int](5)
+func ExampleNewArray() {
+	list := list.NewArray[int](5)
 	list.Append(10, 20, 30)
 
 	val, _ := list.Get(1)
@@ -24,8 +24,8 @@ func ExampleNewArrayList() {
 	// 10 25 30
 }
 
-func ExampleNewLinkedList() {
-	list := list.NewLinkedList[string]()
+func ExampleNewLinked() {
+	list := list.NewLinked[string]()
 	list.Append("Go", "is", "fast")
 
 	// O(n)
@@ -39,8 +39,8 @@ func ExampleNewLinkedList() {
 	// 0:fast 1:is 2:Go
 }
 
-func ExampleNewDoubleLinkedList() {
-	list := list.NewDoubleLinkedList[int]()
+func ExampleNewDoubleLinked() {
+	list := list.NewDoubleLinked[int]()
 	list.Append(1, 2, 3)
 
 	// O(1)

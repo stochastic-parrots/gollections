@@ -20,13 +20,13 @@
 //
 // The package provides three main flavors of lists, each optimized for specific access patterns:
 //
-//   - [array.ArrayList]: Best for random access (O(1)) and memory locality.
-//   - [linked.LinkedList]: A classic singly linked list for efficient head insertions.
-//   - [doublelinked.DoubleLinkedList]: Supports O(1) reversal and bi-directional traversal.
+//   - [list.ArrayList]: Best for random access (O(1)) and memory locality.
+//   - [list.LinkedList]: A classic singly linked list for efficient head insertions.
+//   - [list.DoubleLinkedList]: Supports O(1) reversal and bi-directional traversal.
 //
 // # Usage Example
 //
-//	l := linked.NewLinkedList[string]()
+//	l := list.NewLinked[string]()
 //	l.Append("Go", "is", "awesome")
 //
 //	// Idiomatic iteration (Go 1.23+)

@@ -28,7 +28,7 @@ var _ List[any] = &list.DoubleLinkedList[any]{}
 //	IsEmpty()                    O(1)
 //	String()                     O(N)
 //	Iterator()                   O(1)
-func NewArrayList[T any](size int) ArrayList[T] {
+func NewArray[T any](size int) ArrayList[T] {
 	return list.NewArrayList[T](size)
 }
 
@@ -46,7 +46,7 @@ func NewArrayList[T any](size int) ArrayList[T] {
 //	IsEmpty()                    O(1)
 //	String()                     O(N)
 //	Iterator()                   O(1)
-func NewLinkedList[T any]() LinkedList[T] {
+func NewLinked[T any]() LinkedList[T] {
 	return list.NewLinkedList[T]()
 }
 
@@ -64,6 +64,6 @@ func NewLinkedList[T any]() LinkedList[T] {
 //	IsEmpty()                    O(1)
 //	String()                     O(N)
 //	Iterator()                   O(1)
-func NewDoubleLinkedList[T any]() DoubleLinkedList[T] {
+func NewDoubleLinked[T any]() DoubleLinkedList[T] {
 	return list.NewDoubleLinkedList[T]()
 }
