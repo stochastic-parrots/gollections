@@ -57,6 +57,30 @@ func TestBinaryHeapPushNothing(t *testing.T) {
 	assert.Equal(t, 0, heap.Length())
 }
 
+func TestBinaryHeapReplace(t *testing.T) {
+	heap := NewBinaryHeap(0, MinFunc[int]())
+
+	heap.Push(10)
+	heap.Push(5)
+	val, _ := heap.Peek()
+	assert.Equal(t, 5, val)
+
+	heap.Replace(2)
+	val, _ = heap.Peek()
+	assert.Equal(t, 2, val)
+	assert.Equal(t, 2, heap.Length())
+
+	heap.Replace(8)
+	val, _ = heap.Peek()
+	assert.Equal(t, 8, val)
+	assert.Equal(t, 2, heap.Length())
+
+	heap.Replace(15)
+	val, _ = heap.Peek()
+	assert.Equal(t, 10, val)
+	assert.Equal(t, 2, heap.Length())
+}
+
 func TestBinaryHeapPop(t *testing.T) {
 	heap := NewBinaryHeapFromSlice([]int{10, 2, 8, 1}, MinFunc[int]())
 

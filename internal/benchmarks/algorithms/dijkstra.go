@@ -3,10 +3,11 @@ package algorithms
 import (
 	"math"
 
+	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 )
 
-func Dijkstra(graph models.Graph, start int, pm PriorityMap[int, float64]) []float64 {
+func Dijkstra(graph models.Graph, start int, pm datastructs.PriorityMap[int, float64]) []float64 {
 	dist := make([]float64, len(graph))
 	for i := range dist {
 		dist[i] = math.MaxInt

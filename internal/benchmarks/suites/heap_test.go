@@ -2,120 +2,134 @@ package suites
 
 import (
 	"cmp"
-	"math/rand/v2"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/algorithms"
+	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
+	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 	"github.com/stochastic-parrots/gollections/internal/heap"
 )
 
-func GetHeapSuite(size int) Implementations[algorithms.Heap[int]] {
+func GetHeapSuite(size int, data []int) datastructs.Implementations[datastructs.Heap[int]] {
 	less := cmp.Less[int]
-	return []Implementation[algorithms.Heap[int]]{
+	return []datastructs.Implementation[datastructs.Heap[int]]{
 		{
-			name: "Gollections/Binary",
-			factory: func() algorithms.Heap[int] {
-				return heap.NewBinaryHeap(size, less)
+			Name: "stdlib",
+			Factory: func() datastructs.Heap[int] {
+				if data != nil {
+					return datastructs.NewStdLibHeapCloneSlice(data)
+				}
+				return datastructs.NewStdLibHeap(size)
 			},
 		},
 		{
-			name: "stdlib",
-			factory: func() algorithms.Heap[int] {
-				return NewStdLibHeap(make([]int, size))
+			Name: "Gollections_BinaryHeap",
+			Factory: func() datastructs.Heap[int] {
+				if data != nil {
+					return heap.NewBinaryHeapCloneSlice(data, less)
+				}
+				return heap.NewBinaryHeap(size, less)
 			},
 		},
 	}
 }
 
-func BenchmarkBinaryHeap_Push(b *testing.B) {
-	n := 10_000
-	initialData := make([]int, n)
+func BenchmarkHeaps_Push_Random(b *testing.B) {
+	N := 10_000
+	data := models.NewRandomSlice(N)
 	ratios := []struct {
 		name string
 		val  float64
 	}{
 		{"x0.1", 0.1},
-		{"x0.3", 0.3},
-		{"x0.4", 0.4},
 		{"x0.5", 0.5},
 		{"x1", 1.0},
 		{"x10", 10.0},
 	}
 
-	for _, r := range ratios {
-		k := int(float64(n) * r.val)
-		newItems := make([]int, k)
+	for _, ratio := range ratios {
+		n := int(float64(N) * ratio.val)
+		items := models.NewRandomSliceWithMax(n, N*10)
 
-		b.Run(r.name, func(b *testing.B) {
-			b.Run("Library=Gollections/BinaryHeap", func(b *testing.B) {
-				for i := 0; i < b.N; i++ {
-					b.StopTimer()
-					h := heap.NewBinaryHeap(n+k, less)
-					h.Push(initialData...)
-					b.StartTimer()
-					h.Push(newItems...)
-				}
-			})
-
-			b.Run("Library=Container/Heap", func(b *testing.B) {
-				for i := 0; i < b.N; i++ {
-					b.StopTimer()
-					h := NewStdLibHeap(initialData)
-					b.StartTimer()
-					for _, item := range newItems {
-						h.Push(item)
+		b.Run("Size="+ratio.name, func(b *testing.B) {
+			for _, implementation := range GetHeapSuite(n, data) {
+				b.Run("Library="+implementation.Name, func(b *testing.B) {
+					b.ReportAllocs()
+					for range b.N {
+						b.StopTimer()
+						h := implementation.Factory()
+						b.StartTimer()
+						h.Push(items...)
 					}
-				}
-			})
+				})
+			}
 		})
 	}
 }
 
-func BenchmarkBinaryHeap_Pop(b *testing.B) {
-	const N = 100_000
-	data := make([]int, N)
-	for i := range N {
-		data[i] = i
+func BenchmarkHeaps_Push_Reverse(b *testing.B) {
+	N := 10_000
+	data := models.NewReversedSlice(N)
+	ratios := []struct {
+		name string
+		val  float64
+	}{
+		{"x0.1", 0.1},
+		{"x0.5", 0.5},
+		{"x1", 1.0},
+		{"x10", 10.0},
 	}
 
-	b.Run("Library=Gollections/BinaryHeap", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			b.StopTimer()
-			h := heap.NewBinaryHeapFromSlice(append([]int{}, data...), less)
-			b.StartTimer()
-			for !h.IsEmpty() {
-				h.Pop()
-			}
-		}
-	})
+	for _, ratio := range ratios {
+		n := int(float64(N) * ratio.val)
+		items := models.NewReversedSliceStartedAt(n, N)
 
-	b.Run("Library=Container/Heap", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			b.StopTimer()
-			h := NewStdLibHeap(append([]int{}, data...))
-			b.StartTimer()
-			for h.Length() > 0 {
-				h.Pop()
+		b.Run("Size="+ratio.name, func(b *testing.B) {
+			for _, implementation := range GetHeapSuite(n, data) {
+				b.Run("Library="+implementation.Name, func(b *testing.B) {
+					b.ReportAllocs()
+					for range b.N {
+						b.StopTimer()
+						h := implementation.Factory()
+						b.StartTimer()
+						h.Push(items...)
+					}
+				})
 			}
-		}
-	})
+		})
+	}
 }
 
-func BenchmarkBinaryHeap_TopK(b *testing.B) {
+func BenchmarkHeaps_Pop(b *testing.B) {
+	const N = 100_000
+	data := models.NewRandomSlice(N)
+	for _, implementation := range GetHeapSuite(N, data) {
+		b.Run("Library="+implementation.Name, func(b *testing.B) {
+			b.ReportAllocs()
+			h := implementation.Factory()
+			for range b.N {
+				if h.Length() == 0 {
+					b.StopTimer()
+					h = implementation.Factory()
+					b.StartTimer()
+				}
+				h.Pop()
+			}
+		})
+	}
+}
+
+func BenchmarkHeaps_TopK(b *testing.B) {
 	const N = 100_000
 	const K = 100
+	data := models.NewRandomSlice(N)
 
-	data := make([]int, N)
-	for i := range N {
-		data[i] = rand.Int()
-	}
-
-	for _, implementation := range GetHeapSuite(K) {
-		b.Run("Library="+implementation.name, func(b *testing.B) {
+	for _, implementation := range GetHeapSuite(K, nil) {
+		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
-				heap := implementation.factory()
-				algorithms.TopK(data, K, heap, func(i1, i2 int) bool { return i1 > i2 })
+				heap := implementation.Factory()
+				algorithms.TopK(data, K, heap, func(some, other int) bool { return some > other })
 			}
 		})
 	}

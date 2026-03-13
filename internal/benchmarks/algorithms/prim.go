@@ -3,10 +3,11 @@ package algorithms
 import (
 	"math"
 
+	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 )
 
-func Prim(graph models.Graph, pm PriorityMap[int, float64]) float64 {
+func Prim(graph models.Graph, pm datastructs.PriorityMap[int, float64]) float64 {
 	nodes := len(graph)
 	mstWeight := 0.0
 	visited := make([]bool, nodes)

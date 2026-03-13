@@ -5,23 +5,30 @@ import (
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/algorithms"
+	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
-	"github.com/stochastic-parrots/gollections/internal/heap"
+	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-func GetPriorityMapSuite(size int) Implementations[algorithms.PriorityMap[int, float64]] {
+func GetPriorityMapSuite(size int) datastructs.Implementations[datastructs.PriorityMap[int, float64]] {
 	less := cmp.Less[float64]
-	return []Implementation[algorithms.PriorityMap[int, float64]]{
+	return []datastructs.Implementation[datastructs.PriorityMap[int, float64]]{
 		{
-			name: "Gollections/Binary",
-			factory: func() algorithms.PriorityMap[int, float64] {
-				return heap.NewBinaryPriorityMap[int](size, less)
+			Name: "stdlib",
+			Factory: func() datastructs.PriorityMap[int, float64] {
+				return datastructs.NewStdPriorityMap[int](size, less)
 			},
 		},
 		{
-			name: "stdlib",
-			factory: func() algorithms.PriorityMap[int, float64] {
-				return NewStdPriorityMap[int](size, less)
+			Name: "Gollections_BinaryHeapPriorityMap",
+			Factory: func() datastructs.PriorityMap[int, float64] {
+				return prioritymap.NewBinaryPriorityMap[int](size, less)
+			},
+		},
+		{
+			Name: "Gollections_PairingHeapPriorityMap",
+			Factory: func() datastructs.PriorityMap[int, float64] {
+				return prioritymap.NewPairingPriorityMap[int](less)
 			},
 		},
 	}
@@ -33,10 +40,10 @@ func BenchmarkPriorityMap_Dijkstra(b *testing.B) {
 	graph := models.NewRandomGraph(nodes, density)
 
 	for _, implementation := range GetPriorityMapSuite(nodes) {
-		b.Run("Library="+implementation.name, func(b *testing.B) {
+		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
-				priorityMap := implementation.factory()
+				priorityMap := implementation.Factory()
 				algorithms.Dijkstra(graph, 0, priorityMap)
 			}
 		})
@@ -49,10 +56,10 @@ func BenchmarkPriorityMap_Prim(b *testing.B) {
 	graph := models.NewRandomGraph(nodes, density)
 
 	for _, implementation := range GetPriorityMapSuite(nodes) {
-		b.Run("Library="+implementation.name, func(b *testing.B) {
+		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
-				priorityMap := implementation.factory()
+				priorityMap := implementation.Factory()
 				algorithms.Prim(graph, priorityMap)
 			}
 		})

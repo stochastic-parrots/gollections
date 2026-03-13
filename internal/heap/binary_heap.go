@@ -121,6 +121,28 @@ func (heap *BinaryHeap[T]) Pop() (T, bool) {
 	return root, true
 }
 
+// Replace replaces the root element with the given item and rebalances the heap.
+// It is more efficient than a Pop followed by a Push as it only performs a downward
+// rebalance (sift-down) and avoids slice resizing.
+//
+// Complexity: O(log n).
+// Returns the previous root and true, or the zero value of T and false if the heap is empty.
+func (heap *BinaryHeap[T]) Replace(x T) (T, bool) {
+	if len(heap.data) == 0 {
+		var zero T
+		return zero, false
+	}
+
+	root := heap.data[0]
+	heap.data[0] = x
+
+	if len(heap.data) > 1 {
+		heap.fixdown(0)
+	}
+
+	return root, true
+}
+
 // Peek returns the element with the highest priority without removing it.
 //
 // Complexity: O(1).
@@ -134,16 +156,7 @@ func (heap *BinaryHeap[T]) Peek() (T, bool) {
 	return heap.data[0], true
 }
 
-// PushAll inserts one or more elements into the heap.
-//
-// Complexity: O(log n).
-func (heap *BinaryHeap[T]) Push_(x T) {
-	heap.data = append(heap.data, x)
-	heap.fixup(len(heap.data) - 1)
-
-}
-
-// PushAll inserts one or more elements into the heap.
+// Push inserts one or more elements into the heap.
 //
 // Complexity: O(log n) per element inserted.
 // If multiple elements are provided and the heap is small or empty,
@@ -153,8 +166,8 @@ func (heap *BinaryHeap[T]) Push(xs ...T) {
 	if k == 0 {
 		return
 	}
-	n := len(heap.data)
 
+	n := len(heap.data)
 	if n == 0 || (k > 64 && k > n) {
 		heap.data = append(heap.data, xs...)
 		heap.heapify()

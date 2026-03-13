@@ -1,4 +1,4 @@
-package algorithms
+package datastructs
 
 type PriorityMap[K comparable, V any] interface {
 	Set(key K, priority V)

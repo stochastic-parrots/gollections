@@ -1,15 +1,16 @@
 package algorithms
 
-func TopK(data []int, k int, heap Heap[int], hasPriority func(int, int) bool) {
+import "github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
+
+func TopK(data []int, k int, heap datastructs.Heap[int], hasPriority func(int, int) bool) {
 	for _, x := range data {
 		if heap.Length() < k {
 			heap.Push(x)
-		} else {
-			root, _ := heap.Peek()
-			if hasPriority(x, root) {
-				heap.Pop()
-				heap.Push(x)
-			}
+			continue
+		}
+
+		if root, ok := heap.Peek(); ok && hasPriority(x, root) {
+			heap.Replace(x)
 		}
 	}
 }

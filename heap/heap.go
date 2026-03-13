@@ -40,5 +40,15 @@ type Heap[T any] interface {
 	//   iter.Seq2[int, T]  A sequence of rank and elements from highest to lowest priority.
 	Drain() iter.Seq2[int, T]
 
+	// Replace replaces the root element with the given item and rebalances the heap.
+	//
+	// Parameters:
+	//   x  The element to be inserted the heap root.
+	//
+	// Returns:
+	//   T     The last heap root if heap is not empty or zero.
+	//   bool  False if the heap is empty, true otherwise.
+	Replace(x T) (T, bool)
+
 	pkg.Collection[T]
 }
