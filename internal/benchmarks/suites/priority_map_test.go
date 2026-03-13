@@ -25,12 +25,6 @@ func GetPriorityMapSuite(size int) datastructs.Implementations[datastructs.Prior
 				return prioritymap.NewBinaryPriorityMap[int](size, less)
 			},
 		},
-		{
-			Name: "Gollections_PairingHeapPriorityMap",
-			Factory: func() datastructs.PriorityMap[int, float64] {
-				return prioritymap.NewPairingPriorityMap[int](less)
-			},
-		},
 	}
 }
 

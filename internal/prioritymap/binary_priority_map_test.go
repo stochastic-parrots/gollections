@@ -3,11 +3,12 @@ package prioritymap
 import (
 	"testing"
 
+	"github.com/stochastic-parrots/gollections/internal/comparator"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBinaryPriorityMap(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](10, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](10, comparator.Min[int]())
 
 	assert.Equal(t, 0, pm.Length())
 	assert.True(t, pm.IsEmpty())
@@ -17,7 +18,7 @@ func TestNewBinaryPriorityMap(t *testing.T) {
 
 func TestBinaryPriorityMapSet(t *testing.T) {
 	t.Run("Insert New Keys", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("B", 5)
 
@@ -28,7 +29,7 @@ func TestBinaryPriorityMapSet(t *testing.T) {
 	})
 
 	t.Run("Update Existing Keys", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("A", 2) // Update priority to be higher
 
@@ -39,7 +40,7 @@ func TestBinaryPriorityMapSet(t *testing.T) {
 }
 
 func TestBinaryPriorityMapGet(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 	pm.Set("apple", 100)
 
 	val, ok := pm.Get("apple")
@@ -52,7 +53,7 @@ func TestBinaryPriorityMapGet(t *testing.T) {
 }
 
 func TestBinaryPriorityMapRemove(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 	pm.Set("A", 10)
 	pm.Set("B", 20)
 	pm.Set("C", 30)
@@ -66,7 +67,7 @@ func TestBinaryPriorityMapRemove(t *testing.T) {
 }
 
 func TestBinaryPriorityMapPop(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
 	pm.Set(1, 50)
 	pm.Set(2, 10)
 	pm.Set(3, 30)
@@ -85,7 +86,7 @@ func TestBinaryPriorityMapPop(t *testing.T) {
 }
 
 func TestBinaryPriorityMapPeek(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 
 	_, _, ok := pm.Peek()
 	assert.False(t, ok)
@@ -98,7 +99,7 @@ func TestBinaryPriorityMapPeek(t *testing.T) {
 }
 
 func TestBinaryPriorityMapIsEmpty(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
 	assert.True(t, pm.IsEmpty())
 
 	pm.Set(1, 10)
@@ -109,7 +110,7 @@ func TestBinaryPriorityMapIsEmpty(t *testing.T) {
 }
 
 func TestBinaryPriorityMapLength(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
 	assert.Equal(t, 0, pm.Length())
 
 	pm.Set(1, 10)
@@ -118,7 +119,7 @@ func TestBinaryPriorityMapLength(t *testing.T) {
 }
 
 func TestBinaryPriorityMapKeys(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 	pm.Set("A", 1)
 	pm.Set("B", 2)
 
@@ -133,7 +134,7 @@ func TestBinaryPriorityMapKeys(t *testing.T) {
 }
 
 func TestBinaryPriorityMapValues(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 	pm.Set("A", 100)
 	pm.Set("B", 200)
 
@@ -148,7 +149,7 @@ func TestBinaryPriorityMapValues(t *testing.T) {
 }
 
 func TestBinaryPriorityMapAll(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 	pm.Set("A", 1)
 	pm.Set("B", 2)
 
@@ -163,7 +164,7 @@ func TestBinaryPriorityMapAll(t *testing.T) {
 }
 
 func TestBinaryPriorityMapIntegrity(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, MinFunc[int]())
+	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
 
 	for i := 10; i > 0; i-- {
 		pm.Set(i, i)

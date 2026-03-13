@@ -3,13 +3,13 @@ package heap
 import (
 	"cmp"
 
-	constructors "github.com/stochastic-parrots/gollections/internal/heap"
-	internal "github.com/stochastic-parrots/gollections/internal/heap"
+	"github.com/stochastic-parrots/gollections/internal/comparator"
+	constructor "github.com/stochastic-parrots/gollections/internal/heap"
 )
 
-var _ Heap[any] = &constructors.BinaryHeap[any]{}
+var _ Heap[any] = &constructor.BinaryHeap[any]{}
 
-type BinaryHeap[T any] = *constructors.BinaryHeap[T]
+type BinaryHeap[T any] = *constructor.BinaryHeap[T]
 
 // NewBinary creates a new empty Binary Heap.
 //
@@ -23,7 +23,7 @@ type BinaryHeap[T any] = *constructors.BinaryHeap[T]
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func NewBinary[T any](capacity int, cmp func(T, T) bool) BinaryHeap[T] {
-	return constructors.NewBinaryHeap(capacity, cmp)
+	return constructor.NewBinaryHeap(capacity, cmp)
 }
 
 // BinaryFrom creates a Binary Heap with custom comparator.
@@ -40,7 +40,7 @@ func NewBinary[T any](capacity int, cmp func(T, T) bool) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func BinaryFrom[T any](data []T, cmp func(T, T) bool) BinaryHeap[T] {
-	return constructors.NewBinaryHeapFromSlice(data, cmp)
+	return constructor.NewBinaryHeapFromSlice(data, cmp)
 }
 
 // BinaryClone creates a Binary Heap from a clone of the provided slice with custom comparator.
@@ -55,7 +55,7 @@ func BinaryFrom[T any](data []T, cmp func(T, T) bool) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func BinaryClone[T any](data []T, cmp func(T, T) bool) BinaryHeap[T] {
-	return constructors.NewBinaryHeapCloneSlice(data, cmp)
+	return constructor.NewBinaryHeapCloneSlice(data, cmp)
 }
 
 // NewMinBinary creates a new empty Min Binary Heap for ordered types.
@@ -70,7 +70,7 @@ func BinaryClone[T any](data []T, cmp func(T, T) bool) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func NewMinBinary[T cmp.Ordered](capacity int) BinaryHeap[T] {
-	return constructors.NewBinaryHeap(capacity, internal.MinFunc[T]())
+	return constructor.NewBinaryHeap(capacity, comparator.Min[T]())
 }
 
 // NewMaxBinary creates a new empty Max Binary Heap for ordered types.
@@ -85,7 +85,7 @@ func NewMinBinary[T cmp.Ordered](capacity int) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func NewMaxBinary[T cmp.Ordered](capacity int) BinaryHeap[T] {
-	return constructors.NewBinaryHeap(capacity, internal.MaxFunc[T]())
+	return constructor.NewBinaryHeap(capacity, comparator.Max[T]())
 }
 
 // MinBinaryFrom creates a Min Binary Heap for ordered types.
@@ -103,7 +103,7 @@ func NewMaxBinary[T cmp.Ordered](capacity int) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func MinBinaryFrom[T cmp.Ordered](data []T) BinaryHeap[T] {
-	return constructors.NewBinaryHeapFromSlice(data, internal.MinFunc[T]())
+	return constructor.NewBinaryHeapFromSlice(data, comparator.Min[T]())
 }
 
 // MinBinaryClone creates a Min Binary Heap from a clone of the provided slice for ordered types.
@@ -120,7 +120,7 @@ func MinBinaryFrom[T cmp.Ordered](data []T) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func MinBinaryClone[T cmp.Ordered](data []T) BinaryHeap[T] {
-	return constructors.NewBinaryHeapCloneSlice(data, internal.MinFunc[T]())
+	return constructor.NewBinaryHeapCloneSlice(data, comparator.Min[T]())
 }
 
 // MaxBinaryFrom creates a Max Binary Heap.
@@ -138,7 +138,7 @@ func MinBinaryClone[T cmp.Ordered](data []T) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func MaxBinaryFrom[T cmp.Ordered](data []T) BinaryHeap[T] {
-	return constructors.NewBinaryHeapFromSlice(data, internal.MaxFunc[T]())
+	return constructor.NewBinaryHeapFromSlice(data, comparator.Max[T]())
 }
 
 // MaxBinaryClone creates a Max Binary Heap from a clone of the provided slice for ordered types.
@@ -155,5 +155,5 @@ func MaxBinaryFrom[T cmp.Ordered](data []T) BinaryHeap[T] {
 //	Length()            O(1)
 //	IsEmpty()           O(1)
 func MaxBinaryClone[T cmp.Ordered](data []T) BinaryHeap[T] {
-	return constructors.NewBinaryHeapCloneSlice(data, internal.MaxFunc[T]())
+	return constructor.NewBinaryHeapCloneSlice(data, comparator.Max[T]())
 }

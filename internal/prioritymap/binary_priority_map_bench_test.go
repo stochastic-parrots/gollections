@@ -2,11 +2,13 @@ package prioritymap
 
 import (
 	"testing"
+
+	"github.com/stochastic-parrots/gollections/internal/comparator"
 )
 
 func BenchmarkBinaryPriorityMap_Set(b *testing.B) {
 	const n = 100_000
-	pm := NewBinaryPriorityMap[int](n, MinFunc[int]())
+	pm := NewBinaryPriorityMap[int](n, comparator.Min[int]())
 	for i := range n {
 		pm.Set(i, i)
 	}
@@ -22,7 +24,7 @@ func BenchmarkBinaryPriorityMap_Pop(b *testing.B) {
 
 	for b.Loop() {
 		b.StopTimer()
-		pm := NewBinaryPriorityMap[int](n, MinFunc[int]())
+		pm := NewBinaryPriorityMap[int](n, comparator.Min[int]())
 		for i := range n {
 			pm.Set(i, i)
 		}
@@ -36,7 +38,7 @@ func BenchmarkBinaryPriorityMap_Pop(b *testing.B) {
 
 func BenchmarkBinaryPriorityMap_Remove(b *testing.B) {
 	const n = 100_000
-	pm := NewBinaryPriorityMap[int](n, MinFunc[int]())
+	pm := NewBinaryPriorityMap[int](n, comparator.Min[int]())
 	for i := range n {
 		pm.Set(i, i)
 	}

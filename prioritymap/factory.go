@@ -3,18 +3,18 @@ package prioritymap
 import (
 	"cmp"
 
-	constructors "github.com/stochastic-parrots/gollections/internal/prioritymap"
-	internal "github.com/stochastic-parrots/gollections/internal/prioritymap"
+	comparator "github.com/stochastic-parrots/gollections/internal/comparator"
+	constructor "github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-var _ PriorityMap[int, any] = &constructors.BinaryPriorityMap[int, any]{}
+var _ PriorityMap[int, any] = &constructor.BinaryPriorityMap[int, any]{}
 
 // BinaryPriorityMap implements a priority-map (priority queue with lookup)
 // built on top of a binary heap and an internal hash map.
 //
 // This structure allows associating keys with priorities, enabling
 // updates or removals of any element in logarithmic time using its key.
-type BinaryPriorityMap[K comparable, V any] = *constructors.BinaryPriorityMap[K, V]
+type BinaryPriorityMap[K comparable, V any] = *constructor.BinaryPriorityMap[K, V]
 
 // NewBinary creates and returns a new empty Priority Map (Indexed Binary Heap) with a custom comparator.
 //
@@ -29,7 +29,7 @@ type BinaryPriorityMap[K comparable, V any] = *constructors.BinaryPriorityMap[K,
 //	Peek()              O(1)
 //	Length()            O(1)
 func NewBinary[K comparable, V any](capacity int, cmp func(V, V) bool) BinaryPriorityMap[K, V] {
-	return constructors.NewBinaryPriorityMap[K](capacity, cmp)
+	return constructor.NewBinaryPriorityMap[K](capacity, cmp)
 }
 
 // Min creates and returns a new empty Priority Map (Indexed Min Binary Heap) for ordered types.
@@ -44,7 +44,7 @@ func NewBinary[K comparable, V any](capacity int, cmp func(V, V) bool) BinaryPri
 //	Pop()               O(log N)
 //	Peek()              O(1)
 func MinBinary[K comparable, V cmp.Ordered](capacity int) BinaryPriorityMap[K, V] {
-	return constructors.NewBinaryPriorityMap[K](capacity, internal.MinFunc[V]())
+	return constructor.NewBinaryPriorityMap[K](capacity, comparator.Min[V]())
 }
 
 // MaxBinary creates and returns a new empty Priority Map (Indexed Max Binary Heap) for ordered types.
@@ -59,5 +59,5 @@ func MinBinary[K comparable, V cmp.Ordered](capacity int) BinaryPriorityMap[K, V
 //	Pop()               O(log N)
 //	Peek()              O(1)
 func MaxBinary[K comparable, V cmp.Ordered](capacity int) BinaryPriorityMap[K, V] {
-	return constructors.NewBinaryPriorityMap[K](capacity, internal.MaxFunc[V]())
+	return constructor.NewBinaryPriorityMap[K](capacity, comparator.Max[V]())
 }
