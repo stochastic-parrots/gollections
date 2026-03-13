@@ -3,8 +3,8 @@ package prioritymap
 import (
 	"cmp"
 
-	constructors "github.com/stochastic-parrots/gollections/internal/heap"
-	internal "github.com/stochastic-parrots/gollections/internal/heap"
+	constructors "github.com/stochastic-parrots/gollections/internal/prioritymap"
+	internal "github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
 var _ PriorityMap[int, any] = &constructors.BinaryPriorityMap[int, any]{}
