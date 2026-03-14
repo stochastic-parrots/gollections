@@ -1,70 +1,43 @@
-// Package gollections provides a collection of generic data structures for Go.
+// Package gollections provides a suite of high-performance, generic data structures for Go.
 //
-// Gollections offers efficient, type-safe implementations of common collections
-// such as lists and heaps, leveraging Go's generics (available in Go 1.18+).
-// All data structures are fully generic, allowing you to work with any type
-// without sacrificing performance or type safety.
+// The library leverages Go Generics (1.18+) for type safety and the standard iterators
+// (1.23+) for idiomatic data traversal. Instead of a "one-size-fits-all" approach,
+// gollections provides specialized implementations optimized for specific memory
+// and performance profiles.
 //
-// # Lists
+// # Core Interfaces
 //
-// The lists subpackage provides three implementations optimized for different use cases:
+// Most data structures in this module implement one of the two base interfaces,
+// ensuring a predictable API across different implementations:
 //
-//   - ArrayList: Slice-based list with O(1) random access and amortized O(1) append.
-//     Best for scenarios requiring frequent random access.
+//   - [Collection]: Foundation for linear structures like lists and heaps.
+//   - [Map]: Base operations for key-value based structures.
 //
-//   - LinkedList: Singly linked list with O(N) random access but efficient insertion/deletion
-//     at known positions. Useful for sequential traversal and memory efficiency.
+// # Subpackages
 //
-//   - DoubleLinkedList: Doubly linked list supporting efficient traversal in both directions.
-//     Best when you need bidirectional iteration or frequent modifications near the end.
+// The library is organized into specialized subpackages. Refer to each package
+// documentation for detailed time complexity tables:
 //
-// All lists support common operations like Append, Get, Set, Reverse, Sort, and iteration.
-// They implement the Collection interface, ensuring consistent API across implementations.
+//   - [github.com/stochastic-parrots/gollections/list]:
+//     Indexed sequences like ArrayList and LinkedList.
 //
-// The heaps subpackage provides min-heaps and max-heaps with support for custom comparators.
-// Heaps are useful for priority queues, sorting, and selection problems.
+//   - [github.com/stochastic-parrots/gollections/heap]:
+//     Priority-based ordering (Min/Max Heaps).
 //
-//   - Min Heap: Efficiently retrieves the smallest element.
-//   - Max Heap: Efficiently retrieves the largest element.
-//   - Custom Heap: Define your own comparison function for complex sorting logic.
+//   - [github.com/stochastic-parrots/gollections/prioritymap]:
+//     A hybrid structure combining Map lookups with Heap ordering.
 //
-// Heaps can be created from scratch or initialized from existing slices. When initialized
-// from a slice, the heap operates on that slice directly for minimal memory overhead.
-//
-// # Design Principles.
+// # Design Principles
 //
 //   - Type Safety: Full generic support ensures compile-time type checking.
-//   - Performance: Implementations are optimized for their intended use cases.
-//   - Simplicity: Clean, intuitive APIs follow Go conventions (e.g., iter.Seq iterators).
-//   - Flexibility: Support for custom comparators and multiple implementations.
 //
-// # Collection Interface
+//   - Performance: Focused on O(1) and O(log N) operations where possible.
 //
-// Most collections implement the Collection interface, providing a unified API:
+//   - Idiomatic Go: Full support for 'range' over iterators (Go 1.23+).
 //
-//	type Collection[T any] interface {
-//		IsEmpty() bool
-//		Length() int
-//		Iterator() iter.Seq[T]
-//		fmt.Stringer
-//		fmt.Formatter
-//	}
-//
-// Additional operations like Reverse and Sort are available on specific implementations
-// (e.g., all lists support these). Use type assertions if needed to access implementation-specific methods.
-//
-// # Iterators
-//
-// All collections support Go's iter.Seq[T] for efficient, range-based iteration.
-// This allows seamless integration with the range keyword (Go 1.22+):
-//
-//	for val := range list.Iterator() {
-//		fmt.Println(val)
-//	}
-//
-// # Performance Characteristics
+// # Documentation Characteristics
 //
 // Each data structure includes detailed performance documentation in its subpackage.
-// Refer to the factory functions (e.g., lists.NewArrayList) for Time Complexity tables
-// covering all operations.
+// Refer to the factory functions (e.g., list.NewArrayList) for Time Complexity
+// tables covering all operations.
 package gollections

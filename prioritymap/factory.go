@@ -28,7 +28,7 @@ type BinaryPriorityMap[K comparable, V any] = *constructor.BinaryPriorityMap[K, 
 //	Pop()               O(log N)
 //	Peek()              O(1)
 //	Length()            O(1)
-func NewBinary[K comparable, V any](capacity int, cmp func(V, V) bool) BinaryPriorityMap[K, V] {
+func NewBinary[K comparable, V comparable](capacity int, cmp func(V, V) bool) BinaryPriorityMap[K, V] {
 	return constructor.NewBinaryPriorityMap[K](capacity, cmp)
 }
 

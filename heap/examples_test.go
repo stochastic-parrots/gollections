@@ -1,10 +1,54 @@
 package heap_test
 
 import (
+	"cmp"
 	"fmt"
 
 	"github.com/stochastic-parrots/gollections/heap"
 )
+
+func ExampleNewBinary() {
+	byLength := func(a, b string) bool {
+		return len(a) < len(b)
+	}
+
+	h := heap.NewBinary(0, byLength)
+	h.Push("apple", "kiwi", "banana", "pear")
+
+	for !h.IsEmpty() {
+		val, _ := h.Pop()
+		fmt.Printf("%s ", val)
+	}
+
+	// Output:
+	// kiwi pear apple banana
+}
+
+func ExampleBinaryFrom() {
+	data := []int{10, 50, 5, 1}
+	h := heap.BinaryFrom(data, cmp.Less[int])
+
+	for !h.IsEmpty() {
+		val, _ := h.Pop()
+		fmt.Printf("%d ", val)
+	}
+
+	// Output:
+	// 1 5 10 50
+}
+
+func ExampleBinaryClone() {
+	data := []int{10, 50, 5, 1}
+	h := heap.BinaryClone(data, cmp.Less[int])
+
+	for !h.IsEmpty() {
+		val, _ := h.Pop()
+		fmt.Printf("%d ", val)
+	}
+
+	// Output:
+	// 1 5 10 50
+}
 
 func ExampleNewMinBinary() {
 	h := heap.NewMinBinary[int](5)
@@ -85,21 +129,4 @@ func ExampleMaxBinaryClone() {
 	// Output:
 	// Length: 4
 	// Data: [1 13 7 42 99]
-}
-
-func ExampleNewBinary() {
-	byLength := func(a, b string) bool {
-		return len(a) < len(b)
-	}
-
-	h := heap.NewBinary(0, byLength)
-	h.Push("apple", "kiwi", "banana", "pear")
-
-	for !h.IsEmpty() {
-		val, _ := h.Pop()
-		fmt.Printf("%s ", val)
-	}
-
-	// Output:
-	// kiwi pear apple banana
 }
