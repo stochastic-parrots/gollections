@@ -12,13 +12,13 @@ type Readonly[K comparable, P any] interface {
 	// If the key exists, it returns the priority and true.
 	//
 	// Otherwise, it returns the zero value and false.
-	Get(key K) (priority P, exists bool)
+	Get(key K) (priority P, ok bool)
 
 	// Peek returns the key and priority of the element with the highest priority
 	// without removing it.
 	//
 	// It returns ok as false if the map is empty.
-	Peek() (key K, priority P, isEmpty bool)
+	Peek() (key K, priority P, ok bool)
 
 	pkg.Map[K, P]
 }
@@ -32,15 +32,38 @@ type PriorityMap[K comparable, P any] interface {
 	// If the key already exists, its priority is updated to the new value.
 	Set(key K, priority P)
 
+	// Update changes the priority of an existing key.
+	//
+	// If the key exists, its priority is updated to the new value and it returns true.
+	// If the key does not exist, it performs no operation and returns false.
+	Update(key K, priority P) (ok bool)
+
 	// Remove deletes the key-priority pair from the map.
 	//
 	// It returns true if the key was found and removed.
-	Remove(key K) bool
+	Remove(key K) (ok bool)
 
 	// Pop removes and returns the key and priority with the highest priority.
 	//
 	// It returns ok as false if the map is empty.
-	Pop() (key K, priority P, isEmpty bool)
+	Pop() (key K, priority P, ok bool)
+
+	// Drain returns a destructive iterator that removes and yields elements
+	// in priority order (highest priority first).
+	//
+	// The map is emptied as the iterator progresses. If the iteration
+	// is stopped early (e.g., via break), only the yielded elements
+	// are removed, and the remaining ones stay in the map.
+	//
+	// For a non-destructive iteration, use [pkg.Map.All].
+	Drain() iter.Seq2[K, P]
+
+	// Clear removes all elements from the priority map.
+	//
+	// After calling Clear, the map will be empty and its length will be zero.
+	// This operation is typically more efficient than creating a new map
+	// as it may reuse the underlying storage.
+	Clear()
 
 	Readonly[K, P]
 }
@@ -63,6 +86,8 @@ type readonly[K comparable, P any] struct {
 func (w readonly[K, P]) Get(key K) (P, bool) { return w.inner.Get(key) }
 
 func (w readonly[K, P]) Peek() (K, P, bool) { return w.inner.Peek() }
+
+func (w readonly[K, P]) Contains(key K) bool { return w.inner.Contains(key) }
 
 func (w readonly[K, P]) Keys() iter.Seq[K] { return w.inner.Keys() }
 

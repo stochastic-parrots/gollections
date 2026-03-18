@@ -210,7 +210,7 @@ func (pm *PairingPriorityMap[K, P]) Length() int {
 // The zero value of P and false are returned if the key does not exist.
 //
 // Complexity: O(1).
-func (pm *PairingPriorityMap[K, P]) Get(key K) (P, bool) {
+func (pm *PairingPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 	if node, ok := pm.indexes[key]; ok {
 		return node.priority, true
 	}
@@ -260,6 +260,47 @@ func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
 	}
 }
 
+// Update changes the priority of an existing key.
+//
+// It returns true if the key was found and updated. If the key does not exist,
+// it performs no operation and returns false.
+//
+// Complexity: O(log n) amortized.
+func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
+	n, exists := pm.indexes[key]
+	if !exists {
+		return false
+	}
+
+	old := n.priority
+	n.priority = priority
+	if pm.hasPriority(priority, old) || (!pm.hasPriority(old, priority)) {
+		if n != pm.root {
+			pm.cut(n)
+			pm.root = pm.merge(pm.root, n)
+		}
+		return true
+	}
+
+	if n == pm.root {
+		children := n.child
+		n.child = nil
+		pm.root = n
+		if children != nil {
+			pm.root = pm.merge(pm.root, pm.combine(children))
+		}
+	} else {
+		pm.cut(n)
+		children := n.child
+		n.child = nil
+		pm.root = pm.merge(pm.root, n)
+		if children != nil {
+			pm.root = pm.merge(pm.root, pm.combine(children))
+		}
+	}
+	return true
+}
+
 // Remove deletes the entry for key if present, returning true if an entry
 // was removed.
 //
@@ -289,7 +330,7 @@ func (pm *PairingPriorityMap[K, P]) Remove(key K) bool {
 // priority. If empty, it returns zero values and false.
 //
 // Complexity: O(log n) amortized.
-func (pm *PairingPriorityMap[K, P]) Pop() (K, P, bool) {
+func (pm *PairingPriorityMap[K, P]) Pop() (key K, priority P, ok bool) {
 	if pm.root == nil {
 		var zK K
 		var zP P
@@ -298,7 +339,7 @@ func (pm *PairingPriorityMap[K, P]) Pop() (K, P, bool) {
 
 	root := pm.root
 	children := root.child
-	key, priority := root.key, root.priority
+	key, priority = root.key, root.priority
 
 	delete(pm.indexes, key)
 	root.child = nil
@@ -316,13 +357,21 @@ func (pm *PairingPriorityMap[K, P]) Pop() (K, P, bool) {
 // If empty returns zero-key, zero-value, false.
 //
 // Complexity: O(1).
-func (pm *PairingPriorityMap[K, P]) Peek() (K, P, bool) {
+func (pm *PairingPriorityMap[K, P]) Peek() (key K, priority P, ok bool) {
 	if pm.root == nil {
 		var zK K
 		var zP P
 		return zK, zP, false
 	}
 	return pm.root.key, pm.root.priority, true
+}
+
+// Contains returns true if the key exists in the map.
+//
+// Complexity: O(1).
+func (pm *PairingPriorityMap[K, P]) Contains(key K) bool {
+	_, exists := pm.indexes[key]
+	return exists
 }
 
 // Keys returns an iterator for all keys in the collection.
@@ -357,12 +406,55 @@ func (pm *PairingPriorityMap[K, P]) Values() iter.Seq[P] {
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
-func (m *PairingPriorityMap[K, P]) All() iter.Seq2[K, P] {
+func (pm *PairingPriorityMap[K, P]) All() iter.Seq2[K, P] {
 	return func(yield func(K, P) bool) {
-		for key, entry := range m.indexes {
+		for key, entry := range pm.indexes {
 			if !yield(key, entry.priority) {
 				return
 			}
 		}
+	}
+}
+
+// Drain returns a destructive iterator that removes and yields elements
+// in priority order (highest priority first).
+//
+// As a destructive operation, the map will be empty after a full traversal.
+// If the iteration is stopped early, the map will retain only the remaining elements.
+//
+// Complexity: O(n log n) amortized for a full traversal.
+func (pm *PairingPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
+	return func(yield func(K, P) bool) {
+		for {
+			key, priority, ok := pm.Pop()
+			if !ok {
+				break
+			}
+			if !yield(key, priority) {
+				break
+			}
+		}
+	}
+}
+
+// Clear removes all elements from the priority map.
+//
+// After calling Clear, the map will be empty and its length will be zero.
+// This operation is typically more efficient than creating a new map
+// as it may reuse the underlying storage.
+//
+// Complexity: O(n) to zero out elements (avoiding memory leaks).
+func (pm *PairingPriorityMap[K, P]) Clear() {
+	var zeroK K
+	var zeroP P
+	clear(pm.indexes)
+	pm.root = nil
+
+	curr := pm.freelist
+	for curr != nil {
+		next := curr.next
+		curr.key, curr.priority = zeroK, zeroP
+		curr.child, curr.next, curr.previous = nil, nil, nil
+		curr = next
 	}
 }

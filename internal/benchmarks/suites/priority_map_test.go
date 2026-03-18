@@ -42,8 +42,11 @@ func BenchmarkPriorityMap_Dijkstra(b *testing.B) {
 	for _, implementation := range GetPriorityMapSuite(nodes) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
+			priorityMap := implementation.Factory()
 			for range b.N {
-				priorityMap := implementation.Factory()
+				b.StopTimer()
+				priorityMap.Clear()
+				b.StartTimer()
 				algorithms.Dijkstra(graph, 0, priorityMap)
 			}
 		})
@@ -58,8 +61,11 @@ func BenchmarkPriorityMap_Prim(b *testing.B) {
 	for _, implementation := range GetPriorityMapSuite(nodes) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
+			priorityMap := implementation.Factory()
 			for range b.N {
-				priorityMap := implementation.Factory()
+				b.StopTimer()
+				priorityMap.Clear()
+				b.StartTimer()
 				algorithms.Prim(graph, priorityMap)
 			}
 		})

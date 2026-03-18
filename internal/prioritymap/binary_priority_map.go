@@ -110,11 +110,25 @@ func (pm *BinaryPriorityMap[K, P]) fix(idx int) int {
 	return idx
 }
 
+// IsEmpty returns true if the heap contains no elements.
+//
+// Complexity: O(1).
+func (pm *BinaryPriorityMap[K, P]) IsEmpty() bool {
+	return len(pm.indexes) == 0
+}
+
+// Length returns the current number of elements in the heap.
+//
+// Complexity: O(1).
+func (pm *BinaryPriorityMap[K, P]) Length() int {
+	return len(pm.indexes)
+}
+
 // Get returns the priority associated with key.  The zero value of V and
 // false are returned if the key does not exist.
 //
 // Complexity: O(1).
-func (pm *BinaryPriorityMap[K, P]) Get(key K) (P, bool) {
+func (pm *BinaryPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 	if idx, ok := pm.indexes[key]; ok {
 		return pm.data[idx].priority, true
 	}
@@ -135,7 +149,6 @@ func (pm *BinaryPriorityMap[K, P]) Set(key K, priority P) {
 		} else {
 			pm.fixdown(idx)
 		}
-
 		return
 	}
 	e := entry[K, P]{key: key, priority: priority}
@@ -143,6 +156,26 @@ func (pm *BinaryPriorityMap[K, P]) Set(key K, priority P) {
 	idx := len(pm.data) - 1
 	pm.indexes[key] = idx
 	pm.fix(idx)
+}
+
+// Update changes the priority of an existing key.
+//
+// It returns true if the key was found and updated. If the key does not exist,
+// it performs no operation and returns false.
+//
+// Complexity: O(log n).
+func (pm *BinaryPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
+	if idx, exists := pm.indexes[key]; exists {
+		pm.data[idx].priority = priority
+		parent := (idx - 1) / 2
+		if idx > 0 && pm.hasPriority(priority, pm.data[parent].priority) {
+			pm.fixup(idx)
+		} else {
+			pm.fixdown(idx)
+		}
+		return true
+	}
+	return false
 }
 
 // Remove deletes the entry for key if present, returning true if an entry
@@ -170,7 +203,7 @@ func (pm *BinaryPriorityMap[K, P]) Remove(key K) bool {
 // zero-key, zero-value and false.
 //
 // Complexity: O(log n).
-func (pm *BinaryPriorityMap[K, P]) Pop() (K, P, bool) {
+func (pm *BinaryPriorityMap[K, P]) Pop() (key K, priority P, ok bool) {
 	n := len(pm.data)
 	if n == 0 {
 		var zK K
@@ -197,7 +230,7 @@ func (pm *BinaryPriorityMap[K, P]) Pop() (K, P, bool) {
 // If empty returns zero-key, zero-value, false.
 //
 // Complexity: O(1).
-func (pm *BinaryPriorityMap[K, P]) Peek() (K, P, bool) {
+func (pm *BinaryPriorityMap[K, P]) Peek() (key K, priority P, ok bool) {
 	if len(pm.data) != 0 {
 		entry := pm.data[0]
 		return entry.key, entry.priority, true
@@ -206,6 +239,14 @@ func (pm *BinaryPriorityMap[K, P]) Peek() (K, P, bool) {
 	var zK K
 	var zP P
 	return zK, zP, false
+}
+
+// Contains returns true if the key exists in the map.
+//
+// Complexity: O(1).
+func (pm *BinaryPriorityMap[K, P]) Contains(key K) bool {
+	_, exists := pm.indexes[key]
+	return exists
 }
 
 // Keys returns an iterator for all keys in the collection.
@@ -250,16 +291,37 @@ func (pm *BinaryPriorityMap[K, P]) All() iter.Seq2[K, P] {
 	}
 }
 
-// IsEmpty returns true if the heap contains no elements.
+// Drain returns a destructive iterator that removes and yields elements
+// in priority order (highest priority first).
 //
-// Complexity: O(1).
-func (pm *BinaryPriorityMap[K, P]) IsEmpty() bool {
-	return len(pm.indexes) == 0
+// Since this is a destructive operation, the map will be empty after a
+// full traversal. If the iteration is stopped early (e.g., via break),
+// the map will retain only the remaining elements.
+//
+// Complexity: O(n log n) for a full traversal.
+func (pm *BinaryPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
+	return func(yield func(K, P) bool) {
+		for {
+			key, priority, ok := pm.Pop()
+			if !ok {
+				break
+			}
+			if !yield(key, priority) {
+				break
+			}
+		}
+	}
 }
 
-// Length returns the current number of elements in the heap.
+// Clear removes all elements from the priority map.
 //
-// Complexity: O(1).
-func (pm *BinaryPriorityMap[K, P]) Length() int {
-	return len(pm.indexes)
+// After calling Clear, the map will be empty and its length will be zero.
+// This operation is typically more efficient than creating a new map
+// as it may reuse the underlying storage.
+//
+// Complexity: O(n) to zero out elements (avoiding memory leaks).
+func (pm *BinaryPriorityMap[K, P]) Clear() {
+	clear(pm.indexes)
+	clear(pm.data)
+	pm.data = pm.data[:0]
 }

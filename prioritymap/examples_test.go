@@ -13,8 +13,7 @@ func ExampleNewBinary() {
 	pm.Set("other", 2)
 	pm.Set("some", 1)
 
-	for !pm.IsEmpty() {
-		key, value, _ := pm.Pop()
+	for key, value := range pm.Drain() {
 		fmt.Printf("user - %s: age - %d\n", key, value)
 	}
 
@@ -34,8 +33,7 @@ func ExampleMinBinary() {
 
 	pm.Set("another", 10)
 
-	for !pm.IsEmpty() {
-		key, value, _ := pm.Pop()
+	for key, value := range pm.Drain() {
 		fmt.Printf("user - %s: age - %d\n", key, value)
 	}
 
@@ -57,8 +55,7 @@ func ExampleMaxBinary() {
 
 	pm.Set("another", 12)
 
-	for !pm.IsEmpty() {
-		key, value, _ := pm.Pop()
+	for key, value := range pm.Drain() {
 		fmt.Printf("user - %s: age - %d\n", key, value)
 	}
 
@@ -75,8 +72,7 @@ func ExampleNewPairing() {
 	pm.Set("other", 2)
 	pm.Set("some", 1)
 
-	for !pm.IsEmpty() {
-		key, value, _ := pm.Pop()
+	for key, value := range pm.Drain() {
 		fmt.Printf("user - %s: age - %d\n", key, value)
 	}
 
@@ -96,8 +92,7 @@ func ExampleMinPairing() {
 
 	pm.Set("another", 10)
 
-	for !pm.IsEmpty() {
-		key, value, _ := pm.Pop()
+	for key, value := range pm.Drain() {
 		fmt.Printf("user - %s: age - %d\n", key, value)
 	}
 
@@ -119,8 +114,7 @@ func ExampleMaxPairing() {
 
 	pm.Set("another", 12)
 
-	for !pm.IsEmpty() {
-		key, value, _ := pm.Pop()
+	for key, value := range pm.Drain() {
 		fmt.Printf("user - %s: age - %d\n", key, value)
 	}
 
@@ -150,9 +144,12 @@ func ExampleAsReadonly() {
 	task, priority, _ := view.Peek()
 	fmt.Println(task, priority)
 
+	fmt.Println(view.Contains("Some other issue"))
+
 	// Output:
 	// 3
 	// false
 	// 10
 	// Critical Bug 1
+	// false
 }

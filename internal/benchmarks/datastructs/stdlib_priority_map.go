@@ -10,7 +10,7 @@ type stdLibEntry[K comparable, V any] struct {
 type stdPriorityMapHeap[K comparable, V any] struct {
 	data    []stdLibEntry[K, V]
 	less    func(a, b V) bool
-	indices map[K]int
+	indexes map[K]int
 }
 
 func (h stdPriorityMapHeap[K, V]) Len() int {
@@ -23,13 +23,13 @@ func (h stdPriorityMapHeap[K, V]) Less(i, j int) bool {
 
 func (h stdPriorityMapHeap[K, V]) Swap(i, j int) {
 	h.data[i], h.data[j] = h.data[j], h.data[i]
-	h.indices[h.data[i].key] = i
-	h.indices[h.data[j].key] = j
+	h.indexes[h.data[i].key] = i
+	h.indexes[h.data[j].key] = j
 }
 
 func (h *stdPriorityMapHeap[K, V]) Push(x any) {
 	it := x.(stdLibEntry[K, V])
-	h.indices[it.key] = len(h.data)
+	h.indexes[it.key] = len(h.data)
 	h.data = append(h.data, it)
 }
 
@@ -38,7 +38,7 @@ func (h *stdPriorityMapHeap[K, V]) Pop() any {
 	n := len(old)
 	it := old[n-1]
 	h.data = old[0 : n-1]
-	delete(h.indices, it.key)
+	delete(h.indexes, it.key)
 	return it
 }
 
@@ -51,13 +51,13 @@ func NewStdPriorityMap[K comparable, V any](size int, less func(a, b V) bool) *S
 		heap: &stdPriorityMapHeap[K, V]{
 			less:    less,
 			data:    make([]stdLibEntry[K, V], 0, size),
-			indices: make(map[K]int, size),
+			indexes: make(map[K]int, size),
 		},
 	}
 }
 
 func (m *StdPriorityMap[K, V]) Set(key K, priority V) {
-	if idx, ok := m.heap.indices[key]; ok {
+	if idx, ok := m.heap.indexes[key]; ok {
 		m.heap.data[idx].priority = priority
 		heap.Fix(m.heap, idx)
 		return
@@ -78,4 +78,9 @@ func (m *StdPriorityMap[K, V]) Pop() (K, V, bool) {
 
 func (m *StdPriorityMap[K, V]) Length() int {
 	return len(m.heap.data)
+}
+
+func (m *StdPriorityMap[K, V]) Clear() {
+	clear(m.heap.indexes)
+	clear(m.heap.data)
 }
