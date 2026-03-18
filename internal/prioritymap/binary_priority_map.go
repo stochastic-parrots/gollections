@@ -3,9 +3,9 @@ package prioritymap
 import "iter"
 
 // entry holds a key–priority pair stored in the underlying heap.
-type entry[K comparable, T any] struct {
-	key   K
-	value T
+type entry[K comparable, P any] struct {
+	key      K
+	priority P
 }
 
 // BinaryPriorityMap implements a priority‑map on top of a binary heap.
@@ -21,10 +21,10 @@ type entry[K comparable, T any] struct {
 //   - indexes   – a map[K]int mapping each key to its index in the slice.
 //
 // All heap movements update the map via the swap/fix helpers below.
-type BinaryPriorityMap[K comparable, V any] struct {
-	indexes map[K]int
-	data    []entry[K, V]
-	less    func(a, b V) bool
+type BinaryPriorityMap[K comparable, P any] struct {
+	indexes     map[K]int
+	data        []entry[K, P]
+	hasPriority func(P, P) bool
 }
 
 // NewBinaryPriorityMap creates an empty priority map with the given
@@ -32,40 +32,44 @@ type BinaryPriorityMap[K comparable, V any] struct {
 // higher priority than b (for a min‑heap use a < b).
 //
 // Complexity: O(1).
-func NewBinaryPriorityMap[K comparable, V any](
+func NewBinaryPriorityMap[K comparable, P any](
 	capacity int,
-	less func(V, V) bool) *BinaryPriorityMap[K, V] {
+	hasPriority func(P, P) bool) *BinaryPriorityMap[K, P] {
 
-	data := make([]entry[K, V], 0, capacity)
+	data := make([]entry[K, P], 0, capacity)
 	indexes := make(map[K]int, capacity)
-	return &BinaryPriorityMap[K, V]{indexes, data, less}
+	return &BinaryPriorityMap[K, P]{indexes, data, hasPriority}
 }
 
 // fixup restores the heap invariant by moving the element at idx upward.
 // Used after an insertion or priority decrease.
-func (m *BinaryPriorityMap[K, V]) fixup(idx int) {
+//
+// Complexity: O(log n).
+func (pm *BinaryPriorityMap[K, P]) fixup(idx int) {
 	i := idx
-	target := m.data[i]
+	target := pm.data[i]
 
 	for i > 0 {
 		parent := (i - 1) / 2
-		if !m.less(target.value, m.data[parent].value) {
+		if !pm.hasPriority(target.priority, pm.data[parent].priority) {
 			break
 		}
-		m.data[i] = m.data[parent]
-		m.indexes[m.data[i].key] = i
+		pm.data[i] = pm.data[parent]
+		pm.indexes[pm.data[i].key] = i
 		i = parent
 	}
-	m.data[i] = target
-	m.indexes[target.key] = i
+	pm.data[i] = target
+	pm.indexes[target.key] = i
 }
 
 // fixdown restores the heap invariant by moving the element at idx downward.
 // Used after removal or priority increase.
-func (m *BinaryPriorityMap[K, V]) fixdown(idx int) {
-	n := len(m.data)
+//
+// Complexity: O(log n).
+func (pm *BinaryPriorityMap[K, P]) fixdown(idx int) {
+	n := len(pm.data)
 	i := idx
-	target := m.data[i]
+	target := pm.data[i]
 
 	for {
 		left := 2*i + 1
@@ -74,34 +78,34 @@ func (m *BinaryPriorityMap[K, V]) fixdown(idx int) {
 		}
 		right := left + 1
 		smallest := left
-		if right < n && m.less(m.data[right].value, m.data[left].value) {
+		if right < n && pm.hasPriority(pm.data[right].priority, pm.data[left].priority) {
 			smallest = right
 		}
-		if !m.less(m.data[smallest].value, target.value) {
+		if !pm.hasPriority(pm.data[smallest].priority, target.priority) {
 			break
 		}
 
-		m.data[i] = m.data[smallest]
-		m.indexes[m.data[i].key] = i
+		pm.data[i] = pm.data[smallest]
+		pm.indexes[pm.data[i].key] = i
 		i = smallest
 	}
-	m.data[i] = target
-	m.indexes[target.key] = i
+	pm.data[i] = target
+	pm.indexes[target.key] = i
 }
 
 // fix chooses between fixup and fixdown based on the element’s relation
 // to its parent. It returns the final index of the element (not used yet
 // but kept for symmetry with BinaryHeap.fix).
-func (m *BinaryPriorityMap[K, V]) fix(idx int) int {
+func (pm *BinaryPriorityMap[K, P]) fix(idx int) int {
 	if idx == 0 {
-		m.fixdown(idx)
+		pm.fixdown(idx)
 		return idx
 	}
 	parent := (idx - 1) / 2
-	if m.less(m.data[idx].value, m.data[parent].value) {
-		m.fixup(idx)
+	if pm.hasPriority(pm.data[idx].priority, pm.data[parent].priority) {
+		pm.fixup(idx)
 	} else {
-		m.fixdown(idx)
+		pm.fixdown(idx)
 	}
 	return idx
 }
@@ -110,50 +114,50 @@ func (m *BinaryPriorityMap[K, V]) fix(idx int) int {
 // false are returned if the key does not exist.
 //
 // Complexity: O(1).
-func (m *BinaryPriorityMap[K, V]) Get(key K) (V, bool) {
-	if idx, ok := m.indexes[key]; ok {
-		return m.data[idx].value, true
+func (pm *BinaryPriorityMap[K, P]) Get(key K) (P, bool) {
+	if idx, ok := pm.indexes[key]; ok {
+		return pm.data[idx].priority, true
 	}
-	var zero V
-	return zero, false
+	var zP P
+	return zP, false
 }
 
 // Set inserts a new key with the given priority or updates an existing
 // key’s priority.  The heap is adjusted accordingly.
 //
 // Complexity: O(log n).
-func (m *BinaryPriorityMap[K, V]) Set(key K, value V) {
-	if idx, ok := m.indexes[key]; ok {
-		m.data[idx].value = value
+func (pm *BinaryPriorityMap[K, P]) Set(key K, priority P) {
+	if idx, ok := pm.indexes[key]; ok {
+		pm.data[idx].priority = priority
 		parent := (idx - 1) / 2
-		if idx > 0 && m.less(value, m.data[parent].value) {
-			m.fixup(idx)
+		if idx > 0 && pm.hasPriority(priority, pm.data[parent].priority) {
+			pm.fixup(idx)
 		} else {
-			m.fixdown(idx)
+			pm.fixdown(idx)
 		}
 
 		return
 	}
-	e := entry[K, V]{key: key, value: value}
-	m.data = append(m.data, e)
-	idx := len(m.data) - 1
-	m.indexes[key] = idx
-	m.fix(idx)
+	e := entry[K, P]{key: key, priority: priority}
+	pm.data = append(pm.data, e)
+	idx := len(pm.data) - 1
+	pm.indexes[key] = idx
+	pm.fix(idx)
 }
 
 // Remove deletes the entry for key if present, returning true if an entry
 // was removed.  The heap and index map are kept consistent.
 //
 // Complexity: O(log n).
-func (m *BinaryPriorityMap[K, V]) Remove(key K) bool {
-	if idx, exists := m.indexes[key]; exists {
-		last := len(m.data) - 1
-		m.data[idx], m.data[last] = m.data[last], m.data[idx]
-		m.indexes[m.data[idx].key] = idx
-		m.data = m.data[:last]
-		delete(m.indexes, key)
-		if idx < len(m.data) {
-			m.fix(idx)
+func (pm *BinaryPriorityMap[K, P]) Remove(key K) bool {
+	if idx, exists := pm.indexes[key]; exists {
+		last := len(pm.data) - 1
+		pm.data[idx], pm.data[last] = pm.data[last], pm.data[idx]
+		pm.indexes[pm.data[idx].key] = idx
+		pm.data = pm.data[:last]
+		delete(pm.indexes, key)
+		if idx < len(pm.data) {
+			pm.fix(idx)
 		}
 		return true
 	}
@@ -166,51 +170,51 @@ func (m *BinaryPriorityMap[K, V]) Remove(key K) bool {
 // zero-key, zero-value and false.
 //
 // Complexity: O(log n).
-func (m *BinaryPriorityMap[K, V]) Pop() (K, V, bool) {
-	n := len(m.data)
+func (pm *BinaryPriorityMap[K, P]) Pop() (K, P, bool) {
+	n := len(pm.data)
 	if n == 0 {
-		var zk K
-		var zv V
-		return zk, zv, false
+		var zK K
+		var zP P
+		return zK, zP, false
 	}
 
-	e := m.data[0]
-	delete(m.indexes, e.key)
+	e := pm.data[0]
+	delete(pm.indexes, e.key)
 
 	n--
 	if n > 0 {
-		m.data[0] = m.data[n]
-		m.indexes[m.data[0].key] = 0
-		m.data = m.data[:n]
-		m.fixdown(0)
+		pm.data[0] = pm.data[n]
+		pm.indexes[pm.data[0].key] = 0
+		pm.data = pm.data[:n]
+		pm.fixdown(0)
 	} else {
-		m.data = m.data[:0]
+		pm.data = pm.data[:0]
 	}
-	return e.key, e.value, true
+	return e.key, e.priority, true
 }
 
 // Peek returns the highest‑priority key‑value pair without removing it.
 // If empty returns zero-key, zero-value, false.
 //
 // Complexity: O(1).
-func (m *BinaryPriorityMap[K, V]) Peek() (K, V, bool) {
-	if len(m.data) != 0 {
-		entry := m.data[0]
-		return entry.key, entry.value, true
+func (pm *BinaryPriorityMap[K, P]) Peek() (K, P, bool) {
+	if len(pm.data) != 0 {
+		entry := pm.data[0]
+		return entry.key, entry.priority, true
 	}
 
 	var zK K
-	var zv V
-	return zK, zv, false
+	var zP P
+	return zK, zP, false
 }
 
 // Keys returns an iterator for all keys in the collection.
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
-func (m *BinaryPriorityMap[K, V]) Keys() iter.Seq[K] {
+func (pm *BinaryPriorityMap[K, P]) Keys() iter.Seq[K] {
 	return func(yield func(K) bool) {
-		for key := range m.indexes {
+		for key := range pm.indexes {
 			if !yield(key) {
 				return
 			}
@@ -222,10 +226,10 @@ func (m *BinaryPriorityMap[K, V]) Keys() iter.Seq[K] {
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
-func (m *BinaryPriorityMap[K, V]) Values() iter.Seq[V] {
-	return func(yield func(V) bool) {
-		for _, idx := range m.indexes {
-			if !yield(m.data[idx].value) {
+func (pm *BinaryPriorityMap[K, P]) Values() iter.Seq[P] {
+	return func(yield func(P) bool) {
+		for _, idx := range pm.indexes {
+			if !yield(pm.data[idx].priority) {
 				return
 			}
 		}
@@ -236,10 +240,10 @@ func (m *BinaryPriorityMap[K, V]) Values() iter.Seq[V] {
 //
 // Complexity: O(n) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
-func (m *BinaryPriorityMap[K, V]) All() iter.Seq2[K, V] {
-	return func(yield func(K, V) bool) {
-		for key, idx := range m.indexes {
-			if !yield(key, m.data[idx].value) {
+func (pm *BinaryPriorityMap[K, P]) All() iter.Seq2[K, P] {
+	return func(yield func(K, P) bool) {
+		for key, idx := range pm.indexes {
+			if !yield(key, pm.data[idx].priority) {
 				return
 			}
 		}
@@ -249,13 +253,13 @@ func (m *BinaryPriorityMap[K, V]) All() iter.Seq2[K, V] {
 // IsEmpty returns true if the heap contains no elements.
 //
 // Complexity: O(1).
-func (m *BinaryPriorityMap[K, V]) IsEmpty() bool {
-	return len(m.indexes) == 0
+func (pm *BinaryPriorityMap[K, P]) IsEmpty() bool {
+	return len(pm.indexes) == 0
 }
 
 // Length returns the current number of elements in the heap.
 //
 // Complexity: O(1).
-func (m *BinaryPriorityMap[K, V]) Length() int {
-	return len(m.indexes)
+func (pm *BinaryPriorityMap[K, P]) Length() int {
+	return len(pm.indexes)
 }

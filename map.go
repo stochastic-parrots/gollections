@@ -4,6 +4,9 @@ import "iter"
 
 // Map defines the base operations for key-value structures.
 type Map[K comparable, V any] interface {
+	// Get retrieves the current value for a key.
+	Get(key K) (value V, exists bool)
+
 	// Keys returns an iterator for all keys in the collection.
 	Keys() iter.Seq[K]
 

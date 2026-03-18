@@ -15,13 +15,18 @@ func BenchmarkBinaryPriorityMap_Set(b *testing.B) {
 
 	b.ResetTimer()
 	for b.Loop() {
-		pm.Set(n/2, -1)
+		pm.Set(n-1, -1)
+
+		b.StopTimer()
+		pm.Set(n-1, n-1)
+		b.StartTimer()
 	}
 }
 
 func BenchmarkBinaryPriorityMap_Pop(b *testing.B) {
 	const n = 100_000
 
+	b.ResetTimer()
 	for b.Loop() {
 		b.StopTimer()
 		pm := NewBinaryPriorityMap[int](n, comparator.Min[int]())
@@ -43,12 +48,14 @@ func BenchmarkBinaryPriorityMap_Remove(b *testing.B) {
 		pm.Set(i, i)
 	}
 
+	key, _, _ := pm.Peek()
 	b.ResetTimer()
-	i := 0
 	for b.Loop() {
-		key := i % n
 		pm.Remove(key)
-		pm.Set(key, i)
-		i++
+
+		b.StopTimer()
+		pm.Set(key, n+1)
+		key, _, _ = pm.Peek()
+		b.StartTimer()
 	}
 }
