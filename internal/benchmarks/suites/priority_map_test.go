@@ -10,7 +10,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-func GetPriorityMapSuite(size int) datastructs.Implementations[datastructs.PriorityMap[int, float64]] {
+func getPriorityMapSuite(size int) datastructs.Implementations[datastructs.PriorityMap[int, float64]] {
 	less := cmp.Less[float64]
 	return []datastructs.Implementation[datastructs.PriorityMap[int, float64]]{
 		{
@@ -39,7 +39,7 @@ func BenchmarkPriorityMap_Dijkstra(b *testing.B) {
 	const density = 0.8
 	graph := models.NewRandomGraph(nodes, density)
 
-	for _, implementation := range GetPriorityMapSuite(nodes) {
+	for _, implementation := range getPriorityMapSuite(nodes) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			priorityMap := implementation.Factory()
@@ -58,7 +58,7 @@ func BenchmarkPriorityMap_Prim(b *testing.B) {
 	const density = 0.8
 	graph := models.NewRandomGraph(nodes, density)
 
-	for _, implementation := range GetPriorityMapSuite(nodes) {
+	for _, implementation := range getPriorityMapSuite(nodes) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			priorityMap := implementation.Factory()

@@ -224,7 +224,7 @@ func (pm *PairingPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 //
 // Complexity: O(1) amortized for insertions and priority improvements.
 func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
-	n, exists := pm.indexes[key]
+	_, exists := pm.indexes[key]
 	if !exists {
 		newNode := pm.allocate(key, priority)
 		pm.indexes[key] = newNode
@@ -232,32 +232,7 @@ func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
 		return
 	}
 
-	old := n.priority
-	n.priority = priority
-	if pm.hasPriority(priority, old) || (!pm.hasPriority(old, priority)) {
-		if n != pm.root {
-			pm.cut(n)
-			pm.root = pm.merge(pm.root, n)
-		}
-		return
-	}
-
-	if n == pm.root {
-		children := n.child
-		n.child = nil
-		pm.root = n
-		if children != nil {
-			pm.root = pm.merge(pm.root, pm.combine(children))
-		}
-	} else {
-		pm.cut(n)
-		children := n.child
-		n.child = nil
-		pm.root = pm.merge(pm.root, n)
-		if children != nil {
-			pm.root = pm.merge(pm.root, pm.combine(children))
-		}
-	}
+	pm.Update(key, priority)
 }
 
 // Update changes the priority of an existing key.

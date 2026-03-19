@@ -45,15 +45,15 @@ func TestNewPairingPriorityMapWithCapacity(t *testing.T) {
 	assert.Equal(t, capacity-1, count)
 }
 
-func TestPairingPriorityMapMerge(t *testing.T) {
+func TestPairingPriorityMap_Merge(t *testing.T) {
 	pm := NewPairingPriorityMap[string](comparator.Min[int]())
 	n := &node[string, int]{key: "A", priority: 10}
 	assert.Equal(t, n, pm.merge(nil, n))
 	assert.Equal(t, n, pm.merge(n, nil))
 }
 
-func TestPairingPriorityMapCut(t *testing.T) {
-	t.Run("Cut Middle Sibling", func(t *testing.T) {
+func TestPairingPriorityMap_Cut(t *testing.T) {
+	t.Run("MiddleSibling", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 1)
 		pm.Set("B", 10)
@@ -69,8 +69,8 @@ func TestPairingPriorityMapCut(t *testing.T) {
 	})
 }
 
-func TestPairingPriorityMapCombine(t *testing.T) {
-	t.Run("Combine Even Number of Childrens", func(t *testing.T) {
+func TestPairingPriorityMap_Combine(t *testing.T) {
+	t.Run("EvenChildren", func(t *testing.T) {
 		pm := NewPairingPriorityMap[int](comparator.Min[int]())
 		// Insert in order
 		pm.Set(1, 10)
@@ -79,11 +79,11 @@ func TestPairingPriorityMapCombine(t *testing.T) {
 		pm.Set(4, 40)
 		pm.Set(5, 50)
 
-		pm.Pop() // Dispach combine with 4 childrens (even)
+		pm.Pop() // Dispach combine with 4 children (even)
 		assert.Equal(t, 4, pm.Length())
 	})
 
-	t.Run("Combine Odd Number of Childrens", func(t *testing.T) {
+	t.Run("OddChildren", func(t *testing.T) {
 		pm := NewPairingPriorityMap[int](comparator.Min[int]())
 		// Insert in order
 		pm.Set(1, 10)
@@ -91,11 +91,11 @@ func TestPairingPriorityMapCombine(t *testing.T) {
 		pm.Set(3, 30)
 		pm.Set(4, 40)
 
-		pm.Pop() // Dispach combine with 3 childrens (odd)
+		pm.Pop() // Dispach combine with 3 children (odd)
 		assert.Equal(t, 3, pm.Length())
 	})
 
-	t.Run("Combine Nil or Single", func(t *testing.T) {
+	t.Run("NilOrSingle", func(t *testing.T) {
 		pm := NewPairingPriorityMap[int](comparator.Min[int]())
 		assert.Nil(t, pm.combine(nil))
 
@@ -104,8 +104,8 @@ func TestPairingPriorityMapCombine(t *testing.T) {
 	})
 }
 
-func TestPairingPriorityMapSet(t *testing.T) {
-	t.Run("Insert New Keys", func(t *testing.T) {
+func TestPairingPriorityMap_Set(t *testing.T) {
+	t.Run("Insert", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("B", 5)
@@ -116,7 +116,7 @@ func TestPairingPriorityMapSet(t *testing.T) {
 		assert.Equal(t, 5, val)
 	})
 
-	t.Run("Update Root Priority", func(t *testing.T) {
+	t.Run("Root", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("A", 2)
@@ -126,7 +126,7 @@ func TestPairingPriorityMapSet(t *testing.T) {
 		assert.Equal(t, 2, p)
 	})
 
-	t.Run("Update Some Node Priority", func(t *testing.T) {
+	t.Run("Internal", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("B", 11)
@@ -137,7 +137,7 @@ func TestPairingPriorityMapSet(t *testing.T) {
 		assert.Equal(t, 2, p)
 	})
 
-	t.Run("Update Priority Better", func(t *testing.T) {
+	t.Run("BetterCase", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("A", 2)
@@ -147,7 +147,7 @@ func TestPairingPriorityMapSet(t *testing.T) {
 		assert.Equal(t, 2, p)
 	})
 
-	t.Run("Update Priority Worse", func(t *testing.T) {
+	t.Run("WorseCase", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 2)
 		pm.Set("B", 5)
@@ -157,7 +157,7 @@ func TestPairingPriorityMapSet(t *testing.T) {
 		assert.Equal(t, 5, p)
 	})
 
-	t.Run("Update Priority Worse (Non-Root with Children)", func(t *testing.T) {
+	t.Run("WorseCaseNonRoot", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("Root", 1)
 		pm.Set("B", 50)
@@ -181,13 +181,13 @@ func TestPairingPriorityMapSet(t *testing.T) {
 	})
 }
 
-func TestPairingPriorityMapUpdate(t *testing.T) {
-	t.Run("Update nonexistent key", func(t *testing.T) {
+func TestPairingPriorityMap_Update(t *testing.T) {
+	t.Run("Nonexistent", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		assert.False(t, pm.Update("nonexistent", 1))
 	})
 
-	t.Run("Update existent key", func(t *testing.T) {
+	t.Run("Existent", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("apple", 50)
 		pm.Set("banana", 30)
@@ -202,7 +202,7 @@ func TestPairingPriorityMapUpdate(t *testing.T) {
 	})
 }
 
-func TestPairingPriorityMapGet(t *testing.T) {
+func TestPairingPriorityMap_Get(t *testing.T) {
 	pm := NewPairingPriorityMap[string](comparator.Min[int]())
 	pm.Set("apple", 100)
 
@@ -215,7 +215,7 @@ func TestPairingPriorityMapGet(t *testing.T) {
 	assert.Zero(t, val)
 }
 
-func TestPairingPriorityMapRemove(t *testing.T) {
+func TestPairingPriorityMap_Remove(t *testing.T) {
 	pm := NewPairingPriorityMap[string](comparator.Min[int]())
 	pm.Set("A", 10)
 	pm.Set("B", 20)
@@ -229,7 +229,7 @@ func TestPairingPriorityMapRemove(t *testing.T) {
 	assert.Equal(t, 1, pm.Length())
 }
 
-func TestPairingPriorityMapPop(t *testing.T) {
+func TestPairingPriorityMap_Pop(t *testing.T) {
 	pm := NewPairingPriorityMap[int](comparator.Min[int]())
 	pm.Set(1, 50)
 	pm.Set(2, 10)
@@ -246,7 +246,7 @@ func TestPairingPriorityMapPop(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestPairingPriorityMapPeek(t *testing.T) {
+func TestPairingPriorityMap_Peek(t *testing.T) {
 	pm := NewPairingPriorityMap[string](comparator.Min[int]())
 
 	_, _, ok := pm.Peek()
@@ -259,7 +259,7 @@ func TestPairingPriorityMapPeek(t *testing.T) {
 	assert.Equal(t, 1, p)
 }
 
-func TestPairingPriorityMapContains(t *testing.T) {
+func TestPairingPriorityMap_Contains(t *testing.T) {
 	pm := NewPairingPriorityMap[string](comparator.Min[int]())
 	pm.Set("a", 10)
 
@@ -271,57 +271,165 @@ func TestPairingPriorityMapContains(t *testing.T) {
 	assert.False(t, pm.Contains("a"))
 }
 
-func TestPairingPriorityMapIsEmpty(t *testing.T) {
+func TestPairingPriorityMap_IsEmpty(t *testing.T) {
 	pm := NewPairingPriorityMap[int](comparator.Min[int]())
 	assert.True(t, pm.IsEmpty())
 	pm.Set(1, 10)
 	assert.False(t, pm.IsEmpty())
 }
 
-func TestPairingPriorityMapLength(t *testing.T) {
+func TestPairingPriorityMap_Length(t *testing.T) {
 	pm := NewPairingPriorityMap[int](comparator.Min[int]())
 	pm.Set(1, 10)
 	assert.Equal(t, 1, pm.Length())
 }
 
-func TestPairingPriorityMapKeys(t *testing.T) {
-	pm := NewPairingPriorityMap[string](comparator.Min[int]())
-	pm.Set("A", 1)
-	pm.Set("B", 0)
+func TestPairingPriorityMap_Keys(t *testing.T) {
+	t.Run("FullIteration", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Max[int]())
+		pm.Set("a", 10)
+		pm.Set("b", 20)
+		pm.Set("c", 30)
 
-	keys := make(map[string]bool)
-	for k := range pm.Keys() {
-		keys[k] = true
-	}
-	assert.True(t, keys["A"])
-	assert.True(t, keys["B"])
-	assert.False(t, keys["C"])
+		count := 0
+		for range pm.Keys() {
+			count++
+		}
+
+		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, count)
+		assert.True(t, pm.Contains("a"))
+		assert.True(t, pm.Contains("b"))
+		assert.True(t, pm.Contains("c"))
+	})
+
+	t.Run("PartialIteration", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Max[int]())
+		pm.Set("a", 10)
+		pm.Set("b", 20)
+		pm.Set("c", 30)
+
+		count := 0
+		for range pm.Keys() {
+			count++
+			break
+		}
+
+		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 1, count)
+		assert.True(t, pm.Contains("a"))
+		assert.True(t, pm.Contains("b"))
+		assert.True(t, pm.Contains("c"))
+	})
+
+	t.Run("EmptyMap", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		count := 0
+		for range pm.Keys() {
+			count++
+		}
+		assert.Equal(t, 0, count)
+	})
 }
 
-func TestPairingPriorityMapValues(t *testing.T) {
-	pm := NewPairingPriorityMap[string](comparator.Min[int]())
-	pm.Set("A", 100)
+func TestPairingPriorityMap_Values(t *testing.T) {
+	t.Run("FullIteration", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Max[int]())
+		pm.Set("a", 10)
+		pm.Set("b", 20)
+		pm.Set("c", 30)
 
-	var values []int
-	for v := range pm.Values() {
-		values = append(values, v)
-	}
-	assert.Contains(t, values, 100)
-	assert.NotContains(t, values, 200)
+		count := 0
+		for range pm.Values() {
+			count++
+		}
+
+		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, count)
+		assert.True(t, pm.Contains("a"))
+		assert.True(t, pm.Contains("b"))
+		assert.True(t, pm.Contains("c"))
+	})
+
+	t.Run("PartialIteration", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Max[int]())
+		pm.Set("a", 10)
+		pm.Set("b", 20)
+		pm.Set("c", 30)
+
+		count := 0
+		for range pm.Values() {
+			count++
+			break
+		}
+
+		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 1, count)
+		assert.True(t, pm.Contains("a"))
+		assert.True(t, pm.Contains("b"))
+		assert.True(t, pm.Contains("c"))
+	})
+
+	t.Run("EmptyMap", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		count := 0
+		for range pm.Values() {
+			count++
+		}
+		assert.Equal(t, 0, count)
+	})
 }
 
-func TestPairingPriorityMapAll(t *testing.T) {
-	pm := NewPairingPriorityMap[string](comparator.Min[int]())
-	pm.Set("A", 1)
+func TestPairingPriorityMap_All(t *testing.T) {
+	t.Run("FullIteration", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Max[int]())
+		pm.Set("a", 10)
+		pm.Set("b", 20)
+		pm.Set("c", 30)
 
-	for k, v := range pm.All() {
-		assert.Equal(t, "A", k)
-		assert.Equal(t, 1, v)
-	}
+		count := 0
+		for range pm.All() {
+			count++
+		}
+
+		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, count)
+		assert.True(t, pm.Contains("a"))
+		assert.True(t, pm.Contains("b"))
+		assert.True(t, pm.Contains("c"))
+	})
+
+	t.Run("PartialIteration", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Max[int]())
+		pm.Set("a", 10)
+		pm.Set("b", 20)
+		pm.Set("c", 30)
+
+		count := 0
+		for range pm.All() {
+			count++
+			break
+		}
+
+		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 1, count)
+		assert.True(t, pm.Contains("a"))
+		assert.True(t, pm.Contains("b"))
+		assert.True(t, pm.Contains("c"))
+	})
+
+	t.Run("EmptyMap", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		count := 0
+		for range pm.Values() {
+			count++
+		}
+		assert.Equal(t, 0, count)
+	})
 }
 
-func TestPairingPriorityMapDrain(t *testing.T) {
-	t.Run("Total Drain", func(t *testing.T) {
+func TestPairingPriorityMap_Drain(t *testing.T) {
+	t.Run("FullIteration", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Max[int]())
 		items := map[string]int{"a": 30, "b": 10, "c": 20}
 		for k, v := range items {
@@ -340,7 +448,7 @@ func TestPairingPriorityMapDrain(t *testing.T) {
 		assert.True(t, pm.IsEmpty())
 	})
 
-	t.Run("Partial Drain (break)", func(t *testing.T) {
+	t.Run("PartialIteration", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
@@ -358,7 +466,7 @@ func TestPairingPriorityMapDrain(t *testing.T) {
 		assert.True(t, pm.Contains("c"))
 	})
 
-	t.Run("Drain Empty Map", func(t *testing.T) {
+	t.Run("EmptyMap", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		count := 0
 		for range pm.Drain() {
@@ -368,7 +476,7 @@ func TestPairingPriorityMapDrain(t *testing.T) {
 	})
 }
 
-func TestPairingPriorityMapIntegrity(t *testing.T) {
+func TestPairingPriorityMap_Integrity(t *testing.T) {
 	pm := NewPairingPriorityMap[int](comparator.Min[int]())
 	for i := 10; i > 0; i-- {
 		pm.Set(i, i)
@@ -390,8 +498,8 @@ func TestPairingPriorityMapIntegrity(t *testing.T) {
 	}
 }
 
-func TestPairingPriorityMapClear(t *testing.T) {
-	t.Run("Clear populated map", func(t *testing.T) {
+func TestPairingPriorityMap_Clear(t *testing.T) {
+	t.Run("PopulatedMap", func(t *testing.T) {
 		pm := NewPairingPriorityMapWithCapacity[string](10, comparator.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
@@ -426,7 +534,7 @@ func TestPairingPriorityMapClear(t *testing.T) {
 		}
 	})
 
-	t.Run("Reuse after Clear", func(t *testing.T) {
+	t.Run("Reuse", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 
 		pm.Set("old", 100)

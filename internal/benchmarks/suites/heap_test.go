@@ -10,7 +10,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/heap"
 )
 
-func GetHeapSuite(size int, data []int) datastructs.Implementations[datastructs.Heap[int]] {
+func getHeapSuite(size int, data []int) datastructs.Implementations[datastructs.Heap[int]] {
 	less := cmp.Less[int]
 	return []datastructs.Implementation[datastructs.Heap[int]]{
 		{
@@ -52,7 +52,7 @@ func BenchmarkHeaps_Push_Random(b *testing.B) {
 		items := models.NewRandomSliceWithMax(n, N*10)
 
 		b.Run("Size="+ratio.name, func(b *testing.B) {
-			for _, implementation := range GetHeapSuite(n, data) {
+			for _, implementation := range getHeapSuite(n, data) {
 				b.Run("Library="+implementation.Name, func(b *testing.B) {
 					b.ReportAllocs()
 					for range b.N {
@@ -85,7 +85,7 @@ func BenchmarkHeaps_Push_Reverse(b *testing.B) {
 		items := models.NewReversedSliceStartedAt(n, N)
 
 		b.Run("Size="+ratio.name, func(b *testing.B) {
-			for _, implementation := range GetHeapSuite(n, data) {
+			for _, implementation := range getHeapSuite(n, data) {
 				b.Run("Library="+implementation.Name, func(b *testing.B) {
 					b.ReportAllocs()
 					for range b.N {
@@ -103,7 +103,7 @@ func BenchmarkHeaps_Push_Reverse(b *testing.B) {
 func BenchmarkHeaps_Pop(b *testing.B) {
 	const N = 100_000
 	data := models.NewRandomSlice(N)
-	for _, implementation := range GetHeapSuite(N, data) {
+	for _, implementation := range getHeapSuite(N, data) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			h := implementation.Factory()
@@ -124,7 +124,7 @@ func BenchmarkHeaps_TopK(b *testing.B) {
 	const K = 100
 	data := models.NewRandomSlice(N)
 
-	for _, implementation := range GetHeapSuite(K, nil) {
+	for _, implementation := range getHeapSuite(K, nil) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
