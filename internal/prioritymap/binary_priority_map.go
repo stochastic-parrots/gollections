@@ -178,6 +178,33 @@ func (pm *BinaryPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 	return false
 }
 
+// SetIfBetter ensures that the key has at least the given priority.
+//
+// If the key does not exist, it is inserted with the provided priority.
+// If the key already exists, its priority is updated only if the new
+// priority is "better" (higher priority) than the current one according
+// to the map's comparator.
+//
+// It returns true if the map was modified (either by insertion or update).
+//
+// Complexity: O(log n).
+func (pm *BinaryPriorityMap[K, P]) SetIfBetter(key K, priority P) bool {
+	idx, exists := pm.indexes[key]
+	if !exists {
+		pm.Set(key, priority)
+		return true
+	}
+
+	if !pm.hasPriority(priority, pm.data[idx].priority) {
+		return false
+	}
+
+	pm.data[idx].priority = priority
+	pm.fixup(idx)
+
+	return true
+}
+
 // Remove deletes the entry for key if present, returning true if an entry
 // was removed.  The heap and index map are kept consistent.
 //

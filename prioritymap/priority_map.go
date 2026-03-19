@@ -32,8 +32,9 @@ type Readonly[K comparable, P any] interface {
 }
 
 // PriorityMap defines a structure that combines a map (key-based access) with a heap (priority ordering).
-// It allows efficient insertion, update, and removal of key-priority pairs, as well as extraction of the minimum priority element.
-// K must be comparable for map operations, and V is the priority type (requires a comparator in implementações).
+// It allows efficient insertion, update, and removal of key-priority pairs,
+// as well as extraction of the minimum priority element.
+// K must be comparable for map operations, and P is the priority type (requires a comparator in implementações).
 type PriorityMap[K comparable, P any] interface {
 	// Set inserts or updates the priority for the given key.
 	//
@@ -45,6 +46,17 @@ type PriorityMap[K comparable, P any] interface {
 	// If the key exists, its priority is updated to the new value and it returns true.
 	// If the key does not exist, it performs no operation and returns false.
 	Update(key K, priority P) (ok bool)
+
+	// SetIfBetter ensures that the key has at least the given priority.
+    //
+    // If the key does not exist, it is inserted with the provided priority.
+    // If the key already exists, its priority is updated only if the new
+    // priority is "better" than the current one according to the comparator.
+	//
+	// It returns true if the map was modified (either by insertion or update).
+	//
+	// * Note: Ideal for algorithms like Dijkstra or A*.
+    SetIfBetter(key K, priority P) (ok bool)
 
 	// Remove deletes the key-priority pair from the map.
 	//

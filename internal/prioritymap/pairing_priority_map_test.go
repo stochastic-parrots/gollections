@@ -202,6 +202,57 @@ func TestPairingPriorityMap_Update(t *testing.T) {
 	})
 }
 
+func TestPairingPriorityMap_SetIfBetter(t *testing.T) {
+	t.Run("Insert", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+
+		assert.True(t, pm.SetIfBetter("A", 10))
+		assert.Equal(t, 1, pm.Length())
+
+		val, ok := pm.Get("A")
+		assert.True(t, ok)
+		assert.Equal(t, 10, val)
+	})
+
+	t.Run("ImprovePriority", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm.Set("Root", 1)
+		pm.Set("A", 10)
+		pm.Set("B", 20)
+
+		assert.True(t, pm.SetIfBetter("A", 5))
+
+		key, priority, _ := pm.Peek()
+		assert.Equal(t, "Root", key)
+		assert.Equal(t, 1, priority)
+
+		assert.True(t, pm.SetIfBetter("Root", 0))
+
+		key, priority, _ = pm.Peek()
+		assert.Equal(t, "Root", key)
+		assert.Equal(t, 0, priority)
+		priority, _ = pm.Get("A")
+		assert.Equal(t, 5, priority)
+	})
+
+	t.Run("WorsenPriority", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm.Set("A", 10)
+
+		assert.False(t, pm.SetIfBetter("A", 15))
+
+		val, _ := pm.Get("A")
+		assert.Equal(t, 10, val)
+	})
+
+	t.Run("SamePriority", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm.Set("A", 10)
+
+		assert.False(t, pm.SetIfBetter("A", 10))
+	})
+}
+
 func TestPairingPriorityMap_Get(t *testing.T) {
 	pm := NewPairingPriorityMap[string](comparator.Min[int]())
 	pm.Set("apple", 100)
