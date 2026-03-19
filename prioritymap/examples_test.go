@@ -7,8 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/prioritymap"
 )
 
-func ExampleNewBinary() {
-	pm := prioritymap.NewBinary[string](3, cmp.Less[int])
+func ExampleNewBinaryHeap() {
+	pm := prioritymap.NewBinaryHeap[string](3, cmp.Less[int])
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 	pm.Set("some", 1)
@@ -22,8 +22,8 @@ func ExampleNewBinary() {
 	// user - other: age - 2
 }
 
-func ExampleMinBinary() {
-	pm := prioritymap.MinBinary[string, int](3)
+func ExampleMinBinaryHeap() {
+	pm := prioritymap.MinBinaryHeap[string, int](3)
 	pm.Set("some", 3)
 	pm.Set("other", 2)
 
@@ -44,8 +44,8 @@ func ExampleMinBinary() {
 	// user - another: age - 10
 }
 
-func ExampleMaxBinary() {
-	pm := prioritymap.MaxBinary[string, int](3)
+func ExampleMaxBinaryHeap() {
+	pm := prioritymap.MaxBinaryHeap[string, int](3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 
@@ -66,8 +66,8 @@ func ExampleMaxBinary() {
 	// user - other: age - 2
 }
 
-func ExampleNewPairing() {
-	pm := prioritymap.NewPairing[string](3, cmp.Less[int])
+func ExampleNewPairingHeap() {
+	pm := prioritymap.NewPairingHeap[string](3, cmp.Less[int])
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 	pm.Set("some", 1)
@@ -81,8 +81,8 @@ func ExampleNewPairing() {
 	// user - other: age - 2
 }
 
-func ExampleMinPairing() {
-	pm := prioritymap.MinPairing[string, int](3)
+func ExampleMinPairingHeap() {
+	pm := prioritymap.MinPairingHeap[string, int](3)
 	pm.Set("some", 3)
 	pm.Set("other", 2)
 
@@ -103,8 +103,8 @@ func ExampleMinPairing() {
 	// user - another: age - 10
 }
 
-func ExampleMaxPairing() {
-	pm := prioritymap.MaxPairing[string, int](3)
+func ExampleMaxPairingHeap() {
+	pm := prioritymap.MaxPairingHeap[string, int](3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 
@@ -126,7 +126,7 @@ func ExampleMaxPairing() {
 }
 
 func ExampleAsReadonly() {
-	pm := prioritymap.MinPairing[string, int](10)
+	pm := prioritymap.MinPairingHeap[string, int](10)
 	pm.Set("Critical Bug", 1)
 	pm.Set("Feature Request", 10)
 	pm.Set("Documentation Update", 5)
@@ -145,6 +145,18 @@ func ExampleAsReadonly() {
 	fmt.Println(task, priority)
 
 	fmt.Println(view.Contains("Some other issue"))
+
+	for key := range view.Keys() {
+		println(key)
+	}
+
+	for priority := range view.Values() {
+		println(priority)
+	}
+
+	for key, priority := range view.All() {
+		println(key, priority)
+	}
 
 	// Output:
 	// 3

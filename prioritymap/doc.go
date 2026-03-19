@@ -5,6 +5,17 @@
 // for efficient "decrease-key" operations, which are essential for algorithms
 // like Dijkstra's or A*.
 //
+// # Readonly Interface
+//
+// All priority maps implement the [Readonly] interface, providing a unified API
+// for key-value management with priority ordering:
+//
+//	type Readonly[K comparable, V any] interface {
+//		Get(key K) (V, bool)
+//		Peek() (K, V, bool)
+//		pkg.Map[K, V]
+//	}
+//
 // # PriorityMap Interface
 //
 // All priority maps implement the [PriorityMap] interface, providing a unified API
@@ -12,11 +23,11 @@
 //
 //	type PriorityMap[K comparable, V any] interface {
 //		Set(key K, value V)
-//		Get(key K) (V, bool)
+//		Update(key K, value V)
 //		Remove(key K) bool
 //		Pop() (K, V, bool)
 //		Peek() (K, V, bool)
-//		pkg.Map[K, V]
+//		Readonly[K, V]
 //	}
 //
 // # Why this package?
@@ -40,7 +51,7 @@
 //
 // Example of a basic workflow:
 //
-//	pm := prioritymap.NewMin[string, int]()
+//	pm := prioritymap.MinBinaryHeap[string, int](10)
 //	pm.Set("task1", 10)
 //	pm.Set("task2", 5)
 //

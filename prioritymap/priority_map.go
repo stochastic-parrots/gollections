@@ -6,6 +6,14 @@ import (
 	pkg "github.com/stochastic-parrots/gollections"
 )
 
+// Readonly defines a non-mutable view of a PriorityMap.
+//
+// It provides access to elements by key and the ability to peek at the
+// highest priority element, but forbids any operation that modifies
+// the map's state (like Set, Pop, or Clear).
+//
+// This is particularly useful for exposing the map's state to observers
+// while guaranteeing data integrity.
 type Readonly[K comparable, P any] interface {
 	// Get returns the priority associated with key.
 	//
