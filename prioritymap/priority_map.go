@@ -47,16 +47,16 @@ type PriorityMap[K comparable, P any] interface {
 	// If the key does not exist, it performs no operation and returns false.
 	Update(key K, priority P) (ok bool)
 
-	// SetIfBetter ensures that the key has at least the given priority.
-    //
-    // If the key does not exist, it is inserted with the provided priority.
-    // If the key already exists, its priority is updated only if the new
-    // priority is "better" than the current one according to the comparator.
+	// Improve ensures that the key has at least the given priority.
+	//
+	// If the key does not exist, it is inserted with the provided priority.
+	// If the key already exists, its priority is updated only if the new
+	// priority is "better" than the current one according to the comparator.
 	//
 	// It returns true if the map was modified (either by insertion or update).
 	//
 	// * Note: Ideal for algorithms like Dijkstra or A*.
-    SetIfBetter(key K, priority P) (ok bool)
+	Improve(key K, priority P) (ok bool)
 
 	// Remove deletes the key-priority pair from the map.
 	//

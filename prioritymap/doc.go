@@ -24,6 +24,7 @@
 //	type PriorityMap[K comparable, V any] interface {
 //		Set(key K, value V)
 //		Update(key K, value V)
+//		Improve(key K, priority P) bool
 //		Remove(key K) bool
 //		Pop() (K, V, bool)
 //		Peek() (K, V, bool)

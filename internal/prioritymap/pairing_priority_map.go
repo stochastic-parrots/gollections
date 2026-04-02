@@ -276,7 +276,7 @@ func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 	return true
 }
 
-// SetIfBetter ensures that the key has at least the given priority.
+// Improve ensures that the key has at least the given priority.
 //
 // If the key does not exist, it is inserted with the provided priority.
 // If the key already exists, its priority is updated only if the new
@@ -286,7 +286,7 @@ func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 // It returns true if the map was modified (either by insertion or update).
 //
 // Complexity: O(1) amortized for priority improvements.
-func (pm *PairingPriorityMap[K, P]) SetIfBetter(key K, priority P) bool {
+func (pm *PairingPriorityMap[K, P]) Improve(key K, priority P) bool {
     node, exists := pm.indexes[key]
     if !exists {
         pm.Set(key, priority)

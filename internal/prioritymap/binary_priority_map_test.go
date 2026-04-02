@@ -60,11 +60,11 @@ func TestBinaryPriorityMap_Update(t *testing.T) {
 	})
 }
 
-func TestBinaryPriorityMap_SetIfBetter(t *testing.T) {
+func TestBinaryPriorityMap_Improve(t *testing.T) {
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 
-		assert.True(t, pm.SetIfBetter("A", 10))
+		assert.True(t, pm.Improve("A", 10))
 		assert.Equal(t, 1, pm.Length())
 
 		val, ok := pm.Get("A")
@@ -78,13 +78,13 @@ func TestBinaryPriorityMap_SetIfBetter(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("B", 20)
 
-		assert.True(t, pm.SetIfBetter("A", 5))
+		assert.True(t, pm.Improve("A", 5))
 
 		key, priority, _ := pm.Peek()
 		assert.Equal(t, "Root", key)
 		assert.Equal(t, 1, priority)
 
-		assert.True(t, pm.SetIfBetter("Root", 0))
+		assert.True(t, pm.Improve("Root", 0))
 
 		key, priority, _ = pm.Peek()
 		assert.Equal(t, "Root", key)
@@ -97,7 +97,7 @@ func TestBinaryPriorityMap_SetIfBetter(t *testing.T) {
 		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 		pm.Set("A", 10)
 
-		assert.False(t, pm.SetIfBetter("A", 15))
+		assert.False(t, pm.Improve("A", 15))
 
 		val, _ := pm.Get("A")
 		assert.Equal(t, 10, val)
@@ -107,7 +107,7 @@ func TestBinaryPriorityMap_SetIfBetter(t *testing.T) {
 		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
 		pm.Set("A", 10)
 
-		assert.False(t, pm.SetIfBetter("A", 10))
+		assert.False(t, pm.Improve("A", 10))
 	})
 }
 
