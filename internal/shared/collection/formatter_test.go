@@ -1,4 +1,4 @@
-package formatters_test
+package collection_test
 
 import (
 	"fmt"
@@ -15,13 +15,13 @@ func TestFormat(t *testing.T) {
 		expected   string
 	}{
 		{
-			name:       "Empty Value",
+			name:       "Empty",
 			collection: &FakeCollection[int]{data: []int{}},
 			format:     "%v",
 			expected:   "[]",
 		},
 		{
-			name:       "Simple Value",
+			name:       "Default",
 			collection: &FakeCollection[int]{data: []int{1, 2, 3}},
 			format:     "%v",
 			expected:   "[1 2 3]",
@@ -30,13 +30,13 @@ func TestFormat(t *testing.T) {
 			name:       "Verbose",
 			collection: &FakeCollection[int]{data: []int{1, 2}},
 			format:     "%+v",
-			expected:   "*formatters_test.FakeCollection[int]{len:2, cap:2} [1 2]",
+			expected:   "*collection_test.FakeCollection[int]{len:2, cap:2} [1 2]",
 		},
 		{
-			name:       "Go Syntax",
+			name:       "GoSyntax",
 			collection: &FakeCollection[int]{data: []int{1, 2}},
 			format:     "%#v",
-			expected:   "*formatters_test.FakeCollection[int]{size:2, cap:2}",
+			expected:   "*collection_test.FakeCollection[int]{size:2, cap:2}",
 		},
 		{
 			name: "Truncate",

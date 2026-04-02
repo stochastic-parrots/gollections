@@ -1,7 +1,6 @@
 package gollections
 
 import (
-	"fmt"
 	"iter"
 )
 
@@ -16,10 +15,6 @@ type Collection[T any] interface {
 	// All Returns an iterator for the collection.
 	All() iter.Seq[T]
 
-	// Iterator Returns an indexed iterator for the collection.
+	// Enumerate returns an iterator that yields both the index and the element.
 	Enumerate() iter.Seq2[int, T]
-
-	fmt.Stringer
-
-	fmt.Formatter
 }

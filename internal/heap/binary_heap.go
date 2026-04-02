@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/stochastic-parrots/gollections/internal/formatters"
+	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 )
 
 // BinaryHeap represents a priority queue implemented as a binary tree in a contiguous slice.
@@ -39,6 +39,11 @@ func NewBinaryHeapCloneSlice[T any](src []T, less func(a, b T) bool) *BinaryHeap
 	return heap
 }
 
+// heapify reorders the entire underlying slice to satisfy the heap property.
+// It uses the Floyd's heap construction algorithm, starting from the last
+// non-leaf node down to the root.
+//
+// Complexity: O(n).
 func (heap *BinaryHeap[T]) heapify() {
 	n := len(heap.data)
 	if n < 2 {
@@ -50,6 +55,10 @@ func (heap *BinaryHeap[T]) heapify() {
 	}
 }
 
+// fixdown restores the heap property by moving the element at idx down the tree.
+// Also known as "sift-down" or "sink".
+//
+// Complexity: O(log n).
 func (heap *BinaryHeap[T]) fixdown(idx int) {
 	length, i := len(heap.data), idx
 	target := heap.data[i]
@@ -78,6 +87,10 @@ func (heap *BinaryHeap[T]) fixdown(idx int) {
 	heap.data[i] = target
 }
 
+// fixup restores the heap property by moving the element at idx up the tree.
+// Also known as "sift-up" or "swim".
+//
+// Complexity: O(log n).
 func (heap *BinaryHeap[T]) fixup(idx int) {
 	i := idx
 	target := heap.data[i]
@@ -243,13 +256,49 @@ func (heap *BinaryHeap[T]) Drain() iter.Seq2[int, T] {
 	}
 }
 
-// Format implements the fmt.Formatter interface, allowing custom formatting
-// with verbs like %v, %+v, and %#v.
-func (heap *BinaryHeap[T]) Format(s fmt.State, verb rune) {
-	formatters.Format(s, verb, heap, cap(heap.data))
+// Clear removes all elements from the list.
+//
+// After calling Clear, the list will be empty and its length will be zero.
+// This operation is typically more efficient than creating a new map
+// as it may reuse the underlying storage.
+//
+// Complexity: O(n) to zero out elements (avoiding memory leaks).
+func (l *BinaryHeap[T]) Clear() {
+	clear(l.data)
+	l.data = l.data[:0]
 }
 
-// String returns a string representation of the heap.
-func (heap *BinaryHeap[T]) String() string {
-	return fmt.Sprint(heap)
+// MarshalJSON converts the list into a JSON array.
+// It uses the internal serialization utility to ensure elements are
+// encoded in their current logical order.
+//
+// Complexity: O(n).
+func (l *BinaryHeap[T]) MarshalJSON() ([]byte, error) {
+	return collection.Marshal(l)
+}
+
+// UnmarshalJSON populates the list from a JSON array.
+// It clears any existing elements before appending the new ones from the JSON data.
+//
+// Note: This operation is destructive; it calls Clear() to remove all existing
+// elements before appending the ones from the JSON data.
+//
+// Complexity: O(n + k) where k is the number of elements in the JSON.
+func (l *BinaryHeap[T]) UnmarshalJSON(data []byte) error {
+	return collection.Unmarshal(data, l.Clear, l.Push)
+}
+
+// Format implements the fmt.Formatter interface, allowing custom formatting
+// with verbs like %v, %+v, and %#v.
+//
+// Complexity: O(1) as it respects a fixed display limit.
+func (l *BinaryHeap[T]) Format(s fmt.State, verb rune) {
+	collection.Format(s, verb, l, l.Length())
+}
+
+// String returns a string representation of the list.
+//
+// Complexity: O(1) as it respects a fixed display limit.
+func (l *BinaryHeap[T]) String() string {
+	return fmt.Sprint(l)
 }

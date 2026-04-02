@@ -1,6 +1,7 @@
 package heap
 
 import (
+	"encoding/json"
 	"iter"
 
 	pkg "github.com/stochastic-parrots/gollections"
@@ -51,4 +52,6 @@ type Heap[T any] interface {
 	Replace(x T) (T, bool)
 
 	pkg.Collection[T]
+
+	json.Unmarshaler
 }

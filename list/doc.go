@@ -5,16 +5,34 @@
 // to eliminate interface{} casting and the latest 'iter' package (1.23+) for
 // high-performance, idiomatic data traversal.
 //
+// # Readonly Interface
+//
+// All lists implement the [Readonly] interface, providing a unified API:
+//
+//	type Readonly[T any] interface {
+//		Get(idx int) (T, error)
+//		Find(x T, cmp func(a, b T) int) (idx int, ok bool)
+//		Contains(x T, cmp func(a, b T) int) bool
+//		Backward() iter.Seq[T]
+//		ToSlice() []T
+//		pkg.Collection[T]
+//		fmt.Stringer
+//		json.Marshaler
+//	}
+//
 // # List Interface
 //
 // All lists implement the [List] interface, providing a unified API:
 //
 //	type List[T any] interface {
 //		Append(xs ...T)
-//		Get(idx int) (T, error)
+//		Insert(idx int, x T) error
 //		Set(idx int, x T) error
+//		Remove(idx int) (T, error)
 //		Reverse()
-//		pkg.Collection[T]
+//		Clear()
+//		Readonly[T]
+//		json.Unmarshaler
 //	}
 //
 // # Why this package?
@@ -36,8 +54,8 @@
 // The package provides three main flavors of lists, each optimized for specific access patterns:
 //
 //   - [ArrayList]: Best for random access O(1) and memory locality.
-//   - [LinkedList]: A classic singly linked list for efficient head insertions.
-//   - [DoubleLinkedList]: Supports O(1) reversal and bi-directional traversal.
+//   - [LinkedList]: A doubly linked list optimized for efficient boundary insertions.
+//     Supports O(1) reversal and bi-directional traversal.
 //
 // # Usage Example
 //

@@ -1,4 +1,4 @@
-package formatters
+package collection
 
 import (
 	"fmt"
@@ -10,6 +10,16 @@ import (
 
 const displayLimit = 5
 
+// Format provides a standardized way to render any pkg.Collection[T] into a string.
+// It is designed to be called by the Format(s fmt.State, verb rune) method of
+// concrete collection implementations.
+//
+// Features:
+//   - Supports %v, %+v (verbose), and %#v (Go-syntax).
+//   - Automatically truncates output to displayLimit (5) to avoid terminal flooding.
+//   - Displays logical length and physical capacity when flags are present.
+//
+// Complexity: O(1) in time, as it only iterates up to displayLimit elements.
 func Format[T any](s fmt.State, verb rune, collection pkg.Collection[T], capacity int) {
 	t := reflect.TypeOf(collection)
 

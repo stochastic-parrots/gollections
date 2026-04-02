@@ -4,30 +4,52 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/stochastic-parrots/gollections/internal/formatters"
+	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 )
 
+// LinkedNode represents an individual node in a singly linked list.
+// It stores a generic value and a pointer to the subsequent node in the sequence.
 type LinkedNode[T any] struct {
 	value T
 	next  *LinkedNode[T]
 }
 
+// NewLinkedNode creates a new LinkedNode initialized with the provided value.
+//
+// Complexity: O(1).
 func NewLinkedNode[T any](value T) *LinkedNode[T] {
 	return &LinkedNode[T]{value: value, next: nil}
 }
 
+// Value returns the data stored within the node.
+//
+// Complexity: O(1).
 func (node LinkedNode[T]) Value() T {
 	return node.value
 }
 
+// Next returns the pointer to the succeeding node in the chain.
+// It returns nil if the current node is the tail of the list.
+//
+// Complexity: O(1).
 func (node LinkedNode[T]) Next() *LinkedNode[T] {
 	return node.next
 }
 
+// HasNext returns true if there is a node following the current one.
+//
+// Complexity: O(1).
 func (node LinkedNode[T]) HasNext() bool {
 	return node.next != nil
 }
 
+// Append creates a new node with the given value and attaches it
+// immediately after the current node.
+//
+// Note: This operation is low-level and does not update the parent
+// LinkedList's length or 'last' pointer. Use with caution.
+//
+// Complexity: O(1).
 func (node *LinkedNode[T]) Append(x T) *LinkedNode[T] {
 	new := NewLinkedNode(x)
 	node.next = new
@@ -83,6 +105,40 @@ func (l *LinkedList[T]) Get(index int) (T, error) {
 	return current.Value(), nil
 }
 
+// Find locates the index of an element using a linear search.
+//
+// Complexity: O(n).
+func (l *LinkedList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
+	if l.IsEmpty() {
+		return -1, false
+	}
+
+	for idx, value := range l.Enumerate() {
+		if cmp(x, value) == 0 {
+			return idx, true
+		}
+	}
+
+	return -1, false
+}
+
+// Contains returns true if the element exists in the list according.
+//
+// Complexity: O(n).
+func (l *LinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {
+	if l.IsEmpty() {
+		return false
+	}
+
+	for value := range l.All() {
+		if cmp(x, value) == 0 {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Set updates the value at the specified index.
 //
 // Complexity: O(n).
@@ -103,26 +159,107 @@ func (l *LinkedList[T]) Set(index int, x T) error {
 
 func (l *LinkedList[T]) append(x T) {
 	new := NewLinkedNode(x)
-
-	if l.IsEmpty() {
+	if l.first == nil {
 		l.first = new
-		l.last = new
-		l.length++
-		return
 	} else {
 		l.last.next = new
-		l.last = new
 	}
+	l.last = new
 	l.length++
 }
 
 // Append adds one or more elements to the end of the list.
 //
-// Complexity: O(k) where k is the number of elements provided.
+// Complexity: O(len(xs)) the number of elements provided.
 func (l *LinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
 		l.append(x)
 	}
+}
+
+// Insert adds a value at the specified index, shifting existing elements to the right.
+//
+// If the index is equal to the current length, the value is appended to the end.
+// If the index is 0, the value becomes the new first element.
+//
+// Complexity: O(n) in the worst case; O(1) if inserting at the boundaries (0 or Length).
+// Returns an IndexOutOfBounds error if the index is out of range [0, Length].
+func (l *LinkedList[T]) Insert(idx int, x T) error {
+	size := l.Length()
+	if idx < 0 || idx > size {
+		return NewIndexOutOfBoundError(idx, size)
+	}
+
+	if idx == size {
+		l.Append(x)
+		return nil
+	}
+
+	node := NewLinkedNode(x)
+
+	if idx == 0 {
+		node.next = l.first
+		l.first = node
+		l.length++
+		return nil
+	}
+
+	current := l.first
+	for range idx - 1 {
+		current = current.next
+	}
+
+	node.next = current.next
+	current.next = node
+
+	l.length++
+	return nil
+}
+
+// Remove deletes the element at the specified index and returns its value.
+// It optimizes removal by checking if the index is at the boundaries (0 or length-1).
+//
+// Complexity: O(n) in the worst case; O(1) if removing from the start or end.
+// Returns an IndexOutOfBounds error if the index is out of range.
+func (l *LinkedList[T]) Remove(idx int) (T, error) {
+	size := l.Length()
+	if idx < 0 || idx >= size {
+		var zero T
+		return zero, NewIndexOutOfBoundError(idx, size-1)
+	}
+
+	var val T
+	if idx == 0 {
+		val = l.first.value
+		old := l.first
+		l.first = l.first.next
+
+		if l.first == nil {
+			l.last = nil
+		}
+
+		old.next = nil
+		var zero T
+		old.value = zero
+	} else {
+		prev := l.first
+		for range idx - 1 {
+			prev = prev.next
+		}
+		removed := prev.next
+		val = removed.value
+		prev.next = removed.next
+
+		if idx == size-1 {
+			l.last = prev
+		}
+		removed.next = nil
+		var zero T
+		removed.value = zero
+	}
+
+	l.length--
+	return val, nil
 }
 
 // Reverse inverts the order of the elements in the list in-place.
@@ -136,6 +273,7 @@ func (l *LinkedList[T]) Reverse() {
 
 	var previous *LinkedNode[T]
 	current := l.first
+	l.last = l.first
 
 	for current != nil {
 		next := current.next
@@ -144,9 +282,8 @@ func (l *LinkedList[T]) Reverse() {
 		current = next
 	}
 
-	tmp := l.first
 	l.first = previous
-	l.last = tmp
+	l.last.next = nil
 }
 
 // All returns a sequence that yields elements from the first to the last node.
@@ -176,12 +313,88 @@ func (l *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-// Format implements the fmt.Formatter interface for custom string formatting.
+// Backward returns a sequence that yields elements in order from index length-1 to 0.
+//
+// Complexity: O(n) for a full traversal, O(1) per step. O(n) space.
+func (l *LinkedList[T]) Backward() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		slice := l.ToSlice()
+		for idx := len(slice) - 1; idx >= 0; idx-- {
+			if !yield(slice[idx]) {
+				return
+			}
+		}
+	}
+}
+
+// ToSlice exports the list elements into a native Go slice.
+// It pre-allocates the slice based on the current list length for efficiency.
+//
+// Complexity: O(n).
+func (l *LinkedList[T]) ToSlice() []T {
+	if l.length == 0 {
+		return nil
+	}
+
+	slice := make([]T, l.length)
+	for idx, value := range l.Enumerate() {
+		slice[idx] = value
+	}
+	return slice
+}
+
+// Clear removes all elements from the list.
+//
+// After calling Clear, the list will be empty and its length will be zero.
+// This operation is typically more efficient than creating a new list
+// as it may reuse the underlying storage.
+//
+// Complexity: O(n) to zero out elements (avoiding memory leaks).
+func (l *LinkedList[T]) Clear() {
+	var zero T
+	current := l.first
+	for current != nil {
+		next := current.next
+		current.next = nil
+		current.value = zero
+		current = next
+	}
+	l.first = nil
+	l.last = nil
+	l.length = 0
+}
+
+// MarshalJSON converts the list into a JSON array.
+// It uses the internal serialization utility to ensure elements are
+// encoded in their current logical order.
+//
+// Complexity: O(n).
+func (l *LinkedList[T]) MarshalJSON() ([]byte, error) {
+	return collection.Marshal(l)
+}
+
+// UnmarshalJSON populates the list from a JSON array.
+// It clears any existing elements before appending the new ones from the JSON data.
+//
+// Note: This operation is destructive; it calls Clear() to remove all existing
+// elements before appending the ones from the JSON data.
+//
+// Complexity: O(n + k) where k is the number of elements in the JSON.
+func (l *LinkedList[T]) UnmarshalJSON(data []byte) error {
+	return collection.Unmarshal(data, l.Clear, l.Append)
+}
+
+// Format implements the fmt.Formatter interface, allowing custom formatting
+// with verbs like %v, %+v, and %#v.
+//
+// Complexity: O(1) as it respects a fixed display limit.
 func (l *LinkedList[T]) Format(s fmt.State, verb rune) {
-	formatters.Format(s, verb, l, l.Length())
+	collection.Format(s, verb, l, l.Length())
 }
 
 // String returns a string representation of the list.
+//
+// Complexity: O(1) as it respects a fixed display limit.
 func (l *LinkedList[T]) String() string {
 	return fmt.Sprint(l)
 }
