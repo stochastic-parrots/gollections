@@ -5,110 +5,14 @@ import (
 	"iter"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
+	"github.com/stochastic-parrots/gollections/internal/shared/node"
 )
-
-// DoubleLinkedNode represents a single element in a doubly linked list.
-// It contains a value of type T and pointers to the previous and next nodes
-// in the sequence, allowing for bidirectional navigation.
-type DoubleLinkedNode[T any] struct {
-	previous *DoubleLinkedNode[T]
-	value    T
-	next     *DoubleLinkedNode[T]
-}
-
-// NewDoubleLinkedNode creates an empty DoubleLinkedNode ready for use.
-//
-// Complexity: O(1).
-func NewDoubleLinkedNode[T any](value T) *DoubleLinkedNode[T] {
-	return &DoubleLinkedNode[T]{
-		previous: nil,
-		value:    value,
-		next:     nil,
-	}
-}
-
-// Unlink disconnects the node from its neighbors in the list.
-// It updates the adjacent nodes to point to each other, effectively
-// removing the current node from the chain while maintaining list integrity.
-//
-// Complexity: O(1).
-func (node *DoubleLinkedNode[T]) Unlink() {
-	previous := node.previous
-	next := node.next
-
-	if previous != nil {
-		previous.next = next
-	}
-	if next != nil {
-		next.previous = previous
-	}
-
-	node.previous = nil
-	node.next = nil
-}
-
-// Value returns the data stored in the node.
-//
-// Complexity: O(1).
-func (node DoubleLinkedNode[T]) Value() T {
-	return node.value
-}
-
-// Next returns the succeeding node in the chain.
-//
-// Complexity: O(1).
-func (node DoubleLinkedNode[T]) Next() *DoubleLinkedNode[T] {
-	return node.next
-}
-
-// Append creates a new node with the given value and attaches it
-// immediately after the current node.
-//
-// Complexity: O(1).
-func (node *DoubleLinkedNode[T]) Append(x T) *DoubleLinkedNode[T] {
-	new := NewDoubleLinkedNode(x)
-	node.next = new
-	new.previous = node
-	return new
-}
-
-// HasNext returns true if there is a node following the current one.
-//
-// Complexity: O(1).
-func (node DoubleLinkedNode[T]) HasNext() bool {
-	return node.next != nil
-}
-
-// Previous returns the preceding node in the chain.
-//
-// Complexity: O(1).
-func (node DoubleLinkedNode[T]) Previous() *DoubleLinkedNode[T] {
-	return node.previous
-}
-
-// PreAppend creates a new node with the given value and attaches it
-// immediately before the current node.
-//
-// Complexity: O(1).
-func (node *DoubleLinkedNode[T]) PreAppend(x T) *DoubleLinkedNode[T] {
-	new := NewDoubleLinkedNode(x)
-	node.previous = new
-	new.next = node
-	return new
-}
-
-// HasPrevious returns true if there is a node preceding the current one.
-//
-// Complexity: O(1).
-func (node DoubleLinkedNode[T]) HasPrevious() bool {
-	return node.previous != nil
-}
 
 // DoubleLinkedList represents a doubly linked list data structure.
 // It stores elements in a series of nodes where each node points to both
 // its predecessor and its successor, allowing for efficient bi-directional traversal.
 type DoubleLinkedList[T any] struct {
-	first, last *DoubleLinkedNode[T]
+	first, last *node.DoubleLinkedNode[T]
 	length      int
 	reversed    bool
 }
@@ -141,22 +45,22 @@ func (l *DoubleLinkedList[T]) IsEmpty() bool {
 // If the list is reversed, it moves toward the 'previous' pointer.
 //
 // Complexity: O(1).
-func (l *DoubleLinkedList[T]) forward(n *DoubleLinkedNode[T]) *DoubleLinkedNode[T] {
+func (l *DoubleLinkedList[T]) forward(n *node.DoubleLinkedNode[T]) *node.DoubleLinkedNode[T] {
 	if l.reversed {
-		return n.previous
+		return n.Previous
 	}
-	return n.next
+	return n.Next
 }
 
 // backward returns the logically "previous" node based on the list's orientation.
 // If the list is reversed, it moves toward the 'next' pointer.
 //
 // Complexity: O(1).
-func (l *DoubleLinkedList[T]) backward(n *DoubleLinkedNode[T]) *DoubleLinkedNode[T] {
+func (l *DoubleLinkedList[T]) backward(n *node.DoubleLinkedNode[T]) *node.DoubleLinkedNode[T] {
 	if l.reversed {
-		return n.next
+		return n.Next
 	}
-	return n.previous
+	return n.Previous
 }
 
 // get traverses the list to find the node at the specific index.
@@ -164,9 +68,9 @@ func (l *DoubleLinkedList[T]) backward(n *DoubleLinkedNode[T]) *DoubleLinkedNode
 // depending on which is closer to the requested index.
 //
 // Complexity: O(n/2) which simplifies to O(n).
-func (l *DoubleLinkedList[T]) get(idx int) *DoubleLinkedNode[T] {
+func (l *DoubleLinkedList[T]) get(idx int) *node.DoubleLinkedNode[T] {
 	size := l.Length()
-	var current *DoubleLinkedNode[T]
+	var current *node.DoubleLinkedNode[T]
 
 	if idx < size/2 {
 		current = l.first
@@ -192,7 +96,7 @@ func (l *DoubleLinkedList[T]) Get(idx int) (T, error) {
 		return zero, NewIndexOutOfBoundError(idx, l.Length()-1)
 	}
 
-	return l.get(idx).Value(), nil
+	return l.get(idx).Value, nil
 }
 
 // Find locates the index of an element using a linear search.
@@ -238,7 +142,7 @@ func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 		return NewIndexOutOfBoundError(idx, l.Length()-1)
 	}
 
-	l.get(idx).value = x
+	l.get(idx).Value = x
 	return nil
 }
 
@@ -246,24 +150,24 @@ func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 // It handles pointer updates for both standard and reversed list states.
 func (l *DoubleLinkedList[T]) append(x T) {
 	if l.IsEmpty() {
-		l.first = NewDoubleLinkedNode(x)
+		l.first = node.NewDoubleLinkedNode(x)
 		l.last = l.first
 		l.length++
 		return
 	}
 
 	if !l.reversed {
-		new := NewDoubleLinkedNode(x)
-		l.last.next = new
-		new.previous = l.last
+		new := node.NewDoubleLinkedNode(x)
+		l.last.Next = new
+		new.Previous = l.last
 		l.last = new
 		l.length++
 		return
 	}
 
-	new := NewDoubleLinkedNode(x)
-	l.last.previous = new
-	new.next = l.last
+	new := node.NewDoubleLinkedNode(x)
+	l.last.Previous = new
+	new.Next = l.last
 	l.last = new
 	l.length++
 }
@@ -276,13 +180,13 @@ func (l *DoubleLinkedList[T]) prepend(x T) {
 		return
 	}
 
-	new := NewDoubleLinkedNode(x)
+	new := node.NewDoubleLinkedNode(x)
 	if !l.reversed {
-		new.next = l.first
-		l.first.previous = new
+		new.Next = l.first
+		l.first.Previous = new
 	} else {
-		new.previous = l.first
-		l.first.next = new
+		new.Previous = l.first
+		l.first.Next = new
 	}
 	l.first = new
 	l.length++
@@ -312,24 +216,24 @@ func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
 	}
 
 	target := l.get(idx)
-	node := NewDoubleLinkedNode(x)
+	node := node.NewDoubleLinkedNode(x)
 
 	if !l.reversed {
-		prev := target.previous
-		node.next = target
-		node.previous = prev
+		prev := target.Previous
+		node.Next = target
+		node.Previous = prev
 		if prev != nil {
-			prev.next = node
+			prev.Next = node
 		}
-		target.previous = node
+		target.Previous = node
 	} else {
-		nxt := target.next
-		node.previous = target
-		node.next = nxt
+		nxt := target.Next
+		node.Previous = target
+		node.Next = nxt
 		if nxt != nil {
-			nxt.previous = node
+			nxt.Previous = node
 		}
-		target.next = node
+		target.Next = node
 	}
 
 	l.length++
@@ -350,14 +254,14 @@ func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
 	}
 
 	current := l.get(idx)
-	val := current.value
-	p, n := current.previous, current.next
+	val := current.Value
+	p, n := current.Previous, current.Next
 
 	if p != nil {
-		p.next = n
+		p.Next = n
 	}
 	if n != nil {
-		n.previous = p
+		n.Previous = p
 	}
 
 	if current == l.first {
@@ -368,10 +272,10 @@ func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
 		l.last = l.backward(current)
 	}
 
-	current.next = nil
-	current.previous = nil
+	current.Next = nil
+	current.Previous = nil
 	var zero T
-	current.value = zero
+	current.Value = zero
 	l.length--
 	return val, nil
 }
@@ -403,14 +307,14 @@ func (l *DoubleLinkedList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.first
 		for current != nil {
-			if !yield(current.value) {
+			if !yield(current.Value) {
 				return
 			}
 
 			if !l.reversed {
-				current = current.next
+				current = current.Next
 			} else {
-				current = current.previous
+				current = current.Previous
 			}
 		}
 	}
@@ -423,13 +327,13 @@ func (l *DoubleLinkedList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.last
 		for current != nil {
-			if !yield(current.value) {
+			if !yield(current.Value) {
 				return
 			}
 			if !l.reversed {
-				current = current.previous
+				current = current.Previous
 			} else {
-				current = current.next
+				current = current.Next
 			}
 		}
 	}
@@ -443,14 +347,14 @@ func (l *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		current := l.first
 		for index := 0; current != nil; index++ {
-			if !yield(index, current.value) {
+			if !yield(index, current.Value) {
 				return
 			}
 
 			if !l.reversed {
-				current = current.next
+				current = current.Next
 			} else {
-				current = current.previous
+				current = current.Previous
 			}
 		}
 	}
@@ -483,13 +387,13 @@ func (l *DoubleLinkedList[T]) Clear() {
 	var zero T
 	current := l.first
 	for current != nil {
-		next := current.next
+		next := current.Next
 		if l.reversed {
-			next = current.previous
+			next = current.Previous
 		}
-		current.previous = nil
-		current.next = nil
-		current.value = zero
+		current.Previous = nil
+		current.Next = nil
+		current.Value = zero
 		current = next
 	}
 	l.first = nil

@@ -5,62 +5,14 @@ import (
 	"iter"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
+	"github.com/stochastic-parrots/gollections/internal/shared/node"
 )
-
-// LinkedNode represents an individual node in a singly linked list.
-// It stores a generic value and a pointer to the subsequent node in the sequence.
-type LinkedNode[T any] struct {
-	value T
-	next  *LinkedNode[T]
-}
-
-// NewLinkedNode creates a new LinkedNode initialized with the provided value.
-//
-// Complexity: O(1).
-func NewLinkedNode[T any](value T) *LinkedNode[T] {
-	return &LinkedNode[T]{value: value, next: nil}
-}
-
-// Value returns the data stored within the node.
-//
-// Complexity: O(1).
-func (node LinkedNode[T]) Value() T {
-	return node.value
-}
-
-// Next returns the pointer to the succeeding node in the chain.
-// It returns nil if the current node is the tail of the list.
-//
-// Complexity: O(1).
-func (node LinkedNode[T]) Next() *LinkedNode[T] {
-	return node.next
-}
-
-// HasNext returns true if there is a node following the current one.
-//
-// Complexity: O(1).
-func (node LinkedNode[T]) HasNext() bool {
-	return node.next != nil
-}
-
-// Append creates a new node with the given value and attaches it
-// immediately after the current node.
-//
-// Note: This operation is low-level and does not update the parent
-// LinkedList's length or 'last' pointer. Use with caution.
-//
-// Complexity: O(1).
-func (node *LinkedNode[T]) Append(x T) *LinkedNode[T] {
-	new := NewLinkedNode(x)
-	node.next = new
-	return new
-}
 
 // LinkedList represents a singly linked list data structure.
 // It consists of nodes where each element points to the next, making it efficient
 // for sequential insertion and deletion at the ends, but requiring O(n) for random access.
 type LinkedList[T any] struct {
-	first, last *LinkedNode[T]
+	first, last *node.LinkedNode[T]
 	length      int
 }
 
@@ -99,10 +51,10 @@ func (l *LinkedList[T]) Get(index int) (T, error) {
 
 	current := l.first
 	for range index {
-		current = current.Next()
+		current = current.Next
 	}
 
-	return current.Value(), nil
+	return current.Value, nil
 }
 
 // Find locates the index of an element using a linear search.
@@ -150,19 +102,19 @@ func (l *LinkedList[T]) Set(index int, x T) error {
 
 	current := l.first
 	for range index {
-		current = current.Next()
+		current = current.Next
 	}
 
-	current.value = x
+	current.Value = x
 	return nil
 }
 
 func (l *LinkedList[T]) append(x T) {
-	new := NewLinkedNode(x)
+	new := node.NewLinkedNode(x)
 	if l.first == nil {
 		l.first = new
 	} else {
-		l.last.next = new
+		l.last.Next = new
 	}
 	l.last = new
 	l.length++
@@ -195,10 +147,10 @@ func (l *LinkedList[T]) Insert(idx int, x T) error {
 		return nil
 	}
 
-	node := NewLinkedNode(x)
+	node := node.NewLinkedNode(x)
 
 	if idx == 0 {
-		node.next = l.first
+		node.Next = l.first
 		l.first = node
 		l.length++
 		return nil
@@ -206,11 +158,11 @@ func (l *LinkedList[T]) Insert(idx int, x T) error {
 
 	current := l.first
 	for range idx - 1 {
-		current = current.next
+		current = current.Next
 	}
 
-	node.next = current.next
-	current.next = node
+	node.Next = current.Next
+	current.Next = node
 
 	l.length++
 	return nil
@@ -230,32 +182,32 @@ func (l *LinkedList[T]) Remove(idx int) (T, error) {
 
 	var val T
 	if idx == 0 {
-		val = l.first.value
+		val = l.first.Value
 		old := l.first
-		l.first = l.first.next
+		l.first = l.first.Next
 
 		if l.first == nil {
 			l.last = nil
 		}
 
-		old.next = nil
+		old.Next = nil
 		var zero T
-		old.value = zero
+		old.Value = zero
 	} else {
 		prev := l.first
 		for range idx - 1 {
-			prev = prev.next
+			prev = prev.Next
 		}
-		removed := prev.next
-		val = removed.value
-		prev.next = removed.next
+		removed := prev.Next
+		val = removed.Value
+		prev.Next = removed.Next
 
 		if idx == size-1 {
 			l.last = prev
 		}
-		removed.next = nil
+		removed.Next = nil
 		var zero T
-		removed.value = zero
+		removed.Value = zero
 	}
 
 	l.length--
@@ -271,19 +223,19 @@ func (l *LinkedList[T]) Reverse() {
 		return
 	}
 
-	var previous *LinkedNode[T]
+	var previous *node.LinkedNode[T]
 	current := l.first
 	l.last = l.first
 
 	for current != nil {
-		next := current.next
-		current.next = previous
+		next := current.Next
+		current.Next = previous
 		previous = current
 		current = next
 	}
 
 	l.first = previous
-	l.last.next = nil
+	l.last.Next = nil
 }
 
 // All returns a sequence that yields elements from the first to the last node.
@@ -291,8 +243,8 @@ func (l *LinkedList[T]) Reverse() {
 // Complexity: O(n) for a full traversal, O(1) per step.
 func (l *LinkedList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for current := l.first; current != nil; current = current.next {
-			if !yield(current.value) {
+		for current := l.first; current != nil; current = current.Next {
+			if !yield(current.Value) {
 				return
 			}
 		}
@@ -304,8 +256,8 @@ func (l *LinkedList[T]) All() iter.Seq[T] {
 // Complexity: O(n) for a full traversal, O(1) per step.
 func (l *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
-		for current, index := l.first, 0; current != nil; current = current.next {
-			if !yield(index, current.value) {
+		for current, index := l.first, 0; current != nil; current = current.Next {
+			if !yield(index, current.Value) {
 				return
 			}
 			index++
@@ -354,9 +306,9 @@ func (l *LinkedList[T]) Clear() {
 	var zero T
 	current := l.first
 	for current != nil {
-		next := current.next
-		current.next = nil
-		current.value = zero
+		next := current.Next
+		current.Next = nil
+		current.Value = zero
 		current = next
 	}
 	l.first = nil

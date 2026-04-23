@@ -9,47 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewLinked_Node(t *testing.T) {
-	node := NewLinkedNode(5)
-
-	assert.Equal(t, 5, node.Value())
-	assert.Nil(t, node.Next())
-	assert.False(t, node.HasNext())
-}
-
-func TestLinkedNode_HasNext(t *testing.T) {
-	node := NewLinkedNode(5)
-	next := node.Append(6)
-
-	assert.True(t, node.HasNext())
-	assert.False(t, next.HasNext())
-}
-
-func TestLinkedNode_Append(t *testing.T) {
-	node := NewLinkedNode(5)
-	next := node.Append(6)
-
-	assert.Same(t, next, node.Next())
-	assert.Nil(t, next.Next())
-	assert.Equal(t, 6, next.Value())
-}
-
-func TestLinkedNode_Next(t *testing.T) {
-	node := NewLinkedNode(5)
-	next := node.Append(6)
-
-	assert.Same(t, next, node.Next())
-	assert.Nil(t, next.Next())
-}
-
-func TestLinkedNode_Value(t *testing.T) {
-	node := NewLinkedNode(10)
-	other := NewLinkedNode("some")
-
-	assert.Equal(t, 10, node.Value())
-	assert.Equal(t, "some", other.Value())
-}
-
 func TestNewLinkedList(t *testing.T) {
 	l := NewLinkedList[any]()
 
@@ -258,7 +217,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 3, l.Length())
 		assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
-		assert.Equal(t, 3, l.first.Value())
+		assert.Equal(t, 3, l.first.Value)
 	})
 
 	t.Run("InMiddle_Reversed", func(t *testing.T) {
@@ -709,8 +668,8 @@ func TestLinkedList_UnmarshalJSON(t *testing.T) {
 		assert.Equal(t, 3, l.Length())
 		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
 
-		assert.Equal(t, 4, l.first.Value())
-		assert.Equal(t, 6, l.last.Value())
+		assert.Equal(t, 4, l.first.Value)
+		assert.Equal(t, 6, l.last.Value)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
