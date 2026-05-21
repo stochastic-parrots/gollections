@@ -574,15 +574,13 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 		assert.Equal(t, 0, len(pm.indexes))
 		assert.Nil(t, pm.root)
 
-		if pm.freelist != nil {
-			curr := pm.freelist
-			for curr != nil {
-				assert.Nil(t, curr.child)
-				assert.Nil(t, curr.next)
-				assert.Nil(t, curr.previous)
-				curr = curr.next
-			}
+		count := 0
+		for curr := pm.freelist; curr != nil; curr = curr.next {
+			assert.Nil(t, curr.child)
+			assert.Nil(t, curr.previous)
+			count++
 		}
+		assert.Equal(t, 10, count)
 	})
 
 	t.Run("Reuse", func(t *testing.T) {
@@ -600,14 +598,9 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 		assert.Equal(t, "newer", key)
 		assert.Equal(t, 1, priority)
 
-		if pm.freelist != nil {
-			curr := pm.freelist
-			for curr != nil {
-				assert.Nil(t, curr.child)
-				assert.Nil(t, curr.next)
-				assert.Nil(t, curr.previous)
-				curr = curr.next
-			}
+		for curr := pm.freelist; curr != nil; curr = curr.next {
+			assert.Nil(t, curr.child)
+			assert.Nil(t, curr.previous)
 		}
 	})
 }

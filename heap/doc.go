@@ -14,7 +14,11 @@
 //		Peek() (T, bool)
 //		Drain() iter.Seq2[int, T]
 //		Replace(x T) (T, bool)
+//		Clear()
 //		Collection[T]
+//		fmt.Stringer
+//		json.Marshaler
+//		json.Unmarshaler
 //	}
 //
 // # Why this package?

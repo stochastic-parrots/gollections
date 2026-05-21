@@ -287,25 +287,25 @@ func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 //
 // Complexity: O(1) amortized for priority improvements.
 func (pm *PairingPriorityMap[K, P]) Improve(key K, priority P) bool {
-    node, exists := pm.indexes[key]
-    if !exists {
-        pm.Set(key, priority)
-        return true
-    }
+	node, exists := pm.indexes[key]
+	if !exists {
+		pm.Set(key, priority)
+		return true
+	}
 
 	if !pm.hasPriority(priority, node.priority) {
-        return false
-    }
+		return false
+	}
 
-    node.priority = priority
-    if node == pm.root {
-        return true
-    }
+	node.priority = priority
+	if node == pm.root {
+		return true
+	}
 
-    pm.cut(node)
-    pm.root = pm.merge(pm.root, node)
+	pm.cut(node)
+	pm.root = pm.merge(pm.root, node)
 
-    return true
+	return true
 }
 
 // Remove deletes the entry for key if present, returning true if an entry
@@ -452,16 +452,25 @@ func (pm *PairingPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
 //
 // Complexity: O(n) to zero out elements (avoiding memory leaks).
 func (pm *PairingPriorityMap[K, P]) Clear() {
-	var zeroK K
-	var zeroP P
 	clear(pm.indexes)
+	root := pm.root
 	pm.root = nil
 
-	curr := pm.freelist
-	for curr != nil {
-		next := curr.next
-		curr.key, curr.priority = zeroK, zeroP
-		curr.child, curr.next, curr.previous = nil, nil, nil
-		curr = next
+	if root == nil {
+		return
+	}
+
+	stack := []*node[K, P]{root}
+	for len(stack) > 0 {
+		n := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		for child := n.child; child != nil; {
+			next := child.next
+			stack = append(stack, child)
+			child = next
+		}
+
+		pm.deallocate(n)
 	}
 }

@@ -2,6 +2,7 @@ package heap
 
 import (
 	"encoding/json"
+	"fmt"
 	"iter"
 
 	pkg "github.com/stochastic-parrots/gollections"
@@ -51,7 +52,12 @@ type Heap[T any] interface {
 	//   bool  False if the heap is empty, true otherwise.
 	Replace(x T) (T, bool)
 
+	// Clear removes all elements from the heap, resetting it to an empty state.
+	Clear()
+
 	pkg.Collection[T]
 
+	fmt.Stringer
+	json.Marshaler
 	json.Unmarshaler
 }

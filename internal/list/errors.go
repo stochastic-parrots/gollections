@@ -34,10 +34,26 @@ func (e *IndexOutOfBoundError) Error() string {
 	return fmt.Sprintf("index %d is out of bounds; maximum valid index is %d", e.index, e.limit)
 }
 
+// Is reports whether the target is an IndexOutOfBoundError.
+func (e *IndexOutOfBoundError) Is(target error) bool {
+	_, ok := target.(*IndexOutOfBoundError)
+	return ok
+}
+
+// Index returns the invalid index that was requested.
+func (e *IndexOutOfBoundError) Index() int {
+	return e.index
+}
+
+// Limit returns the largest valid index allowed in the collection.
+func (e *IndexOutOfBoundError) Limit() int {
+	return e.limit
+}
+
 // ErrIndexOutOfBound is the "sentinel" error used for type checking.
 //
-// API consumers should use errors.Is(err, lists.ErrIndexOutOfBound)
+// API consumers should use errors.Is(err, list.ErrIndexOutOfBound)
 // to check if the returned error is an IndexOutOfBoundError.
 //
-// To extract the 'index' and 'limit' fields, use errors.As.
+// To extract the index and limit values, use errors.As and the Index/Limit methods.
 var ErrIndexOutOfBound = &IndexOutOfBoundError{}
