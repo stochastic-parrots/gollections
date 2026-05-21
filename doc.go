@@ -21,6 +21,9 @@
 //   - [github.com/stochastic-parrots/gollections/list]:
 //     Indexed sequences like ArrayList and LinkedList.
 //
+//   - [github.com/stochastic-parrots/gollections/deque]:
+//     Double-ended queues backed by circular arrays or linked nodes.
+//
 //   - [github.com/stochastic-parrots/gollections/heap]:
 //     Priority-based ordering (Min/Max Heaps).
 //
