@@ -34,7 +34,19 @@ func TestAsReadonly(t *testing.T) {
 		view := deque.AsReadonly[int](mutable)
 
 		assert.Equal(t, []int{1, 2}, slices.Collect(view.All()))
+		assert.Equal(t, []int{0, 1}, collectIndexes(view.Enumerate()))
 		assert.Equal(t, 2, view.Length())
+		assert.False(t, view.IsEmpty())
+
+		front, ok := view.Front()
+		assert.True(t, ok)
+		assert.Equal(t, 1, front)
+
+		back, ok := view.Back()
+		assert.True(t, ok)
+		assert.Equal(t, 2, back)
+
+		assert.Equal(t, "[1 2]", view.String())
 
 		mutable.Prepend(0)
 		assert.Equal(t, []int{0, 1, 2}, view.ToSlice())
@@ -83,4 +95,12 @@ func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 	d.Clear()
 	assert.True(t, d.IsEmpty())
 	assert.Nil(t, d.ToSlice())
+}
+
+func collectIndexes(seq func(func(int, int) bool)) []int {
+	var indexes []int
+	for idx := range seq {
+		indexes = append(indexes, idx)
+	}
+	return indexes
 }
