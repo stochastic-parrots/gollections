@@ -13,6 +13,12 @@
 //   - [Collection]: Foundation for linear structures like lists and heaps.
 //   - [Map]: Base operations for key-value based structures.
 //
+// Root-level interfaces are intentionally read-only capability contracts. They
+// describe how callers can inspect or iterate over a structure without changing
+// its state. Mutating operations such as Append, Push, Set, Remove, Pop, or
+// Clear are exposed only by the structure-specific interfaces in each
+// subpackage, where their semantics are precise and unambiguous.
+//
 // # Subpackages
 //
 // The library is organized into specialized subpackages. Refer to each package
@@ -33,6 +39,9 @@
 // # Design Principles
 //
 //   - Type Safety: Full generic support ensures compile-time type checking.
+//
+//   - Read-only Roots: Shared root interfaces expose observation and iteration;
+//     mutation belongs to the concrete collection family.
 //
 //   - Performance: Focused on O(1) and O(log N) operations where possible.
 //
