@@ -20,6 +20,7 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 | Package | Structures | Use when you need |
 | --- | --- | --- |
 | `list` | `ArrayList`, `LinkedList` | Indexed, ordered sequences with forward/backward traversal |
+| `sortedlist` | `ArraySortedList` | Comparator-sorted sequences that allow duplicate values |
 | `deque` | `ArrayDeque`, `LinkedDeque` | Fast insertion and removal at both ends |
 | `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
 | `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
@@ -80,6 +81,6 @@ go test -cover ./internal/deque
 
 ## Status
 
-The available packages are `list`, `deque`, `heap`, and `prioritymap`. `queue`
-and `stack` are planned as thin, focused APIs on top of the same collection
-foundations.
+The available packages are `list`, `sortedlist`, `deque`, `heap`, and
+`prioritymap`. `queue`, `stack`, and set families are planned as focused APIs on
+top of the same collection foundations.
