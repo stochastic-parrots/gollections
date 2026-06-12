@@ -138,6 +138,20 @@ func TestBinaryPriorityMap_Remove(t *testing.T) {
 	assert.False(t, pm.Remove("non-existent"))
 }
 
+func TestBinaryPriorityMap_RemoveClearsDiscardedSlot(t *testing.T) {
+	a, b, c := 10, 20, 30
+	pm := NewBinaryPriorityMap[string](3, func(a, b *int) bool { return *a < *b })
+	pm.Set("A", &a)
+	pm.Set("B", &b)
+	pm.Set("C", &c)
+
+	assert.True(t, pm.Remove("B"))
+
+	backing := pm.data[:cap(pm.data)]
+	assert.Zero(t, backing[len(pm.data)].key)
+	assert.Nil(t, backing[len(pm.data)].priority)
+}
+
 func TestBinaryPriorityMap_Pop(t *testing.T) {
 	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
 	pm.Set(1, 50)
@@ -154,6 +168,21 @@ func TestBinaryPriorityMap_Pop(t *testing.T) {
 
 	_, _, ok = pm.Pop()
 	assert.False(t, ok)
+}
+
+func TestBinaryPriorityMap_PopClearsDiscardedSlot(t *testing.T) {
+	a, b, c := 10, 20, 30
+	pm := NewBinaryPriorityMap[string](3, func(a, b *int) bool { return *a < *b })
+	pm.Set("A", &a)
+	pm.Set("B", &b)
+	pm.Set("C", &c)
+
+	_, _, ok := pm.Pop()
+	assert.True(t, ok)
+
+	backing := pm.data[:cap(pm.data)]
+	assert.Zero(t, backing[len(pm.data)].key)
+	assert.Nil(t, backing[len(pm.data)].priority)
 }
 
 func TestBinaryPriorityMap_Peek(t *testing.T) {

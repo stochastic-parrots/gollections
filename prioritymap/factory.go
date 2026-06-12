@@ -44,7 +44,7 @@ type PairingHeapPriorityMap[K comparable, P any] = *constructor.PairingPriorityM
 //	-----------------   ---------------
 //	Set(K, V)           O(log N)
 //	Update(K, V)        O(log N)
-//	SetIfBetter(K, V)   O(log N)
+//	Improve(K, V)       O(log N)
 //	Get(K)              O(1)
 //	Remove(K)           O(log N)
 //	Pop()               O(log N)
@@ -63,7 +63,7 @@ func NewBinaryHeap[K comparable, V any](capacity int, hasPriority func(V, V) boo
 //	-----------------   ---------------
 //	Set(K, V)           O(log N)
 //	Update(K, V)        O(log N)
-//	SetIfBetter(K, V)   O(log N)
+//	Improve(K, V)       O(log N)
 //	Get(K)              O(1)
 //	Remove(K)           O(log N)
 //	Pop()               O(log N)
@@ -82,7 +82,7 @@ func MinBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 //	-----------------   ---------------
 //	Set(K, V)           O(log N)
 //	Update(K, V)        O(log N)
-//	SetIfBetter(K, V)   O(log N)
+//	Improve(K, V)       O(log N)
 //	Get(K)              O(1)
 //	Remove(K)           O(log N)
 //	Pop()               O(log N)
@@ -101,7 +101,7 @@ func MaxBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 //	-----------------   ---------------
 //	Set(K, V)           O(1) Amortized*
 //	Update(K, V)        O(log N) Amortized
-//	SetIfBetter(K, V)   O(1) Amortized*
+//	Improve(K, V)       O(1) Amortized*
 //	Get(K)              O(1)
 //	Remove(K)           O(log N) Amortized
 //	Pop()               O(log N) Amortized
@@ -109,7 +109,7 @@ func MaxBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 //	Clear()             O(N)
 //	Drain()             O(N log N)
 //
-// * Note: Set and SetIfBetter are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
+// * Note: Set and Improve are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
 func NewPairingHeap[K comparable, V any](capacity int, hasPriority func(V, V) bool) PairingHeapPriorityMap[K, V] {
 	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, hasPriority)
 }
@@ -122,7 +122,7 @@ func NewPairingHeap[K comparable, V any](capacity int, hasPriority func(V, V) bo
 //	-----------------   ---------------
 //	Set(K, V)           O(1) Amortized*
 //	Update(K, V)        O(log N) Amortized
-//	SetIfBetter(K, V)   O(1) Amortized*
+//	Improve(K, V)       O(1) Amortized*
 //	Get(K)              O(1)
 //	Remove(K)           O(log N) Amortized
 //	Pop()               O(log N) Amortized
@@ -130,7 +130,7 @@ func NewPairingHeap[K comparable, V any](capacity int, hasPriority func(V, V) bo
 //	Clear()             O(N)
 //	Drain()             O(N log N)
 //
-// * Note: Set and SetIfBetter are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
+// * Note: Set and Improve are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
 func MinPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriorityMap[K, V] {
 	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Min[V]())
 }
@@ -143,7 +143,7 @@ func MinPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriori
 //	-----------------   ---------------
 //	Set(K, V)           O(1) Amortized*
 //	Update(K, V)        O(log N) Amortized
-//	SetIfBetter(K, V)   O(1) Amortized*
+//	Improve(K, V)       O(1) Amortized*
 //	Get(K)              O(1)
 //	Remove(K)           O(log N) Amortized
 //	Pop()               O(log N) Amortized
@@ -151,7 +151,7 @@ func MinPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriori
 //	Clear()             O(N)
 //	Drain()             O(N log N)
 //
-// * Note: Set and SetIfBetter are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
+// * Note: Set and Improve are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
 func MaxPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriorityMap[K, V] {
 	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Max[V]())
 }

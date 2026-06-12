@@ -13,7 +13,7 @@ generics, such as lists, deques, heaps, and priority maps.
 go get github.com/stochastic-parrots/gollections
 ```
 
-The module uses Go's standard iterator APIs and targets Go 1.25+.
+The module uses Go's standard iterator APIs and targets Go 1.24+.
 
 ## Collections
 

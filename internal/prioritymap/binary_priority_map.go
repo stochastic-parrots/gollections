@@ -214,6 +214,8 @@ func (pm *BinaryPriorityMap[K, P]) Remove(key K) bool {
 		last := len(pm.data) - 1
 		pm.data[idx], pm.data[last] = pm.data[last], pm.data[idx]
 		pm.indexes[pm.data[idx].key] = idx
+		var zero entry[K, P]
+		pm.data[last] = zero
 		pm.data = pm.data[:last]
 		delete(pm.indexes, key)
 		if idx < len(pm.data) {
@@ -245,9 +247,13 @@ func (pm *BinaryPriorityMap[K, P]) Pop() (key K, priority P, ok bool) {
 	if n > 0 {
 		pm.data[0] = pm.data[n]
 		pm.indexes[pm.data[0].key] = 0
+		var zero entry[K, P]
+		pm.data[n] = zero
 		pm.data = pm.data[:n]
 		pm.fixdown(0)
 	} else {
+		var zero entry[K, P]
+		pm.data[0] = zero
 		pm.data = pm.data[:0]
 	}
 	return e.key, e.priority, true

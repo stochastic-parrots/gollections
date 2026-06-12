@@ -29,8 +29,8 @@
 //
 //   - Versatile: Supports Min-Heaps, Max-Heaps, and custom priority logic.
 //
-//   - Memory Efficient: Provides in-place constructors with sufix 'From'
-//     and safe copies constructors with sufix 'Clone'.
+//   - Memory Efficient: Provides in-place constructors with suffix 'From'
+//     and safe-copy constructors with suffix 'Clone'.
 //
 //   - Predictable API: Consistent method signatures across different heap types
 //     (Push, Pop, Peek, Drain) to reduce the learning curve.

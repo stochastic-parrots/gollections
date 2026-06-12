@@ -23,11 +23,13 @@
 //
 //	type PriorityMap[K comparable, V any] interface {
 //		Set(key K, value V)
-//		Update(key K, value V)
-//		Improve(key K, priority P) bool
+//		Update(key K, value V) bool
+//		Improve(key K, value V) bool
 //		Remove(key K) bool
 //		Pop() (K, V, bool)
 //		Peek() (K, V, bool)
+//		Drain() iter.Seq2[K, V]
+//		Clear()
 //		Readonly[K, V]
 //	}
 //
