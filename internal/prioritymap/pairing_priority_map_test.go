@@ -99,8 +99,10 @@ func TestPairingPriorityMap_Combine(t *testing.T) {
 		pm := NewPairingPriorityMap[int](comparator.Min[int]())
 		assert.Nil(t, pm.combine(nil))
 
-		n := &node[int, int]{key: 1, priority: 1}
+		parent := &node[int, int]{key: 0, priority: 0}
+		n := &node[int, int]{key: 1, priority: 1, previous: parent}
 		assert.Equal(t, n, pm.combine(n))
+		assert.Nil(t, n.previous)
 	})
 }
 
@@ -199,6 +201,20 @@ func TestPairingPriorityMap_Update(t *testing.T) {
 		assert.Equal(t, "apple", key)
 		assert.Equal(t, 5, priority)
 		assert.True(t, ok)
+	})
+
+	t.Run("RootWorsenedWithSingleChild", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm.Set("root", 1)
+		pm.Set("child", 2)
+
+		assert.True(t, pm.Update("root", 10))
+
+		key, priority, ok := pm.Peek()
+		assert.True(t, ok)
+		assert.Equal(t, "child", key)
+		assert.Equal(t, 2, priority)
+		assert.Nil(t, pm.root.previous)
 	})
 }
 

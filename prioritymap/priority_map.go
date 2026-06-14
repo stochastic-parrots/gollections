@@ -33,7 +33,7 @@ type Readonly[K comparable, P any] interface {
 
 // PriorityMap defines a structure that combines a map (key-based access) with a heap (priority ordering).
 // It allows efficient insertion, update, and removal of key-priority pairs,
-// as well as extraction of the minimum priority element.
+// as well as extraction of the highest-priority element according to the comparator.
 // K must be comparable for map operations, and P is the priority type (requires a comparator in implementations).
 type PriorityMap[K comparable, P any] interface {
 	// Set inserts or updates the priority for the given key.

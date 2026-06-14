@@ -83,4 +83,5 @@ func (m *StdPriorityMap[K, V]) Length() int {
 func (m *StdPriorityMap[K, V]) Clear() {
 	clear(m.heap.indexes)
 	clear(m.heap.data)
+	m.heap.data = m.heap.data[:0]
 }

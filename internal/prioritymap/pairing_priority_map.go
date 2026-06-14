@@ -156,6 +156,7 @@ func (pm *PairingPriorityMap[K, P]) combine(first *node[K, P]) *node[K, P] {
 	}
 
 	if first.next == nil {
+		first.previous = nil
 		return first
 	}
 
