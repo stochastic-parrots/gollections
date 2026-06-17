@@ -3,12 +3,14 @@ package prioritymap
 import (
 	"cmp"
 
+	"github.com/stochastic-parrots/gollections/constraint"
 	comparator "github.com/stochastic-parrots/gollections/internal/comparator"
 	constructor "github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
 var _ PriorityMap[int, any] = &constructor.BinaryPriorityMap[int, any]{}
 var _ PriorityMap[int, any] = &constructor.PairingPriorityMap[int, any]{}
+var _ PriorityMap[int, uint64] = &constructor.RadixPriorityMap[int, uint64]{}
 
 // BinaryHeapPriorityMap implements a priority-map (priority queue with lookup)
 // built on top of a classic Binary Heap and an internal hash map.
@@ -35,6 +37,42 @@ type BinaryHeapPriorityMap[K comparable, P any] = *constructor.BinaryPriorityMap
 // which maintains a remarkably flat tree structure, ensuring efficient
 // future operations.
 type PairingHeapPriorityMap[K comparable, P any] = *constructor.PairingPriorityMap[K, P]
+
+// RadixHeapPriorityMap implements a monotone min-priority map for integer
+// priorities.
+//
+// Priorities must be non-negative, and every inserted or updated priority
+// must be at least the priority returned by the most recent Pop.
+//
+// The implementation does not validate this precondition; callers are
+// responsible for preserving it.
+type RadixHeapPriorityMap[K comparable, P constraint.Integer] = *constructor.RadixPriorityMap[K, P]
+
+// NewRadixPriorityMap creates an empty indexed radix priority map.
+//
+// Performance Summary (amortized time complexity, W = priority bit width):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Set(K, P)           O(1)
+//	Update(K, P)        O(1)
+//	Improve(K, P)       O(1)
+//	Get(K)              O(1)
+//	Remove(K)           O(1)
+//	Pop()               O(W)
+//	Peek()              O(N)
+//	Clear()             O(N + W)
+//	Drain()             O(NW)
+//
+// The initial monotone lower bound is zero. After Pop returns priority p,
+// subsequent Set, Update, and Improve operations must not introduce priorities
+// smaller than p.
+//
+// This invariant is not checked for performance reasons. Violating it causes
+// the heap ordering guarantees to be lost.
+func NewRadixHeap[K comparable, P constraint.Integer](capacity int) RadixHeapPriorityMap[K, P] {
+	return constructor.NewRadixPriorityMap[K, P](capacity)
+}
 
 // NewBinary creates and returns a new empty Priority Map (Indexed Binary Heap) with a custom comparator.
 //
