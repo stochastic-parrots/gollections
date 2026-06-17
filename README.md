@@ -22,7 +22,7 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 | `list` | `ArrayList`, `LinkedList` | Indexed, ordered sequences with forward/backward traversal |
 | `deque` | `ArrayDeque`, `LinkedDeque` | Fast insertion and removal at both ends |
 | `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
-| `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap` | A priority queue with key lookup and priority updates |
+| `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
 
 Package-level examples live alongside each public package and are rendered by
 Go documentation tools.
@@ -42,6 +42,17 @@ Go documentation tools.
   to the mutable interface.
 - JSON support: linear collections and heaps can marshal/unmarshal as arrays
   where the operation makes sense.
+
+## Choosing a priority map
+
+- `BinaryHeapPriorityMap`: predictable O(log N) updates with compact,
+  contiguous storage.
+- `PairingHeapPriorityMap`: a strong general-purpose choice for workloads with
+  frequent priority improvements.
+- `RadixHeapPriorityMap`: optimized for unsigned integer priorities where
+  popped priorities never decrease, such as Dijkstra with non-negative integer
+  edge weights. After `Pop` returns `p`, callers must never insert or update an
+  entry to a priority below `p`; this precondition is intentionally unchecked.
 
 ## Development
 

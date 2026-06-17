@@ -125,6 +125,22 @@ func ExampleMaxPairingHeap() {
 	// user - other: age - 2
 }
 
+func ExampleNewRadixHeap() {
+	pm := prioritymap.NewRadixHeap[string, uint64](3)
+	pm.Set("destination", 20)
+	pm.Set("neighbor", 7)
+	pm.Set("start", 0)
+
+	for node, distance := range pm.Drain() {
+		fmt.Printf("%s: %d\n", node, distance)
+	}
+
+	// Output:
+	// start: 0
+	// neighbor: 7
+	// destination: 20
+}
+
 func ExampleAsReadonly() {
 	pm := prioritymap.MinPairingHeap[string, int](10)
 	pm.Set("Critical Bug", 1)

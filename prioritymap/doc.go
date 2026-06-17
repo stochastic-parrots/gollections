@@ -5,6 +5,13 @@
 // for efficient "decrease-key" operations, which are essential for algorithms
 // like Dijkstra's or A*.
 //
+// The package also provides [RadixHeapPriorityMap] for monotone unsigned
+// integer priorities. It is designed for workloads such as Dijkstra with
+// non-negative integer edge weights, where priorities returned by Pop never
+// decrease. After Pop returns p, subsequent insertions and updates must use
+// priorities greater than or equal to p. This precondition is intentionally
+// unchecked to keep the radix heap's hot path minimal.
+//
 // # Readonly Interface
 //
 // All priority maps implement the [Readonly] interface, providing a unified API
@@ -51,6 +58,12 @@
 //
 // The [PriorityMap] is particularly powerful when you need to track the "best"
 // element while frequently changing the scores of other elements.
+//
+// Choose [BinaryHeapPriorityMap] for predictable general-purpose behavior,
+// [PairingHeapPriorityMap] for frequent priority improvements, and
+// [RadixHeapPriorityMap] when priorities are unsigned integers and extraction
+// is monotone. Callers are responsible for preserving the radix heap's
+// monotonicity requirement.
 //
 // Example of a basic workflow:
 //
