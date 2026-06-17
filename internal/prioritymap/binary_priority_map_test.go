@@ -58,6 +58,20 @@ func TestBinaryPriorityMap_Update(t *testing.T) {
 		assert.Equal(t, 5, priority)
 		assert.True(t, ok)
 	})
+
+	t.Run("WorsePriority", func(t *testing.T) {
+		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm.Set("root", 1)
+		pm.Set("a", 2)
+		pm.Set("b", 3)
+
+		assert.True(t, pm.Update("root", 10))
+
+		key, priority, ok := pm.Peek()
+		assert.True(t, ok)
+		assert.Equal(t, "a", key)
+		assert.Equal(t, 2, priority)
+	})
 }
 
 func TestBinaryPriorityMap_Improve(t *testing.T) {

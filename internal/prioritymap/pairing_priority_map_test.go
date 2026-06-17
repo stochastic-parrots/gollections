@@ -53,6 +53,17 @@ func TestPairingPriorityMap_Merge(t *testing.T) {
 }
 
 func TestPairingPriorityMap_Cut(t *testing.T) {
+	t.Run("Root", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm.Set("A", 1)
+
+		pm.cut(pm.root)
+
+		assert.Equal(t, pm.root, pm.indexes["A"])
+		assert.Nil(t, pm.root.previous)
+		assert.Nil(t, pm.root.next)
+	})
+
 	t.Run("MiddleSibling", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](comparator.Min[int]())
 		pm.Set("A", 1)
@@ -566,6 +577,16 @@ func TestPairingPriorityMap_Integrity(t *testing.T) {
 }
 
 func TestPairingPriorityMap_Clear(t *testing.T) {
+	t.Run("EmptyMap", func(t *testing.T) {
+		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+
+		pm.Clear()
+
+		assert.Equal(t, 0, pm.Length())
+		assert.True(t, pm.IsEmpty())
+		assert.Nil(t, pm.root)
+	})
+
 	t.Run("PopulatedMap", func(t *testing.T) {
 		pm := NewPairingPriorityMapWithCapacity[string](10, comparator.Min[int]())
 		pm.Set("a", 10)
