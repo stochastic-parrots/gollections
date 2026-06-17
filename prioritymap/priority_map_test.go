@@ -16,6 +16,7 @@ func TestFactoriesImplementPriorityMap(t *testing.T) {
 	var _ prioritymap.PriorityMap[string, int] = prioritymap.NewPairingHeap[string](0, cmp.Less[int])
 	var _ prioritymap.PriorityMap[string, int] = prioritymap.MinPairingHeap[string, int](0)
 	var _ prioritymap.PriorityMap[string, int] = prioritymap.MaxPairingHeap[string, int](0)
+	var _ prioritymap.PriorityMap[string, uint64] = prioritymap.NewRadixHeap[string, uint64](0)
 }
 
 func TestNewBinaryHeap(t *testing.T) {
@@ -42,6 +43,28 @@ func TestMaxPairingHeap(t *testing.T) {
 	assertPriorityMapBehavior(t, prioritymap.MaxPairingHeap[string, int](0), "three", 3, 4, []int{4, 3, 1})
 }
 
+func TestNewRadixHeap(t *testing.T) {
+	type distance uint32
+	pm := prioritymap.NewRadixHeap[string, distance](0)
+	pm.Set("far", 100)
+	pm.Set("near", 10)
+	pm.Set("middle", 50)
+
+	key, value, ok := pm.Pop()
+	assert.True(t, ok)
+	assert.Equal(t, "near", key)
+	assert.Equal(t, distance(10), value)
+
+	assert.True(t, pm.Improve("far", 60))
+	assert.False(t, pm.Improve("far", 70))
+
+	var priorities []distance
+	for _, priority := range pm.Drain() {
+		priorities = append(priorities, priority)
+	}
+	assert.Equal(t, []distance{50, 60}, priorities)
+}
+
 func TestAsReadonly(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		assert.Nil(t, prioritymap.AsReadonly[string, int](nil))
@@ -52,7 +75,7 @@ func TestAsReadonly(t *testing.T) {
 		mutable.Set("slow", 10)
 		mutable.Set("fast", 1)
 
-		view := prioritymap.AsReadonly[string, int](mutable)
+		view := prioritymap.AsReadonly(mutable)
 
 		assert.Equal(t, 2, view.Length())
 		assert.True(t, view.Contains("slow"))
