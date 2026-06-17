@@ -1,20 +1,21 @@
 package algorithms
 
 import (
-	"math"
-
+	"github.com/stochastic-parrots/gollections/constraint"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 )
 
-func Prim(graph models.Graph, pm datastructs.PriorityMap[int, float64]) float64 {
+func Prim[T constraint.Number](graph models.Graph[T], pm datastructs.PriorityMap[int, T]) T {
+	var zeroT T
 	nodes := len(graph)
-	mstWeight := 0.0
+	mstWeight := zeroT
 	visited := make([]bool, nodes)
 
-	weights := make([]float64, nodes)
+	weights := make([]T, nodes)
+	inf := infinity[T]()
 	for i := range weights {
-		weights[i] = math.MaxFloat64
+		weights[i] = inf
 	}
 
 	weights[0] = 0

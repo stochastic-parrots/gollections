@@ -1,25 +1,41 @@
 package models
 
-import "math/rand/v2"
+import (
+	"math/rand/v2"
 
-type Edge struct {
+	"github.com/stochastic-parrots/gollections/constraint"
+)
+
+type Edge[T constraint.Number] struct {
 	To     int
-	Weight float64
+	Weight T
 }
 
-type Graph [][]Edge
+type Graph[T constraint.Number] [][]Edge[T]
 
-func NewRandomGraph(nodes int, density float64) Graph {
+func weight[T constraint.Number](r *rand.Rand) T {
+	var zero T
+
+	switch any(zero).(type) {
+	case float32, float64:
+		return T(r.Float64()*1000 + 1)
+
+	default:
+		return T(r.Int64N(1000) + 1)
+	}
+}
+
+func NewRandomGraph[T constraint.Number](nodes int, density float64) Graph[T] {
 	pcg := rand.NewPCG(42, 1024)
 	r := rand.New(pcg)
 
-	graph := make([][]Edge, nodes)
+	graph := make([][]Edge[T], nodes)
 	for i := range nodes {
 		for j := range nodes {
 			if i != j && r.Float64() < density {
-				graph[i] = append(graph[i], Edge{
+				graph[i] = append(graph[i], Edge[T]{
 					To:     j,
-					Weight: r.Float64()*1000 + 1,
+					Weight: weight[T](r),
 				})
 			}
 		}

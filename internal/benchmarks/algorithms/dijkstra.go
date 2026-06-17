@@ -1,16 +1,16 @@
 package algorithms
 
 import (
-	"math"
-
+	"github.com/stochastic-parrots/gollections/constraint"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 )
 
-func Dijkstra(graph models.Graph, start int, pm datastructs.PriorityMap[int, float64]) []float64 {
-	dist := make([]float64, len(graph))
+func Dijkstra[T constraint.Number](graph models.Graph[T], start int, pm datastructs.PriorityMap[int, T]) []T {
+	dist := make([]T, len(graph))
+	inf := infinity[T]()
 	for i := range dist {
-		dist[i] = math.MaxInt
+		dist[i] = inf
 	}
 
 	dist[start] = 0
