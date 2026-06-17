@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a new collection, API, behavior, or documentation improvement.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an improvement. Please focus on the use case and the API or behavior tradeoff.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: I checked whether the existing structures already cover this use case.
+          required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the desired API, data structure, behavior, or documentation change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Explain existing APIs or designs you considered and why they are not enough.
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and migration impact
+      description: Note whether this would change existing public API or documented behavior.
