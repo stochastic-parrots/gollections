@@ -78,11 +78,11 @@ type List[T any] interface {
 //
 // The returned view is a wrapper that prevents type assertion back to
 // the mutable interface, ensuring data safety for observers.
-func AsReadonly[T any](list List[T]) Readonly[T] {
+func AsReadonly[T any](list List[T]) *readonly[T] {
 	if list == nil {
 		return nil
 	}
-	return readonly[T]{inner: list}
+	return &readonly[T]{inner: list}
 }
 
 type readonly[T any] struct {

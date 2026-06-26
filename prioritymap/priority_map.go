@@ -95,11 +95,11 @@ type PriorityMap[K comparable, P any] interface {
 //
 // The returned view is a wrapper that prevents type assertion back to
 // the mutable interface, ensuring data safety for observers.
-func AsReadonly[K comparable, P any](pm PriorityMap[K, P]) Readonly[K, P] {
+func AsReadonly[K comparable, P any](pm PriorityMap[K, P]) *readonly[K, P] {
 	if pm == nil {
 		return nil
 	}
-	return readonly[K, P]{inner: pm}
+	return &readonly[K, P]{inner: pm}
 }
 
 type readonly[K comparable, P any] struct {

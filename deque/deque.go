@@ -69,11 +69,11 @@ type Deque[T any] interface {
 //
 // The returned view is a wrapper that prevents type assertion back to
 // the mutable interface, ensuring data safety for observers.
-func AsReadonly[T any](d Deque[T]) Readonly[T] {
+func AsReadonly[T any](d Deque[T]) *readonly[T] {
 	if d == nil {
 		return nil
 	}
-	return readonly[T]{inner: d}
+	return &readonly[T]{inner: d}
 }
 
 type readonly[T any] struct {
