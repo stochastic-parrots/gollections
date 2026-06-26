@@ -19,3 +19,11 @@ paths:
   when those paths exist.
 - Benchmarks use `b.ReportAllocs()` and keep setup outside measured sections
   unless setup is the measured operation.
+- Use local `*_bench_test.go` files beside internal implementations for
+  operation-level measurements.
+- Use `internal/benchmarks` only for optional cross-implementation suites:
+  contracts and optional pure Go baselines in `datastructs`, input helpers in
+  `models`, algorithms that exercise those contracts in `algorithms`, and
+  benchmark entrypoints in `suites`.
+- Do not add behavior to benchmark adapters just to include an implementation
+  in a suite.

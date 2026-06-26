@@ -30,10 +30,19 @@ Use this file to orient quickly, then rely on
   related public API section.
 - Tests: read `Tests`, then mirror the implementation method order where
   practical.
-- Benchmarks: read `Benchmarks`; keep suite wrappers and local benchmarks in
-  their existing locations.
+- Benchmarks: read `Benchmarks`; use local `*_bench_test.go` files beside
+  internal implementations for operation-level measurements. Use
+  `internal/benchmarks` only for optional cross-implementation suites:
+  structure contracts, implementation lists, adapters, and optional pure Go
+  `stdlib_*.go` baselines go in `datastructs`; benchmark input helpers go in
+  `models`; algorithms that exercise `datastructs` contracts go in
+  `algorithms`; benchmark entrypoints and timer control go in `suites`. Model
+  suites after the existing `heap` and `prioritymap` suites. Adapters normalize
+  APIs only; they must not invent behavior.
 - Docs or examples: read `Documentation`; exported identifiers need comments
-  that start with the identifier.
+  that start with the identifier. AI-written comments should explain contracts,
+  tradeoffs, invariants, mutation, errors, or complexity, and should not merely
+  restate obvious code.
 - Commits or tags: read `Commits And Tags`.
 
 ## Default Engineering Rules
@@ -48,6 +57,8 @@ Use this file to orient quickly, then rely on
 - Use `gofmt` on changed Go files.
 - Prefer focused tests with `assert`; use `require` only when later assertions
   depend on the current one.
+- For benchmark suites, use a `get<Family>Suite(...)` helper and check that the
+  benchmark abstraction itself does not introduce hot-loop allocations.
 
 ## Verification
 

@@ -11,6 +11,11 @@ paths:
 - Public Go documentation is written in English.
 - Exported package, type, interface, and function comments start with the
   exported identifier.
+- AI-written comments should explain contracts, tradeoffs, invariants,
+  mutation, errors, ownership, or complexity. Do not add comments that merely
+  restate obvious code.
+- Match nearby package docs, public interfaces, factory comments, and
+  implementation comments before introducing new wording.
 - Constructor docs explain when to choose that implementation and include
   performance tables when they define a data-structure choice.
 - Destructive methods say they are destructive in the first paragraph.

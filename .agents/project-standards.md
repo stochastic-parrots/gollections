@@ -171,6 +171,27 @@ alias and constructor from the public package.
 - Every exported package, type, interface, and function should have a comment
   that starts with the exported identifier.
 - Package docs live in `doc.go`.
+- AI-written comments should follow the same standard as handwritten comments:
+  explain the contract, tradeoff, invariant, ownership, error behavior,
+  mutation, complexity, or reason a caller should care. Do not add comments
+  that merely restate names or obvious code.
+- Before adding or changing a comment, inspect the surrounding package docs,
+  public interface, factory comments, and nearest implementation comments.
+  Match their vocabulary and level of detail instead of introducing a new tone.
+- Keep comments factual and stable. Avoid marketing language, speculative
+  claims, unsupported performance promises, version chatter, and phrases like
+  "modern", "easy", or "high-performance" unless the surrounding docs already
+  use them intentionally and the claim is backed by the implementation.
+- Prefer caller-facing language in public packages and invariant-facing
+  language in internal packages:
+  - public API comments describe what the method does, what it returns for
+    empty or invalid input, whether it mutates, and when to choose the
+    implementation;
+  - internal comments describe ownership, pointer/slice invariants, cleanup,
+    amortized behavior, and why a non-obvious branch exists.
+- Keep comments close to the API or invariant they describe. Do not duplicate
+  the same long warning in multiple files unless each public entrypoint needs
+  to carry the warning independently.
 - Public constructors should include a performance table when they define a
   data-structure choice. Use this style:
 
@@ -243,14 +264,67 @@ alias and constructor from the public package.
 ## Benchmarks
 
 - Structure-specific benchmarks live next to internal implementations, for
-  example `internal/prioritymap/*_bench_test.go`.
-- Cross-implementation benchmark suites live in `internal/benchmarks/suites`.
-- Benchmark wrapper types live under `internal/benchmarks/datastructs`.
+  example `internal/prioritymap/*_bench_test.go`. Use these for focused
+  operation-level measurements of one implementation.
+- `internal/benchmarks` is the optional cross-implementation benchmark harness
+  for library structures when a comparison is useful. Not every structure
+  family needs a suite; for example, `heap` and `prioritymap` have suites today,
+  while `list` and `deque` do not.
+- The `internal/benchmarks` subpackages have distinct responsibilities based on
+  the existing `heap` and `prioritymap` pattern:
+  - `internal/benchmarks/datastructs` defines the benchmark contract for the
+    structure being exercised, such as `Heap` or `PriorityMap`. It also contains
+    `Implementation`/`Implementations` helpers and, when useful, a pure Go
+    standard-library or built-in baseline in a `stdlib_*.go` file.
+  - `internal/benchmarks/algorithms` contains algorithms that exercise one of
+    the contracts from `datastructs`, such as Dijkstra and Prim for
+    `PriorityMap` or Top K for `Heap`.
+  - `internal/benchmarks/models` contains only helpers for benchmark inputs,
+    such as random slices, reversed slices, graphs, or similar reusable data.
+  - `internal/benchmarks/suites` contains one benchmark file for each
+    Gollections structure family that needs a cross-implementation suite.
+- A `stdlib_*.go` file is optional. Add one only when a pure Go baseline is
+  useful for comparing the standard library or built-in Go approach against the
+  Gollections implementation. Keep that baseline implemented with Go's standard
+  library or built-ins, not with another Gollections implementation.
+- Cross-implementation suites follow the existing `prioritymap` and `heap`
+  pattern:
+  - expose a `get<Family>Suite(...)` helper returning
+    `datastructs.Implementations[...]`;
+  - iterate that suite inside each benchmark function;
+  - name sub-benchmarks with `Library=<implementation name>`;
+  - use `b.ReportAllocs()`;
+  - reset or rebuild structures outside the measured section unless setup is
+    the operation being measured.
+- Benchmark contracts in `datastructs` should describe the structure capability
+  required by the benchmark algorithms, not mirror a public package by habit.
+- Real Gollections implementations may be used directly in a suite when they
+  already satisfy the benchmark contract. Add an adapter only when method names
+  or return shapes need normalization.
+- Adapters may normalize APIs, but they must delegate to real behavior. Do not
+  add ordering, indexing, caching, deduplication, priority policy, or other
+  semantics that the wrapped implementation does not provide just to include it
+  in a suite.
+- Algorithms in `algorithms` should accept model data plus a narrow
+  `datastructs` contract. They must not import `testing`, manage timers, choose
+  implementations, generate random input, or contain benchmark orchestration.
+- Do not add thin wrappers around individual collection methods such as Build,
+  Add, Contains, Remove, Find, or iteration to `algorithms`. If the goal is to
+  measure one method of one implementation, write a local `*_bench_test.go`
+  beside that implementation.
+- Suite files should select data from `models`, select implementations from a
+  `get<Family>Suite(...)` helper, call the workload or structure operation, and
+  store results in a package-level sink when needed to avoid compiler
+  elimination.
+- Benchmark input generation belongs in `models`. Generate inputs outside the
+  measured section unless input construction is the operation being measured.
+  Prefer deterministic data or fixed seeds when reproducibility matters.
 - Benchmark models and algorithms should be generic only when that enables a
   meaningful comparison, such as comparing float and integer priority maps.
-- Use `b.ReportAllocs()` for suite benchmarks.
-- Reset or rebuild structures outside the measured section when setup is not
-  part of the operation under test.
+- Keep benchmark contracts narrow enough that the abstraction does not add
+  per-operation allocations. In particular, avoid calling variadic methods
+  through interfaces in hot loops; split bulk and single-item operations when
+  necessary and verify with `b.ReportAllocs()`.
 
 ## Code Style
 
