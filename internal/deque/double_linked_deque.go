@@ -87,6 +87,9 @@ func (d *DoubleLinkedDeque[T]) Append(xs ...T) {
 	}
 }
 
+// Front returns the element at the beginning of the deque without removing it.
+//
+// Complexity: O(1).
 func (d *DoubleLinkedDeque[T]) Front() (x T, ok bool) {
 	if d.IsEmpty() {
 		return x, false
@@ -94,6 +97,9 @@ func (d *DoubleLinkedDeque[T]) Front() (x T, ok bool) {
 	return d.first.Value, true
 }
 
+// Back returns the element at the end of the deque without removing it.
+//
+// Complexity: O(1).
 func (d *DoubleLinkedDeque[T]) Back() (x T, ok bool) {
 	if d.IsEmpty() {
 		return x, false
@@ -101,6 +107,9 @@ func (d *DoubleLinkedDeque[T]) Back() (x T, ok bool) {
 	return d.last.Value, true
 }
 
+// Shift removes and returns the element at the beginning of the deque.
+//
+// Complexity: O(1).
 func (d *DoubleLinkedDeque[T]) Shift() (T, bool) {
 	var zero T
 	if d.IsEmpty() {
@@ -120,6 +129,9 @@ func (d *DoubleLinkedDeque[T]) Shift() (T, bool) {
 	return data, true
 }
 
+// Pop removes and returns the element at the end of the deque.
+//
+// Complexity: O(1).
 func (d *DoubleLinkedDeque[T]) Pop() (T, bool) {
 	var zero T
 	if d.IsEmpty() {

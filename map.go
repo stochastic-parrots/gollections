@@ -22,6 +22,6 @@ type Map[K comparable, V any] interface {
 	// IsEmpty returns true if the collection is empty.
 	IsEmpty() bool
 
-	// Length Returns the collection length (number of elements).
+	// Length returns the number of key-value pairs in the map.
 	Length() int
 }

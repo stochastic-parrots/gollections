@@ -35,8 +35,7 @@ type Readonly[T any] interface {
 	json.Marshaler
 }
 
-// Deque defines the operations for a double-ended queue, typically implemented
-// via a ring buffer.
+// Deque defines the operations for a double-ended queue.
 //
 // It supports highly efficient O(1) insertions and removals at both ends.
 type Deque[T any] interface {

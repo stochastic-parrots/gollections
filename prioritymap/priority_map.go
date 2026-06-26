@@ -31,11 +31,13 @@ type Readonly[K comparable, P any] interface {
 	pkg.Map[K, P]
 }
 
-// PriorityMap defines a structure that combines a map (key-based access) with a heap (priority ordering).
+// PriorityMap defines a structure that combines key-based access with priority
+// ordering.
+//
 // It allows efficient insertion, update, and removal of key-priority pairs,
 // as well as extraction of the highest-priority element according to the
 // implementation's ordering contract.
-// K must be comparable for map operations, and P is the priority type (requires a comparator in implementations).
+// K must be comparable for map operations, and P is the priority type.
 type PriorityMap[K comparable, P any] interface {
 	// Set inserts or updates the priority for the given key.
 	//
@@ -56,7 +58,7 @@ type PriorityMap[K comparable, P any] interface {
 	//
 	// It returns true if the map was modified (either by insertion or update).
 	//
-	// * Note: Ideal for algorithms like Dijkstra or A*.
+	// This method is useful for algorithms like Dijkstra or A*.
 	Improve(key K, priority P) (ok bool)
 
 	// Remove deletes the key-priority pair from the map.

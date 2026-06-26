@@ -6,6 +6,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 )
 
+// Dijkstra computes shortest-path distances using the provided priority map.
 func Dijkstra[T constraint.Number](graph models.Graph[T], start int, pm datastructs.PriorityMap[int, T]) []T {
 	dist := make([]T, len(graph))
 	inf := infinity[T]()

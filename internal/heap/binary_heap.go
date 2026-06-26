@@ -256,49 +256,49 @@ func (heap *BinaryHeap[T]) Drain() iter.Seq2[int, T] {
 	}
 }
 
-// Clear removes all elements from the list.
+// Clear removes all elements from the heap.
 //
-// After calling Clear, the list will be empty and its length will be zero.
-// This operation is typically more efficient than creating a new map
+// After calling Clear, the heap will be empty and its length will be zero.
+// This operation is typically more efficient than creating a new heap
 // as it may reuse the underlying storage.
 //
 // Complexity: O(n) to zero out elements (avoiding memory leaks).
-func (l *BinaryHeap[T]) Clear() {
-	clear(l.data)
-	l.data = l.data[:0]
+func (heap *BinaryHeap[T]) Clear() {
+	clear(heap.data)
+	heap.data = heap.data[:0]
 }
 
-// MarshalJSON converts the list into a JSON array.
+// MarshalJSON converts the heap into a JSON array.
 // It uses the internal serialization utility to ensure elements are
-// encoded in their current logical order.
+// encoded in their current underlying order.
 //
 // Complexity: O(n).
-func (l *BinaryHeap[T]) MarshalJSON() ([]byte, error) {
-	return collection.Marshal(l)
+func (heap *BinaryHeap[T]) MarshalJSON() ([]byte, error) {
+	return collection.Marshal(heap)
 }
 
-// UnmarshalJSON populates the list from a JSON array.
+// UnmarshalJSON populates the heap from a JSON array.
 // It clears any existing elements before appending the new ones from the JSON data.
 //
 // Note: This operation is destructive; it calls Clear() to remove all existing
 // elements before appending the ones from the JSON data.
 //
 // Complexity: O(n + k) where k is the number of elements in the JSON.
-func (l *BinaryHeap[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Push)
+func (heap *BinaryHeap[T]) UnmarshalJSON(data []byte) error {
+	return collection.Unmarshal(data, heap.Clear, heap.Push)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting
 // with verbs like %v, %+v, and %#v.
 //
 // Complexity: O(1) as it respects a fixed display limit.
-func (l *BinaryHeap[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, l, l.Length())
+func (heap *BinaryHeap[T]) Format(s fmt.State, verb rune) {
+	collection.Format(s, verb, heap, heap.Length())
 }
 
-// String returns a string representation of the list.
+// String returns a string representation of the heap.
 //
 // Complexity: O(1) as it respects a fixed display limit.
-func (l *BinaryHeap[T]) String() string {
-	return fmt.Sprint(l)
+func (heap *BinaryHeap[T]) String() string {
+	return fmt.Sprint(heap)
 }

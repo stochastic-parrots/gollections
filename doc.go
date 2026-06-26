@@ -1,7 +1,7 @@
 // Package gollections provides a suite of high-performance, generic data structures for Go.
 //
-// The library leverages Go Generics (1.18+) for type safety and the standard iterators
-// (1.23+) for idiomatic data traversal. Instead of a "one-size-fits-all" approach,
+// The library leverages Go generics for type safety and standard iterators for
+// idiomatic data traversal. Instead of a "one-size-fits-all" approach,
 // gollections provides specialized implementations optimized for specific memory
 // and performance profiles.
 //
@@ -45,11 +45,11 @@
 //
 //   - Performance: Focused on O(1) and O(log N) operations where possible.
 //
-//   - Idiomatic Go: Full support for 'range' over iterators (Go 1.23+).
+//   - Idiomatic Go: Full support for range over iterators.
 //
 // # Documentation Characteristics
 //
 // Each data structure includes detailed performance documentation in its subpackage.
-// Refer to the factory functions (e.g., list.NewArrayList) for Time Complexity
+// Refer to the factory functions (for example, list.NewArray) for time complexity
 // tables covering all operations.
 package gollections

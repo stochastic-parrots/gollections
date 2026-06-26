@@ -17,10 +17,12 @@ func (h *stdLibIntHeap) Pop() any {
 	return x
 }
 
+// StdLibHeap adapts container/heap to the benchmark Heap contract.
 type StdLibHeap struct {
 	stdheap *stdLibIntHeap
 }
 
+// Push inserts values into the standard-library heap baseline.
 func (w *StdLibHeap) Push(xs ...int) {
 	k := len(xs)
 	if k == 0 {
@@ -39,6 +41,7 @@ func (w *StdLibHeap) Push(xs ...int) {
 	}
 }
 
+// Pop removes and returns the root of the standard-library heap baseline.
 func (w *StdLibHeap) Pop() (int, bool) {
 	if w.stdheap.Len() == 0 {
 		return -1, false
@@ -46,6 +49,7 @@ func (w *StdLibHeap) Pop() (int, bool) {
 	return heap.Pop(w.stdheap).(int), true
 }
 
+// Peek returns the root of the standard-library heap baseline without removing it.
 func (w *StdLibHeap) Peek() (int, bool) {
 	if w.stdheap.Len() == 0 {
 		return -1, false
@@ -53,6 +57,7 @@ func (w *StdLibHeap) Peek() (int, bool) {
 	return (*w.stdheap)[0], true
 }
 
+// Replace swaps the root and restores heap order.
 func (w *StdLibHeap) Replace(v int) (int, bool) {
 	if w.stdheap.Len() == 0 {
 		w.Push(v)
@@ -66,16 +71,19 @@ func (w *StdLibHeap) Replace(v int) (int, bool) {
 	return root, true
 }
 
+// Length returns the number of values in the heap baseline.
 func (w *StdLibHeap) Length() int {
 	return len(*w.stdheap)
 }
 
+// NewStdLibHeap creates an empty standard-library heap baseline.
 func NewStdLibHeap(size int) *StdLibHeap {
 	h := make(stdLibIntHeap, 0, size)
 	heap.Init(&h)
 	return &StdLibHeap{stdheap: &h}
 }
 
+// NewStdLibHeapCloneSlice creates a standard-library heap baseline from a cloned slice.
 func NewStdLibHeapCloneSlice(data []int) *StdLibHeap {
 	h := make(stdLibIntHeap, len(data))
 	copy(h, data)

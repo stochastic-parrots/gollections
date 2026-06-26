@@ -56,7 +56,7 @@ func (node DoubleLinkedNode[T]) HasNext() bool {
 	return node.Next != nil
 }
 
-// PreAppend creates a new node with the given value and attaches it
+// Prepend creates a new node with the given value and attaches it
 // immediately before the current node.
 //
 // Complexity: O(1).

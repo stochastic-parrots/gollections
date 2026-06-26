@@ -2,6 +2,7 @@ package algorithms
 
 import "github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 
+// TopK keeps the k highest-priority values according to hasPriority.
 func TopK(data []int, k int, heap datastructs.Heap[int], hasPriority func(int, int) bool) {
 	for _, x := range data {
 		if heap.Length() < k {

@@ -15,7 +15,7 @@ type IndexOutOfBoundError struct {
 	limit int
 }
 
-// NewIndexOutOfBoundError creates and returns a new instance of IndexOutOfBoundError.
+// NewIndexOutOfBoundError creates a new IndexOutOfBoundError.
 //
 // This function should be used internally by the library to generate an
 // out-of-bounds error with contextual information.

@@ -116,7 +116,7 @@ func (l *DoubleLinkedList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool)
 	return -1, false
 }
 
-// Contains returns true if the element exists in the list according.
+// Contains returns true if the element exists in the list according to cmp.
 //
 // Complexity: O(n).
 func (l *DoubleLinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {

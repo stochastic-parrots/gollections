@@ -1,7 +1,7 @@
 // Package prioritymap provides high-performance, generic priority map implementations.
 //
-// The package offers a sophisticated data structure that combines the O(1) average
-// lookup of a Hash Map with the O(log n) ordering of a Priority Queue. This allows
+// The package offers data structures that combine the O(1) average lookup of a
+// hash map with the O(log n) ordering of a priority queue. This allows
 // for efficient "decrease-key" operations, which are essential for algorithms
 // like Dijkstra's or A*.
 //
@@ -45,8 +45,8 @@
 //   - Efficient Updates: Unlike a standard heap, you can update the priority
 //     of an existing key in O(log n) time without searching the entire structure.
 //
-//   - Type Safety: Fully leverages Go Generics (1.18+) to ensure keys and
-//     priorities are strictly typed, eliminating interface{} casting.
+//   - Type Safety: Fully leverages Go generics to ensure keys and priorities
+//     are strictly typed, eliminating interface{} casting.
 //
 //   - Dual Nature: Implements both the [pkg.Map] and priority queue
 //     behaviors, making it a versatile tool for scheduling and graph traversal.

@@ -1,8 +1,8 @@
 // Package heap provides high-performance, generic heap implementations.
 //
 // The package offers a modern alternative to the standard library's container/heap,
-// leveraging Go Generics (1.18+) for type safety and the new iterators (1.23+)
-// for idiomatic data traversal.
+// leveraging Go generics for type safety and standard iterators for idiomatic
+// data traversal.
 //
 // # Heap Interface
 //
@@ -23,7 +23,8 @@
 //
 // # Why this package?
 //
-//   - Type Safety: No more interface{} casting; work directly with your types.
+//   - Type Safety: No interface{} casting for stored values; work directly with
+//     your types.
 //
 //   - Go Idiomatic: Integrates with the 'iter' package for seamless range loops.
 //
@@ -37,8 +38,8 @@
 //
 // # Core Concepts
 //
-// The [Heap] interface extends the base [gollections.Collection], adding priority-specific
-// operations like Push, Pop, and Peek.
+// The [Heap] interface extends the base [gollections.Collection], adding
+// priority-specific operations like Push, Pop, and Peek.
 //
 // One of the standout features is the Drain method:
 //

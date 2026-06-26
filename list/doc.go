@@ -1,8 +1,8 @@
 // Package list provides high-performance, generic linear collection implementations.
 //
 // The package offers a modern, type-safe suite of list structures, ranging from
-// contiguous memory Array Lists to flexible Linked Lists. It leverages Go Generics (1.18+)
-// to eliminate interface{} casting and the latest 'iter' package (1.23+) for
+// contiguous-memory array lists to flexible linked lists. It leverages Go
+// generics to eliminate interface{} casting and the standard iter package for
 // high-performance, idiomatic data traversal.
 //
 // # Readonly Interface

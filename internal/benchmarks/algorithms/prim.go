@@ -6,6 +6,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 )
 
+// Prim computes the total weight of a minimum spanning tree using the provided priority map.
 func Prim[T constraint.Number](graph models.Graph[T], pm datastructs.PriorityMap[int, T]) T {
 	var zeroT T
 	nodes := len(graph)

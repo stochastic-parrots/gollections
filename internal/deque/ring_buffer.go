@@ -164,10 +164,10 @@ func (rb *RingBufferDeque[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(rb)
 }
 
-// Clear removes all elements from the list.
+// Clear removes all elements from the deque.
 //
-// After calling Clear, the list will be empty and its length will be zero.
-// This operation is typically more efficient than creating a new array list
+// After calling Clear, the deque will be empty and its length will be zero.
+// This operation is typically more efficient than creating a new deque
 // as it may reuse the underlying storage.
 //
 // Complexity: O(n) to zero out elements (avoiding memory leaks).

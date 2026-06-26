@@ -4,7 +4,10 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/list"
 )
 
+// ArrayList is a slice-backed [List].
 type ArrayList[T any] = *list.ArrayList[T]
+
+// LinkedList is a doubly linked [List].
 type LinkedList[T any] = *list.DoubleLinkedList[T]
 
 var _ List[any] = &list.ArrayList[any]{}
@@ -24,8 +27,8 @@ var _ List[any] = &list.LinkedList[any]{}
 //	Append(xs...T)      O(len(xs)) Amortized
 //	Insert(idx, x)      O(N)
 //	Remove(idx)         O(N)
-//	Get(index)          O(1)
-//	Set(index, x)       O(1)
+//	Get(idx)            O(1)
+//	Set(idx, x)         O(1)
 //	Find(x)             O(N)
 //	Contains(x)         O(N)
 //	Reverse()           O(N)
@@ -48,8 +51,8 @@ func NewArray[T any](size int) ArrayList[T] {
 //	Append(xs...T)      O(len(xs))
 //	Insert(idx, x)      O(N)
 //	Remove(idx)         O(N)
-//	Get(index)          O(N)
-//	Set(index, x)       O(N)
+//	Get(idx)            O(N)
+//	Set(idx, x)         O(N)
 //	Find(x)             O(N)
 //	Contains(x)         O(N)
 //	Reverse()           O(1)

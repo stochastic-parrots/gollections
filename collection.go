@@ -6,13 +6,13 @@ import (
 
 // Collection defines the basic operations for a generic data structure.
 type Collection[T any] interface {
-	// IsEmpty Checks if the collection is empty.
+	// IsEmpty returns true if the collection is empty.
 	IsEmpty() bool
 
-	// Length Returns the collection length (number of elements).
+	// Length returns the number of elements in the collection.
 	Length() int
 
-	// All Returns an iterator for the collection.
+	// All returns an iterator for the collection.
 	All() iter.Seq[T]
 
 	// Enumerate returns an iterator that yields both the index and the element.

@@ -48,7 +48,7 @@ type PairingHeapPriorityMap[K comparable, P any] = *constructor.PairingPriorityM
 // responsible for preserving it.
 type RadixHeapPriorityMap[K comparable, P constraint.Integer] = *constructor.RadixPriorityMap[K, P]
 
-// NewRadixPriorityMap creates an empty indexed radix priority map.
+// NewRadixHeap creates an empty indexed radix priority map.
 //
 // Performance Summary (amortized time complexity, W = priority bit width):
 //
@@ -74,7 +74,7 @@ func NewRadixHeap[K comparable, P constraint.Integer](capacity int) RadixHeapPri
 	return constructor.NewRadixPriorityMap[K, P](capacity)
 }
 
-// NewBinary creates and returns a new empty Priority Map (Indexed Binary Heap) with a custom comparator.
+// NewBinaryHeap creates an empty priority map backed by an indexed binary heap.
 //
 // Performance Summary (Time Complexity):
 //
@@ -93,7 +93,7 @@ func NewBinaryHeap[K comparable, V any](capacity int, hasPriority func(V, V) boo
 	return constructor.NewBinaryPriorityMap[K](capacity, hasPriority)
 }
 
-// MinBinaryHeap creates and returns a new empty Priority Map (Indexed Min Binary Heap) for ordered types.
+// MinBinaryHeap creates an empty min priority map backed by an indexed binary heap.
 //
 // Performance Summary (Time Complexity):
 //
@@ -112,7 +112,7 @@ func MinBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 	return constructor.NewBinaryPriorityMap[K](capacity, comparator.Min[V]())
 }
 
-// MaxBinaryHeap creates and returns a new empty Priority Map (Indexed Max Binary Heap) for ordered types.
+// MaxBinaryHeap creates an empty max priority map backed by an indexed binary heap.
 //
 // Performance Summary (Time Complexity):
 //
@@ -131,7 +131,7 @@ func MaxBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 	return constructor.NewBinaryPriorityMap[K](capacity, comparator.Max[V]())
 }
 
-// NewPairing creates and returns a new empty Priority Map (Indexed Pairing Heap) with a custom comparator.
+// NewPairingHeap creates an empty priority map backed by an indexed pairing heap.
 //
 // Performance Summary (Time Complexity):
 //
@@ -152,7 +152,7 @@ func NewPairingHeap[K comparable, V any](capacity int, hasPriority func(V, V) bo
 	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, hasPriority)
 }
 
-// MinPairingHeap creates and returns a new empty Priority Map (Indexed Min Pairing Heap) for ordered types.
+// MinPairingHeap creates an empty min priority map backed by an indexed pairing heap.
 //
 // Performance Summary (Time Complexity):
 //
@@ -173,7 +173,7 @@ func MinPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriori
 	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Min[V]())
 }
 
-// MaxPairingHeap creates and returns a new empty Priority Map (Indexed Max Pairing Heap) for ordered types.
+// MaxPairingHeap creates an empty max priority map backed by an indexed pairing heap.
 //
 // Performance Summary (Time Complexity):
 //

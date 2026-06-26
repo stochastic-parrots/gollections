@@ -42,10 +42,12 @@ func (h *stdPriorityMapHeap[K, V]) Pop() any {
 	return it
 }
 
+// StdPriorityMap adapts container/heap plus a map to the benchmark PriorityMap contract.
 type StdPriorityMap[K comparable, V any] struct {
 	heap *stdPriorityMapHeap[K, V]
 }
 
+// NewStdPriorityMap creates an empty pure-Go priority map baseline.
 func NewStdPriorityMap[K comparable, V any](size int, less func(a, b V) bool) *StdPriorityMap[K, V] {
 	return &StdPriorityMap[K, V]{
 		heap: &stdPriorityMapHeap[K, V]{
@@ -56,6 +58,7 @@ func NewStdPriorityMap[K comparable, V any](size int, less func(a, b V) bool) *S
 	}
 }
 
+// Set inserts or updates a key priority in the baseline map.
 func (m *StdPriorityMap[K, V]) Set(key K, priority V) {
 	if idx, ok := m.heap.indexes[key]; ok {
 		m.heap.data[idx].priority = priority
@@ -65,6 +68,7 @@ func (m *StdPriorityMap[K, V]) Set(key K, priority V) {
 	heap.Push(m.heap, stdLibEntry[K, V]{key, priority})
 }
 
+// Pop removes and returns the highest-priority entry from the baseline map.
 func (m *StdPriorityMap[K, V]) Pop() (K, V, bool) {
 	if m.heap.Len() == 0 {
 		var zk K
@@ -76,10 +80,12 @@ func (m *StdPriorityMap[K, V]) Pop() (K, V, bool) {
 	return item.key, item.priority, true
 }
 
+// Length returns the number of entries in the baseline map.
 func (m *StdPriorityMap[K, V]) Length() int {
 	return len(m.heap.data)
 }
 
+// Clear removes all entries from the baseline map while preserving capacity.
 func (m *StdPriorityMap[K, V]) Clear() {
 	clear(m.heap.indexes)
 	clear(m.heap.data)

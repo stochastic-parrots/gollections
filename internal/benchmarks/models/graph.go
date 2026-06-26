@@ -6,11 +6,13 @@ import (
 	"github.com/stochastic-parrots/gollections/constraint"
 )
 
+// Edge represents a weighted directed edge in benchmark graph inputs.
 type Edge[T constraint.Number] struct {
 	To     int
 	Weight T
 }
 
+// Graph is an adjacency-list graph used by benchmark algorithms.
 type Graph[T constraint.Number] [][]Edge[T]
 
 func weight[T constraint.Number](r *rand.Rand) T {
@@ -25,6 +27,7 @@ func weight[T constraint.Number](r *rand.Rand) T {
 	}
 }
 
+// NewRandomGraph creates a deterministic random weighted directed graph.
 func NewRandomGraph[T constraint.Number](nodes int, density float64) Graph[T] {
 	pcg := rand.NewPCG(42, 1024)
 	r := rand.New(pcg)
