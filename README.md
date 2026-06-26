@@ -20,6 +20,7 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 | Package | Structures | Use when you need |
 | --- | --- | --- |
 | `list` | `ArrayList`, `LinkedList` | Indexed, ordered sequences with forward/backward traversal |
+| `sortedlist` | `ArraySortedList`, `OrderedArraySortedList` | Sorted sequences that allow duplicate values |
 | `deque` | `ArrayDeque`, `LinkedDeque` | Fast insertion and removal at both ends |
 | `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
 | `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
@@ -33,15 +34,49 @@ Go documentation tools.
 - Read-only root interfaces: `gollections.Collection` and `gollections.Map`
   are observation contracts. They expose inspection and iteration, while
   mutating operations live in structure-specific interfaces such as
-  `list.List`, `deque.Deque`, `heap.Heap`, and `prioritymap.PriorityMap`.
+  `list.List`, `sortedlist.SortedList`, `deque.Deque`, `heap.Heap`, and
+  `prioritymap.PriorityMap`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.
 - Internal implementations: public packages expose stable constructors while
   concrete internals live under `internal`.
-- Read-only views: packages such as `list`, `deque`, and `prioritymap` expose
-  wrappers for sharing non-mutating access without allowing type assertion back
-  to the mutable interface.
+- Read-only views: packages such as `list`, `sortedlist`, `deque`, and
+  `prioritymap` expose wrappers for sharing non-mutating access without
+  allowing type assertion back to the mutable interface.
 - JSON support: linear collections and heaps can marshal/unmarshal as arrays
   where the operation makes sense.
+
+## Choosing a list
+
+- `ArrayList`: use as the default indexed sequence when O(1) random access,
+  O(1) indexed writes, append-heavy growth, and memory locality matter.
+- `LinkedList`: use when boundary insertions/removals and O(1) reversal matter
+  more than random indexed access.
+
+Lists preserve explicit positional order. Use `sortedlist` when the collection
+should stay ordered by value instead of by insertion position.
+
+## Choosing a sorted list
+
+- `OrderedArraySortedList`: use when element values satisfy `cmp.Ordered`; it
+  uses standard-library ordered sort and binary search paths.
+- `ArraySortedList`: use when values need a custom comparator, such as sorting
+  structs by one field or using descending order.
+
+Both sorted-list implementations are best for data that is built once or
+updated occasionally and queried many times. Lookups and bounds are O(log N),
+indexed access is O(1), and single-element insertion/removal shifts O(N) values.
+For custom comparators, values that compare equal may appear in any relative
+order; add a tie-breaker to the comparator when that order matters.
+
+## Choosing a deque
+
+- `ArrayDeque`: use as the default double-ended queue when amortized O(1)
+  operations at both ends and cache-friendly traversal are useful.
+- `LinkedDeque`: use when growth is unpredictable or when avoiding backing
+  array reallocations matters more than memory locality.
+
+Deques are the right fit for queue, stack, sliding-window, worklist, and small
+scheduling-buffer patterns.
 
 ## Choosing a priority map
 
@@ -73,6 +108,7 @@ implementations. To inspect coverage for a package:
 
 ```bash
 go test -cover ./internal/list
+go test -cover ./internal/sortedlist
 go test -cover ./internal/heap
 go test -cover ./internal/prioritymap
 go test -cover ./internal/deque
@@ -80,6 +116,6 @@ go test -cover ./internal/deque
 
 ## Status
 
-The available packages are `list`, `deque`, `heap`, and `prioritymap`. `queue`
-and `stack` are planned as thin, focused APIs on top of the same collection
-foundations.
+The available packages are `list`, `sortedlist`, `deque`, `heap`, and
+`prioritymap`. `queue`, `stack`, and set families are planned as focused APIs on
+top of the same collection foundations.

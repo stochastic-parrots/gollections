@@ -14,7 +14,7 @@ the relevant sections below.
   - `Collection[T]` for linear collections.
   - `Map[K, V]` for key-value structures.
 - Mutating operations belong in structure-specific subpackages such as `list`,
-  `deque`, `heap`, and `prioritymap`.
+  `sortedlist`, `deque`, `heap`, and `prioritymap`.
 - Public subpackages expose stable constructors, type aliases, interfaces,
   examples, and package documentation.
 - Concrete implementations live under `internal/...`.
@@ -51,8 +51,8 @@ alias and constructor from the public package.
 - Keep root interfaces observation-only. Do not add mutating methods to
   `gollections.Collection` or `gollections.Map`.
 - Expose mutations through the domain interface where their semantics are clear,
-  for example `list.List`, `deque.Deque`, `heap.Heap`, and
-  `prioritymap.PriorityMap`.
+  for example `list.List`, `sortedlist.SortedList`, `deque.Deque`,
+  `heap.Heap`, and `prioritymap.PriorityMap`.
 - Empty reads and removals should be safe. Methods such as `Pop`, `Peek`, `Get`,
   and indexed reads return zero values plus `false` or an explicit error rather
   than panicking.
@@ -82,14 +82,14 @@ alias and constructor from the public package.
 ## Naming
 
 - Public package names are short, singular, and domain-specific: `list`,
-  `deque`, `heap`, `prioritymap`.
+  `sortedlist`, `deque`, `heap`, `prioritymap`.
 - Public concrete type aliases use the data-structure name:
-  `ArrayList`, `LinkedList`, `ArrayDeque`, `LinkedDeque`, `BinaryHeap`,
-  `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`,
+  `ArrayList`, `LinkedList`, `ArraySortedList`, `ArrayDeque`, `LinkedDeque`,
+  `BinaryHeap`, `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`,
   `RadixHeapPriorityMap`.
 - Internal implementation types include their backing strategy:
-  `ArrayList`, `DoubleLinkedList`, `RingBufferDeque`, `BinaryHeap`,
-  `BinaryPriorityMap`, `PairingPriorityMap`, `RadixPriorityMap`.
+  `ArrayList`, `DoubleLinkedList`, `ArraySortedList`, `RingBufferDeque`,
+  `BinaryHeap`, `BinaryPriorityMap`, `PairingPriorityMap`, `RadixPriorityMap`.
 - Constructors use predictable prefixes:
   - `New...` creates an empty structure.
   - `...From` may consume and reorder the provided slice in place.
@@ -100,6 +100,7 @@ alias and constructor from the public package.
   over abbreviated or domain-opaque names.
 - Use receiver names that match the structure family:
   - `list` implementations use `list` or a concise local name when clearer.
+  - sorted list implementations use `list` or a concise local name when clearer.
   - `deque` implementations use `deque`.
   - `heap` implementations use `heap`.
   - priority maps use `pm`.
@@ -114,6 +115,7 @@ alias and constructor from the public package.
 - Use `idx` for indexes, not `index`, in method signatures and tests.
 - Constructors should preserve the user-facing vocabulary:
   - `NewArray`, `NewLinked`, `NewBinary`, `NewMinBinary`, `NewMaxBinary`.
+  - `ArrayFrom`, `ArrayClone`, and `ArrayFromSeq` are sorted-list factories.
   - `BinaryFrom` means in-place construction from a slice.
   - `BinaryClone` means clone-before-build.
   - `NewBinaryHeap`, `NewPairingHeap`, and `NewRadixHeap` are priority map
@@ -245,8 +247,8 @@ alias and constructor from the public package.
 - Cleanup tests should verify both user-visible state and reference cleanup when
   the implementation stores pointers.
 - The project aims for complete coverage on core internal data-structure
-  packages: `internal/list`, `internal/deque`, `internal/heap`, and
-  `internal/prioritymap`.
+  packages: `internal/list`, `internal/sortedlist`, `internal/deque`,
+  `internal/heap`, and `internal/prioritymap`.
 - Internal test files should mirror the implementation method order as much as
   practical. This makes coverage gaps easy to map back to code.
 - Prefer direct assertions over helper-heavy test DSLs.
