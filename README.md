@@ -57,10 +57,12 @@ should stay ordered by value instead of by insertion position.
 
 ## Choosing a sorted list
 
-- `OrderedArraySortedList`: use when element values satisfy `cmp.Ordered`; it
-  uses standard-library ordered sort and binary search paths.
+- `OrderedArraySortedList`: use by default when element values satisfy
+  `cmp.Ordered`; it uses standard-library ordered sort and binary search paths
+  without custom comparator calls.
 - `ArraySortedList`: use when values need a custom comparator, such as sorting
-  structs by one field or using descending order.
+  structs by one field or using descending order. This flexibility means each
+  search and sort comparison calls the comparator.
 
 Both sorted-list implementations are best for data that is built once or
 updated occasionally and queried many times. Lookups and bounds are O(log N),
