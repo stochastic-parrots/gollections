@@ -7,7 +7,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/sortedlist"
 )
 
-// ArraySortedList is a slice-backed [SortedList].
+// ArraySortedList is a slice-backed [SortedList] with custom comparator order.
 type ArraySortedList[T any] = sortedlist.ArraySortedList[T]
 
 // OrderedArraySortedList is a slice-backed [SortedList] for naturally ordered values.
@@ -24,6 +24,8 @@ var _ SortedList[int] = &sortedlist.OrderedArraySortedList[int]{}
 // It must define the same strict weak ordering used for every later lookup and
 // mutation on the list. Values for which compare returns zero may appear in any
 // relative order; include a tie-breaker when that order matters.
+// Each search and sort comparison calls compare; prefer [NewOrderedArray] when
+// T satisfies cmp.Ordered and natural order is enough.
 //
 // ArraySortedList is optimized for read-heavy workloads: lookup is O(log N),
 // indexed access is O(1), and traversal is cache-friendly. It is not ideal for
@@ -156,7 +158,7 @@ func NewArrayFromSeq[T any](seq iter.Seq[T], compare func(a, b T) int) *ArraySor
 //
 // OrderedArraySortedList is optimized for read-heavy workloads where T already
 // supports Go's ordered operations. Lookup uses the standard library's ordered
-// binary search path without a custom comparator.
+// binary search path without custom comparator calls.
 //
 // Performance Summary (Time Complexity):
 //

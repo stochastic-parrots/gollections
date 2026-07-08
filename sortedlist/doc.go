@@ -14,12 +14,14 @@
 // a heap, priority map, or a future tree/skip-list implementation depending on
 // the access pattern.
 //
-// Use [NewOrderedArray] and related constructors when T satisfies cmp.Ordered.
-// Use [NewArray] and related constructors when values need a custom comparator.
-// Custom comparators must define the same ordering for construction, lookup,
-// replacement, and removal. The relative order of values considered equivalent
-// by the comparator is unspecified; include a tie-breaker in the comparator when
-// that order matters.
+// Use [NewOrderedArray] and related constructors when T satisfies cmp.Ordered
+// and natural order is enough. These constructors use standard-library ordered
+// sort and search paths without custom comparator calls. Use [NewArray] and
+// related constructors when values need a custom comparator. Custom comparators
+// must define the same ordering for construction, lookup, replacement, and
+// removal, and are called during search and sort operations. The relative order
+// of values considered equivalent by the comparator is unspecified; include a
+// tie-breaker in the comparator when that order matters.
 //
 // Bounds and range operations use list order. [Readonly.Range] is half-open:
 // it yields values in [from, to), including values equivalent to from and
@@ -68,10 +70,11 @@
 //
 // The package currently exposes two slice-backed implementations:
 //
-//   - [ArraySortedList]: A comparator-backed sorted list with O(log N) lookup
-//     and O(N) single-element insertion/removal.
+//   - [ArraySortedList]: A comparator-backed sorted list for custom ordering
+//     with O(log N) lookup and O(N) single-element insertion/removal.
 //   - [OrderedArraySortedList]: A sorted list for cmp.Ordered values that uses
-//     standard-library ordered search and sort paths.
+//     standard-library ordered search and sort paths without custom comparator
+//     calls.
 //
 // Constructors can build sorted lists from empty capacity, slices, cloned
 // slices, or iterators. Iterator constructors make it possible to sort any
