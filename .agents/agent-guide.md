@@ -55,6 +55,10 @@ Use this file to orient quickly, then rely on
   packages.
 - Clear removed slots, nodes, and freelist entries so references do not leak.
 - Use `gofmt` on changed Go files.
+- Do not use explicit import aliases.
+- Omit generic type arguments when Go can infer them; keep explicit type
+  arguments only when inference has no value argument or prior type argument to
+  use.
 - Prefer focused tests with `assert`; use `require` only when later assertions
   depend on the current one.
 - For benchmark suites, use a `get<Family>Suite(...)` helper and check that the
@@ -74,7 +78,8 @@ Use this file to orient quickly, then rely on
 - For coverage-sensitive internal changes, run the affected package with
   `-coverprofile` and inspect `go tool cover -func`.
 - Use `make lint` when changing public APIs, docs, or broad implementation
-  behavior.
+  behavior. It includes `golangci-lint` plus `gopls` hint diagnostics such as
+  unnecessary generic type arguments.
 
 ## When To Ask
 

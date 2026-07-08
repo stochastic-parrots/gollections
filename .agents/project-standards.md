@@ -332,6 +332,9 @@ alias and constructor from the public package.
 
 - Run `gofmt` on all changed Go files.
 - Prefer simple generic code over reflection or `interface{}` casts.
+- Omit explicit generic type arguments when Go can infer them from function
+  arguments or earlier type arguments. Keep them when only result context,
+  capacity arguments, or empty argument lists would identify the type.
 - Keep allocations predictable. Reuse capacity when the implementation already
   owns backing storage.
 - Avoid exposing `internal` implementation details through public interfaces.
@@ -342,9 +345,9 @@ alias and constructor from the public package.
   breaking change.
 - Imports are grouped as standard library first, then blank line, then project
   imports.
-- Use package aliases only when they remove ambiguity, such as `pkg` for the
-  root `gollections` package from a subpackage or `constructor` for an internal
-  implementation package.
+- Do not use explicit import aliases. Prefer the imported package's declared
+  name, even for the root `gollections` package and internal implementation
+  packages.
 - Keep one-line forwarding methods in readonly wrappers on one line.
 - Prefer small methods that each preserve one invariant over large methods with
   many modes.
@@ -376,7 +379,8 @@ alias and constructor from the public package.
   ```
 
 - Use `make lint` when changing public APIs, docs, or broad implementation
-  behavior.
+  behavior. It runs `golangci-lint` and `gopls` hint diagnostics, including
+  checks for unnecessary generic type arguments.
 
 ## Commits And Tags
 
