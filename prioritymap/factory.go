@@ -4,13 +4,13 @@ import (
 	"cmp"
 
 	"github.com/stochastic-parrots/gollections/constraint"
-	comparator "github.com/stochastic-parrots/gollections/internal/comparator"
-	constructor "github.com/stochastic-parrots/gollections/internal/prioritymap"
+	"github.com/stochastic-parrots/gollections/internal/comparator"
+	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-var _ PriorityMap[int, any] = &constructor.BinaryPriorityMap[int, any]{}
-var _ PriorityMap[int, any] = &constructor.PairingPriorityMap[int, any]{}
-var _ PriorityMap[int, uint64] = &constructor.RadixPriorityMap[int, uint64]{}
+var _ PriorityMap[int, any] = &prioritymap.BinaryPriorityMap[int, any]{}
+var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
+var _ PriorityMap[int, uint64] = &prioritymap.RadixPriorityMap[int, uint64]{}
 
 // BinaryHeapPriorityMap implements a priority-map (priority queue with lookup)
 // built on top of a classic Binary Heap and an internal hash map.
@@ -23,7 +23,7 @@ var _ PriorityMap[int, uint64] = &constructor.RadixPriorityMap[int, uint64]{}
 // or when the workload involves a balanced mix of priority improvements
 // and worsenings, as its worst-case performance is more stable than
 // amortized structures.
-type BinaryHeapPriorityMap[K comparable, P any] = *constructor.BinaryPriorityMap[K, P]
+type BinaryHeapPriorityMap[K comparable, P any] = *prioritymap.BinaryPriorityMap[K, P]
 
 // PairingHeapPriorityMap implements a priority-map (priority queue with lookup)
 // built on top of a Pairing Heap and an internal hash map.
@@ -36,7 +36,7 @@ type BinaryHeapPriorityMap[K comparable, P any] = *constructor.BinaryPriorityMap
 // This implementation uses a "two-pass" merging strategy during Pop operations,
 // which maintains a remarkably flat tree structure, ensuring efficient
 // future operations.
-type PairingHeapPriorityMap[K comparable, P any] = *constructor.PairingPriorityMap[K, P]
+type PairingHeapPriorityMap[K comparable, P any] = *prioritymap.PairingPriorityMap[K, P]
 
 // RadixHeapPriorityMap implements a monotone min-priority map for integer
 // priorities.
@@ -46,7 +46,7 @@ type PairingHeapPriorityMap[K comparable, P any] = *constructor.PairingPriorityM
 //
 // The implementation does not validate this precondition; callers are
 // responsible for preserving it.
-type RadixHeapPriorityMap[K comparable, P constraint.Integer] = *constructor.RadixPriorityMap[K, P]
+type RadixHeapPriorityMap[K comparable, P constraint.Integer] = *prioritymap.RadixPriorityMap[K, P]
 
 // NewRadixHeap creates an empty indexed radix priority map.
 //
@@ -71,7 +71,7 @@ type RadixHeapPriorityMap[K comparable, P constraint.Integer] = *constructor.Rad
 // This invariant is not checked for performance reasons. Violating it causes
 // the heap ordering guarantees to be lost.
 func NewRadixHeap[K comparable, P constraint.Integer](capacity int) RadixHeapPriorityMap[K, P] {
-	return constructor.NewRadixPriorityMap[K, P](capacity)
+	return prioritymap.NewRadixPriorityMap[K, P](capacity)
 }
 
 // NewBinaryHeap creates an empty priority map backed by an indexed binary heap.
@@ -90,7 +90,7 @@ func NewRadixHeap[K comparable, P constraint.Integer](capacity int) RadixHeapPri
 //	Clear()             O(N)
 //	Drain()             O(N log N)
 func NewBinaryHeap[K comparable, V any](capacity int, hasPriority func(V, V) bool) BinaryHeapPriorityMap[K, V] {
-	return constructor.NewBinaryPriorityMap[K](capacity, hasPriority)
+	return prioritymap.NewBinaryPriorityMap[K](capacity, hasPriority)
 }
 
 // MinBinaryHeap creates an empty min priority map backed by an indexed binary heap.
@@ -109,7 +109,7 @@ func NewBinaryHeap[K comparable, V any](capacity int, hasPriority func(V, V) boo
 //	Clear()             O(N)
 //	Drain()             O(N log N)
 func MinBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriorityMap[K, V] {
-	return constructor.NewBinaryPriorityMap[K](capacity, comparator.Min[V]())
+	return prioritymap.NewBinaryPriorityMap[K](capacity, comparator.Min[V]())
 }
 
 // MaxBinaryHeap creates an empty max priority map backed by an indexed binary heap.
@@ -128,7 +128,7 @@ func MinBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 //	Clear()             O(N)
 //	Drain()             O(N log N)
 func MaxBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriorityMap[K, V] {
-	return constructor.NewBinaryPriorityMap[K](capacity, comparator.Max[V]())
+	return prioritymap.NewBinaryPriorityMap[K](capacity, comparator.Max[V]())
 }
 
 // NewPairingHeap creates an empty priority map backed by an indexed pairing heap.
@@ -149,7 +149,7 @@ func MaxBinaryHeap[K comparable, V cmp.Ordered](capacity int) BinaryHeapPriority
 //
 // * Note: Set and Improve are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
 func NewPairingHeap[K comparable, V any](capacity int, hasPriority func(V, V) bool) PairingHeapPriorityMap[K, V] {
-	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, hasPriority)
+	return prioritymap.NewPairingPriorityMapWithCapacity[K](capacity, hasPriority)
 }
 
 // MinPairingHeap creates an empty min priority map backed by an indexed pairing heap.
@@ -170,7 +170,7 @@ func NewPairingHeap[K comparable, V any](capacity int, hasPriority func(V, V) bo
 //
 // * Note: Set and Improve are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
 func MinPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriorityMap[K, V] {
-	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Min[V]())
+	return prioritymap.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Min[V]())
 }
 
 // MaxPairingHeap creates an empty max priority map backed by an indexed pairing heap.
@@ -191,5 +191,5 @@ func MinPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriori
 //
 // * Note: Set and Improve are O(1) for priority improvements (e.g., decreasing key in a Min-Heap).
 func MaxPairingHeap[K comparable, V cmp.Ordered](capacity int) PairingHeapPriorityMap[K, V] {
-	return constructor.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Max[V]())
+	return prioritymap.NewPairingPriorityMapWithCapacity[K](capacity, comparator.Max[V]())
 }

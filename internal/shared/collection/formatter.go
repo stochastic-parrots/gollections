@@ -5,12 +5,12 @@ import (
 	"io"
 	"reflect"
 
-	pkg "github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections"
 )
 
 const displayLimit = 5
 
-// Format provides a standardized way to render any pkg.Collection[T] into a string.
+// Format provides a standardized way to render any gollections.Collection[T] into a string.
 // It is designed to be called by the Format(s fmt.State, verb rune) method of
 // concrete collection implementations.
 //
@@ -20,7 +20,7 @@ const displayLimit = 5
 //   - Displays logical length and physical capacity when flags are present.
 //
 // Complexity: O(1) in time, as it only iterates up to displayLimit elements.
-func Format[T any](s fmt.State, verb rune, collection pkg.Collection[T], capacity int) {
+func Format[T any](s fmt.State, verb rune, collection gollections.Collection[T], capacity int) {
 	t := reflect.TypeOf(collection)
 
 	if verb == 'v' && s.Flag('#') {

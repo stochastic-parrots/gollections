@@ -6,40 +6,40 @@ import (
 
 	"github.com/stochastic-parrots/gollections/constraint"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/algorithms"
-	ds "github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
+	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-func getPriorityMapSuite[T constraint.Number](size int) ds.Implementations[ds.PriorityMap[int, T]] {
+func getPriorityMapSuite[T constraint.Number](size int) datastructs.Implementations[datastructs.PriorityMap[int, T]] {
 	less := cmp.Less[T]
-	return []ds.Implementation[ds.PriorityMap[int, T]]{
+	return []datastructs.Implementation[datastructs.PriorityMap[int, T]]{
 		{
 			Name: "stdlib",
-			Factory: func() ds.PriorityMap[int, T] {
-				return ds.NewStdPriorityMap[int](size, less)
+			Factory: func() datastructs.PriorityMap[int, T] {
+				return datastructs.NewStdPriorityMap[int](size, less)
 			},
 		},
 		{
 			Name: "Gollections_BinaryHeapPriorityMap",
-			Factory: func() ds.PriorityMap[int, T] {
+			Factory: func() datastructs.PriorityMap[int, T] {
 				return prioritymap.NewBinaryPriorityMap[int](size, less)
 			},
 		},
 		{
 			Name: "Gollections_PairingHeapPriorityMap",
-			Factory: func() ds.PriorityMap[int, T] {
+			Factory: func() datastructs.PriorityMap[int, T] {
 				return prioritymap.NewPairingPriorityMapWithCapacity[int](size, less)
 			},
 		},
 	}
 }
 
-func getIntPriorityMapSuite[T constraint.Integer](size int) ds.Implementations[ds.PriorityMap[int, T]] {
+func getIntPriorityMapSuite[T constraint.Integer](size int) datastructs.Implementations[datastructs.PriorityMap[int, T]] {
 	suites := getPriorityMapSuite[T](size)
-	suites = append(suites, ds.Implementation[ds.PriorityMap[int, T]]{
+	suites = append(suites, datastructs.Implementation[datastructs.PriorityMap[int, T]]{
 		Name: "Gollections_RadixHeapPriorityMap",
-		Factory: func() ds.PriorityMap[int, T] {
+		Factory: func() datastructs.PriorityMap[int, T] {
 			return prioritymap.NewRadixPriorityMap[int, T](size)
 		},
 	})
