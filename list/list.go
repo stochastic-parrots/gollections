@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"iter"
 
-	pkg "github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections"
 )
 
 // Readonly defines a non-mutable view of an indexed collection.
@@ -42,7 +42,7 @@ type Readonly[T any] interface {
 	// and copies each element.
 	ToSlice() []T
 
-	pkg.Collection[T]
+	gollections.Collection[T]
 	fmt.Stringer
 	json.Marshaler
 }

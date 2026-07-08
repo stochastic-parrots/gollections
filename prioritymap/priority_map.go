@@ -3,7 +3,7 @@ package prioritymap
 import (
 	"iter"
 
-	pkg "github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections"
 )
 
 // Readonly defines a non-mutable view of a PriorityMap.
@@ -28,7 +28,7 @@ type Readonly[K comparable, P any] interface {
 	// It returns ok as false if the map is empty.
 	Peek() (key K, priority P, ok bool)
 
-	pkg.Map[K, P]
+	gollections.Map[K, P]
 }
 
 // PriorityMap defines a structure that combines key-based access with priority
@@ -78,7 +78,7 @@ type PriorityMap[K comparable, P any] interface {
 	// is stopped early (e.g., via break), only the yielded elements
 	// are removed, and the remaining ones stay in the map.
 	//
-	// For a non-destructive iteration, use [pkg.Map.All].
+	// For a non-destructive iteration, use [gollections.Map.All].
 	Drain() iter.Seq2[K, P]
 
 	// Clear removes all elements from the priority map.

@@ -7,7 +7,7 @@ GO_LINT_URI=github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 BENCH_COUNT ?= 10
 BENCH_PKG := ./internal/benchmarks/suites/...
 BENCH_TIME ?= 1s
-BENCH_SUITES := $(shell go test -list . $(BENCH_PKG) | grep "Benchmark" | cut -d'_' -f1 | sed 's/Benchmark//' | sort -u)
+BENCH_SUITES = $(shell go test -list . $(BENCH_PKG) | grep "Benchmark" | cut -d'_' -f1 | sed 's/Benchmark//' | sort -u)
 
 ifeq ($(HEAVY),1)
     BENCH_COUNT := 20
@@ -21,7 +21,27 @@ build:
 .PHONY: lint
 lint:
 	$(if $(GO_LINT), ,go install $(GO_LINT_URI))
-	golangci-lint run -v
+	golangci-lint run -v ./...
+	$(MAKE) lint/gopls
+
+.PHONY: lint/gopls
+lint/gopls:
+	@go_files="$$(go list -f '{{$$dir := .Dir}}{{range .GoFiles}}{{$$dir}}/{{.}} {{end}}{{range .TestGoFiles}}{{$$dir}}/{{.}} {{end}}' ./... 2>&1)"; \
+	list_status=$$?; \
+	if [ $$list_status -ne 0 ]; then \
+		printf '%s\n' "$$go_files"; \
+		exit $$list_status; \
+	fi; \
+	output="$$(gopls check -severity=hint $$go_files 2>&1)"; \
+	check_status=$$?; \
+	if [ $$check_status -ne 0 ]; then \
+		printf '%s\n' "$$output"; \
+		exit $$check_status; \
+	fi; \
+	if [ -n "$$output" ]; then \
+		printf '%s\n' "$$output"; \
+		exit 1; \
+	fi
 
 .PHONY: test
 test:

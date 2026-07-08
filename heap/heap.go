@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"iter"
 
-	pkg "github.com/stochastic-parrots/gollections"
+	"github.com/stochastic-parrots/gollections"
 )
 
 // Heap defines a priority queue whose top element is selected by a comparator.
@@ -46,7 +46,7 @@ type Heap[T any] interface {
 	// Clear removes all elements from the heap, resetting it to an empty state.
 	Clear()
 
-	pkg.Collection[T]
+	gollections.Collection[T]
 
 	fmt.Stringer
 	json.Marshaler

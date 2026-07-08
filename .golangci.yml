@@ -1,0 +1,19 @@
+linters:
+  enable:
+    - asciicheck
+    - copyloopvar
+    - errorlint
+    - gofmt
+    - goimports
+    - importas
+    - misspell
+    - nilerr
+    - nolintlint
+    - unconvert
+
+linters-settings:
+  importas:
+    no-unaliased: false
+    no-extra-aliases: true
+    # Keep this list empty: explicit import aliases are not allowed.
+    alias: []
