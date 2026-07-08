@@ -20,3 +20,6 @@ paths:
 - Use `cmp.Ordered`, `constraint`, or `internal/comparator` according to the
   existing package pattern.
 - Run `gofmt` on changed Go files.
+- Do not use explicit import aliases.
+- Omit explicit generic type arguments when Go can infer them from function
+  arguments or earlier type arguments.
