@@ -19,6 +19,9 @@ paths:
   when those paths exist.
 - Benchmarks use `b.ReportAllocs()` and keep setup outside measured sections
   unless setup is the measured operation.
+- Separate implementation behavior from benchmark-harness artifacts when
+  interpreting results; call out known artifacts instead of silently changing a
+  user-chosen benchmark contract.
 - Use local `*_bench_test.go` files beside internal implementations for
   operation-level measurements.
 - Use `internal/benchmarks` only for optional cross-implementation suites:
@@ -27,3 +30,6 @@ paths:
   benchmark entrypoints in `suites`.
 - Do not add behavior to benchmark adapters just to include an implementation
   in a suite.
+- Avoid variadic interface calls in benchmark hot loops when the benchmark
+  contract can be shaped narrowly; if the user chooses the public variadic
+  contract, report the allocation artifact clearly.

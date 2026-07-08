@@ -59,6 +59,13 @@ Use this file to orient quickly, then rely on
   depend on the current one.
 - For benchmark suites, use a `get<Family>Suite(...)` helper and check that the
   benchmark abstraction itself does not introduce hot-loop allocations.
+- When interpreting benchmark output, separate implementation behavior from
+  benchmark-harness artifacts. State whether a gap is a release blocker, an
+  expected tradeoff, or optional cleanup, and update public docs when the
+  benchmark clarifies how callers should choose between implementations.
+- Respect an explicit user choice about benchmark contracts. If the chosen
+  contract introduces a known measurement artifact, document it in the response
+  instead of reworking the harness in a different direction.
 
 ## Verification
 
