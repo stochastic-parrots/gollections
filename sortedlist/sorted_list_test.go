@@ -17,10 +17,18 @@ func TestFactoriesImplementSortedList(t *testing.T) {
 	var _ sortedlist.SortedList[int] = sortedlist.NewArrayFrom([]int{1}, cmp.Compare[int])
 	var _ sortedlist.SortedList[int] = sortedlist.NewArrayClone([]int{1}, cmp.Compare[int])
 	var _ sortedlist.SortedList[int] = sortedlist.NewArrayFromSeq(slices.Values([]int{1}), cmp.Compare[int])
+	var _ sortedlist.SortedList[int] = sortedlist.NewSkip(cmp.Compare[int])
+	var _ sortedlist.SortedList[int] = sortedlist.NewSkipFrom([]int{1}, cmp.Compare[int])
+	var _ sortedlist.SortedList[int] = sortedlist.NewSkipClone([]int{1}, cmp.Compare[int])
+	var _ sortedlist.SortedList[int] = sortedlist.NewSkipFromSeq(slices.Values([]int{1}), cmp.Compare[int])
 	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArray[int](0)
 	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArrayFrom([]int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArrayClone([]int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArrayFromSeq(slices.Values([]int{1}))
+	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedSkip[int]()
+	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedSkipFrom([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedSkipClone([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedSkipFromSeq(slices.Values([]int{1}))
 }
 
 func TestNewArray(t *testing.T) {
@@ -29,6 +37,14 @@ func TestNewArray(t *testing.T) {
 
 func TestNewOrderedArray(t *testing.T) {
 	assertSortedListBehavior(t, sortedlist.NewOrderedArray[int](0))
+}
+
+func TestNewSkip(t *testing.T) {
+	assertSortedListBehavior(t, sortedlist.NewSkip(cmp.Compare[int]))
+}
+
+func TestNewOrderedSkip(t *testing.T) {
+	assertSortedListBehavior(t, sortedlist.NewOrderedSkip[int]())
 }
 
 func TestArrayFrom(t *testing.T) {
@@ -59,6 +75,34 @@ func TestArrayFromSeq(t *testing.T) {
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
 }
 
+func TestSkipFrom(t *testing.T) {
+	data := []int{3, 1, 2}
+
+	list := sortedlist.NewSkipFrom(data, cmp.Compare[int])
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, data)
+}
+
+func TestSkipClone(t *testing.T) {
+	data := []int{3, 1, 2}
+
+	list := sortedlist.NewSkipClone(data, cmp.Compare[int])
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{3, 1, 2}, data)
+}
+
+func TestSkipFromSeq(t *testing.T) {
+	source := list.NewArray[int](0)
+	source.Append(3, 1, 2)
+
+	list := sortedlist.NewSkipFromSeq(source.All(), cmp.Compare[int])
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
+}
+
 func TestNewOrderedArrayFrom(t *testing.T) {
 	data := []int{3, 1, 2}
 
@@ -82,6 +126,34 @@ func TestNewOrderedArrayFromSeq(t *testing.T) {
 	source.Append(3, 1, 2)
 
 	list := sortedlist.NewOrderedArrayFromSeq(source.All())
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
+}
+
+func TestNewOrderedSkipFrom(t *testing.T) {
+	data := []int{3, 1, 2}
+
+	list := sortedlist.NewOrderedSkipFrom(data)
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, data)
+}
+
+func TestNewOrderedSkipClone(t *testing.T) {
+	data := []int{3, 1, 2}
+
+	list := sortedlist.NewOrderedSkipClone(data)
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{3, 1, 2}, data)
+}
+
+func TestNewOrderedSkipFromSeq(t *testing.T) {
+	source := list.NewArray[int](0)
+	source.Append(3, 1, 2)
+
+	list := sortedlist.NewOrderedSkipFromSeq(source.All())
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())

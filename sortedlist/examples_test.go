@@ -47,6 +47,30 @@ func ExampleNewOrderedArray() {
 	// true
 }
 
+func ExampleNewSkip() {
+	list := sortedlist.NewSkip(cmp.Compare[int])
+	list.Add(3, 1, 2, 2)
+
+	fmt.Println(slices.Collect(list.All()))
+	fmt.Println(list.Contains(3))
+
+	// Output:
+	// [1 2 2 3]
+	// true
+}
+
+func ExampleNewOrderedSkip() {
+	list := sortedlist.NewOrderedSkip[int]()
+	list.Add(3, 1, 2, 2)
+
+	fmt.Println(slices.Collect(list.All()))
+	fmt.Println(slices.Collect(list.Range(2, 4)))
+
+	// Output:
+	// [1 2 2 3]
+	// [2 2 3]
+}
+
 func ExampleOrderedArraySortedList_bounds() {
 	list := sortedlist.NewOrderedArray[int](0)
 	list.Add(1, 2, 2, 2, 3)

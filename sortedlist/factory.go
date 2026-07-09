@@ -13,8 +13,16 @@ type ArraySortedList[T any] = sortedlist.ArraySortedList[T]
 // OrderedArraySortedList is a slice-backed [SortedList] for naturally ordered values.
 type OrderedArraySortedList[T cmp.Ordered] = sortedlist.OrderedArraySortedList[T]
 
+// SkipList is a probabilistic skip-list-backed [SortedList] with custom comparator order.
+type SkipList[T any] = sortedlist.SkipList[T]
+
+// OrderedSkipList is a probabilistic skip-list-backed [SortedList] for naturally ordered values.
+type OrderedSkipList[T cmp.Ordered] = sortedlist.OrderedSkipList[T]
+
 var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}
 var _ SortedList[int] = &sortedlist.OrderedArraySortedList[int]{}
+var _ SortedList[any] = &sortedlist.SkipList[any]{}
+var _ SortedList[int] = &sortedlist.OrderedSkipList[int]{}
 
 // NewArray creates an empty ArraySortedList with a custom comparator.
 //
@@ -154,6 +162,136 @@ func NewArrayFromSeq[T any](seq iter.Seq[T], compare func(a, b T) int) *ArraySor
 	return sortedlist.NewArraySortedListFromSeq(seq, compare)
 }
 
+// NewSkip creates an empty SkipList with a custom comparator.
+//
+// The comparator follows the same contract as [cmp.Compare]: it returns a
+// negative value when a sorts before b, zero when they are equivalent, and a
+// positive value when a sorts after b.
+// It must define the same strict weak ordering used for every later lookup and
+// mutation on the list. Values for which compare returns zero may appear in any
+// relative order; include a tie-breaker when that order matters.
+//
+// SkipList is optimized for mixed lookup and update workloads: lookup,
+// insertion, removal, replacement by sorted index, and indexed access are
+// expected O(log N). It keeps skip-list nodes and level links in internal
+// arenas, but [ArraySortedList] remains the better fit when data is built once
+// and queried many times with few updates.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Add(xs...T)         O(K log (N+K))
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewSkip[T any](compare func(a, b T) int) *SkipList[T] {
+	return sortedlist.NewSkipList(compare)
+}
+
+// NewSkipFrom creates a SkipList from the provided slice.
+//
+// WARNING: This operation is in-place and will sort the original slice.
+// Use [NewSkipClone] when the original slice order must be preserved.
+//
+// This constructor is useful when data already exists in a slice but later
+// single-element updates should avoid the O(N) shifting cost of [ArraySortedList].
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Construction        O(N log N)
+//	Extra Space         O(N)
+//	Add(x)              O(log N)
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewSkipFrom[T any](data []T, compare func(a, b T) int) *SkipList[T] {
+	return sortedlist.NewSkipListFromSlice(data, compare)
+}
+
+// NewSkipClone creates a SkipList from a sorted clone of the provided slice.
+//
+// Use this constructor when the source slice must keep its original order.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Construction        O(N log N)
+//	Extra Space         O(N)
+//	Add(x)              O(log N)
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewSkipClone[T any](data []T, compare func(a, b T) int) *SkipList[T] {
+	return sortedlist.NewSkipListCloneSlice(data, compare)
+}
+
+// NewSkipFromSeq creates a SkipList from an iterator.
+//
+// The iterator is collected into new storage before sorting, so the source
+// collection is never modified.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Construction        O(N log N)
+//	Extra Space         O(N)
+//	Add(x)              O(log N)
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewSkipFromSeq[T any](seq iter.Seq[T], compare func(a, b T) int) *SkipList[T] {
+	return sortedlist.NewSkipListFromSeq(seq, compare)
+}
+
 // NewOrderedArray creates an empty OrderedArraySortedList with natural ordering.
 //
 // OrderedArraySortedList is optimized for read-heavy workloads where T already
@@ -280,4 +418,123 @@ func NewOrderedArrayClone[T cmp.Ordered](data []T) *OrderedArraySortedList[T] {
 //	Clear()             O(N)
 func NewOrderedArrayFromSeq[T cmp.Ordered](seq iter.Seq[T]) *OrderedArraySortedList[T] {
 	return sortedlist.NewOrderedArraySortedListFromSeq(seq)
+}
+
+// NewOrderedSkip creates an empty OrderedSkipList with natural ordering.
+//
+// OrderedSkipList is optimized for mixed lookup and update workloads where T
+// already supports Go's ordered operations. It avoids custom comparator calls
+// while keeping expected O(log N) lookup, insertion, removal, replacement by
+// sorted index, and indexed access.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Add(xs...T)         O(K log (N+K))
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewOrderedSkip[T cmp.Ordered]() *OrderedSkipList[T] {
+	return sortedlist.NewOrderedSkipList[T]()
+}
+
+// NewOrderedSkipFrom creates an OrderedSkipList from the provided slice.
+//
+// WARNING: This operation is in-place and will sort the original slice.
+// Use [NewOrderedSkipClone] when the original slice order must be preserved.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Construction        O(N log N)
+//	Extra Space         O(N)
+//	Add(x)              O(log N)
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewOrderedSkipFrom[T cmp.Ordered](data []T) *OrderedSkipList[T] {
+	return sortedlist.NewOrderedSkipListFromSlice(data)
+}
+
+// NewOrderedSkipClone creates an OrderedSkipList from a sorted clone of the provided slice.
+//
+// Use this constructor when the source slice must keep its original order.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Construction        O(N log N)
+//	Extra Space         O(N)
+//	Add(x)              O(log N)
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewOrderedSkipClone[T cmp.Ordered](data []T) *OrderedSkipList[T] {
+	return sortedlist.NewOrderedSkipListCloneSlice(data)
+}
+
+// NewOrderedSkipFromSeq creates an OrderedSkipList from an iterator.
+//
+// The iterator is collected into new storage before sorting, so the source
+// collection is never modified.
+//
+// Performance Summary (Expected Time Complexity):
+//
+//	Operation           Time Complexity
+//	-----------------   ---------------
+//	Construction        O(N log N)
+//	Extra Space         O(N)
+//	Add(x)              O(log N)
+//	Remove(x)           O(log N)
+//	Replace(idx, x)     O(log N)
+//	LowerBound(x)       O(log N)
+//	UpperBound(x)       O(log N)
+//	EqualRange(x)       O(log N)
+//	Count(x)            O(log N)
+//	Ceiling/Floor(x)    O(log N)
+//	Higher/Lower(x)     O(log N)
+//	Range(from, to)     O(log N + K)
+//	Find(x)             O(log N)
+//	Contains(x)         O(log N)
+//	Get(idx)            O(log N)
+//	First()/Last()      O(1)
+//	Clear()             O(N)
+func NewOrderedSkipFromSeq[T cmp.Ordered](seq iter.Seq[T]) *OrderedSkipList[T] {
+	return sortedlist.NewOrderedSkipListFromSeq(seq)
 }

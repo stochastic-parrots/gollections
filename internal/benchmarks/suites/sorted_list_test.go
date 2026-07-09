@@ -31,6 +31,18 @@ func getSortedListSuite(capacity int) datastructs.Implementations[datastructs.So
 				return sortedlist.NewOrderedArray[int](capacity)
 			},
 		},
+		{
+			Name: "Gollections_SkipList",
+			Factory: func() datastructs.SortedList {
+				return sortedlist.NewSkip(cmp.Compare[int])
+			},
+		},
+		{
+			Name: "Gollections_OrderedSkipList",
+			Factory: func() datastructs.SortedList {
+				return sortedlist.NewOrderedSkip[int]()
+			},
+		},
 	}
 }
 
@@ -81,7 +93,7 @@ func BenchmarkSortedList_RangeQueries(b *testing.B) {
 func BenchmarkSortedList_SlidingMedian(b *testing.B) {
 	const size = 100_000
 	const maxValue = 1_000_000
-	const windowSize = 1_001
+	const windowSize = 100_001
 
 	data := models.NewRandomSliceWithMax(size, maxValue)
 
