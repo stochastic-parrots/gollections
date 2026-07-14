@@ -22,13 +22,13 @@ func getSortedListSuite(capacity int) datastructs.Implementations[datastructs.So
 		{
 			Name: "Gollections_ArraySortedList",
 			Factory: func() datastructs.SortedList {
-				return sortedlist.NewArray(capacity, cmp.Compare[int])
+				return sortedlist.Array(cmp.Compare[int]).New(capacity)
 			},
 		},
 		{
 			Name: "Gollections_OrderedArraySortedList",
 			Factory: func() datastructs.SortedList {
-				return sortedlist.NewOrderedArray[int](capacity)
+				return sortedlist.OrderedArray[int]().New(capacity)
 			},
 		},
 	}

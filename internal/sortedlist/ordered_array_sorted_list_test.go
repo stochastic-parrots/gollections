@@ -469,11 +469,11 @@ func TestOrderedArraySortedList_JSON(t *testing.T) {
 }
 
 func TestOrderedArraySortedList_Format(t *testing.T) {
-	l := NewOrderedArraySortedList[int](0)
+	l := NewOrderedArraySortedList[int](10)
 	l.Add(5, 4, 3, 2, 1, 0)
 
 	assert.Equal(t, "[0 1 2 3 4 ...(+1 more)]", l.String())
 	assert.Equal(t, "[0 1 2 3 4 ...(+1 more)]", fmt.Sprintf("%v", l))
-	assert.Contains(t, fmt.Sprintf("%+v", l), "len:6")
-	assert.Contains(t, fmt.Sprintf("%#v", l), "OrderedArraySortedList")
+	assert.Contains(t, fmt.Sprintf("%+v", l), "len:6, cap:10")
+	assert.Contains(t, fmt.Sprintf("%#v", l), "size:6, cap:10")
 }

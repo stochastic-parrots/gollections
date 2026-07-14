@@ -293,7 +293,7 @@ func (heap *BinaryHeap[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (heap *BinaryHeap[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, heap, heap.Length())
+	collection.Format(s, verb, heap, cap(heap.data))
 }
 
 // String returns a string representation of the heap.

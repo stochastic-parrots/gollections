@@ -6,6 +6,17 @@ import (
 	"github.com/stochastic-parrots/gollections"
 )
 
+// Order selects which end of a priority type's natural order receives priority.
+type Order bool
+
+const (
+	// Min gives smaller values higher priority.
+	Min Order = false
+
+	// Max gives larger values higher priority.
+	Max Order = true
+)
+
 // Readonly defines a non-mutable view of a PriorityMap.
 //
 // It provides access to elements by key and the ability to peek at the

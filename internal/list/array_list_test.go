@@ -18,6 +18,34 @@ func TestNewArrayList(t *testing.T) {
 	assert.Equal(t, 100, cap(list.data))
 }
 
+func TestNewArrayListFromSlice(t *testing.T) {
+	data := make([]int, 2, 3)
+	copy(data, []int{1, 2})
+
+	list := NewArrayListFromSlice(data)
+	list.Append(3)
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, 3, cap(list.data))
+	assert.Equal(t, 3, data[:3][2])
+}
+
+func TestNewArrayListCloneSlice(t *testing.T) {
+	data := []int{1, 2}
+
+	list := NewArrayListCloneSlice(data)
+	_ = list.Set(0, 10)
+
+	assert.Equal(t, []int{10, 2}, list.ToSlice())
+	assert.Equal(t, []int{1, 2}, data)
+}
+
+func TestNewArrayListFromSeq(t *testing.T) {
+	list := NewArrayListFromSeq(slices.Values([]int{1, 2, 3}))
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+}
+
 func TestArrayList_IsEmpty(t *testing.T) {
 	list := NewArrayList[int](100)
 	assert.True(t, list.IsEmpty())
@@ -364,18 +392,18 @@ func TestArrayList_Format(t *testing.T) {
 	})
 
 	t.Run("Verbose", func(t *testing.T) {
-		list := NewArrayList[int](10)
+		list := NewArrayList[int](12)
 		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", list)
-		want := "*list.ArrayList[int]{size:10, cap:10}"
+		want := "*list.ArrayList[int]{size:10, cap:12}"
 		assert.Equal(t, want, got)
 	})
 
 	t.Run("GoSyntax", func(t *testing.T) {
-		list := NewArrayList[int](10)
+		list := NewArrayList[int](12)
 		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", list)
-		want := "*list.ArrayList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
+		want := "*list.ArrayList[int]{len:10, cap:12} [30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
 	})
 }

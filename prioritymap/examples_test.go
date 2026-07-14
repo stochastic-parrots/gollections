@@ -7,8 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/prioritymap"
 )
 
-func ExampleNewBinaryHeap() {
-	pm := prioritymap.NewBinaryHeap[string](3, cmp.Less[int])
+func ExampleBinaryHeap() {
+	pm := prioritymap.BinaryHeap[string](cmp.Less[int]).New(3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 	pm.Set("some", 1)
@@ -22,8 +22,8 @@ func ExampleNewBinaryHeap() {
 	// user - other: age - 2
 }
 
-func ExampleMinBinaryHeap() {
-	pm := prioritymap.MinBinaryHeap[string, int](3)
+func ExampleOrderedBinaryHeap_min() {
+	pm := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(3)
 	pm.Set("some", 3)
 	pm.Set("other", 2)
 
@@ -44,8 +44,8 @@ func ExampleMinBinaryHeap() {
 	// user - another: age - 10
 }
 
-func ExampleMaxBinaryHeap() {
-	pm := prioritymap.MaxBinaryHeap[string, int](3)
+func ExampleOrderedBinaryHeap_max() {
+	pm := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Max).New(3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 
@@ -66,8 +66,8 @@ func ExampleMaxBinaryHeap() {
 	// user - other: age - 2
 }
 
-func ExampleNewPairingHeap() {
-	pm := prioritymap.NewPairingHeap[string](3, cmp.Less[int])
+func ExamplePairingHeap() {
+	pm := prioritymap.PairingHeap[string](cmp.Less[int]).New(3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 	pm.Set("some", 1)
@@ -81,8 +81,8 @@ func ExampleNewPairingHeap() {
 	// user - other: age - 2
 }
 
-func ExampleMinPairingHeap() {
-	pm := prioritymap.MinPairingHeap[string, int](3)
+func ExampleOrderedPairingHeap_min() {
+	pm := prioritymap.OrderedPairingHeap[string, int](prioritymap.Min).New(3)
 	pm.Set("some", 3)
 	pm.Set("other", 2)
 
@@ -103,8 +103,8 @@ func ExampleMinPairingHeap() {
 	// user - another: age - 10
 }
 
-func ExampleMaxPairingHeap() {
-	pm := prioritymap.MaxPairingHeap[string, int](3)
+func ExampleOrderedPairingHeap_max() {
+	pm := prioritymap.OrderedPairingHeap[string, int](prioritymap.Max).New(3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 
@@ -125,8 +125,8 @@ func ExampleMaxPairingHeap() {
 	// user - other: age - 2
 }
 
-func ExampleNewRadixHeap() {
-	pm := prioritymap.NewRadixHeap[string, uint64](3)
+func ExampleRadixHeap() {
+	pm := prioritymap.RadixHeap[string, uint64]().New(3)
 	pm.Set("destination", 20)
 	pm.Set("neighbor", 7)
 	pm.Set("start", 0)
@@ -142,7 +142,7 @@ func ExampleNewRadixHeap() {
 }
 
 func ExampleAsReadonly() {
-	pm := prioritymap.MinPairingHeap[string, int](10)
+	pm := prioritymap.OrderedPairingHeap[string, int](prioritymap.Min).New(10)
 	pm.Set("Critical Bug", 1)
 	pm.Set("Feature Request", 10)
 	pm.Set("Documentation Update", 5)

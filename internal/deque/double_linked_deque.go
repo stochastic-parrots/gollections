@@ -3,6 +3,7 @@ package deque
 import (
 	"fmt"
 	"iter"
+	"slices"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 	"github.com/stochastic-parrots/gollections/internal/shared/node"
@@ -23,6 +24,23 @@ func NewDoubleLinkedDeque[T any]() *DoubleLinkedDeque[T] {
 		last:   nil,
 		length: 0,
 	}
+}
+
+// NewDoubleLinkedDequeFromSlice creates a DoubleLinkedDeque containing data.
+// Values are copied into newly allocated nodes and data is not retained.
+func NewDoubleLinkedDequeFromSlice[T any](data []T) *DoubleLinkedDeque[T] {
+	deque := NewDoubleLinkedDeque[T]()
+	deque.Append(data...)
+	return deque
+}
+
+// NewDoubleLinkedDequeFromSeq creates a DoubleLinkedDeque containing values from seq.
+func NewDoubleLinkedDequeFromSeq[T any](seq iter.Seq[T]) *DoubleLinkedDeque[T] {
+	deque := NewDoubleLinkedDeque[T]()
+	for value := range seq {
+		deque.Append(value)
+	}
+	return deque
 }
 
 // Length returns the current number of elements in the deque.
@@ -73,8 +91,8 @@ func (d *DoubleLinkedDeque[T]) prepend(x T) {
 //
 // Complexity: O(k) where k is the number of elements provided.
 func (d *DoubleLinkedDeque[T]) Prepend(xs ...T) {
-	for i := len(xs) - 1; i >= 0; i-- {
-		d.prepend(xs[i])
+	for _, x := range slices.Backward(xs) {
+		d.prepend(x)
 	}
 }
 

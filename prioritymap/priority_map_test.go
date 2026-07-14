@@ -10,42 +10,45 @@ import (
 )
 
 func TestFactoriesImplementPriorityMap(t *testing.T) {
-	var _ prioritymap.PriorityMap[string, int] = prioritymap.NewBinaryHeap[string](0, cmp.Less[int])
-	var _ prioritymap.PriorityMap[string, int] = prioritymap.MinBinaryHeap[string, int](0)
-	var _ prioritymap.PriorityMap[string, int] = prioritymap.MaxBinaryHeap[string, int](0)
-	var _ prioritymap.PriorityMap[string, int] = prioritymap.NewPairingHeap[string](0, cmp.Less[int])
-	var _ prioritymap.PriorityMap[string, int] = prioritymap.MinPairingHeap[string, int](0)
-	var _ prioritymap.PriorityMap[string, int] = prioritymap.MaxPairingHeap[string, int](0)
-	var _ prioritymap.PriorityMap[string, uint64] = prioritymap.NewRadixHeap[string, uint64](0)
+	var _ *prioritymap.BinaryHeapPriorityMap[string, int] = prioritymap.BinaryHeap[string](cmp.Less[int]).New(0)
+	var _ *prioritymap.PairingHeapPriorityMap[string, int] = prioritymap.PairingHeap[string](cmp.Less[int]).New(0)
+	var _ *prioritymap.RadixHeapPriorityMap[string, uint64] = prioritymap.RadixHeap[string, uint64]().New(0)
+	var _ prioritymap.PriorityMap[string, int] = prioritymap.BinaryHeap[string](cmp.Less[int]).New(0)
+	var _ prioritymap.PriorityMap[string, int] = prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(0)
+	var _ prioritymap.PriorityMap[string, int] = prioritymap.OrderedBinaryHeap[string, int](prioritymap.Max).New(0)
+	var _ prioritymap.PriorityMap[string, int] = prioritymap.PairingHeap[string](cmp.Less[int]).New(0)
+	var _ prioritymap.PriorityMap[string, int] = prioritymap.OrderedPairingHeap[string, int](prioritymap.Min).New(0)
+	var _ prioritymap.PriorityMap[string, int] = prioritymap.OrderedPairingHeap[string, int](prioritymap.Max).New(0)
+	var _ prioritymap.PriorityMap[string, uint64] = prioritymap.RadixHeap[string, uint64]().New(0)
 }
 
-func TestNewBinaryHeap(t *testing.T) {
-	assertPriorityMapBehavior(t, prioritymap.NewBinaryHeap[string](0, cmp.Less[int]), "one", 1, 0, []int{0, 1, 3})
+func TestBinaryHeapFactory_New(t *testing.T) {
+	t.Run("Custom", func(t *testing.T) {
+		assertPriorityMapBehavior(t, prioritymap.BinaryHeap[string](cmp.Less[int]).New(0), "one", 1, 0, []int{0, 1, 3})
+	})
+	t.Run("Min", func(t *testing.T) {
+		assertPriorityMapBehavior(t, prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(0), "one", 1, 0, []int{0, 1, 3})
+	})
+	t.Run("Max", func(t *testing.T) {
+		assertPriorityMapBehavior(t, prioritymap.OrderedBinaryHeap[string, int](prioritymap.Max).New(0), "three", 3, 4, []int{4, 3, 1})
+	})
 }
 
-func TestMinBinaryHeap(t *testing.T) {
-	assertPriorityMapBehavior(t, prioritymap.MinBinaryHeap[string, int](0), "one", 1, 0, []int{0, 1, 3})
+func TestPairingHeapFactory_New(t *testing.T) {
+	t.Run("Custom", func(t *testing.T) {
+		assertPriorityMapBehavior(t, prioritymap.PairingHeap[string](cmp.Less[int]).New(0), "one", 1, 0, []int{0, 1, 3})
+	})
+	t.Run("Min", func(t *testing.T) {
+		assertPriorityMapBehavior(t, prioritymap.OrderedPairingHeap[string, int](prioritymap.Min).New(0), "one", 1, 0, []int{0, 1, 3})
+	})
+	t.Run("Max", func(t *testing.T) {
+		assertPriorityMapBehavior(t, prioritymap.OrderedPairingHeap[string, int](prioritymap.Max).New(0), "three", 3, 4, []int{4, 3, 1})
+	})
 }
 
-func TestMaxBinaryHeap(t *testing.T) {
-	assertPriorityMapBehavior(t, prioritymap.MaxBinaryHeap[string, int](0), "three", 3, 4, []int{4, 3, 1})
-}
-
-func TestNewPairingHeap(t *testing.T) {
-	assertPriorityMapBehavior(t, prioritymap.NewPairingHeap[string](0, cmp.Less[int]), "one", 1, 0, []int{0, 1, 3})
-}
-
-func TestMinPairingHeap(t *testing.T) {
-	assertPriorityMapBehavior(t, prioritymap.MinPairingHeap[string, int](0), "one", 1, 0, []int{0, 1, 3})
-}
-
-func TestMaxPairingHeap(t *testing.T) {
-	assertPriorityMapBehavior(t, prioritymap.MaxPairingHeap[string, int](0), "three", 3, 4, []int{4, 3, 1})
-}
-
-func TestNewRadixHeap(t *testing.T) {
+func TestRadixHeapFactory_New(t *testing.T) {
 	type distance uint32
-	pm := prioritymap.NewRadixHeap[string, distance](0)
+	pm := prioritymap.RadixHeap[string, distance]().New(0)
 	pm.Set("far", 100)
 	pm.Set("near", 10)
 	pm.Set("middle", 50)
@@ -71,7 +74,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := prioritymap.MinBinaryHeap[string, int](0)
+		mutable := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(0)
 		mutable.Set("slow", 10)
 		mutable.Set("fast", 1)
 

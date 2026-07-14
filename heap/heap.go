@@ -8,6 +8,17 @@ import (
 	"github.com/stochastic-parrots/gollections"
 )
 
+// Order selects which end of a type's natural order receives priority.
+type Order bool
+
+const (
+	// Min gives smaller values higher priority.
+	Min Order = false
+
+	// Max gives larger values higher priority.
+	Max Order = true
+)
+
 // Heap defines a priority queue whose top element is selected by a comparator.
 //
 // The comparator supplied by the concrete constructor defines what "highest

@@ -312,8 +312,8 @@ func (l *OrderedArraySortedList[T]) All() iter.Seq[T] {
 // Complexity: O(N) for a full traversal, O(1) per step.
 func (l *OrderedArraySortedList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for idx := len(l.data) - 1; idx >= 0; idx-- {
-			if !yield(l.data[idx]) {
+		for _, value := range slices.Backward(l.data) {
+			if !yield(value) {
 				return
 			}
 		}
@@ -412,7 +412,7 @@ func (l *OrderedArraySortedList[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (l *OrderedArraySortedList[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, l, l.Length())
+	collection.Format(s, verb, l, cap(l.data))
 }
 
 // String returns a string representation of the list.

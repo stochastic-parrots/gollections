@@ -13,82 +13,84 @@ import (
 )
 
 func TestFactoriesImplementSortedList(t *testing.T) {
-	var _ sortedlist.SortedList[int] = sortedlist.NewArray(0, cmp.Compare[int])
-	var _ sortedlist.SortedList[int] = sortedlist.NewArrayFrom([]int{1}, cmp.Compare[int])
-	var _ sortedlist.SortedList[int] = sortedlist.NewArrayClone([]int{1}, cmp.Compare[int])
-	var _ sortedlist.SortedList[int] = sortedlist.NewArrayFromSeq(slices.Values([]int{1}), cmp.Compare[int])
-	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArray[int](0)
-	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArrayFrom([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArrayClone([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArrayFromSeq(slices.Values([]int{1}))
+	var _ *sortedlist.ArraySortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
+	var _ *sortedlist.OrderedArraySortedList[int] = sortedlist.OrderedArray[int]().New(0)
+	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
+	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).From([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).Clone([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).FromSeq(slices.Values([]int{1}))
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().New(0)
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().From([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().Clone([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().FromSeq(slices.Values([]int{1}))
 }
 
-func TestNewArray(t *testing.T) {
-	assertSortedListBehavior(t, sortedlist.NewArray(0, cmp.Compare[int]))
+func TestArrayFactory_New(t *testing.T) {
+	assertSortedListBehavior(t, sortedlist.Array(cmp.Compare[int]).New(0))
 }
 
-func TestNewOrderedArray(t *testing.T) {
-	assertSortedListBehavior(t, sortedlist.NewOrderedArray[int](0))
+func TestOrderedArrayFactory_New(t *testing.T) {
+	assertSortedListBehavior(t, sortedlist.OrderedArray[int]().New(0))
 }
 
-func TestArrayFrom(t *testing.T) {
+func TestArrayFactory_From(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.NewArrayFrom(data, cmp.Compare[int])
+	list := sortedlist.Array(cmp.Compare[int]).From(data)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{1, 2, 3}, data)
 }
 
-func TestArrayClone(t *testing.T) {
+func TestArrayFactory_Clone(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.NewArrayClone(data, cmp.Compare[int])
+	list := sortedlist.Array(cmp.Compare[int]).Clone(data)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, data)
 }
 
-func TestArrayFromSeq(t *testing.T) {
-	source := list.NewArray[int](0)
+func TestArrayFactory_FromSeq(t *testing.T) {
+	source := list.Array[int]().New(0)
 	source.Append(3, 1, 2)
 
-	list := sortedlist.NewArrayFromSeq(source.All(), cmp.Compare[int])
+	list := sortedlist.Array(cmp.Compare[int]).FromSeq(source.All())
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
 }
 
-func TestNewOrderedArrayFrom(t *testing.T) {
+func TestOrderedArrayFactory_From(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.NewOrderedArrayFrom(data)
+	list := sortedlist.OrderedArray[int]().From(data)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{1, 2, 3}, data)
 }
 
-func TestNewOrderedArrayClone(t *testing.T) {
+func TestOrderedArrayFactory_Clone(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.NewOrderedArrayClone(data)
+	list := sortedlist.OrderedArray[int]().Clone(data)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, data)
 }
 
-func TestNewOrderedArrayFromSeq(t *testing.T) {
-	source := list.NewArray[int](0)
+func TestOrderedArrayFactory_FromSeq(t *testing.T) {
+	source := list.Array[int]().New(0)
 	source.Append(3, 1, 2)
 
-	list := sortedlist.NewOrderedArrayFromSeq(source.All())
+	list := sortedlist.OrderedArray[int]().FromSeq(source.All())
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
 }
 
 func TestArraySortedList_GetError(t *testing.T) {
-	list := sortedlist.NewArray(0, cmp.Compare[int])
+	list := sortedlist.Array(cmp.Compare[int]).New(0)
 
 	_, err := list.Get(0)
 
@@ -102,7 +104,7 @@ func TestArraySortedList_GetError(t *testing.T) {
 }
 
 func TestArraySortedList_ReplaceError(t *testing.T) {
-	list := sortedlist.NewArray(0, cmp.Compare[int])
+	list := sortedlist.Array(cmp.Compare[int]).New(0)
 	list.Add(1, 3, 5)
 
 	err := list.Replace(1, 6)
@@ -117,7 +119,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := sortedlist.NewArray(0, cmp.Compare[int])
+		mutable := sortedlist.Array(cmp.Compare[int]).New(0)
 		mutable.Add(2, 1)
 
 		view := sortedlist.AsReadonly(mutable)

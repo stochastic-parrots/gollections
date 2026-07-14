@@ -11,27 +11,28 @@ import (
 )
 
 func TestFactoriesImplementHeap(t *testing.T) {
-	var _ heap.Heap[int] = heap.NewBinary[int](0, cmp.Less[int])
-	var _ heap.Heap[int] = heap.NewMinBinary[int](0)
-	var _ heap.Heap[int] = heap.NewMaxBinary[int](0)
-	var _ heap.Heap[int] = heap.BinaryClone([]int{1}, cmp.Less[int])
+	var _ *heap.BinaryHeap[int] = heap.Binary(cmp.Less[int]).New(0)
+	var _ heap.Heap[int] = heap.Binary(cmp.Less[int]).New(0)
+	var _ heap.Heap[int] = heap.OrderedBinary[int](heap.Min).New(0)
+	var _ heap.Heap[int] = heap.OrderedBinary[int](heap.Max).New(0)
+	var _ heap.Heap[int] = heap.Binary(cmp.Less[int]).Clone([]int{1})
 }
 
-func TestNewBinary(t *testing.T) {
-	assertHeapBehavior(t, heap.NewBinary[int](0, cmp.Less[int]), []int{1, 2, 3})
+func TestBinaryFactory_New(t *testing.T) {
+	t.Run("Custom", func(t *testing.T) {
+		assertHeapBehavior(t, heap.Binary(cmp.Less[int]).New(0), []int{1, 2, 3})
+	})
+	t.Run("Min", func(t *testing.T) {
+		assertHeapBehavior(t, heap.OrderedBinary[int](heap.Min).New(0), []int{1, 2, 3})
+	})
+	t.Run("Max", func(t *testing.T) {
+		assertHeapBehavior(t, heap.OrderedBinary[int](heap.Max).New(0), []int{3, 2, 1})
+	})
 }
 
-func TestNewMinBinary(t *testing.T) {
-	assertHeapBehavior(t, heap.NewMinBinary[int](0), []int{1, 2, 3})
-}
-
-func TestNewMaxBinary(t *testing.T) {
-	assertHeapBehavior(t, heap.NewMaxBinary[int](0), []int{3, 2, 1})
-}
-
-func TestBinaryFrom(t *testing.T) {
+func TestBinaryFactory_From(t *testing.T) {
 	data := []int{3, 1, 2}
-	h := heap.BinaryFrom(data, cmp.Less[int])
+	h := heap.Binary(cmp.Less[int]).From(data)
 
 	assert.Equal(t, []int{1, 2, 3}, slices.Collect(func(yield func(int) bool) {
 		for _, value := range h.Drain() {
@@ -43,9 +44,9 @@ func TestBinaryFrom(t *testing.T) {
 	assert.NotEqual(t, []int{3, 1, 2}, data)
 }
 
-func TestBinaryClone(t *testing.T) {
+func TestBinaryFactory_Clone(t *testing.T) {
 	data := []int{3, 1, 2}
-	h := heap.BinaryClone(data, cmp.Less[int])
+	h := heap.Binary(cmp.Less[int]).Clone(data)
 
 	assert.Equal(t, []int{1, 2, 3}, slices.Collect(func(yield func(int) bool) {
 		for _, value := range h.Drain() {

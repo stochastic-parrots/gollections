@@ -18,6 +18,21 @@ func TestNewDoubleLinkedDeque(t *testing.T) {
 	assert.Nil(t, deque.last)
 }
 
+func TestNewDoubleLinkedDequeFromSlice(t *testing.T) {
+	data := []int{1, 2, 3}
+
+	deque := NewDoubleLinkedDequeFromSlice(data)
+	data[0] = 10
+
+	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
+}
+
+func TestNewDoubleLinkedDequeFromSeq(t *testing.T) {
+	deque := NewDoubleLinkedDequeFromSeq(slices.Values([]int{1, 2, 3}))
+
+	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
+}
+
 func TestDoubleLinkedDeque_Length(t *testing.T) {
 	deque := NewDoubleLinkedDeque[int]()
 	assert.Equal(t, 0, deque.Length())
