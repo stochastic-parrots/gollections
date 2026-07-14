@@ -23,6 +23,10 @@
 // of values considered equivalent by the comparator is unspecified; include a
 // tie-breaker in the comparator when that order matters.
 //
+// The zero value of [OrderedArraySortedList] is ready for use. An
+// [ArraySortedList] requires a comparator and must be constructed through
+// [Array]; its zero value is invalid.
+//
 // Bounds and range operations use list order. [Readonly.Range] is half-open:
 // it yields values in [from, to), including values equivalent to from and
 // excluding values equivalent to to.

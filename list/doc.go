@@ -17,6 +17,7 @@
 // Select an implementation with [Array] or [Linked]. Each selector returns a
 // reusable concrete factory whose construction methods return pointers to the
 // corresponding concrete list type.
+// The zero values of [ArrayList] and [LinkedList] are ready for use.
 //
 // # Construction And Ownership
 //

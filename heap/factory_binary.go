@@ -7,7 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/heap"
 )
 
-// BinaryHeap is a comparator-backed binary [Heap].
+// BinaryHeap is a comparator-backed binary [Heap]. Its zero value is invalid;
+// construct one with [Binary] or [OrderedBinary].
 type BinaryHeap[T any] = heap.BinaryHeap[T]
 
 var _ Heap[any] = &heap.BinaryHeap[any]{}

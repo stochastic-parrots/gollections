@@ -13,6 +13,8 @@
 // smaller values priority or [Max] to give larger values priority. Both
 // selectors return a reusable [BinaryFactory] whose methods return
 // *[BinaryHeap].
+// Binary heaps require a priority comparator, so the zero values of
+// [BinaryFactory] and [BinaryHeap] are invalid.
 //
 // # Construction And Ownership
 //
