@@ -18,7 +18,8 @@ Use these checklists for repeatable agent workflows. They supplement
 1. Add public and internal packages in parallel.
 2. Expose public interfaces, readonly views, type aliases, constructors,
    package docs, examples, and external package tests.
-3. Keep concrete types under `internal/...`.
+3. Keep concrete types under `internal/...`; public aliases name structs and
+   constructors return pointers to those aliases.
 4. Add internal same-package tests for invariants and cleanup.
 5. Add benchmarks beside implementations and suite wrappers when comparisons
    are meaningful.
