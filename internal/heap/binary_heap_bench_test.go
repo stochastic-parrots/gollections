@@ -3,7 +3,7 @@ package heap
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
 )
 
 func BenchmarkBinaryHeap_Push(b *testing.B) {

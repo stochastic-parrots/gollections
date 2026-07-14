@@ -3,8 +3,8 @@ package heap
 import (
 	"cmp"
 
-	"github.com/stochastic-parrots/gollections/internal/comparator"
 	"github.com/stochastic-parrots/gollections/internal/heap"
+	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
 )
 
 // BinaryHeap is a comparator-backed binary [Heap]. Its zero value is invalid;
@@ -18,6 +18,8 @@ var _ Heap[any] = &heap.BinaryHeap[any]{}
 // The comparator returns true when its first argument has higher priority than
 // its second argument. Binary heaps provide O(1) Peek, O(log N) Pop and Replace,
 // and O(N) in-place or cloned construction from a slice.
+// The comparator must be non-nil, define a strict weak ordering, and remain
+// stable for the lifetime of every heap created by the factory.
 //
 // The zero value is invalid. Create a factory with [Binary] or [OrderedBinary].
 //
@@ -37,7 +39,11 @@ type BinaryFactory[T any] struct {
 }
 
 // Binary returns a binary-heap factory using hasPriority to order values.
+// It panics if hasPriority is nil.
 func Binary[T any](hasPriority func(T, T) bool) BinaryFactory[T] {
+	if hasPriority == nil {
+		panic("heap: nil priority comparator")
+	}
 	return BinaryFactory[T]{hasPriority: hasPriority}
 }
 

@@ -18,6 +18,12 @@ func TestFactoriesImplementHeap(t *testing.T) {
 	var _ heap.Heap[int] = heap.Binary(cmp.Less[int]).Clone([]int{1})
 }
 
+func TestBinary_NilComparator(t *testing.T) {
+	assert.PanicsWithValue(t, "heap: nil priority comparator", func() {
+		heap.Binary[int](nil)
+	})
+}
+
 func TestBinaryFactory_New(t *testing.T) {
 	t.Run("Custom", func(t *testing.T) {
 		assertHeapBehavior(t, heap.Binary(cmp.Less[int]).New(0), []int{1, 2, 3})

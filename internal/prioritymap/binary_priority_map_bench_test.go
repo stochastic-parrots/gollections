@@ -3,7 +3,7 @@ package prioritymap
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
 )
 
 func BenchmarkBinaryPriorityMap_Set(b *testing.B) {
