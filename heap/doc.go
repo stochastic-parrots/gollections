@@ -28,6 +28,5 @@
 // rebuilding is cheaper. Drain is O(N log N) when fully consumed.
 //
 // All and Enumerate expose the internal heap representation and do not guarantee
-// priority order. Use Drain when destructive priority-ordered traversal is
-// required.
+// priority order. Use Drain when destructive priority-ordered traversal is required.
 package heap

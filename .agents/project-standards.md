@@ -167,6 +167,10 @@ alias and constructor from the public package.
   }
   ```
 
+- Public iterator contracts are lazy: they observe collection state when
+  iteration begins. Mutation while an iterator is running is unsupported unless
+  the iterator explicitly documents its own destructive behavior. A destructive
+  iterator does not permit additional caller-driven mutation while it runs.
 - Destructive iterators such as `Drain` should stop immediately on either empty
   structure or `yield == false`.
 - Use simple `for range` loops over integer counts when targeting Go 1.24:
