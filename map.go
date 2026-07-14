@@ -23,7 +23,6 @@ type Map[K comparable, V any] interface {
 	// when each value must remain associated with its key.
 	Values() iter.Seq[V]
 
-	// All returns an iterator for key-value pairs in unspecified order.
 	// Keys returns an iterator for all keys in the collection.
 	//
 	// The map must not be mutated while the iterator is running.
@@ -34,7 +33,7 @@ type Map[K comparable, V any] interface {
 	// The map must not be mutated while the iterator is running.
 	Values() iter.Seq[V]
 
-	// All returns an iterator for key-value pairs.
+	// All returns an iterator for key-value pairs in unspecified order.
 	//
 	// The map must not be mutated while the iterator is running.
 	All() iter.Seq2[K, V]
