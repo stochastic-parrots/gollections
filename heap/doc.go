@@ -18,7 +18,8 @@
 //
 // [BinaryFactory.New] creates an empty heap with the requested capacity.
 // [BinaryFactory.From] heapifies a slice in place and transfers ownership of its
-// backing storage. [BinaryFactory.Clone] makes a shallow copy before heapifying
+// backing storage; the caller must not use the slice or aliases of its backing
+// array afterward. [BinaryFactory.Clone] makes a shallow copy before heapifying
 // and does not retain the source slice.
 //
 // # Complexity

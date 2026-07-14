@@ -46,8 +46,9 @@ func (factory ArrayFactory[T]) New(capacity int) *ArraySortedList[T] {
 
 // From creates an array sorted list using data as its backing storage.
 //
-// WARNING: From sorts data in place and transfers its backing storage to the
-// returned list. Use [ArrayFactory.Clone] to preserve the source slice.
+// WARNING: From sorts data in place and transfers ownership of its backing
+// storage. The caller must not use data or aliases of its backing array after
+// this call. Use [ArrayFactory.Clone] to preserve the source slice.
 func (factory ArrayFactory[T]) From(data []T) *ArraySortedList[T] {
 	return sortedlist.NewArraySortedListFromSlice(data, factory.compare)
 }

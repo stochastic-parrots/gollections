@@ -43,8 +43,9 @@ func (OrderedArrayFactory[T]) New(capacity int) *OrderedArraySortedList[T] {
 
 // From creates an ordered array sorted list using data as its backing storage.
 //
-// WARNING: From sorts data in place and transfers its backing storage to the
-// returned list. Use [OrderedArrayFactory.Clone] to preserve the source slice.
+// WARNING: From sorts data in place and transfers ownership of its backing
+// storage. The caller must not use data or aliases of its backing array after
+// this call. Use [OrderedArrayFactory.Clone] to preserve the source slice.
 func (OrderedArrayFactory[T]) From(data []T) *OrderedArraySortedList[T] {
 	return sortedlist.NewOrderedArraySortedListFromSlice(data)
 }

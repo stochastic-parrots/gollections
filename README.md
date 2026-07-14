@@ -57,9 +57,10 @@ scores := sortedlist.OrderedArray[int]().Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
 ```
 
-For slice-based construction, `From` may reorder and retain the provided slice.
-Use `Clone` when the source must remain unchanged. Linked structures always
-copy values into nodes, so their `From` methods do not retain the source.
+Array-backed `From` methods transfer ownership of the provided slice and may
+reorder it. The caller must not use the slice or aliases of its backing array
+afterward. Use `Clone` when the source must remain available. Linked structures
+always copy values into nodes, so their `From` methods do not retain the source.
 
 ## Choosing a list
 
