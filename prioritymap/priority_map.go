@@ -92,11 +92,11 @@ type PriorityMap[K comparable, P any] interface {
 	// For a non-destructive iteration, use [gollections.Map.All].
 	Drain() iter.Seq2[K, P]
 
-	// Clear removes all elements from the priority map.
+	// Clear removes all elements and leaves the priority map ready for reuse with
+	// the same implementation configuration. Strategy-specific ordering state,
+	// such as a radix map's monotone lower bound, is reset.
 	//
-	// After calling Clear, the map will be empty and its length will be zero.
-	// This operation is typically more efficient than creating a new map
-	// as it may reuse the underlying storage.
+	// Resource retention depends on the concrete priority-map strategy.
 	Clear()
 
 	Readonly[K, P]

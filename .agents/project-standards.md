@@ -63,8 +63,10 @@ alias and constructor from the public package.
     order unless the method explicitly says so.
   - `Drain` is destructive and yields in the structure's priority/order
     contract.
-- `Clear` must leave the structure empty, preserve reusable capacity where
-  practical, and zero references that could otherwise keep values alive.
+- `Clear` must leave the structure empty and reusable, preserve configuration,
+  and zero references that could otherwise keep values alive. Slice-backed and
+  freelist-backed implementations retain reusable resources where practical;
+  linked implementations may release detached nodes for garbage collection.
 - For ordered behavior, use `cmp.Ordered` or the local comparator helpers in
   `internal/comparator`.
 - For numeric-only generic APIs, use the package-level constraints in
@@ -149,10 +151,15 @@ alias and constructor from the public package.
 - Index-based methods return package-owned errors for invalid indexes.
 - Mutating removal paths must clear discarded slots or nodes before releasing
   storage so references do not leak.
-- Backing storage should be reused after `Clear` when the structure owns the
-  storage. Preserve capacity unless there is a strong reason not to.
+- Slice-backed storage should be reused after `Clear` when the structure owns
+  it. Preserve capacity unless there is a strong reason not to. Do not promise
+  capacity retention in shared public interfaces because linked strategies have
+  no equivalent capacity concept.
 - Freelist-backed structures must reset all pointer fields before returning a
   node/entry to the freelist.
+- Freelist retention must be bounded by the capacity requested at construction.
+  Once the freelist reaches that limit, additional removed or cleared nodes must
+  become unreachable so the garbage collector can reclaim them.
 - Iterator functions should be written as closures returning early when
   `yield` returns false:
 

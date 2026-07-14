@@ -19,6 +19,13 @@
 // Clear are exposed only by the structure-specific interfaces in each
 // subpackage, where their semantics are precise and unambiguous.
 //
+// # Clearing And Reuse
+//
+// Clear removes all elements, releases stored references, preserves the
+// structure's construction configuration, and leaves it ready for reuse.
+// Resource retention is implementation-specific: slice-backed structures
+// normally preserve capacity, while linked structures may release their nodes.
+//
 // # Subpackages
 //
 // The library is organized into specialized subpackages. Refer to each package

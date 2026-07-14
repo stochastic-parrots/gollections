@@ -35,7 +35,9 @@ func RadixHeap[K comparable, P constraint.Integer]() RadixHeapFactory[K, P] {
 	return RadixHeapFactory[K, P]{}
 }
 
-// New creates an empty radix priority map with the requested initial capacity.
+// New creates an empty radix priority map and retains up to capacity entries for
+// reuse. Once that limit is reached, additional removed entries are released
+// rather than retained in the freelist.
 func (RadixHeapFactory[K, P]) New(capacity int) *RadixHeapPriorityMap[K, P] {
 	return prioritymap.NewRadixPriorityMap[K, P](capacity)
 }

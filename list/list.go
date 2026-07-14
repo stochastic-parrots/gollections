@@ -68,7 +68,9 @@ type List[T any] interface {
 	// Reverse reorders the elements in the list in-place.
 	Reverse()
 
-	// Clear removes all elements from the list, resetting it to an empty state.
+	// Clear removes all elements and leaves the list ready for reuse.
+	// Implementation configuration is preserved; storage retention depends on
+	// the concrete list strategy.
 	Clear()
 
 	json.Unmarshaler

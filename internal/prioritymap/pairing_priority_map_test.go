@@ -14,6 +14,8 @@ func TestNewPairingPriorityMap(t *testing.T) {
 	assert.True(t, pm.IsEmpty())
 	assert.Nil(t, pm.root)
 	assert.Nil(t, pm.freelist)
+	assert.Zero(t, pm.freeLen)
+	assert.Zero(t, pm.freeCapacity)
 	assert.Empty(t, pm.indexes)
 }
 
@@ -26,6 +28,8 @@ func TestNewPairingPriorityMapWithCapacity(t *testing.T) {
 	assert.Nil(t, pm.root)
 	assert.NotNil(t, pm.indexes)
 	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, capacity, pm.freeLen)
+	assert.Equal(t, capacity, pm.freeCapacity)
 
 	count := 0
 	current := pm.freelist
@@ -43,6 +47,7 @@ func TestNewPairingPriorityMapWithCapacity(t *testing.T) {
 		current = current.next
 	}
 	assert.Equal(t, capacity-1, count)
+	assert.Equal(t, capacity-1, pm.freeLen)
 }
 
 func TestPairingPriorityMap_Merge(t *testing.T) {
@@ -621,10 +626,11 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 	})
 
 	t.Run("Reuse", func(t *testing.T) {
-		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm := NewPairingPriorityMapWithCapacity[string](1, comparator.Min[int]())
 
 		pm.Set("old", 100)
 		pm.Clear()
+		assert.Equal(t, 1, pm.freeLen)
 
 		pm.Set("new", 5)
 		pm.Set("newer", 1)
@@ -639,5 +645,23 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 			assert.Nil(t, curr.child)
 			assert.Nil(t, curr.previous)
 		}
+	})
+
+	t.Run("RetainsConfiguredCapacity", func(t *testing.T) {
+		pm := NewPairingPriorityMapWithCapacity[string](2, comparator.Min[int]())
+		pm.Set("a", 1)
+		pm.Set("b", 2)
+		pm.Set("c", 3)
+		pm.Set("d", 4)
+
+		pm.Clear()
+
+		assert.Equal(t, 2, pm.freeCapacity)
+		assert.Equal(t, 2, pm.freeLen)
+		count := 0
+		for curr := pm.freelist; curr != nil; curr = curr.next {
+			count++
+		}
+		assert.Equal(t, 2, count)
 	})
 }

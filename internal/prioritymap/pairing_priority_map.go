@@ -24,13 +24,16 @@ type node[K comparable, P any] struct {
 // by the hasPriority function passed to the constructor.
 //
 // Internally, the structure uses a multi-way tree (pairing heap) where
-// each node is indexed in a map for instant access. It also includes a
-// freelist to reuse node allocations and mitigate GC pressure.
+// each node is indexed in a map for instant access. A bounded freelist retains
+// at most the capacity requested at construction, avoiding retention based on
+// historical peak size.
 type PairingPriorityMap[K comparable, P any] struct {
-	hasPriority func(P, P) bool
-	root        *node[K, P]
-	indexes     map[K]*node[K, P]
-	freelist    *node[K, P]
+	hasPriority  func(P, P) bool
+	root         *node[K, P]
+	indexes      map[K]*node[K, P]
+	freelist     *node[K, P]
+	freeLen      int
+	freeCapacity int
 }
 
 // NewPairingPriorityMap creates an empty pairing priority map.
@@ -45,8 +48,8 @@ func NewPairingPriorityMap[K comparable, P any](hasPriority func(P, P) bool) *Pa
 }
 
 // NewPairingPriorityMapWithCapacity creates an empty pairing priority map with
-// pre-allocated nodes and map capacity. This is recommended for high-performance
-// scenarios to reduce allocations during initial bursts.
+// pre-allocated nodes and map capacity. Its freelist retains at most capacity
+// nodes, including after the map grows beyond that capacity.
 //
 // Complexity: O(capacity).
 func NewPairingPriorityMapWithCapacity[K comparable, P any](
@@ -66,6 +69,8 @@ func NewPairingPriorityMapWithCapacity[K comparable, P any](
 	pm.hasPriority = hasPriority
 	pm.root = nil
 	pm.indexes = indexes
+	pm.freeLen = capacity
+	pm.freeCapacity = capacity
 	return pm
 }
 
@@ -77,6 +82,7 @@ func (pm *PairingPriorityMap[K, P]) allocate(key K, priority P) *node[K, P] {
 	} else {
 		n = pm.freelist
 		pm.freelist = pm.freelist.next
+		pm.freeLen--
 	}
 
 	n.key = key
@@ -85,15 +91,19 @@ func (pm *PairingPriorityMap[K, P]) allocate(key K, priority P) *node[K, P] {
 	return n
 }
 
-// deallocate clears a node's data and returns it to the freelist.
+// deallocate clears a node's data and returns it to the bounded freelist.
 func (pm *PairingPriorityMap[K, P]) deallocate(address *node[K, P]) {
 	var zK K
 	var zP P
 	address.key, address.priority = zK, zP
 	address.child, address.previous, address.next = nil, nil, nil
 
+	if pm.freeLen == pm.freeCapacity {
+		return
+	}
 	address.next = pm.freelist
 	pm.freelist = address
+	pm.freeLen++
 }
 
 // merge unites two sub-heaps. The node with higher priority becomes the

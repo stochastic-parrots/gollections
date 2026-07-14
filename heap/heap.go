@@ -54,7 +54,8 @@ type Heap[T any] interface {
 	// the zero value of T and false without inserting x.
 	Replace(x T) (T, bool)
 
-	// Clear removes all elements from the heap, resetting it to an empty state.
+	// Clear removes all elements and leaves the heap ready for reuse with the
+	// same priority comparator.
 	Clear()
 
 	gollections.Collection[T]
