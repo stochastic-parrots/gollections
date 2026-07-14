@@ -175,18 +175,18 @@ func TestBinaryHeapFormat(t *testing.T) {
 	})
 
 	t.Run("Verbose", func(t *testing.T) {
-		heap := NewBinaryHeap(10, comparator.Min[int]())
+		heap := NewBinaryHeap(12, comparator.Min[int]())
 		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", heap)
-		want := "*heap.BinaryHeap[int]{size:10, cap:10}"
+		want := "*heap.BinaryHeap[int]{size:10, cap:12}"
 		assert.Equal(t, want, got)
 	})
 
 	t.Run("Verbose + String", func(t *testing.T) {
-		heap := NewBinaryHeap(10, comparator.Min[int]())
+		heap := NewBinaryHeap(12, comparator.Min[int]())
 		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", heap)
-		want := "*heap.BinaryHeap[int]{len:10, cap:10} [-99 -10 -1 0 1 ...(+5 more)]"
+		want := "*heap.BinaryHeap[int]{len:10, cap:12} [-99 -10 -1 0 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
 	})
 }

@@ -53,6 +53,8 @@ Use this file to orient quickly, then rely on
   package-owned error.
 - Keep root interfaces observation-only; mutations belong in structure-specific
   packages.
+- Alias public concrete types to implementation structs and return pointers to
+  those aliases from constructors and factory methods.
 - Clear removed slots, nodes, and freelist entries so references do not leak.
 - Use `gofmt` on changed Go files.
 - Do not use explicit import aliases.

@@ -593,13 +593,13 @@ func TestArraySortedList_JSON(t *testing.T) {
 }
 
 func TestArraySortedList_Format(t *testing.T) {
-	l := NewArraySortedList(0, cmp.Compare[int])
+	l := NewArraySortedList(10, cmp.Compare[int])
 	l.Add(5, 4, 3, 2, 1, 0)
 
 	assert.Equal(t, "[0 1 2 3 4 ...(+1 more)]", l.String())
 	assert.Equal(t, "[0 1 2 3 4 ...(+1 more)]", fmt.Sprintf("%v", l))
-	assert.Contains(t, fmt.Sprintf("%+v", l), "len:6")
-	assert.Contains(t, fmt.Sprintf("%#v", l), "ArraySortedList")
+	assert.Contains(t, fmt.Sprintf("%+v", l), "len:6, cap:10")
+	assert.Contains(t, fmt.Sprintf("%#v", l), "size:6, cap:10")
 }
 
 func TestArraySortedList_DescendingComparator(t *testing.T) {

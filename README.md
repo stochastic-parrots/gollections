@@ -37,13 +37,29 @@ Go documentation tools.
   `list.List`, `sortedlist.SortedList`, `deque.Deque`, `heap.Heap`, and
   `prioritymap.PriorityMap`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.
-- Internal implementations: public packages expose stable constructors while
+- Internal implementations: public packages expose stable concrete factories while
   concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
   allowing type assertion back to the mutable interface.
 - JSON support: linear collections and heaps can marshal/unmarshal as arrays
   where the operation makes sense.
+
+## Construction
+
+Public packages select an implementation through a reusable typed factory.
+Factory methods return concrete collection types without interface dispatch:
+
+```go
+items := list.Array[string]().New(16)
+queue := deque.Linked[int]().From([]int{1, 2, 3})
+scores := sortedlist.OrderedArray[int]().Clone([]int{3, 1, 2})
+pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
+```
+
+For slice-based construction, `From` may reorder and retain the provided slice.
+Use `Clone` when the source must remain unchanged. Linked structures always
+copy values into nodes, so their `From` methods do not retain the source.
 
 ## Choosing a list
 

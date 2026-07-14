@@ -19,6 +19,36 @@ func TestNewRingBufferDeque(t *testing.T) {
 	assert.Equal(t, 0, deque.write)
 }
 
+func TestNewRingBufferDequeFromSlice(t *testing.T) {
+	data := make([]int, 3, 5)
+	copy(data, []int{1, 2, 3})
+
+	deque := NewRingBufferDequeFromSlice(data)
+	deque.Append(4)
+	deque.Prepend(0)
+
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, deque.ToSlice())
+	assert.Equal(t, 5, len(deque.data))
+	assert.Equal(t, 5, cap(deque.data))
+	assert.Equal(t, 4, data[:4][3])
+}
+
+func TestNewRingBufferDequeCloneSlice(t *testing.T) {
+	data := []int{1, 2, 3}
+
+	deque := NewRingBufferDequeCloneSlice(data)
+	_, _ = deque.Shift()
+
+	assert.Equal(t, []int{2, 3}, deque.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, data)
+}
+
+func TestNewRingBufferDequeFromSeq(t *testing.T) {
+	deque := NewRingBufferDequeFromSeq(slices.Values([]int{1, 2, 3}))
+
+	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
+}
+
 func TestRingBufferDeque_Length(t *testing.T) {
 	deque := NewRingBufferDeque[int](1)
 	assert.Equal(t, 0, deque.Length())
@@ -282,11 +312,11 @@ func TestRingBufferDeque_String(t *testing.T) {
 }
 
 func TestRingBufferDeque_Format(t *testing.T) {
-	deque := NewRingBufferDeque[int](2)
+	deque := NewRingBufferDeque[int](4)
 	deque.Append(1, 2)
 
-	assert.Equal(t, "*deque.RingBufferDeque[int]{size:2, cap:2}", fmt.Sprintf("%#v", deque))
-	assert.Equal(t, "*deque.RingBufferDeque[int]{len:2, cap:2} [1 2]", fmt.Sprintf("%+v", deque))
+	assert.Equal(t, "*deque.RingBufferDeque[int]{size:2, cap:4}", fmt.Sprintf("%#v", deque))
+	assert.Equal(t, "*deque.RingBufferDeque[int]{len:2, cap:4} [1 2]", fmt.Sprintf("%+v", deque))
 }
 
 func TestRingBufferDeque_MarshalJSON(t *testing.T) {

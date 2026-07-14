@@ -10,16 +10,59 @@ import (
 )
 
 func TestFactoriesImplementDeque(t *testing.T) {
-	var _ deque.Deque[int] = deque.NewArray[int](0)
-	var _ deque.Deque[int] = deque.NewLinked[int]()
+	var _ *deque.ArrayDeque[int] = deque.Array[int]().New(0)
+	var _ *deque.ArrayDeque[int] = deque.Array[int]().From([]int{1})
+	var _ *deque.ArrayDeque[int] = deque.Array[int]().Clone([]int{1})
+	var _ *deque.ArrayDeque[int] = deque.Array[int]().FromSeq(slices.Values([]int{1}))
+	var _ *deque.LinkedDeque[int] = deque.Linked[int]().New()
+	var _ *deque.LinkedDeque[int] = deque.Linked[int]().From([]int{1})
+	var _ *deque.LinkedDeque[int] = deque.Linked[int]().FromSeq(slices.Values([]int{1}))
+	var _ deque.Deque[int] = deque.Array[int]().New(0)
+	var _ deque.Deque[int] = deque.Linked[int]().New()
 }
 
-func TestNewArray(t *testing.T) {
-	assertDequeBehavior(t, deque.NewArray[int](1))
+func TestArrayFactory_From(t *testing.T) {
+	data := []int{1, 2}
+	deque := deque.Array[int]().From(data)
+
+	_, _ = deque.Shift()
+	assert.Equal(t, []int{0, 2}, data)
 }
 
-func TestNewLinked(t *testing.T) {
-	assertDequeBehavior(t, deque.NewLinked[int]())
+func TestArrayFactory_Clone(t *testing.T) {
+	data := []int{1, 2}
+	deque := deque.Array[int]().Clone(data)
+
+	_, _ = deque.Shift()
+	assert.Equal(t, []int{1, 2}, data)
+}
+
+func TestArrayFactory_FromSeq(t *testing.T) {
+	deque := deque.Array[int]().FromSeq(slices.Values([]int{1, 2}))
+
+	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+}
+
+func TestLinkedFactory_From(t *testing.T) {
+	data := []int{1, 2}
+	deque := deque.Linked[int]().From(data)
+	data[0] = 10
+
+	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+}
+
+func TestLinkedFactory_FromSeq(t *testing.T) {
+	deque := deque.Linked[int]().FromSeq(slices.Values([]int{1, 2}))
+
+	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+}
+
+func TestArrayFactory_New(t *testing.T) {
+	assertDequeBehavior(t, deque.Array[int]().New(1))
+}
+
+func TestLinkedFactory_New(t *testing.T) {
+	assertDequeBehavior(t, deque.Linked[int]().New())
 }
 
 func TestAsReadonly(t *testing.T) {
@@ -28,7 +71,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := deque.NewArray[int](0)
+		mutable := deque.Array[int]().New(0)
 		mutable.Append(1, 2)
 
 		view := deque.AsReadonly[int](mutable)

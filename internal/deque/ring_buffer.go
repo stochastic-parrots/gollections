@@ -3,6 +3,7 @@ package deque
 import (
 	"fmt"
 	"iter"
+	"slices"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 )
@@ -21,6 +22,33 @@ type RingBufferDeque[T any] struct {
 func NewRingBufferDeque[T any](size int) *RingBufferDeque[T] {
 	data := make([]T, size)
 	return &RingBufferDeque[T]{data: data}
+}
+
+// NewRingBufferDequeFromSlice creates a RingBufferDeque containing data in
+// logical front-to-back order. The caller transfers ownership of data and its
+// backing array to the returned deque.
+func NewRingBufferDequeFromSlice[T any](data []T) *RingBufferDeque[T] {
+	capacity := cap(data)
+	storage := data[:capacity]
+	write := len(data)
+	if write == capacity {
+		write = 0
+	}
+	return &RingBufferDeque[T]{
+		data:  storage,
+		write: write,
+		count: len(data),
+	}
+}
+
+// NewRingBufferDequeCloneSlice creates a RingBufferDeque from a shallow copy of data.
+func NewRingBufferDequeCloneSlice[T any](data []T) *RingBufferDeque[T] {
+	return NewRingBufferDequeFromSlice(slices.Clone(data))
+}
+
+// NewRingBufferDequeFromSeq collects seq into a new RingBufferDeque.
+func NewRingBufferDequeFromSeq[T any](seq iter.Seq[T]) *RingBufferDeque[T] {
+	return NewRingBufferDequeFromSlice(slices.Collect(seq))
 }
 
 // next returns the index that follows idx in the ring, wrapping around
@@ -145,7 +173,7 @@ func (rb *RingBufferDeque[T]) ToSlice() []T {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (rb *RingBufferDeque[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, rb, rb.Length())
+	collection.Format(s, verb, rb, cap(rb.data))
 }
 
 // String returns a string representation of the deque.
@@ -212,8 +240,8 @@ func (rb *RingBufferDeque[T]) prepend(x T) {
 //
 // Complexity: O(k) where k is the number of elements.
 func (rb *RingBufferDeque[T]) Prepend(xs ...T) {
-	for i := len(xs) - 1; i >= 0; i-- {
-		rb.prepend(xs[i])
+	for _, x := range slices.Backward(xs) {
+		rb.prepend(x)
 	}
 }
 

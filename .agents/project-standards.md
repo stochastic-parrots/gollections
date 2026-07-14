@@ -30,7 +30,7 @@ Follow the file layout already used by the library:
 - Public collection package:
   - `<package>.go` contains the public interface, readonly interface, and
     `AsReadonly` wrapper.
-  - `factory.go` exposes type aliases and constructors.
+  - `factory_<strategy>.go` exposes each concrete alias and its typed factory.
   - `doc.go` explains the package.
   - `examples_test.go` contains public examples.
   - `<package>_test.go` validates public contracts from the external test
@@ -78,6 +78,10 @@ alias and constructor from the public package.
   - compile-time assertion: `var _ Readonly[...] = (*readonly[...])(nil)`.
 - Public factory files should include compile-time assertions that internal
   implementations satisfy the public interface.
+- Public concrete type aliases must alias the implementation struct, never a
+  pointer to it. Factory construction methods return pointers to those aliases.
+  For example, declare `type ArrayList[T any] = list.ArrayList[T]` and return
+  `*ArrayList[T]` from `New`, `From`, `Clone`, and `FromSeq`.
 
 ## Naming
 
@@ -87,6 +91,8 @@ alias and constructor from the public package.
   `ArrayList`, `LinkedList`, `ArraySortedList`, `ArrayDeque`, `LinkedDeque`,
   `BinaryHeap`, `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`,
   `RadixHeapPriorityMap`.
+- Concrete aliases always name structs. Constructors and factory methods return
+  pointers explicitly; do not hide pointer semantics inside an alias.
 - Internal implementation types include their backing strategy:
   `ArrayList`, `DoubleLinkedList`, `ArraySortedList`, `RingBufferDeque`,
   `BinaryHeap`, `BinaryPriorityMap`, `PairingPriorityMap`, `RadixPriorityMap`.
@@ -113,13 +119,14 @@ alias and constructor from the public package.
 - Use `xs ...T` for variadic element inputs, matching `Append(xs ...T)` and
   `Push(xs ...T)`.
 - Use `idx` for indexes, not `index`, in method signatures and tests.
-- Constructors should preserve the user-facing vocabulary:
-  - `NewArray`, `NewLinked`, `NewBinary`, `NewMinBinary`, `NewMaxBinary`.
-  - `ArrayFrom`, `ArrayClone`, and `ArrayFromSeq` are sorted-list factories.
-  - `BinaryFrom` means in-place construction from a slice.
-  - `BinaryClone` means clone-before-build.
-  - `NewBinaryHeap`, `NewPairingHeap`, and `NewRadixHeap` are priority map
-    factories even though the internal type name includes `PriorityMap`.
+- Factory selectors should preserve the user-facing strategy vocabulary:
+  - `Array` and `Linked` select list and deque implementations.
+  - `Binary` and `OrderedBinary` select binary heap implementations.
+  - `Array` and `OrderedArray` select sorted-list implementations.
+  - `BinaryHeap`, `OrderedBinaryHeap`, `PairingHeap`,
+    `OrderedPairingHeap`, and `RadixHeap` select priority-map implementations.
+- Factory construction methods use `New`, `From`, `Clone`, and `FromSeq` where
+  supported by the implementation and its ownership contract.
 - Test names use `Test<Type>_<Method>` or `TestNew<Type>`. Subtests use compact
   PascalCase names such as `FullIteration`, `PartialIteration`, `EmptyMap`,
   `WorsePriority`, or `Reuse`.

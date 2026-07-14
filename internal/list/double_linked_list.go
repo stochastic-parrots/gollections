@@ -27,6 +27,23 @@ func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 	}
 }
 
+// NewDoubleLinkedListFromSlice creates a DoubleLinkedList containing data.
+// Values are copied into newly allocated nodes and data is not retained.
+func NewDoubleLinkedListFromSlice[T any](data []T) *DoubleLinkedList[T] {
+	list := NewDoubleLinkedList[T]()
+	list.Append(data...)
+	return list
+}
+
+// NewDoubleLinkedListFromSeq creates a DoubleLinkedList containing values from seq.
+func NewDoubleLinkedListFromSeq[T any](seq iter.Seq[T]) *DoubleLinkedList[T] {
+	list := NewDoubleLinkedList[T]()
+	for value := range seq {
+		list.Append(value)
+	}
+	return list
+}
+
 // Length returns the current number of elements in the list.
 //
 // Complexity: O(1).

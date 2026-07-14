@@ -24,6 +24,22 @@ func NewArrayList[T any](size int) *ArrayList[T] {
 	return &ArrayList[T]{data: data}
 }
 
+// NewArrayListFromSlice creates an ArrayList using data as its backing storage.
+// The caller transfers ownership of data to the returned list.
+func NewArrayListFromSlice[T any](data []T) *ArrayList[T] {
+	return &ArrayList[T]{data: data}
+}
+
+// NewArrayListCloneSlice creates an ArrayList from a shallow copy of data.
+func NewArrayListCloneSlice[T any](data []T) *ArrayList[T] {
+	return NewArrayListFromSlice(slices.Clone(data))
+}
+
+// NewArrayListFromSeq collects seq into a new ArrayList.
+func NewArrayListFromSeq[T any](seq iter.Seq[T]) *ArrayList[T] {
+	return NewArrayListFromSlice(slices.Collect(seq))
+}
+
 // Length returns the current number of elements in the list.
 //
 // Complexity: O(1).
@@ -252,7 +268,7 @@ func (l *ArrayList[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (l *ArrayList[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, l, l.Length())
+	collection.Format(s, verb, l, cap(l.data))
 }
 
 // String returns a string representation of the list.

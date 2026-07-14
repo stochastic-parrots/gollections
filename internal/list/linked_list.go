@@ -3,6 +3,7 @@ package list
 import (
 	"fmt"
 	"iter"
+	"slices"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 	"github.com/stochastic-parrots/gollections/internal/shared/node"
@@ -271,8 +272,8 @@ func (l *LinkedList[T]) Enumerate() iter.Seq2[int, T] {
 func (l *LinkedList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		slice := l.ToSlice()
-		for idx := len(slice) - 1; idx >= 0; idx-- {
-			if !yield(slice[idx]) {
+		for _, value := range slices.Backward(slice) {
+			if !yield(value) {
 				return
 			}
 		}

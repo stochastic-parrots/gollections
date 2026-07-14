@@ -11,16 +11,59 @@ import (
 )
 
 func TestFactoriesImplementList(t *testing.T) {
-	var _ list.List[int] = list.NewArray[int](0)
-	var _ list.List[int] = list.NewLinked[int]()
+	var _ *list.ArrayList[int] = list.Array[int]().New(0)
+	var _ *list.ArrayList[int] = list.Array[int]().From([]int{1})
+	var _ *list.ArrayList[int] = list.Array[int]().Clone([]int{1})
+	var _ *list.ArrayList[int] = list.Array[int]().FromSeq(slices.Values([]int{1}))
+	var _ *list.LinkedList[int] = list.Linked[int]().New()
+	var _ *list.LinkedList[int] = list.Linked[int]().From([]int{1})
+	var _ *list.LinkedList[int] = list.Linked[int]().FromSeq(slices.Values([]int{1}))
+	var _ list.List[int] = list.Array[int]().New(0)
+	var _ list.List[int] = list.Linked[int]().New()
 }
 
-func TestNewArray(t *testing.T) {
-	assertListBehavior(t, list.NewArray[int](1))
+func TestArrayFactory_From(t *testing.T) {
+	data := []int{1, 2}
+	list := list.Array[int]().From(data)
+
+	assert.NoError(t, list.Set(0, 10))
+	assert.Equal(t, []int{10, 2}, data)
 }
 
-func TestNewLinked(t *testing.T) {
-	assertListBehavior(t, list.NewLinked[int]())
+func TestArrayFactory_Clone(t *testing.T) {
+	data := []int{1, 2}
+	list := list.Array[int]().Clone(data)
+
+	assert.NoError(t, list.Set(0, 10))
+	assert.Equal(t, []int{1, 2}, data)
+}
+
+func TestArrayFactory_FromSeq(t *testing.T) {
+	list := list.Array[int]().FromSeq(slices.Values([]int{1, 2}))
+
+	assert.Equal(t, []int{1, 2}, list.ToSlice())
+}
+
+func TestLinkedFactory_From(t *testing.T) {
+	data := []int{1, 2}
+	list := list.Linked[int]().From(data)
+	data[0] = 10
+
+	assert.Equal(t, []int{1, 2}, list.ToSlice())
+}
+
+func TestLinkedFactory_FromSeq(t *testing.T) {
+	list := list.Linked[int]().FromSeq(slices.Values([]int{1, 2}))
+
+	assert.Equal(t, []int{1, 2}, list.ToSlice())
+}
+
+func TestArrayFactory_New(t *testing.T) {
+	assertListBehavior(t, list.Array[int]().New(1))
+}
+
+func TestLinkedFactory_New(t *testing.T) {
+	assertListBehavior(t, list.Linked[int]().New())
 }
 
 func TestAsReadonly(t *testing.T) {
@@ -29,7 +72,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := list.NewArray[int](0)
+		mutable := list.Array[int]().New(0)
 		mutable.Append(1, 2)
 
 		view := list.AsReadonly[int](mutable)

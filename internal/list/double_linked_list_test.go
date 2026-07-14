@@ -18,6 +18,21 @@ func TestNewDoubleLinkedList(t *testing.T) {
 	assert.Nil(t, list.last)
 }
 
+func TestNewDoubleLinkedListFromSlice(t *testing.T) {
+	data := []int{1, 2, 3}
+
+	list := NewDoubleLinkedListFromSlice(data)
+	data[0] = 10
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+}
+
+func TestNewDoubleLinkedListFromSeq(t *testing.T) {
+	list := NewDoubleLinkedListFromSeq(slices.Values([]int{1, 2, 3}))
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+}
+
 func TestDoubleLinkedList_Length(t *testing.T) {
 	list := NewDoubleLinkedList[any]()
 
