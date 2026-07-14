@@ -26,4 +26,8 @@
 // Peek is O(1). Pop and Replace are O(log N). From and Clone build a heap in
 // O(N). Push is O(K log N) for K inserted values, with a bulk heapify path when
 // rebuilding is cheaper. Drain is O(N log N) when fully consumed.
+//
+// All and Enumerate expose the internal heap representation and do not guarantee
+// priority order. Use Drain when destructive priority-ordered traversal is
+// required.
 package heap

@@ -34,4 +34,8 @@
 // operations. [AsReadonly] prevents callers from recovering the mutable list
 // through a type assertion. Iterators follow the standard iter package and stop
 // without further work when the yield function returns false.
+//
+// All traverses the current logical list order from first to last, including
+// after Reverse. Enumerate uses the same order and assigns consecutive indexes
+// starting at zero. Backward traverses that logical order in reverse.
 package list

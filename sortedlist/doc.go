@@ -26,6 +26,8 @@
 // Bounds and range operations use list order. [Readonly.Range] is half-open:
 // it yields values in [from, to), including values equivalent to from and
 // excluding values equivalent to to.
+// All traverses values in sorted order, Enumerate uses the same order, and
+// Backward traverses it in reverse.
 //
 // # Readonly Interface
 //
