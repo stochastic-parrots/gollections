@@ -33,5 +33,7 @@
 // [List] exposes mutation, while [Readonly] contains observation and traversal
 // operations. [AsReadonly] prevents callers from recovering the mutable list
 // through a type assertion. Iterators follow the standard iter package and stop
-// without further work when the yield function returns false.
+// without further work when the yield function returns false. A readonly view
+// observes the same underlying list; it is not a snapshot and does not make
+// concurrent mutation safe.
 package list

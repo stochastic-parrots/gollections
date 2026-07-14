@@ -40,5 +40,6 @@
 // and map iteration. [AsReadonly] prevents callers from recovering the mutable
 // map through a type assertion. Drain is destructive and removes entries as
 // they are yielded; stopping iteration early leaves unvisited entries in the
-// map.
+// map. A readonly view observes the same underlying priority map; it is not a
+// snapshot and does not make concurrent mutation safe.
 package prioritymap

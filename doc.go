@@ -19,6 +19,14 @@
 // Clear are exposed only by the structure-specific interfaces in each
 // subpackage, where their semantics are precise and unambiguous.
 //
+// # Concurrency
+//
+// Unless a type explicitly documents otherwise, collections in this module are
+// not safe for concurrent use. Callers must synchronize access when at least one
+// goroutine may mutate a shared collection. Readonly interfaces and views limit
+// the operations available through an API; they do not provide synchronization
+// or a snapshot of the underlying collection.
+//
 // # Subpackages
 //
 // The library is organized into specialized subpackages. Refer to each package

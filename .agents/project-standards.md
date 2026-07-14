@@ -76,6 +76,12 @@ alias and constructor from the public package.
   - `AsReadonly` returning `nil` for nil input.
   - private `readonly` wrapper with one-line forwarding methods.
   - compile-time assertion: `var _ Readonly[...] = (*readonly[...])(nil)`.
+- Readonly interfaces and wrappers are capability restrictions over the same
+  underlying structure. Do not describe them as snapshots, synchronization, or
+  concurrency safety.
+- Unless explicitly documented otherwise, public structures are not safe for
+  concurrent use. Package documentation must tell callers to synchronize shared
+  access when any goroutine may mutate the structure.
 - Public factory files should include compile-time assertions that internal
   implementations satisfy the public interface.
 - Public concrete type aliases must alias the implementation struct, never a
