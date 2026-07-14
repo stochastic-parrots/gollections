@@ -14,10 +14,10 @@
 // a heap, priority map, or a future tree/skip-list implementation depending on
 // the access pattern.
 //
-// Use [NewOrderedArray] and related constructors when T satisfies cmp.Ordered
-// and natural order is enough. These constructors use standard-library ordered
-// sort and search paths without custom comparator calls. Use [NewArray] and
-// related constructors when values need a custom comparator. Custom comparators
+// Use [OrderedArray] when T satisfies cmp.Ordered and natural order is enough.
+// Its factory uses standard-library ordered sort and search paths without
+// custom comparator calls. Use [Array] when values need a custom comparator.
+// Custom comparators
 // must define the same ordering for construction, lookup, replacement, and
 // removal, and are called during search and sort operations. The relative order
 // of values considered equivalent by the comparator is unspecified; include a
@@ -76,7 +76,9 @@
 //     standard-library ordered search and sort paths without custom comparator
 //     calls.
 //
-// Constructors can build sorted lists from empty capacity, slices, cloned
-// slices, or iterators. Iterator constructors make it possible to sort any
-// collection in this module that exposes All().
+// Factories build sorted lists from empty capacity, slices, cloned slices, or
+// iterators. [ArrayFactory.From] and [OrderedArrayFactory.From] sort and retain
+// the provided slice; Clone preserves it. FromSeq makes it possible to sort any
+// collection in this module that exposes All(). Every factory method returns a
+// concrete sorted-list type.
 package sortedlist

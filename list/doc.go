@@ -1,72 +1,37 @@
-// Package list provides high-performance, generic linear collection implementations.
+// Package list provides mutable generic linear collections with indexed access.
 //
-// The package offers a modern, type-safe suite of list structures, ranging from
-// contiguous-memory array lists to flexible linked lists. It leverages Go
-// generics to eliminate interface{} casting and the standard iter package for
-// high-performance, idiomatic data traversal.
+// Lists support positional reads, writes, insertion, removal, forward and
+// backward iteration, and reversal. Empty or invalid indexed operations return
+// package-owned errors rather than panicking.
 //
-// # Readonly Interface
+// # Implementations
 //
-// All lists implement the [Readonly] interface, providing a unified API:
+// [ArrayList] stores values in a contiguous slice. Choose it for O(1) indexed
+// access and writes, amortized O(1) append, and memory-local traversal.
+// Insertion and removal at arbitrary positions are O(N).
 //
-//	type Readonly[T any] interface {
-//		Get(idx int) (T, error)
-//		Find(x T, cmp func(a, b T) int) (idx int, ok bool)
-//		Contains(x T, cmp func(a, b T) int) bool
-//		Backward() iter.Seq[T]
-//		ToSlice() []T
-//		pkg.Collection[T]
-//		fmt.Stringer
-//		json.Marshaler
-//	}
+// [LinkedList] stores values in a doubly linked sequence. Choose it when O(1)
+// reversal and boundary insertion or removal matter more than indexed access.
+// Indexed operations require O(N) traversal.
 //
-// # List Interface
+// Select an implementation with [Array] or [Linked]. Each selector returns a
+// reusable concrete factory whose construction methods return pointers to the
+// corresponding concrete list type.
 //
-// All lists implement the [List] interface, providing a unified API:
+// # Construction And Ownership
 //
-//	type List[T any] interface {
-//		Append(xs ...T)
-//		Insert(idx int, x T) error
-//		Set(idx int, x T) error
-//		Remove(idx int) (T, error)
-//		Reverse()
-//		Clear()
-//		Readonly[T]
-//		json.Unmarshaler
-//	}
+// Array factories provide New, From, Clone, and FromSeq. [ArrayFactory.From]
+// takes ownership of the provided slice and may reuse its backing array during
+// later mutations. [ArrayFactory.Clone] preserves the source by making a shallow
+// copy. FromSeq collects an iterator into new storage.
 //
-// # Why this package?
+// Linked factories provide New, From, and FromSeq. Linked construction always
+// copies values into newly allocated nodes and never retains a source slice.
 //
-//   - Performance: Optimized internal operations like O(1) Reverse for Double Linked Lists
-//     and slice-backed efficiency for Array Lists.
+// # Views And Iteration
 //
-//   - Modern Iteration: Full support for 'iter.Seq' and 'iter.Seq2', allowing you to
-//     use range loops directly on your collections.
-//
-//   - Memory Management: Built with GC-friendly practices, including explicit
-//     element zeroing to prevent memory leaks in generic types.
-//
-//   - Predictable API: Consistent method signatures across different list types
-//     (Get, Set, Append, Length) to reduce the learning curve.
-//
-// # Core Concepts
-//
-// The package provides three main flavors of lists, each optimized for specific access patterns:
-//
-//   - [ArrayList]: Best for random access O(1) and memory locality.
-//   - [LinkedList]: A doubly linked list optimized for efficient boundary insertions.
-//     Supports O(1) reversal and bi-directional traversal.
-//
-// # Usage Example
-//
-//	l := list.NewLinked[string]()
-//	l.Append("Go", "is", "awesome")
-//
-//	// Idiomatic iteration (Go 1.23+)
-//	for i, val := range l.Enumerate() {
-//	    fmt.Printf("Node %d: %s\n", i, val)
-//	}
-//
-//	l.Reverse()
-//	fmt.Println(l.String())
+// [List] exposes mutation, while [Readonly] contains observation and traversal
+// operations. [AsReadonly] prevents callers from recovering the mutable list
+// through a type assertion. Iterators follow the standard iter package and stop
+// without further work when the yield function returns false.
 package list

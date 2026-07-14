@@ -53,6 +53,6 @@
 // # Documentation Characteristics
 //
 // Each data structure includes detailed performance documentation in its subpackage.
-// Refer to the factory functions (for example, list.NewArray) for time complexity
-// tables covering all operations.
+// Refer to the factory types (for example, [list.ArrayFactory]) for time
+// complexity tables covering all operations.
 package gollections

@@ -1,52 +1,29 @@
-// Package heap provides high-performance, generic heap implementations.
+// Package heap provides mutable generic priority queues backed by binary heaps.
 //
-// The package offers a modern alternative to the standard library's container/heap,
-// leveraging Go generics for type safety and standard iterators for idiomatic
-// data traversal.
+// The value at the top is selected by a priority comparator. Pop, Replace, and
+// Push maintain the heap property; Peek observes the current top value without
+// removing it. Drain is destructive and yields values in priority order.
 //
-// # Heap Interface
+// # Ordering
 //
-// All heaps implement the Heap interface, providing a unified API:
+// Use [Binary] when priority is defined by a custom function. The function must
+// return true when its first argument has higher priority than its second.
 //
-//	type Heap[T any] interface {
-//		Push(xs ...T)
-//		Pop() (T, bool)
-//		Peek() (T, bool)
-//		Drain() iter.Seq2[int, T]
-//		Replace(x T) (T, bool)
-//		Clear()
-//		Collection[T]
-//		fmt.Stringer
-//		json.Marshaler
-//		json.Unmarshaler
-//	}
+// Use [OrderedBinary] for values satisfying cmp.Ordered. Pass [Min] to give
+// smaller values priority or [Max] to give larger values priority. Both
+// selectors return a reusable [BinaryFactory] whose methods return
+// *[BinaryHeap].
 //
-// # Why this package?
+// # Construction And Ownership
 //
-//   - Type Safety: No interface{} casting for stored values; work directly with
-//     your types.
+// [BinaryFactory.New] creates an empty heap with the requested capacity.
+// [BinaryFactory.From] heapifies a slice in place and transfers ownership of its
+// backing storage. [BinaryFactory.Clone] makes a shallow copy before heapifying
+// and does not retain the source slice.
 //
-//   - Go Idiomatic: Integrates with the 'iter' package for seamless range loops.
+// # Complexity
 //
-//   - Versatile: Supports Min-Heaps, Max-Heaps, and custom priority logic.
-//
-//   - Memory Efficient: Provides in-place constructors with suffix 'From'
-//     and safe-copy constructors with suffix 'Clone'.
-//
-//   - Predictable API: Consistent method signatures across different heap types
-//     (Push, Pop, Peek, Drain) to reduce the learning curve.
-//
-// # Core Concepts
-//
-// The [Heap] interface extends the base [gollections.Collection], adding
-// priority-specific operations like Push, Pop, and Peek.
-//
-// One of the standout features is the Drain method:
-//
-//	h := heap.MinBinaryFrom([]int{3, 1, 2})
-//	for i, val := range h.Drain() {
-//	    fmt.Printf("Rank %d: %v\n", i, val)
-//	}
-//
-// After this loop, h is empty.
+// Peek is O(1). Pop and Replace are O(log N). From and Clone build a heap in
+// O(N). Push is O(K log N) for K inserted values, with a bulk heapify path when
+// rebuilding is cheaper. Drain is O(N log N) when fully consumed.
 package heap

@@ -1,82 +1,44 @@
-// Package prioritymap provides high-performance, generic priority map implementations.
+// Package prioritymap provides mutable maps whose entries are also ordered by
+// priority.
 //
-// The package offers data structures that combine the O(1) average lookup of a
-// hash map with the O(log n) ordering of a priority queue. This allows
-// for efficient "decrease-key" operations, which are essential for algorithms
-// like Dijkstra's or A*.
+// A priority map combines key-based lookup with priority-queue operations.
+// Entries can be inserted, updated, improved, removed by key, or popped in
+// priority order. The comparator associated with an implementation defines what
+// "highest priority" means.
 //
-// The package also provides [RadixHeapPriorityMap] for monotone unsigned
-// integer priorities. It is designed for workloads such as Dijkstra with
-// non-negative integer edge weights, where priorities returned by Pop never
-// decrease. After Pop returns p, subsequent insertions and updates must use
-// priorities greater than or equal to p. This precondition is intentionally
-// unchecked to keep the radix heap's hot path minimal.
+// # Implementations
 //
-// # Readonly Interface
+// [BinaryHeapPriorityMap] provides predictable O(log N) insertion, update,
+// removal, and Pop, with O(1) key lookup and Peek. Select it with [BinaryHeap]
+// or [OrderedBinaryHeap].
 //
-// All priority maps implement the [Readonly] interface, providing a unified API
-// for key-value management with priority ordering:
+// [PairingHeapPriorityMap] provides O(1) amortized priority improvements and is
+// intended for workloads with frequent decrease-key or increase-key operations.
+// Other priority mutations and removals are O(log N) amortized. Select it with
+// [PairingHeap] or [OrderedPairingHeap].
 //
-//	type Readonly[K comparable, V any] interface {
-//		Get(key K) (V, bool)
-//		Peek() (K, V, bool)
-//		pkg.Map[K, V]
-//	}
+// [RadixHeapPriorityMap] is a monotone min-priority map for non-negative integer
+// priorities. It provides O(1) Set, Update, Improve, Get, and Remove, with O(W)
+// amortized Pop for a W-bit priority. Select it with [RadixHeap].
 //
-// # PriorityMap Interface
+// # Ordering
 //
-// All priority maps implement the [PriorityMap] interface, providing a unified API
-// for key-value management with priority ordering:
+// Binary and pairing heap factories accept either a custom priority comparator
+// or the natural order of a cmp.Ordered priority type. Pass [Min] to an ordered
+// factory when smaller values have higher priority, or [Max] when larger values
+// have higher priority.
 //
-//	type PriorityMap[K comparable, V any] interface {
-//		Set(key K, value V)
-//		Update(key K, value V) bool
-//		Improve(key K, value V) bool
-//		Remove(key K) bool
-//		Pop() (K, V, bool)
-//		Peek() (K, V, bool)
-//		Drain() iter.Seq2[K, V]
-//		Clear()
-//		Readonly[K, V]
-//	}
+// The radix heap is always min-priority and monotone. Its lower bound starts at
+// zero and advances when Pop returns a value. Subsequent insertions and updates
+// must not use priorities smaller than that bound. This precondition is not
+// checked at runtime; violating it invalidates ordering guarantees. Peek does
+// not advance the lower bound.
 //
-// # Why this package?
+// # Views And Iteration
 //
-//   - Efficient Updates: Unlike a standard heap, you can update the priority
-//     of an existing key in O(log n) time without searching the entire structure.
-//
-//   - Type Safety: Fully leverages Go generics to ensure keys and priorities
-//     are strictly typed, eliminating interface{} casting.
-//
-//   - Dual Nature: Implements both the [pkg.Map] and priority queue
-//     behaviors, making it a versatile tool for scheduling and graph traversal.
-//
-//   - Go Idiomatic: Designed to feel like a native Go collection, integrating
-//     seamlessly with the broader 'gollections' ecosystem.
-//
-// # Core Concepts
-//
-// The [PriorityMap] is particularly powerful when you need to track the "best"
-// element while frequently changing the scores of other elements.
-//
-// Choose [BinaryHeapPriorityMap] for predictable general-purpose behavior,
-// [PairingHeapPriorityMap] for frequent priority improvements, and
-// [RadixHeapPriorityMap] when priorities are unsigned integers and extraction
-// is monotone. Callers are responsible for preserving the radix heap's
-// monotonicity requirement.
-//
-// Example of a basic workflow:
-//
-//	pm := prioritymap.MinBinaryHeap[string, int](10)
-//	pm.Set("task1", 10)
-//	pm.Set("task2", 5)
-//
-//	// Update task1 to a higher priority (lower value)
-//	pm.Set("task1", 2)
-//
-//	key, val, _ := pm.Pop() // Returns "task1", 2
-//
-// When using [Set], if the key already exists, the implementation internally
-// performs a "fix" or "re-heapify" operation to maintain the correct order
-// based on the new value.
+// [PriorityMap] exposes mutation, while [Readonly] provides key lookup, Peek,
+// and map iteration. [AsReadonly] prevents callers from recovering the mutable
+// map through a type assertion. Drain is destructive and removes entries as
+// they are yielded; stopping iteration early leaves unvisited entries in the
+// map.
 package prioritymap
