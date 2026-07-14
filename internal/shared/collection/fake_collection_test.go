@@ -54,7 +54,3 @@ func (f *FakeCollection[T]) String() string {
 func (f *FakeCollection[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(f.data)
 }
-
-func (f *FakeCollection[T]) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &f.data)
-}

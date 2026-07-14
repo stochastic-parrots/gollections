@@ -252,17 +252,6 @@ func (l *ArrayList[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(l)
 }
 
-// UnmarshalJSON populates the list from a JSON array.
-// It clears any existing elements before appending the new ones from the JSON data.
-//
-// Note: This operation is destructive; it calls Clear() to remove all existing
-// elements before appending the ones from the JSON data.
-//
-// Complexity: O(n + k) where k is the number of elements in the JSON.
-func (l *ArrayList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Append)
-}
-
 // Format implements the fmt.Formatter interface, allowing custom formatting
 // with verbs like %v, %+v, and %#v.
 //

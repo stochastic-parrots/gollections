@@ -9,31 +9,34 @@ import (
 )
 
 func ExampleArray() {
-	deque := deque.Array[int]().New(2)
-	deque.Append(2, 3)
-	deque.Prepend(0, 1)
+	factory := deque.Array[int]()
+	queue := factory.New(2)
+	queue.Append(2, 3)
+	queue.Prepend(0, 1)
 
-	front, _ := deque.Front()
-	back, _ := deque.Back()
+	front, _ := queue.Front()
+	back, _ := queue.Back()
 	fmt.Println(front, back)
 
-	shifted, _ := deque.Shift()
-	popped, _ := deque.Pop()
+	shifted, _ := queue.Shift()
+	popped, _ := queue.Pop()
 	fmt.Println(shifted, popped)
-	fmt.Println(slices.Collect(deque.All()))
+	fmt.Println(slices.Collect(queue.All()))
 
-	data, _ := json.Marshal(deque)
+	data, _ := json.Marshal(queue)
 	fmt.Println("Marshal:", string(data))
 
-	_ = json.Unmarshal([]byte(`[8,9]`), deque)
-	fmt.Println("Unmarshal:", slices.Collect(deque.All()))
+	var values []int
+	_ = json.Unmarshal([]byte(`[8,9]`), &values)
+	queue = factory.From(values)
+	fmt.Println("Decoded:", slices.Collect(queue.All()))
 
 	// Output:
 	// 0 3
 	// 0 3
 	// [1 2]
 	// Marshal: [1,2]
-	// Unmarshal: [8 9]
+	// Decoded: [8 9]
 }
 
 func ExampleLinked() {

@@ -219,6 +219,9 @@ alias and constructor from the public package.
 - Document behavioral contracts close to the API that depends on them. For
   example, radix priority maps must document their monotonicity requirement near
   the type and mutation methods.
+- Collection types may implement `json.Marshaler` when their array order is
+  documented. Do not implement `json.Unmarshaler`; callers decode into a slice
+  and use a public factory so strategy, comparator, and ownership stay explicit.
 - Examples live in `examples_test.go`, use `Example...` names, and include
   `// Output:` blocks when deterministic.
 - README changes should explain when to choose a structure, not only list that

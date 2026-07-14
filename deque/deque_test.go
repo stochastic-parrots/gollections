@@ -103,6 +103,8 @@ func TestAsReadonly(t *testing.T) {
 func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 	t.Helper()
 
+	_, unmarshals := any(d).(json.Unmarshaler)
+	assert.False(t, unmarshals)
 	assert.True(t, d.IsEmpty())
 
 	d.Append(2, 3)
@@ -130,10 +132,6 @@ func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 	data, err := json.Marshal(d)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[1,2]`, string(data))
-
-	err = json.Unmarshal([]byte(`[8,9]`), d)
-	assert.NoError(t, err)
-	assert.Equal(t, []int{8, 9}, d.ToSlice())
 
 	d.Clear()
 	assert.True(t, d.IsEmpty())

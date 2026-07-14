@@ -36,22 +36,3 @@ func Marshal[T any](c gollections.Collection[T]) ([]byte, error) {
 	buffer.WriteByte(']')
 	return buffer.Bytes(), nil
 }
-
-// Unmarshal populates a collection from a JSON array.
-// It uses a two-step process: first decoding into a temporary slice, then
-// applying the 'clear' and 'appender' functions to update the target collection.
-//
-// IMPORTANT: This operation is destructive. The 'clear' function is called
-// before 'appender' to ensure the collection reflects exactly the JSON state.
-//
-// Complexity: O(n + k) where n is the current collection size and k is the JSON size.
-func Unmarshal[T any](data []byte, clear func(), appender func(...T)) error {
-	var temp []T
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-
-	clear()
-	appender(temp...)
-	return nil
-}

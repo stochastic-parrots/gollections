@@ -42,8 +42,9 @@ Go documentation tools.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
   allowing type assertion back to the mutable interface.
-- JSON support: linear collections and heaps can marshal/unmarshal as arrays
-  where the operation makes sense.
+- JSON support: collections marshal as arrays in their documented traversal
+  order. Decode JSON into a slice, then construct the desired structure through
+  its factory so implementation and comparator settings remain explicit.
 
 ## Construction
 
@@ -55,6 +56,17 @@ items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
 scores := sortedlist.OrderedArray[int]().Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
+```
+
+Collection types intentionally do not implement `json.Unmarshaler`. Decode into
+a slice and use the selected factory to establish the structure's invariants:
+
+```go
+var values []int
+if err := json.Unmarshal(data, &values); err != nil {
+	return err
+}
+queue := deque.Array[int]().From(values)
 ```
 
 For slice-based construction, `From` may reorder and retain the provided slice.

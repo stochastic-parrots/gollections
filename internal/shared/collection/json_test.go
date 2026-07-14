@@ -37,30 +37,3 @@ func TestMarshal(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
-
-func TestUnmarshal(t *testing.T) {
-	t.Run("Overwrite", func(t *testing.T) {
-		currentData := []int{1, 2, 3}
-		jsonData := []byte("[4,5,6]")
-
-		clearCalled := false
-		clear := func() {
-			currentData = nil
-			clearCalled = true
-		}
-		appender := func(xs ...int) {
-			currentData = append(currentData, xs...)
-		}
-
-		err := collection.Unmarshal(jsonData, clear, appender)
-
-		assert.NoError(t, err)
-		assert.True(t, clearCalled, "clear should be called before appending")
-		assert.Equal(t, []int{4, 5, 6}, currentData)
-	})
-
-	t.Run("InvalidJSON", func(t *testing.T) {
-		err := collection.Unmarshal([]byte("[1, 2, wrong]"), func() {}, func(...int) {})
-		assert.Error(t, err)
-	})
-}

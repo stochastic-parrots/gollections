@@ -19,6 +19,13 @@
 // Clear are exposed only by the structure-specific interfaces in each
 // subpackage, where their semantics are precise and unambiguous.
 //
+// # JSON
+//
+// Collections that implement json.Marshaler encode as JSON arrays. The module
+// intentionally does not implement json.Unmarshaler: JSON cannot describe
+// construction settings such as comparator and implementation strategy. Decode
+// into a slice first, then pass that slice to the appropriate factory.
+//
 // # Subpackages
 //
 // The library is organized into specialized subpackages. Refer to each package

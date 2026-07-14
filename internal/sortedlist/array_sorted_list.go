@@ -1,7 +1,6 @@
 package sortedlist
 
 import (
-	"encoding/json"
 	"fmt"
 	"iter"
 	"slices"
@@ -412,31 +411,6 @@ func (l *ArraySortedList[T]) Clear() {
 // Complexity: O(N).
 func (l *ArraySortedList[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(l)
-}
-
-// UnmarshalJSON populates the list from a JSON array and restores sorted order.
-//
-// The input order is not preserved; values are sorted according to the list
-// comparator before replacing the current contents.
-// Existing backing storage is reused when it has enough capacity.
-//
-// Complexity: O(M + N log N), where M is the current length and N is the number
-// of decoded values.
-func (l *ArraySortedList[T]) UnmarshalJSON(data []byte) error {
-	var values []T
-	if err := json.Unmarshal(data, &values); err != nil {
-		return err
-	}
-
-	slices.SortFunc(values, l.compare)
-	l.Clear()
-	if len(values) > cap(l.data) {
-		l.data = values
-		return nil
-	}
-
-	l.data = append(l.data, values...)
-	return nil
 }
 
 // Format implements fmt.Formatter.

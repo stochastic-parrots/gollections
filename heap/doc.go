@@ -21,6 +21,13 @@
 // backing storage. [BinaryFactory.Clone] makes a shallow copy before heapifying
 // and does not retain the source slice.
 //
+// # JSON
+//
+// Heaps marshal as arrays in internal heap order, not Pop or Drain order. They
+// do not implement json.Unmarshaler because JSON cannot preserve the comparator.
+// Decode into []T and pass the values to the same factory used to define heap
+// priority.
+//
 // # Complexity
 //
 // Peek is O(1). Pop and Replace are O(log N). From and Clone build a heap in

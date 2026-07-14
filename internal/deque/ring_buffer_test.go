@@ -341,28 +341,6 @@ func TestRingBufferDeque_MarshalJSON(t *testing.T) {
 	})
 }
 
-func TestRingBufferDeque_UnmarshalJSON(t *testing.T) {
-	t.Run("Valid", func(t *testing.T) {
-		deque := NewRingBufferDeque[int](1)
-		deque.Append(1, 2)
-
-		err := json.Unmarshal([]byte(`[8,9]`), deque)
-
-		assert.NoError(t, err)
-		assert.Equal(t, []int{8, 9}, deque.ToSlice())
-	})
-
-	t.Run("Invalid", func(t *testing.T) {
-		deque := NewRingBufferDeque[int](1)
-		deque.Append(1)
-
-		err := json.Unmarshal([]byte(`invalid`), deque)
-
-		assert.Error(t, err)
-		assert.Equal(t, []int{1}, deque.ToSlice())
-	})
-}
-
 func TestRingBufferDeque_Clear(t *testing.T) {
 	deque := NewRingBufferDeque[int](2)
 	deque.Append(1, 2, 3)

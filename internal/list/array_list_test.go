@@ -661,36 +661,6 @@ func TestArrayList_MarshalJSON(t *testing.T) {
 	})
 }
 
-func TestArrayList_UnmarshalJSON(t *testing.T) {
-	t.Run("ValidJSON", func(t *testing.T) {
-		data := []byte("[4,5,6]")
-		l := NewArrayList[int](3)
-		l.Append(1)
-
-		err := l.UnmarshalJSON(data)
-		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
-		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
-	})
-
-	t.Run("Empty", func(t *testing.T) {
-		data := []byte("[]")
-		l := NewArrayList[int](0)
-		l.Append(1, 2)
-
-		err := l.UnmarshalJSON(data)
-		assert.NoError(t, err)
-		assert.True(t, l.IsEmpty())
-	})
-
-	t.Run("InvalidJSON", func(t *testing.T) {
-		data := []byte("[1, 2, 'error']")
-		l := NewArrayList[int](0)
-		err := l.UnmarshalJSON(data)
-		assert.Error(t, err)
-	})
-}
-
 func TestArrayList_ToSlice(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		l := NewArrayList[int](3)

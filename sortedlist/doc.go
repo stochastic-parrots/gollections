@@ -63,7 +63,6 @@
 //		Remove(x T) bool
 //		Clear()
 //		Readonly[T]
-//		json.Unmarshaler
 //	}
 //
 // # Implementations
@@ -81,4 +80,10 @@
 // the provided slice; Clone preserves it. FromSeq makes it possible to sort any
 // collection in this module that exposes All(). Every factory method returns a
 // concrete sorted-list type.
+//
+// # JSON
+//
+// Sorted lists marshal as arrays in sorted order. They do not implement
+// json.Unmarshaler because JSON cannot preserve a custom comparator. Decode into
+// []T and pass the values to the same factory used to define the list order.
 package sortedlist

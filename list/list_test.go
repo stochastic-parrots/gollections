@@ -106,6 +106,8 @@ func TestAsReadonly(t *testing.T) {
 func assertListBehavior(t *testing.T, l list.List[int]) {
 	t.Helper()
 
+	_, unmarshals := any(l).(json.Unmarshaler)
+	assert.False(t, unmarshals)
 	assert.True(t, l.IsEmpty())
 
 	l.Append(1, 3)
@@ -141,10 +143,6 @@ func assertListBehavior(t *testing.T, l list.List[int]) {
 	data, err := json.Marshal(l)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[3,1]`, string(data))
-
-	err = json.Unmarshal([]byte(`[8,9]`), l)
-	assert.NoError(t, err)
-	assert.Equal(t, []int{8, 9}, l.ToSlice())
 
 	l.Clear()
 	assert.True(t, l.IsEmpty())

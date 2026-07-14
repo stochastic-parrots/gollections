@@ -315,28 +315,6 @@ func TestDoubleLinkedDeque_MarshalJSON(t *testing.T) {
 	})
 }
 
-func TestDoubleLinkedDeque_UnmarshalJSON(t *testing.T) {
-	t.Run("Valid", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2)
-
-		err := json.Unmarshal([]byte(`[8,9]`), deque)
-
-		assert.NoError(t, err)
-		assert.Equal(t, []int{8, 9}, deque.ToSlice())
-	})
-
-	t.Run("Invalid", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1)
-
-		err := json.Unmarshal([]byte(`invalid`), deque)
-
-		assert.Error(t, err)
-		assert.Equal(t, []int{1}, deque.ToSlice())
-	})
-}
-
 func TestDoubleLinkedDeque_Clear(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()

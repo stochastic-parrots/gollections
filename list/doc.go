@@ -28,6 +28,11 @@
 // Linked factories provide New, From, and FromSeq. Linked construction always
 // copies values into newly allocated nodes and never retains a source slice.
 //
+// # JSON
+//
+// Lists marshal as arrays in index order. To decode JSON, unmarshal into []T and
+// construct a list with a factory; list types do not implement json.Unmarshaler.
+//
 // # Views And Iteration
 //
 // [List] exposes mutation, while [Readonly] contains observation and traversal

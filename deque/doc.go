@@ -30,7 +30,6 @@
 //		Pop() (T, bool)
 //		Clear()
 //		Readonly[T]
-//		json.Unmarshaler
 //	}
 //
 // # Implementations
@@ -50,4 +49,10 @@
 // [ArrayFactory.From] takes ownership of the provided slice and interprets its
 // values in front-to-back order. Clone preserves the source slice.
 // [LinkedFactory.From] never modifies or retains its source.
+//
+// # JSON
+//
+// Deques marshal as arrays from front to back. To decode JSON, unmarshal into
+// []T and construct a deque with a factory; deque types do not implement
+// json.Unmarshaler.
 package deque

@@ -188,6 +188,8 @@ func TestAsReadonly(t *testing.T) {
 func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	t.Helper()
 
+	_, unmarshals := any(list).(json.Unmarshaler)
+	assert.False(t, unmarshals)
 	assert.True(t, list.IsEmpty())
 
 	list.Add(3, 1, 2, 2)
@@ -252,12 +254,7 @@ func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	data, err := json.Marshal(list)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[1,2,3]`, string(data))
-
-	err = json.Unmarshal([]byte(`[9,7,8]`), list)
-	assert.NoError(t, err)
-	assert.Equal(t, []int{7, 8, 9}, list.ToSlice())
-
-	assert.Equal(t, "[7 8 9]", list.String())
+	assert.Equal(t, "[1 2 3]", list.String())
 
 	list.Clear()
 	assert.True(t, list.IsEmpty())

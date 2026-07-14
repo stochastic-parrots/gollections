@@ -61,5 +61,4 @@ type Heap[T any] interface {
 
 	fmt.Stringer
 	json.Marshaler
-	json.Unmarshaler
 }

@@ -551,45 +551,6 @@ func TestArraySortedList_JSON(t *testing.T) {
 		assert.JSONEq(t, `[]`, string(data))
 	})
 
-	t.Run("Unmarshal", func(t *testing.T) {
-		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Add(10)
-
-		err := json.Unmarshal([]byte(`[3,1,2]`), l)
-
-		assert.NoError(t, err)
-		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
-	})
-
-	t.Run("UnmarshalReusesCapacityAndClearsReferences", func(t *testing.T) {
-		type item struct {
-			Value int
-		}
-
-		l := NewArraySortedList(4, func(a, b *item) int {
-			return cmp.Compare(a.Value, b.Value)
-		})
-		l.Add(&item{Value: 2}, &item{Value: 1})
-		backing := &l.data[:cap(l.data)][0]
-
-		err := json.Unmarshal([]byte(`[{"Value":3}]`), l)
-
-		assert.NoError(t, err)
-		assert.Same(t, backing, &l.data[:cap(l.data)][0])
-		assert.Equal(t, 4, cap(l.data))
-		assert.Equal(t, 3, l.data[0].Value)
-		assert.Nil(t, l.data[:cap(l.data)][1])
-	})
-
-	t.Run("UnmarshalInvalid", func(t *testing.T) {
-		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Add(1)
-
-		err := json.Unmarshal([]byte(`{}`), l)
-
-		assert.Error(t, err)
-		assert.Equal(t, []int{1}, l.ToSlice())
-	})
 }
 
 func TestArraySortedList_Format(t *testing.T) {

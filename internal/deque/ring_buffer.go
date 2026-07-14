@@ -288,14 +288,3 @@ func (rb *RingBufferDeque[T]) Pop() (T, bool) {
 	}
 	return x, true
 }
-
-// UnmarshalJSON populates the deque from a JSON array.
-// It clears any existing elements before appending the new ones from the JSON data.
-//
-// Note: This operation is destructive; it calls Clear() to remove all existing
-// elements before appending the ones from the JSON data.
-//
-// Complexity: O(n + k) where k is the number of elements in the JSON.
-func (rb *RingBufferDeque[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, rb.Clear, rb.Append)
-}
