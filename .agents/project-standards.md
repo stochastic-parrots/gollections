@@ -57,7 +57,8 @@ alias and constructor from the public package.
   and indexed reads return zero values plus `false` or an explicit error rather
   than panicking.
 - Iterators follow this convention:
-  - `All` yields values or key-value pairs without mutation.
+  - `All` yields values or key-value pairs without mutation in the order
+    documented by the concrete collection family.
   - `Enumerate` yields index-value pairs for ordered collections.
   - `Keys`, `Values`, and `All` for maps do not guarantee priority or sorted
     order unless the method explicitly says so.

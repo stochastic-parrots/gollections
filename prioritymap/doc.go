@@ -41,4 +41,8 @@
 // map through a type assertion. Drain is destructive and removes entries as
 // they are yielded; stopping iteration early leaves unvisited entries in the
 // map.
+//
+// Keys, Values, and All do not guarantee priority order. Separate Keys and
+// Values iterations are not positionally related. Use All to retain key-priority
+// association and Drain for destructive priority-ordered traversal.
 package prioritymap

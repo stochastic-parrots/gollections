@@ -18,11 +18,13 @@ type Collection[T any] interface {
 
 	// All returns an iterator for the collection.
 	//
+	// Iteration order is defined by the concrete collection contract.
 	// The collection must not be mutated while the iterator is running.
 	All() iter.Seq[T]
 
 	// Enumerate returns an iterator that yields both the index and the element.
 	//
+	// Values are yielded in the same order as All.
 	// The collection must not be mutated while the iterator is running.
 	Enumerate() iter.Seq2[int, T]
 }
