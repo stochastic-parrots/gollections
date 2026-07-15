@@ -15,21 +15,14 @@ type Map[K comparable, V any] interface {
 	Contains(key K) bool
 
 	// Keys returns an iterator for all keys in unspecified order.
+	//
+	// The map must not be mutated while the iterator is running.
 	Keys() iter.Seq[K]
 
 	// Values returns an iterator for all values in unspecified order.
 	//
 	// A separate Keys iteration is not guaranteed to use the same order. Use All
 	// when each value must remain associated with its key.
-	Values() iter.Seq[V]
-
-	// Keys returns an iterator for all keys in the collection.
-	//
-	// The map must not be mutated while the iterator is running.
-	Keys() iter.Seq[K]
-
-	// Values returns an iterator for all values (priorities/data).
-	//
 	// The map must not be mutated while the iterator is running.
 	Values() iter.Seq[V]
 

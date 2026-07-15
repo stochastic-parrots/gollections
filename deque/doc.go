@@ -51,6 +51,6 @@
 // values in front-to-back order. Clone preserves the source slice.
 // [LinkedFactory.From] never modifies or retains its source.
 //
-// All traverses a deque from front to back. Enumerate uses the same order 
+// All traverses a deque from front to back. Enumerate uses the same order
 // and assigns consecutive indexes starting at zero.
 package deque
