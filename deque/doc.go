@@ -19,6 +19,9 @@
 //		json.Marshaler
 //	}
 //
+// A readonly view observes the same underlying deque. It restricts mutation
+// through that interface but is not a snapshot or concurrency mechanism.
+//
 // # Deque Interface
 //
 // Mutable deques implement the [Deque] interface:
@@ -46,8 +49,12 @@
 // through the returned factory. Array factories provide New, From, Clone, and
 // FromSeq. Linked factories provide New, From, and FromSeq because linked
 // construction always copies values into new nodes.
+// The zero values of [ArrayDeque] and [LinkedDeque] are ready for use.
 //
 // [ArrayFactory.From] takes ownership of the provided slice and interprets its
 // values in front-to-back order. Clone preserves the source slice.
 // [LinkedFactory.From] never modifies or retains its source.
+//
+// All traverses a deque from front to back. Enumerate uses the same order
+// and assigns consecutive indexes starting at zero.
 package deque

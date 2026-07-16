@@ -88,6 +88,7 @@ type PriorityMap[K comparable, P any] interface {
 	// The map is emptied as the iterator progresses. If the iteration
 	// is stopped early (e.g., via break), only the yielded elements
 	// are removed, and the remaining ones stay in the map.
+	// Callers must not otherwise mutate the map while the iterator is running.
 	//
 	// For a non-destructive iteration, use [gollections.Map.All].
 	Drain() iter.Seq2[K, P]

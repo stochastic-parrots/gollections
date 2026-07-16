@@ -7,7 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/heap"
 )
 
-// BinaryHeap is a comparator-backed binary [Heap].
+// BinaryHeap is a comparator-backed binary [Heap]. Its zero value is invalid;
+// construct one with [Binary] or [OrderedBinary].
 type BinaryHeap[T any] = heap.BinaryHeap[T]
 
 var _ Heap[any] = &heap.BinaryHeap[any]{}
@@ -55,8 +56,9 @@ func (factory BinaryFactory[T]) New(capacity int) *BinaryHeap[T] {
 
 // From creates a binary heap using data as its backing storage.
 //
-// WARNING: From reorders data in place. Use [BinaryFactory.Clone] when the
-// original slice order must be preserved.
+// WARNING: From reorders data in place and transfers ownership of its backing
+// storage. The caller must not use data or aliases of its backing array after
+// this call. Use [BinaryFactory.Clone] to preserve the source slice.
 func (factory BinaryFactory[T]) From(data []T) *BinaryHeap[T] {
 	return heap.NewBinaryHeapFromSlice(data, factory.hasPriority)
 }

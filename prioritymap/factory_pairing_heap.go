@@ -7,7 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-// PairingHeapPriorityMap is an indexed, pointer-based pairing heap.
+// PairingHeapPriorityMap is an indexed, pointer-based pairing heap. Its zero
+// value is invalid; construct one with [PairingHeap] or [OrderedPairingHeap].
 type PairingHeapPriorityMap[K comparable, P any] = prioritymap.PairingPriorityMap[K, P]
 
 var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}

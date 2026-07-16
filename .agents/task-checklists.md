@@ -20,8 +20,10 @@ Use these checklists for repeatable agent workflows. They supplement
    package docs, examples, and external package tests.
 3. Keep concrete types under `internal/...`; public aliases name structs and
    constructors return pointers to those aliases.
-4. Add internal same-package tests for invariants and cleanup.
-5. Add benchmarks beside implementations and suite wrappers when comparisons
+4. Document zero-value support for each concrete alias and test every supported
+   zero value without constructing it through a factory.
+5. Add internal same-package tests for invariants and cleanup.
+6. Add benchmarks beside implementations and suite wrappers when comparisons
    are meaningful.
 
 ## Bug Fix

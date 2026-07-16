@@ -57,7 +57,8 @@ alias and constructor from the public package.
   and indexed reads return zero values plus `false` or an explicit error rather
   than panicking.
 - Iterators follow this convention:
-  - `All` yields values or key-value pairs without mutation.
+  - `All` yields values or key-value pairs without mutation in the order
+    documented by the concrete collection family.
   - `Enumerate` yields index-value pairs for ordered collections.
   - `Keys`, `Values`, and `All` for maps do not guarantee priority or sorted
     order unless the method explicitly says so.
@@ -78,12 +79,24 @@ alias and constructor from the public package.
   - `AsReadonly` returning `nil` for nil input.
   - private `readonly` wrapper with one-line forwarding methods.
   - compile-time assertion: `var _ Readonly[...] = (*readonly[...])(nil)`.
+- Readonly interfaces and wrappers are capability restrictions over the same
+  underlying structure. Do not describe them as snapshots, synchronization, or
+  concurrency safety.
+- Unless explicitly documented otherwise, public structures are not safe for
+  concurrent use. Package documentation must tell callers to synchronize shared
+  access when any goroutine may mutate the structure.
 - Public factory files should include compile-time assertions that internal
   implementations satisfy the public interface.
 - Public concrete type aliases must alias the implementation struct, never a
   pointer to it. Factory construction methods return pointers to those aliases.
   For example, declare `type ArrayList[T any] = list.ArrayList[T]` and return
   `*ArrayList[T]` from `New`, `From`, `Clone`, and `FromSeq`.
+- Every public concrete alias must document whether its zero value is ready for
+  use. Zero values should be supported when no comparator or mandatory index
+  initialization is required; otherwise, direct callers to the matching factory.
+- Public contract tests must exercise every supported concrete zero value
+  without using a factory. Types with invalid zero values must keep the factory
+  requirement explicit in both alias and package documentation.
 
 ## Naming
 
@@ -173,6 +186,10 @@ alias and constructor from the public package.
   }
   ```
 
+- Public iterator contracts are lazy: they observe collection state when
+  iteration begins. Mutation while an iterator is running is unsupported unless
+  the iterator explicitly documents its own destructive behavior. A destructive
+  iterator does not permit additional caller-driven mutation while it runs.
 - Destructive iterators such as `Drain` should stop immediately on either empty
   structure or `yield == false`.
 - Use simple `for range` loops over integer counts when targeting Go 1.24:
@@ -240,6 +257,9 @@ alias and constructor from the public package.
 - Warnings should be explicit and near the constructor or method, for example
   `WARNING: This operation is In-Place and WILL modify the original slice
   order.`
+- Array-backed `From` methods transfer ownership of the source backing array.
+  Their public comments must tell callers not to use the slice or any alias
+  afterward and must point to `Clone` as the ownership-preserving alternative.
 
 ## Tests
 

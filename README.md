@@ -45,7 +45,11 @@ Go documentation tools.
   concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
-  allowing type assertion back to the mutable interface.
+  allowing type assertion back to the mutable interface. These wrappers are
+  capability restrictions, not snapshots or concurrency synchronization.
+- Concurrency: collections are not safe for concurrent use unless explicitly
+  documented otherwise. Callers must synchronize shared access when any
+  goroutine may mutate the collection.
 - JSON support: linear collections and heaps can marshal/unmarshal as arrays
   where the operation makes sense.
 
@@ -61,9 +65,10 @@ scores := sortedlist.OrderedArray[int]().Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
 ```
 
-For slice-based construction, `From` may reorder and retain the provided slice.
-Use `Clone` when the source must remain unchanged. Linked structures always
-copy values into nodes, so their `From` methods do not retain the source.
+Array-backed `From` methods transfer ownership of the provided slice and may
+reorder it. The caller must not use the slice or aliases of its backing array
+afterward. Use `Clone` when the source must remain available. Linked structures
+always copy values into nodes, so their `From` methods do not retain the source.
 
 ## Choosing a list
 

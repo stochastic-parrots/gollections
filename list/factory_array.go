@@ -6,7 +6,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/list"
 )
 
-// ArrayList is a slice-backed [List].
+// ArrayList is a slice-backed [List]. Its zero value is ready for use.
 type ArrayList[T any] = list.ArrayList[T]
 
 var _ List[any] = &list.ArrayList[any]{}
