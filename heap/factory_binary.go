@@ -3,8 +3,8 @@ package heap
 import (
 	"cmp"
 
-	"github.com/stochastic-parrots/gollections/internal/comparator"
 	"github.com/stochastic-parrots/gollections/internal/heap"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 )
 
 // BinaryHeap is a comparator-backed binary [Heap]. Its zero value is invalid;
@@ -13,11 +13,13 @@ type BinaryHeap[T any] = heap.BinaryHeap[T]
 
 var _ Heap[any] = &heap.BinaryHeap[any]{}
 
-// BinaryFactory constructs binary heaps with a fixed priority comparator.
+// BinaryFactory constructs binary heaps with a fixed priority ordering.
 //
 // The comparator returns true when its first argument has higher priority than
 // its second argument. Binary heaps provide O(1) Peek, O(log N) Pop and Replace,
 // and O(N) in-place or cloned construction from a slice.
+// The comparator must be non-nil, define a strict weak ordering, and remain
+// stable for the lifetime of every heap created by the factory.
 //
 // The zero value is invalid. Create a factory with [Binary] or [OrderedBinary].
 //
@@ -37,16 +39,20 @@ type BinaryFactory[T any] struct {
 }
 
 // Binary returns a binary-heap factory using hasPriority to order values.
+// It panics if hasPriority is nil.
 func Binary[T any](hasPriority func(T, T) bool) BinaryFactory[T] {
+	if hasPriority == nil {
+		panic("heap: nil priority comparator")
+	}
 	return BinaryFactory[T]{hasPriority: hasPriority}
 }
 
 // OrderedBinary returns a binary-heap factory using the natural order of T.
 func OrderedBinary[T cmp.Ordered](order Order) BinaryFactory[T] {
 	if order == Max {
-		return Binary(comparator.Max[T]())
+		return Binary(ordering.Max[T]())
 	}
-	return Binary(comparator.Min[T]())
+	return Binary(ordering.Min[T]())
 }
 
 // New creates an empty binary heap with space preallocated for capacity values.

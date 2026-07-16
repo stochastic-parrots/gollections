@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBinaryHeap(t *testing.T) {
-	heap := NewBinaryHeap(10, comparator.Min[int]())
+	heap := NewBinaryHeap(10, ordering.Min[int]())
 
 	assert.Equal(t, 0, heap.Length())
 	assert.True(t, heap.IsEmpty())
@@ -18,7 +18,7 @@ func TestNewBinaryHeap(t *testing.T) {
 
 func TestNewBinaryHeapFromSlice(t *testing.T) {
 	data := []int{10, 5, 8, 2, 7}
-	heap := NewBinaryHeapFromSlice(data, comparator.Min[int]())
+	heap := NewBinaryHeapFromSlice(data, ordering.Min[int]())
 
 	assert.Equal(t, 5, heap.Length())
 
@@ -29,7 +29,7 @@ func TestNewBinaryHeapFromSlice(t *testing.T) {
 
 func TestNewBinaryHeapCloneSlice(t *testing.T) {
 	src := []int{10, 5, 8}
-	heap := NewBinaryHeapCloneSlice(src, comparator.Min[int]())
+	heap := NewBinaryHeapCloneSlice(src, ordering.Min[int]())
 
 	heap.Pop()
 	assert.Equal(t, 3, len(src))
@@ -37,7 +37,7 @@ func TestNewBinaryHeapCloneSlice(t *testing.T) {
 }
 
 func TestBinaryHeapPush(t *testing.T) {
-	heap := NewBinaryHeap(0, comparator.Min[int]())
+	heap := NewBinaryHeap(0, ordering.Min[int]())
 
 	heap.Push(10)
 	heap.Push(5)
@@ -51,7 +51,7 @@ func TestBinaryHeapPush(t *testing.T) {
 }
 
 func TestBinaryHeapPushNothing(t *testing.T) {
-	heap := NewBinaryHeap(0, comparator.Min[int]())
+	heap := NewBinaryHeap(0, ordering.Min[int]())
 	heap.Push()
 	_, ok := heap.Peek()
 	assert.False(t, ok)
@@ -59,7 +59,7 @@ func TestBinaryHeapPushNothing(t *testing.T) {
 }
 
 func TestBinaryHeapReplace(t *testing.T) {
-	heap := NewBinaryHeap(0, comparator.Min[int]())
+	heap := NewBinaryHeap(0, ordering.Min[int]())
 
 	heap.Push(10)
 	heap.Push(5)
@@ -83,7 +83,7 @@ func TestBinaryHeapReplace(t *testing.T) {
 }
 
 func TestBinaryHeapPop(t *testing.T) {
-	heap := NewBinaryHeapFromSlice([]int{10, 2, 8, 1}, comparator.Min[int]())
+	heap := NewBinaryHeapFromSlice([]int{10, 2, 8, 1}, ordering.Min[int]())
 
 	expected := []int{1, 2, 8, 10}
 	for _, exp := range expected {
@@ -98,7 +98,7 @@ func TestBinaryHeapPop(t *testing.T) {
 }
 
 func TestBinaryHeapPeek(t *testing.T) {
-	heap := NewBinaryHeap(0, comparator.Min[int]())
+	heap := NewBinaryHeap(0, ordering.Min[int]())
 
 	_, ok := heap.Peek()
 	assert.False(t, ok)
@@ -112,7 +112,7 @@ func TestBinaryHeapPeek(t *testing.T) {
 func TestBinaryHeapDrain(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		items := []int{5, 1, 9, 3}
-		heap := NewBinaryHeapFromSlice(items, comparator.Min[int]())
+		heap := NewBinaryHeapFromSlice(items, ordering.Min[int]())
 
 		expected := []int{1, 3, 5, 9}
 		count := 0
@@ -126,7 +126,7 @@ func TestBinaryHeapDrain(t *testing.T) {
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
-		heap := NewBinaryHeapFromSlice([]int{3, 1, 2}, comparator.Min[int]())
+		heap := NewBinaryHeapFromSlice([]int{3, 1, 2}, ordering.Min[int]())
 
 		for idx, value := range heap.Drain() {
 			assert.Zero(t, idx)
@@ -143,7 +143,7 @@ func TestBinaryHeapDrain(t *testing.T) {
 
 func TestBinaryHeapAll(t *testing.T) {
 	items := []int{1, 2, 3}
-	heap := NewBinaryHeapFromSlice(items, comparator.Min[int]())
+	heap := NewBinaryHeapFromSlice(items, ordering.Min[int]())
 
 	var collected []int
 	for val := range heap.All() {
@@ -164,7 +164,7 @@ func TestBinaryHeapAll(t *testing.T) {
 }
 
 func TestBinaryHeapEnumerate(t *testing.T) {
-	heap := NewBinaryHeapFromSlice([]int{10, 20}, comparator.Min[int]())
+	heap := NewBinaryHeapFromSlice([]int{10, 20}, ordering.Min[int]())
 
 	for idx, val := range heap.Enumerate() {
 		assert.Equal(t, heap.data[idx], val)
@@ -203,7 +203,7 @@ func TestBinaryHeapClear(t *testing.T) {
 
 func TestBinaryHeapString(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
-		heap := NewBinaryHeap(3, comparator.Min[int]())
+		heap := NewBinaryHeap(3, ordering.Min[int]())
 		heap.Push(30, 10, 20)
 		got := heap.String()
 		want := "[10 30 20]"
@@ -211,7 +211,7 @@ func TestBinaryHeapString(t *testing.T) {
 	})
 
 	t.Run("String Many Elements", func(t *testing.T) {
-		heap := NewBinaryHeap(10, comparator.Min[int]())
+		heap := NewBinaryHeap(10, ordering.Min[int]())
 		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := heap.String()
 		want := "[-99 -10 -1 0 1 ...(+5 more)]"
@@ -221,7 +221,7 @@ func TestBinaryHeapString(t *testing.T) {
 
 func TestBinaryHeapFormat(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
-		heap := NewBinaryHeap(3, comparator.Min[int]())
+		heap := NewBinaryHeap(3, ordering.Min[int]())
 		heap.Push(30, 10, 20)
 		got := fmt.Sprintf("%v", heap)
 		want := "[10 30 20]"
@@ -229,7 +229,7 @@ func TestBinaryHeapFormat(t *testing.T) {
 	})
 
 	t.Run("Verbose", func(t *testing.T) {
-		heap := NewBinaryHeap(12, comparator.Min[int]())
+		heap := NewBinaryHeap(12, ordering.Min[int]())
 		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", heap)
 		want := "*heap.BinaryHeap[int]{size:10, cap:12}"
@@ -237,7 +237,7 @@ func TestBinaryHeapFormat(t *testing.T) {
 	})
 
 	t.Run("Verbose + String", func(t *testing.T) {
-		heap := NewBinaryHeap(12, comparator.Min[int]())
+		heap := NewBinaryHeap(12, ordering.Min[int]())
 		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", heap)
 		want := "*heap.BinaryHeap[int]{len:10, cap:12} [-99 -10 -1 0 1 ...(+5 more)]"
@@ -246,7 +246,7 @@ func TestBinaryHeapFormat(t *testing.T) {
 }
 
 func TestBinaryHeapLargePush(t *testing.T) {
-	heap := NewBinaryHeap(0, comparator.Min[int]())
+	heap := NewBinaryHeap(0, ordering.Min[int]())
 	largeSlice := make([]int, 100)
 	for i := range largeSlice {
 		largeSlice[i] = 100 - i

@@ -32,6 +32,12 @@ func TestOrderedArraySortedList_ZeroValue(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 }
 
+func TestArray_NilComparator(t *testing.T) {
+	assert.PanicsWithValue(t, "sortedlist: nil comparator", func() {
+		sortedlist.Array[int](nil)
+	})
+}
+
 func TestArrayFactory_New(t *testing.T) {
 	assertSortedListBehavior(t, sortedlist.Array(cmp.Compare[int]).New(0))
 }

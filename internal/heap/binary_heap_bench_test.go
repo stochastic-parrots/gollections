@@ -3,7 +3,7 @@ package heap
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 )
 
 func BenchmarkBinaryHeap_Push(b *testing.B) {
@@ -28,7 +28,7 @@ func BenchmarkBinaryHeap_Push(b *testing.B) {
 		b.Run(r.name, func(b *testing.B) {
 			for b.Loop() {
 				b.StopTimer()
-				h := NewBinaryHeap(n+k, comparator.Min[int]())
+				h := NewBinaryHeap(n+k, ordering.Min[int]())
 				h.Push(initialData...)
 				b.StartTimer()
 				h.Push(newItems...)
@@ -46,7 +46,7 @@ func BenchmarkBinaryHeap_Pop(b *testing.B) {
 
 	for b.Loop() {
 		b.StopTimer()
-		h := NewBinaryHeapFromSlice(append([]int{}, data...), comparator.Min[int]())
+		h := NewBinaryHeapFromSlice(append([]int{}, data...), ordering.Min[int]())
 		b.StartTimer()
 
 		for !h.IsEmpty() {

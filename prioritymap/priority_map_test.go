@@ -22,6 +22,20 @@ func TestFactoriesImplementPriorityMap(t *testing.T) {
 	var _ prioritymap.PriorityMap[string, uint64] = prioritymap.RadixHeap[string, uint64]().New(0)
 }
 
+func TestComparatorFactories_NilComparator(t *testing.T) {
+	t.Run("BinaryHeap", func(t *testing.T) {
+		assert.PanicsWithValue(t, "prioritymap: nil priority comparator", func() {
+			prioritymap.BinaryHeap[string, int](nil)
+		})
+	})
+
+	t.Run("PairingHeap", func(t *testing.T) {
+		assert.PanicsWithValue(t, "prioritymap: nil priority comparator", func() {
+			prioritymap.PairingHeap[string, int](nil)
+		})
+	})
+}
+
 func TestBinaryHeapFactory_New(t *testing.T) {
 	t.Run("Custom", func(t *testing.T) {
 		assertPriorityMapBehavior(t, prioritymap.BinaryHeap[string](cmp.Less[int]).New(0), "one", 1, 0, []int{0, 1, 3})

@@ -17,6 +17,8 @@ var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}
 // The comparator follows the same contract as cmp.Compare. Array sorted lists
 // provide O(log N) lookup, O(1) indexed access, and O(N) single-value insertion
 // or removal because values may need to be shifted.
+// The comparator must be non-nil, define a transitive ordering and equivalence
+// relation, and remain stable for the lifetime of every list from the factory.
 //
 // The zero value is invalid. Create a factory with [Array].
 //
@@ -36,7 +38,11 @@ type ArrayFactory[T any] struct {
 }
 
 // Array returns an array sorted-list factory using compare for every operation.
+// It panics if compare is nil.
 func Array[T any](compare func(a, b T) int) ArrayFactory[T] {
+	if compare == nil {
+		panic("sortedlist: nil comparator")
+	}
 	return ArrayFactory[T]{compare: compare}
 }
 
