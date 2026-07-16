@@ -23,8 +23,10 @@
 //
 // Clear removes all elements, releases stored references, preserves the
 // structure's construction configuration, and leaves it ready for reuse.
-// Resource retention is implementation-specific: slice-backed structures
-// normally preserve capacity, while linked structures may release their nodes.
+// Resource retention is implementation-specific: slice-backed structures may
+// preserve capacity, bounded freelists retain at most their configured limit,
+// and linked structures without a freelist may release their nodes. Clear does
+// not guarantee that storage is shrunk or memory is returned to the Go runtime.
 //
 // # Concurrency
 //

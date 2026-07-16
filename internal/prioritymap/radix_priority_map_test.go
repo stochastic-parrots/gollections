@@ -585,12 +585,46 @@ func TestRadixPriorityMap_Clear(t *testing.T) {
 		pm.Set("b", 2)
 		pm.Set("c", 3)
 		pm.Set("d", 4)
+		entries := make([]*radixEntry[string, uint64], 0, len(pm.entries))
+		for _, entry := range pm.entries {
+			entries = append(entries, entry)
+		}
 
 		pm.Clear()
 
 		assert.Equal(t, 2, pm.freeCapacity)
 		assert.Equal(t, 2, pm.freeLen)
-		assert.Equal(t, 2, countRadixFree(pm))
+		retained := make(map[*radixEntry[string, uint64]]struct{}, pm.freeLen)
+		for current := pm.free; current != nil; current = current.next {
+			retained[current] = struct{}{}
+		}
+		assert.Len(t, retained, 2)
+		for _, entry := range entries {
+			assert.Empty(t, entry.key)
+			assert.Zero(t, entry.priority)
+			assert.Zero(t, entry.bucket)
+			assert.Nil(t, entry.previous)
+			if _, ok := retained[entry]; !ok {
+				assert.Nil(t, entry.next)
+			}
+		}
+	})
+
+	t.Run("ZeroCapacityDisablesRetention", func(t *testing.T) {
+		pm := NewRadixPriorityMap[string, uint64](0)
+		pm.Set("old", 1)
+		entry := pm.entries["old"]
+
+		assert.True(t, pm.Remove("old"))
+
+		assert.Zero(t, pm.freeCapacity)
+		assert.Zero(t, pm.freeLen)
+		assert.Nil(t, pm.free)
+		assert.Empty(t, entry.key)
+		assert.Zero(t, entry.priority)
+		assert.Zero(t, entry.bucket)
+		assert.Nil(t, entry.previous)
+		assert.Nil(t, entry.next)
 	})
 }
 

@@ -65,9 +65,11 @@ alias and constructor from the public package.
   - `Drain` is destructive and yields in the structure's priority/order
     contract.
 - `Clear` must leave the structure empty and reusable, preserve configuration,
-  and zero references that could otherwise keep values alive. Slice-backed and
-  freelist-backed implementations retain reusable resources where practical;
-  linked implementations may release detached nodes for garbage collection.
+  and zero references that could otherwise keep values alive. Resource
+  retention is strategy-specific: slice-backed implementations retain storage
+  where practical, freelists retain at most their configured limit, and linked
+  implementations without a freelist may release detached nodes. Do not promise
+  that `Clear` shrinks storage or returns memory to the Go runtime.
 - For ordered behavior, use `cmp.Ordered` or the local comparator helpers in
   `internal/comparator`.
 - For numeric-only generic APIs, use the package-level constraints in
@@ -171,8 +173,9 @@ alias and constructor from the public package.
 - Freelist-backed structures must reset all pointer fields before returning a
   node/entry to the freelist.
 - Freelist retention must be bounded by the capacity requested at construction.
-  Once the freelist reaches that limit, additional removed or cleared nodes must
-  become unreachable so the garbage collector can reclaim them.
+  A capacity of zero disables freelist retention. Once the freelist reaches its
+  limit, additional removed or cleared nodes must become unreachable so the
+  garbage collector can reclaim them.
 - Iterator functions should be written as closures returning early when
   `yield` returns false:
 

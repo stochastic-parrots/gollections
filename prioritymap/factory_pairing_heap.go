@@ -50,9 +50,9 @@ func OrderedPairingHeap[K comparable, P cmp.Ordered](order Order) PairingHeapFac
 	return PairingHeap[K](comparator.Min[P]())
 }
 
-// New creates an empty pairing priority map and retains up to capacity nodes for
-// reuse. Once that limit is reached, additional removed nodes are released
-// rather than retained in the freelist.
+// New creates an empty pairing priority map with the requested initial capacity.
+// The freelist retains at most capacity nodes for reuse. A zero capacity
+// disables freelist retention.
 func (factory PairingHeapFactory[K, P]) New(capacity int) *PairingHeapPriorityMap[K, P] {
 	return prioritymap.NewPairingPriorityMapWithCapacity[K](capacity, factory.hasPriority)
 }

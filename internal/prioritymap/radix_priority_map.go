@@ -49,7 +49,8 @@ type RadixPriorityMap[K comparable, P constraint.Integer] struct {
 
 // NewRadixPriorityMap creates an empty radix priority map with pre-allocated
 // entries and map capacity. Its freelist retains at most capacity entries,
-// including after the map grows beyond that capacity.
+// including after the map grows beyond that capacity. A zero capacity disables
+// freelist retention.
 //
 // Complexity: O(capacity).
 func NewRadixPriorityMap[K comparable, P constraint.Integer](capacity int) *RadixPriorityMap[K, P] {

@@ -37,10 +37,11 @@ Go documentation tools.
   `list.List`, `sortedlist.SortedList`, `deque.Deque`, `heap.Heap`, and
   `prioritymap.PriorityMap`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.
-- Reusable clearing: `Clear` removes stored references and preserves construction
-  configuration. Slice-backed structures retain capacity where practical;
-  bounded freelists retain their configured capacity, while linked structures
-  may release their nodes.
+- Reusable clearing: `Clear` removes stored references, preserves construction
+  configuration, and leaves the structure ready for reuse. It does not guarantee
+  storage shrinkage or return memory to the Go runtime. Slice-backed structures
+  retain capacity where practical, freelists retain at most their construction
+  limit, and linked structures without a freelist may release their nodes.
 - Internal implementations: public packages expose stable concrete factories while
   concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, and

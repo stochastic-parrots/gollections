@@ -49,7 +49,8 @@ func NewPairingPriorityMap[K comparable, P any](hasPriority func(P, P) bool) *Pa
 
 // NewPairingPriorityMapWithCapacity creates an empty pairing priority map with
 // pre-allocated nodes and map capacity. Its freelist retains at most capacity
-// nodes, including after the map grows beyond that capacity.
+// nodes, including after the map grows beyond that capacity. A zero capacity
+// disables freelist retention.
 //
 // Complexity: O(capacity).
 func NewPairingPriorityMapWithCapacity[K comparable, P any](
