@@ -14,6 +14,8 @@ func TestNewPairingPriorityMap(t *testing.T) {
 	assert.True(t, pm.IsEmpty())
 	assert.Nil(t, pm.root)
 	assert.Nil(t, pm.freelist)
+	assert.Zero(t, pm.freeLen)
+	assert.Zero(t, pm.freeCapacity)
 	assert.Empty(t, pm.indexes)
 }
 
@@ -26,6 +28,8 @@ func TestNewPairingPriorityMapWithCapacity(t *testing.T) {
 	assert.Nil(t, pm.root)
 	assert.NotNil(t, pm.indexes)
 	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, capacity, pm.freeLen)
+	assert.Equal(t, capacity, pm.freeCapacity)
 
 	count := 0
 	current := pm.freelist
@@ -43,6 +47,7 @@ func TestNewPairingPriorityMapWithCapacity(t *testing.T) {
 		current = current.next
 	}
 	assert.Equal(t, capacity-1, count)
+	assert.Equal(t, capacity-1, pm.freeLen)
 }
 
 func TestPairingPriorityMap_Merge(t *testing.T) {
@@ -621,10 +626,11 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 	})
 
 	t.Run("Reuse", func(t *testing.T) {
-		pm := NewPairingPriorityMap[string](comparator.Min[int]())
+		pm := NewPairingPriorityMapWithCapacity[string](1, comparator.Min[int]())
 
 		pm.Set("old", 100)
 		pm.Clear()
+		assert.Equal(t, 1, pm.freeLen)
 
 		pm.Set("new", 5)
 		pm.Set("newer", 1)
@@ -639,5 +645,53 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 			assert.Nil(t, curr.child)
 			assert.Nil(t, curr.previous)
 		}
+	})
+
+	t.Run("RetainsConfiguredCapacity", func(t *testing.T) {
+		pm := NewPairingPriorityMapWithCapacity[string](2, comparator.Min[int]())
+		pm.Set("a", 1)
+		pm.Set("b", 2)
+		pm.Set("c", 3)
+		pm.Set("d", 4)
+		nodes := make([]*node[string, int], 0, len(pm.indexes))
+		for _, node := range pm.indexes {
+			nodes = append(nodes, node)
+		}
+
+		pm.Clear()
+
+		assert.Equal(t, 2, pm.freeCapacity)
+		assert.Equal(t, 2, pm.freeLen)
+		retained := make(map[*node[string, int]]struct{}, pm.freeLen)
+		for current := pm.freelist; current != nil; current = current.next {
+			retained[current] = struct{}{}
+		}
+		assert.Len(t, retained, 2)
+		for _, node := range nodes {
+			assert.Empty(t, node.key)
+			assert.Zero(t, node.priority)
+			assert.Nil(t, node.child)
+			assert.Nil(t, node.previous)
+			if _, ok := retained[node]; !ok {
+				assert.Nil(t, node.next)
+			}
+		}
+	})
+
+	t.Run("ZeroCapacityDisablesRetention", func(t *testing.T) {
+		pm := NewPairingPriorityMapWithCapacity[string](0, comparator.Min[int]())
+		pm.Set("old", 1)
+		node := pm.indexes["old"]
+
+		assert.True(t, pm.Remove("old"))
+
+		assert.Zero(t, pm.freeCapacity)
+		assert.Zero(t, pm.freeLen)
+		assert.Nil(t, pm.freelist)
+		assert.Empty(t, node.key)
+		assert.Zero(t, node.priority)
+		assert.Nil(t, node.child)
+		assert.Nil(t, node.previous)
+		assert.Nil(t, node.next)
 	})
 }

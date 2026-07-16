@@ -109,7 +109,8 @@ type SortedList[T any] interface {
 	// Remove deletes the first value equivalent to x according to the list order.
 	Remove(x T) bool
 
-	// Clear removes all elements from the list, resetting it to an empty state.
+	// Clear removes all elements and leaves the list ready for reuse with the
+	// same ordering configuration.
 	Clear()
 
 	json.Unmarshaler

@@ -180,6 +180,27 @@ func TestBinaryHeapEnumerate(t *testing.T) {
 	assert.Equal(t, 1, count)
 }
 
+func TestBinaryHeapClear(t *testing.T) {
+	a, b := 1, 2
+	heap := NewBinaryHeap(4, func(a, b *int) bool { return *a < *b })
+	heap.Push(&b, &a)
+	backing := &heap.data[:cap(heap.data)][0]
+
+	heap.Clear()
+
+	assert.True(t, heap.IsEmpty())
+	assert.Equal(t, 4, cap(heap.data))
+	assert.Same(t, backing, &heap.data[:cap(heap.data)][0])
+	assert.Nil(t, heap.data[:cap(heap.data)][0])
+	assert.Nil(t, heap.data[:cap(heap.data)][1])
+
+	heap.Push(&b, &a)
+	top, ok := heap.Peek()
+	assert.True(t, ok)
+	assert.Same(t, &a, top)
+	assert.Same(t, backing, &heap.data[:cap(heap.data)][0])
+}
+
 func TestBinaryHeapString(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
 		heap := NewBinaryHeap(3, comparator.Min[int]())

@@ -299,8 +299,7 @@ func (l *LinkedList[T]) ToSlice() []T {
 // Clear removes all elements from the list.
 //
 // After calling Clear, the list will be empty and its length will be zero.
-// This operation is typically more efficient than creating a new list
-// as it may reuse the underlying storage.
+// Nodes are detached and cleared so they and their values can be collected.
 //
 // Complexity: O(n) to zero out elements (avoiding memory leaks).
 func (l *LinkedList[T]) Clear() {

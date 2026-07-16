@@ -34,24 +34,30 @@ type radixEntry[K comparable, P constraint.Integer] struct {
 // Internally the structure keeps three representations:
 //   - entries - a map[K]*radixEntry mapping each key to its bucket entry;
 //   - buckets - linked lists grouped by the highest differing bit from last;
-//   - free    - a freelist used to reuse pre-allocated entries.
+//   - free    - a bounded freelist that retains the requested capacity.
 //
 // This makes radix priority maps particularly effective for monotone workloads
 // such as Dijkstra with non-negative integer edge weights.
 type RadixPriorityMap[K comparable, P constraint.Integer] struct {
-	entries map[K]*radixEntry[K, P]
-	buckets [radixBucketsCount]*radixEntry[K, P]
-	free    *radixEntry[K, P]
-	last    P
+	entries      map[K]*radixEntry[K, P]
+	buckets      [radixBucketsCount]*radixEntry[K, P]
+	free         *radixEntry[K, P]
+	freeLen      int
+	freeCapacity int
+	last         P
 }
 
 // NewRadixPriorityMap creates an empty radix priority map with pre-allocated
-// entries and map capacity.
+// entries and map capacity. Its freelist retains at most capacity entries,
+// including after the map grows beyond that capacity. A zero capacity disables
+// freelist retention.
 //
 // Complexity: O(capacity).
 func NewRadixPriorityMap[K comparable, P constraint.Integer](capacity int) *RadixPriorityMap[K, P] {
 	pm := &RadixPriorityMap[K, P]{
-		entries: make(map[K]*radixEntry[K, P], capacity),
+		entries:      make(map[K]*radixEntry[K, P], capacity),
+		freeLen:      capacity,
+		freeCapacity: capacity,
 	}
 	storage := make([]radixEntry[K, P], capacity)
 	for i := range storage {
@@ -79,13 +85,14 @@ func (pm *RadixPriorityMap[K, P]) allocate(key K, priority P) *radixEntry[K, P] 
 
 	entry := pm.free
 	pm.free = entry.next
+	pm.freeLen--
 	entry.key = key
 	entry.priority = priority
 	entry.next = nil
 	return entry
 }
 
-// release clears an entry's data and returns it to the freelist.
+// release clears an entry's data and returns it to the bounded freelist.
 //
 // Complexity: O(1).
 func (pm *RadixPriorityMap[K, P]) release(entry *radixEntry[K, P]) {
@@ -95,8 +102,13 @@ func (pm *RadixPriorityMap[K, P]) release(entry *radixEntry[K, P]) {
 	entry.priority = zeroP
 	entry.bucket = 0
 	entry.previous = nil
+	entry.next = nil
+	if pm.freeLen == pm.freeCapacity {
+		return
+	}
 	entry.next = pm.free
 	pm.free = entry
+	pm.freeLen++
 }
 
 // attach inserts an entry into the bucket selected by its priority and the

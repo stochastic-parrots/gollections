@@ -394,14 +394,22 @@ func TestOrderedArraySortedList_ToSlice(t *testing.T) {
 }
 
 func TestOrderedArraySortedList_Clear(t *testing.T) {
-	l := NewOrderedArraySortedList[string](0)
+	l := NewOrderedArraySortedList[string](4)
 	l.Add("a", "b")
+	backing := &l.data[:cap(l.data)][0]
 
 	l.Clear()
 
 	assert.True(t, l.IsEmpty())
 	assert.Nil(t, l.ToSlice())
+	assert.Equal(t, 4, cap(l.data))
+	assert.Same(t, backing, &l.data[:cap(l.data)][0])
 	assert.Empty(t, l.data[:cap(l.data)][0])
+	assert.Empty(t, l.data[:cap(l.data)][1])
+
+	l.Add("b", "a")
+	assert.Equal(t, []string{"a", "b"}, l.ToSlice())
+	assert.Same(t, backing, &l.data[:cap(l.data)][0])
 }
 
 func TestOrderedArraySortedList_JSON(t *testing.T) {

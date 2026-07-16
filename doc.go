@@ -19,6 +19,15 @@
 // Clear are exposed only by the structure-specific interfaces in each
 // subpackage, where their semantics are precise and unambiguous.
 //
+// # Clearing And Reuse
+//
+// Clear removes all elements, releases stored references, preserves the
+// structure's construction configuration, and leaves it ready for reuse.
+// Resource retention is implementation-specific: slice-backed structures may
+// preserve capacity, bounded freelists retain at most their configured limit,
+// and linked structures without a freelist may release their nodes. Clear does
+// not guarantee that storage is shrunk or memory is returned to the Go runtime.
+//
 // # Concurrency
 //
 // Unless a type explicitly documents otherwise, collections in this module are

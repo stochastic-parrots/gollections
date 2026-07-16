@@ -713,11 +713,21 @@ func TestLinkedList_ToSlice(t *testing.T) {
 }
 
 func TestLinkedList_Clear(t *testing.T) {
-	l := NewLinkedList[int]()
-	l.Append(1, 2, 3)
+	a, b := 1, 2
+	l := NewLinkedList[*int]()
+	l.Append(&a, &b)
+	first := l.first
+	last := l.last
+
 	l.Clear()
 
-	assert.Equal(t, 0, l.Length())
+	assert.True(t, l.IsEmpty())
 	assert.Nil(t, l.first)
 	assert.Nil(t, l.last)
+	assert.Nil(t, first.Value)
+	assert.Nil(t, first.Next)
+	assert.Nil(t, last.Value)
+
+	l.Append(&b)
+	assert.Equal(t, []*int{&b}, l.ToSlice())
 }

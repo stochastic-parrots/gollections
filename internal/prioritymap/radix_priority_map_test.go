@@ -14,6 +14,8 @@ func TestNewRadixPriorityMap(t *testing.T) {
 	assert.True(t, pm.IsEmpty())
 	assert.Empty(t, pm.entries)
 	assert.Zero(t, pm.last)
+	assert.Equal(t, 10, pm.freeLen)
+	assert.Equal(t, 10, pm.freeCapacity)
 	assert.Equal(t, 10, countRadixFree(pm))
 	for _, bucket := range pm.buckets {
 		assert.Nil(t, bucket)
@@ -559,12 +561,13 @@ func TestRadixPriorityMap_Clear(t *testing.T) {
 	})
 
 	t.Run("Reuse", func(t *testing.T) {
-		pm := NewRadixPriorityMap[string, uint64](0)
+		pm := NewRadixPriorityMap[string, uint64](1)
 
 		pm.Set("old", 100)
 		pm.Clear()
 		assert.Equal(t, 0, len(pm.entries))
 		assert.Equal(t, 1, countRadixFree(pm))
+		assert.Equal(t, 1, pm.freeLen)
 
 		pm.Set("new", 5)
 		pm.Set("newer", 1)
@@ -574,6 +577,54 @@ func TestRadixPriorityMap_Clear(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, "newer", key)
 		assert.Equal(t, uint64(1), priority)
+	})
+
+	t.Run("RetainsConfiguredCapacity", func(t *testing.T) {
+		pm := NewRadixPriorityMap[string, uint64](2)
+		pm.Set("a", 1)
+		pm.Set("b", 2)
+		pm.Set("c", 3)
+		pm.Set("d", 4)
+		entries := make([]*radixEntry[string, uint64], 0, len(pm.entries))
+		for _, entry := range pm.entries {
+			entries = append(entries, entry)
+		}
+
+		pm.Clear()
+
+		assert.Equal(t, 2, pm.freeCapacity)
+		assert.Equal(t, 2, pm.freeLen)
+		retained := make(map[*radixEntry[string, uint64]]struct{}, pm.freeLen)
+		for current := pm.free; current != nil; current = current.next {
+			retained[current] = struct{}{}
+		}
+		assert.Len(t, retained, 2)
+		for _, entry := range entries {
+			assert.Empty(t, entry.key)
+			assert.Zero(t, entry.priority)
+			assert.Zero(t, entry.bucket)
+			assert.Nil(t, entry.previous)
+			if _, ok := retained[entry]; !ok {
+				assert.Nil(t, entry.next)
+			}
+		}
+	})
+
+	t.Run("ZeroCapacityDisablesRetention", func(t *testing.T) {
+		pm := NewRadixPriorityMap[string, uint64](0)
+		pm.Set("old", 1)
+		entry := pm.entries["old"]
+
+		assert.True(t, pm.Remove("old"))
+
+		assert.Zero(t, pm.freeCapacity)
+		assert.Zero(t, pm.freeLen)
+		assert.Nil(t, pm.free)
+		assert.Empty(t, entry.key)
+		assert.Zero(t, entry.priority)
+		assert.Zero(t, entry.bucket)
+		assert.Nil(t, entry.previous)
+		assert.Nil(t, entry.next)
 	})
 }
 
