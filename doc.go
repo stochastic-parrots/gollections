@@ -30,11 +30,13 @@
 //
 // # JSON
 //
-// Lists and deques implement json.Marshaler and json.Unmarshaler because a JSON
-// array completely defines their logical element order. Sorted lists and heaps
-// marshal as arrays but do not implement json.Unmarshaler because JSON cannot
-// describe their ordering configuration. Decode those structures into a slice
-// first, then pass that slice to the appropriate factory.
+// Collections marshal without external construction input; each package
+// documents the traversal order used by its JSON array. Lists and deques also
+// implement json.Unmarshaler because the array completely defines their logical
+// element order. Sorted lists do not implement unmarshaling so their natural or
+// custom ordering strategy remains an explicit factory choice. Heaps do not
+// implement it because the array does not encode their comparator or min/max
+// selection. Decode those structures into a slice, then use the matching factory.
 //
 // # Concurrency
 //
