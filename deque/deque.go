@@ -58,7 +58,8 @@ type Deque[T any] interface {
 	// It returns the zero value of T and false if the deque is empty.
 	Pop() (T, bool)
 
-	// Clear removes all elements from the deque, resetting it to an empty state.
+	// Clear removes all elements and leaves the deque ready for reuse.
+	// Storage retention depends on the concrete deque strategy.
 	Clear()
 
 	Readonly[T]

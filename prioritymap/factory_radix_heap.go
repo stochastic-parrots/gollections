@@ -5,7 +5,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-// RadixHeapPriorityMap is an indexed monotone min-priority map.
+// RadixHeapPriorityMap is an indexed monotone min-priority map. Its zero value
+// is invalid; construct one with [RadixHeap].
 type RadixHeapPriorityMap[K comparable, P constraint.Integer] = prioritymap.RadixPriorityMap[K, P]
 
 var _ PriorityMap[int, uint64] = &prioritymap.RadixPriorityMap[int, uint64]{}
@@ -36,6 +37,8 @@ func RadixHeap[K comparable, P constraint.Integer]() RadixHeapFactory[K, P] {
 }
 
 // New creates an empty radix priority map with the requested initial capacity.
+// The freelist retains at most capacity entries for reuse. A zero capacity
+// disables freelist retention.
 func (RadixHeapFactory[K, P]) New(capacity int) *RadixHeapPriorityMap[K, P] {
 	return prioritymap.NewRadixPriorityMap[K, P](capacity)
 }

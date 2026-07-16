@@ -342,14 +342,21 @@ func TestRingBufferDeque_MarshalJSON(t *testing.T) {
 }
 
 func TestRingBufferDeque_Clear(t *testing.T) {
-	deque := NewRingBufferDeque[int](2)
-	deque.Append(1, 2, 3)
+	a, b := 1, 2
+	deque := NewRingBufferDeque[*int](4)
+	deque.Append(&a, &b)
+	backing := &deque.data[0]
 
 	deque.Clear()
 
 	assert.True(t, deque.IsEmpty())
 	assert.Nil(t, deque.ToSlice())
+	assert.Equal(t, 4, cap(deque.data))
+	assert.Same(t, backing, &deque.data[0])
+	assert.Nil(t, deque.data[0])
+	assert.Nil(t, deque.data[1])
 
-	deque.Prepend(5, 6)
-	assert.Equal(t, []int{5, 6}, deque.ToSlice())
+	deque.Prepend(&b)
+	assert.Equal(t, []*int{&b}, deque.ToSlice())
+	assert.Same(t, backing, &deque.data[0])
 }

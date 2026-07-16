@@ -7,7 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-// BinaryHeapPriorityMap is an indexed, slice-backed binary heap.
+// BinaryHeapPriorityMap is an indexed, slice-backed binary heap. Its zero value
+// is invalid; construct one with [BinaryHeap] or [OrderedBinaryHeap].
 type BinaryHeapPriorityMap[K comparable, P any] = prioritymap.BinaryPriorityMap[K, P]
 
 var _ PriorityMap[int, any] = &prioritymap.BinaryPriorityMap[int, any]{}

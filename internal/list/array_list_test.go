@@ -683,9 +683,20 @@ func TestArrayList_ToSlice(t *testing.T) {
 }
 
 func TestArrayList_Clear(t *testing.T) {
-	l := NewArrayList[int](3)
-	l.Append(1, 2, 3)
+	a, b := 1, 2
+	l := NewArrayList[*int](4)
+	l.Append(&a, &b)
+	backing := &l.data[:cap(l.data)][0]
+
 	l.Clear()
 
-	assert.Equal(t, 0, l.Length())
+	assert.True(t, l.IsEmpty())
+	assert.Equal(t, 4, cap(l.data))
+	assert.Same(t, backing, &l.data[:cap(l.data)][0])
+	assert.Nil(t, l.data[:cap(l.data)][0])
+	assert.Nil(t, l.data[:cap(l.data)][1])
+
+	l.Append(&b)
+	assert.Equal(t, []*int{&b}, l.ToSlice())
+	assert.Same(t, backing, &l.data[:cap(l.data)][0])
 }

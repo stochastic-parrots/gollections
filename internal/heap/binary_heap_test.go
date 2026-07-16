@@ -110,18 +110,35 @@ func TestBinaryHeapPeek(t *testing.T) {
 }
 
 func TestBinaryHeapDrain(t *testing.T) {
-	items := []int{5, 1, 9, 3}
-	heap := NewBinaryHeapFromSlice(items, comparator.Min[int]())
+	t.Run("FullIteration", func(t *testing.T) {
+		items := []int{5, 1, 9, 3}
+		heap := NewBinaryHeapFromSlice(items, comparator.Min[int]())
 
-	expected := []int{1, 3, 5, 9}
-	count := 0
-	for idx, val := range heap.Drain() {
-		assert.Equal(t, expected[idx], val)
-		count++
-	}
+		expected := []int{1, 3, 5, 9}
+		count := 0
+		for idx, val := range heap.Drain() {
+			assert.Equal(t, expected[idx], val)
+			count++
+		}
 
-	assert.Equal(t, 4, count)
-	assert.True(t, heap.IsEmpty())
+		assert.Equal(t, 4, count)
+		assert.True(t, heap.IsEmpty())
+	})
+
+	t.Run("PartialIteration", func(t *testing.T) {
+		heap := NewBinaryHeapFromSlice([]int{3, 1, 2}, comparator.Min[int]())
+
+		for idx, value := range heap.Drain() {
+			assert.Zero(t, idx)
+			assert.Equal(t, 1, value)
+			break
+		}
+
+		assert.Equal(t, 2, heap.Length())
+		value, ok := heap.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, 2, value)
+	})
 }
 
 func TestBinaryHeapAll(t *testing.T) {
@@ -137,6 +154,13 @@ func TestBinaryHeapAll(t *testing.T) {
 	for _, item := range items {
 		assert.Contains(t, collected, item)
 	}
+
+	var stopped []int
+	for value := range heap.All() {
+		stopped = append(stopped, value)
+		break
+	}
+	assert.Len(t, stopped, 1)
 }
 
 func TestBinaryHeapEnumerate(t *testing.T) {
@@ -145,6 +169,36 @@ func TestBinaryHeapEnumerate(t *testing.T) {
 	for idx, val := range heap.Enumerate() {
 		assert.Equal(t, heap.data[idx], val)
 	}
+
+	count := 0
+	for idx, val := range heap.Enumerate() {
+		assert.Zero(t, idx)
+		assert.Equal(t, heap.data[0], val)
+		count++
+		break
+	}
+	assert.Equal(t, 1, count)
+}
+
+func TestBinaryHeapClear(t *testing.T) {
+	a, b := 1, 2
+	heap := NewBinaryHeap(4, func(a, b *int) bool { return *a < *b })
+	heap.Push(&b, &a)
+	backing := &heap.data[:cap(heap.data)][0]
+
+	heap.Clear()
+
+	assert.True(t, heap.IsEmpty())
+	assert.Equal(t, 4, cap(heap.data))
+	assert.Same(t, backing, &heap.data[:cap(heap.data)][0])
+	assert.Nil(t, heap.data[:cap(heap.data)][0])
+	assert.Nil(t, heap.data[:cap(heap.data)][1])
+
+	heap.Push(&b, &a)
+	top, ok := heap.Peek()
+	assert.True(t, ok)
+	assert.Same(t, &a, top)
+	assert.Same(t, backing, &heap.data[:cap(heap.data)][0])
 }
 
 func TestBinaryHeapString(t *testing.T) {

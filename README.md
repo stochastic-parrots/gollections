@@ -37,14 +37,24 @@ Go documentation tools.
   `list.List`, `sortedlist.SortedList`, `deque.Deque`, `heap.Heap`, and
   `prioritymap.PriorityMap`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.
+- Reusable clearing: `Clear` removes stored references, preserves construction
+  configuration, and leaves the structure ready for reuse. It does not guarantee
+  storage shrinkage or return memory to the Go runtime. Slice-backed structures
+  retain capacity where practical, freelists retain at most their construction
+  limit, and linked structures without a freelist may release their nodes.
 - Internal implementations: public packages expose stable concrete factories while
   concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
-  allowing type assertion back to the mutable interface.
+  allowing type assertion back to the mutable interface. These wrappers are
+  capability restrictions, not snapshots or concurrency synchronization.
+- Concurrency: collections are not safe for concurrent use unless explicitly
+  documented otherwise. Callers must synchronize shared access when any
+  goroutine may mutate the collection.
 - JSON support: collections marshal as arrays in their documented traversal
-  order. Decode JSON into a slice, then construct the desired structure through
-  its factory so implementation and comparator settings remain explicit.
+  order. Collection types intentionally do not implement `json.Unmarshaler`;
+  decode into a slice, then construct the desired structure through its factory
+  so implementation and comparator settings remain explicit.
 
 ## Construction
 
@@ -69,9 +79,10 @@ if err := json.Unmarshal(data, &values); err != nil {
 queue := deque.Array[int]().From(values)
 ```
 
-For slice-based construction, `From` may reorder and retain the provided slice.
-Use `Clone` when the source must remain unchanged. Linked structures always
-copy values into nodes, so their `From` methods do not retain the source.
+Array-backed `From` methods transfer ownership of the provided slice and may
+reorder it. The caller must not use the slice or aliases of its backing array
+afterward. Use `Clone` when the source must remain available. Linked structures
+always copy values into nodes, so their `From` methods do not retain the source.
 
 ## Choosing a list
 

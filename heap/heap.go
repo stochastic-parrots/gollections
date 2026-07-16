@@ -44,6 +44,7 @@ type Heap[T any] interface {
 	//
 	// If the iterator is fully consumed, the heap will be empty. If iteration
 	// stops early, only the yielded elements are removed.
+	// Callers must not otherwise mutate the heap while the iterator is running.
 	//
 	// The yielded index is the zero-based rank of each removed element.
 	Drain() iter.Seq2[int, T]
@@ -54,7 +55,8 @@ type Heap[T any] interface {
 	// the zero value of T and false without inserting x.
 	Replace(x T) (T, bool)
 
-	// Clear removes all elements from the heap, resetting it to an empty state.
+	// Clear removes all elements and leaves the heap ready for reuse with the
+	// same priority comparator.
 	Clear()
 
 	gollections.Collection[T]

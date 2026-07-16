@@ -55,6 +55,8 @@ Use this file to orient quickly, then rely on
   packages.
 - Alias public concrete types to implementation structs and return pointers to
   those aliases from constructors and factory methods.
+- Document whether each concrete alias has a usable zero value, and add a public
+  contract test for every zero value the package supports.
 - Clear removed slots, nodes, and freelist entries so references do not leak.
 - Use `gofmt` on changed Go files.
 - Do not use explicit import aliases.

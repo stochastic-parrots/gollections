@@ -517,18 +517,26 @@ func TestArraySortedList_ToSlice(t *testing.T) {
 }
 
 func TestArraySortedList_Clear(t *testing.T) {
-	l := NewArraySortedList(0, func(a, b *int) int {
+	l := NewArraySortedList(4, func(a, b *int) int {
 		return cmp.Compare(*a, *b)
 	})
 	x := 1
 	y := 2
 	l.Add(&x, &y)
+	backing := &l.data[:cap(l.data)][0]
 
 	l.Clear()
 
 	assert.True(t, l.IsEmpty())
 	assert.Nil(t, l.ToSlice())
+	assert.Equal(t, 4, cap(l.data))
+	assert.Same(t, backing, &l.data[:cap(l.data)][0])
 	assert.Nil(t, l.data[:cap(l.data)][0])
+	assert.Nil(t, l.data[:cap(l.data)][1])
+
+	l.Add(&y, &x)
+	assert.Equal(t, []*int{&x, &y}, l.ToSlice())
+	assert.Same(t, backing, &l.data[:cap(l.data)][0])
 }
 
 func TestArraySortedList_JSON(t *testing.T) {

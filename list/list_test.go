@@ -22,6 +22,17 @@ func TestFactoriesImplementList(t *testing.T) {
 	var _ list.List[int] = list.Linked[int]().New()
 }
 
+func TestConcreteZeroValues(t *testing.T) {
+	var array list.ArrayList[int]
+	array.Append(1, 2)
+	assert.Equal(t, []int{1, 2}, array.ToSlice())
+
+	var linked list.LinkedList[int]
+	linked.Append(1, 2)
+	linked.Reverse()
+	assert.Equal(t, []int{2, 1}, linked.ToSlice())
+}
+
 func TestArrayFactory_From(t *testing.T) {
 	data := []int{1, 2}
 	list := list.Array[int]().From(data)

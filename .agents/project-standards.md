@@ -57,14 +57,19 @@ alias and constructor from the public package.
   and indexed reads return zero values plus `false` or an explicit error rather
   than panicking.
 - Iterators follow this convention:
-  - `All` yields values or key-value pairs without mutation.
+  - `All` yields values or key-value pairs without mutation in the order
+    documented by the concrete collection family.
   - `Enumerate` yields index-value pairs for ordered collections.
   - `Keys`, `Values`, and `All` for maps do not guarantee priority or sorted
     order unless the method explicitly says so.
   - `Drain` is destructive and yields in the structure's priority/order
     contract.
-- `Clear` must leave the structure empty, preserve reusable capacity where
-  practical, and zero references that could otherwise keep values alive.
+- `Clear` must leave the structure empty and reusable, preserve configuration,
+  and zero references that could otherwise keep values alive. Resource
+  retention is strategy-specific: slice-backed implementations retain storage
+  where practical, freelists retain at most their configured limit, and linked
+  implementations without a freelist may release detached nodes. Do not promise
+  that `Clear` shrinks storage or returns memory to the Go runtime.
 - For ordered behavior, use `cmp.Ordered` or the local comparator helpers in
   `internal/comparator`.
 - For numeric-only generic APIs, use the package-level constraints in
@@ -76,12 +81,24 @@ alias and constructor from the public package.
   - `AsReadonly` returning `nil` for nil input.
   - private `readonly` wrapper with one-line forwarding methods.
   - compile-time assertion: `var _ Readonly[...] = (*readonly[...])(nil)`.
+- Readonly interfaces and wrappers are capability restrictions over the same
+  underlying structure. Do not describe them as snapshots, synchronization, or
+  concurrency safety.
+- Unless explicitly documented otherwise, public structures are not safe for
+  concurrent use. Package documentation must tell callers to synchronize shared
+  access when any goroutine may mutate the structure.
 - Public factory files should include compile-time assertions that internal
   implementations satisfy the public interface.
 - Public concrete type aliases must alias the implementation struct, never a
   pointer to it. Factory construction methods return pointers to those aliases.
   For example, declare `type ArrayList[T any] = list.ArrayList[T]` and return
   `*ArrayList[T]` from `New`, `From`, `Clone`, and `FromSeq`.
+- Every public concrete alias must document whether its zero value is ready for
+  use. Zero values should be supported when no comparator or mandatory index
+  initialization is required; otherwise, direct callers to the matching factory.
+- Public contract tests must exercise every supported concrete zero value
+  without using a factory. Types with invalid zero values must keep the factory
+  requirement explicit in both alias and package documentation.
 
 ## Naming
 
@@ -149,10 +166,16 @@ alias and constructor from the public package.
 - Index-based methods return package-owned errors for invalid indexes.
 - Mutating removal paths must clear discarded slots or nodes before releasing
   storage so references do not leak.
-- Backing storage should be reused after `Clear` when the structure owns the
-  storage. Preserve capacity unless there is a strong reason not to.
+- Slice-backed storage should be reused after `Clear` when the structure owns
+  it. Preserve capacity unless there is a strong reason not to. Do not promise
+  capacity retention in shared public interfaces because linked strategies have
+  no equivalent capacity concept.
 - Freelist-backed structures must reset all pointer fields before returning a
   node/entry to the freelist.
+- Freelist retention must be bounded by the capacity requested at construction.
+  A capacity of zero disables freelist retention. Once the freelist reaches its
+  limit, additional removed or cleared nodes must become unreachable so the
+  garbage collector can reclaim them.
 - Iterator functions should be written as closures returning early when
   `yield` returns false:
 
@@ -166,6 +189,10 @@ alias and constructor from the public package.
   }
   ```
 
+- Public iterator contracts are lazy: they observe collection state when
+  iteration begins. Mutation while an iterator is running is unsupported unless
+  the iterator explicitly documents its own destructive behavior. A destructive
+  iterator does not permit additional caller-driven mutation while it runs.
 - Destructive iterators such as `Drain` should stop immediately on either empty
   structure or `yield == false`.
 - Use simple `for range` loops over integer counts when targeting Go 1.24:
@@ -236,6 +263,9 @@ alias and constructor from the public package.
 - Warnings should be explicit and near the constructor or method, for example
   `WARNING: This operation is In-Place and WILL modify the original slice
   order.`
+- Array-backed `From` methods transfer ownership of the source backing array.
+  Their public comments must tell callers not to use the slice or any alias
+  afterward and must point to `Clone` as the ownership-preserving alternative.
 
 ## Tests
 

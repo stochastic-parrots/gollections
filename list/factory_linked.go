@@ -6,7 +6,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/list"
 )
 
-// LinkedList is a doubly linked [List].
+// LinkedList is a doubly linked [List]. Its zero value is ready for use.
 type LinkedList[T any] = list.DoubleLinkedList[T]
 
 var _ List[any] = &list.DoubleLinkedList[any]{}

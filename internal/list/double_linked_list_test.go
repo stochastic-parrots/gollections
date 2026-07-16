@@ -689,14 +689,24 @@ func TestDoubleLinkedList_ToSlice(t *testing.T) {
 
 func TestDoubleLinkedList_Clear(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
-		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		a, b := 1, 2
+		l := NewDoubleLinkedList[*int]()
+		l.Append(&a, &b)
+		first := l.first
+		last := l.last
+
 		l.Clear()
 
-		assert.Equal(t, 0, l.Length())
+		assert.True(t, l.IsEmpty())
 		assert.Nil(t, l.first)
 		assert.Nil(t, l.last)
 		assert.False(t, l.reversed)
+		assert.Nil(t, first.Value)
+		assert.Nil(t, first.Previous)
+		assert.Nil(t, first.Next)
+		assert.Nil(t, last.Value)
+		assert.Nil(t, last.Previous)
+		assert.Nil(t, last.Next)
 	})
 
 	t.Run("Reversed", func(t *testing.T) {

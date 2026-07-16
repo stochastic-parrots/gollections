@@ -19,12 +19,29 @@
 // Clear are exposed only by the structure-specific interfaces in each
 // subpackage, where their semantics are precise and unambiguous.
 //
+// # Clearing And Reuse
+//
+// Clear removes all elements, releases stored references, preserves the
+// structure's construction configuration, and leaves it ready for reuse.
+// Resource retention is implementation-specific: slice-backed structures may
+// preserve capacity, bounded freelists retain at most their configured limit,
+// and linked structures without a freelist may release their nodes. Clear does
+// not guarantee that storage is shrunk or memory is returned to the Go runtime.
+//
 // # JSON
 //
 // Collections that implement json.Marshaler encode as JSON arrays. The module
 // intentionally does not implement json.Unmarshaler: JSON cannot describe
 // construction settings such as comparator and implementation strategy. Decode
 // into a slice first, then pass that slice to the appropriate factory.
+//
+// # Concurrency
+//
+// Unless a type explicitly documents otherwise, collections in this module are
+// not safe for concurrent use. Callers must synchronize access when at least one
+// goroutine may mutate a shared collection. Readonly interfaces and views limit
+// the operations available through an API; they do not provide synchronization
+// or a snapshot of the underlying collection.
 //
 // # Subpackages
 //

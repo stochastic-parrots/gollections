@@ -327,8 +327,11 @@ func TestDoubleLinkedDeque_Clear(t *testing.T) {
 	})
 
 	t.Run("Populated", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2, 3)
+		a, b := 1, 2
+		deque := NewDoubleLinkedDeque[*int]()
+		deque.Append(&a, &b)
+		first := deque.first
+		last := deque.last
 
 		deque.Clear()
 
@@ -336,9 +339,15 @@ func TestDoubleLinkedDeque_Clear(t *testing.T) {
 		assert.Nil(t, deque.ToSlice())
 		assert.Nil(t, deque.first)
 		assert.Nil(t, deque.last)
+		assert.Nil(t, first.Value)
+		assert.Nil(t, first.Previous)
+		assert.Nil(t, first.Next)
+		assert.Nil(t, last.Value)
+		assert.Nil(t, last.Previous)
+		assert.Nil(t, last.Next)
 
-		deque.Prepend(5, 6)
-		assert.Equal(t, []int{5, 6}, deque.ToSlice())
+		deque.Prepend(&a, &b)
+		assert.Equal(t, []*int{&a, &b}, deque.ToSlice())
 	})
 
 }
