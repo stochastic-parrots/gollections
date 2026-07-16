@@ -26,11 +26,15 @@ func TestConcreteZeroValues(t *testing.T) {
 	array.Append(1, 2)
 	array.Prepend(0)
 	assert.Equal(t, []int{0, 1, 2}, array.ToSlice())
+	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &array))
+	assert.Equal(t, []int{3, 4}, array.ToSlice())
 
 	var linked deque.LinkedDeque[int]
 	linked.Append(1, 2)
 	linked.Prepend(0)
 	assert.Equal(t, []int{0, 1, 2}, linked.ToSlice())
+	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &linked))
+	assert.Equal(t, []int{3, 4}, linked.ToSlice())
 }
 
 func TestArrayFactory_From(t *testing.T) {
@@ -87,6 +91,8 @@ func TestAsReadonly(t *testing.T) {
 		mutable.Append(1, 2)
 
 		view := deque.AsReadonly[int](mutable)
+		_, unmarshals := any(view).(json.Unmarshaler)
+		assert.False(t, unmarshals)
 
 		assert.Equal(t, []int{1, 2}, slices.Collect(view.All()))
 		assert.Equal(t, []int{0, 1}, collectIndexes(view.Enumerate()))
@@ -115,8 +121,6 @@ func TestAsReadonly(t *testing.T) {
 func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 	t.Helper()
 
-	_, unmarshals := any(d).(json.Unmarshaler)
-	assert.False(t, unmarshals)
 	assert.True(t, d.IsEmpty())
 
 	d.Append(2, 3)
@@ -144,6 +148,10 @@ func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 	data, err := json.Marshal(d)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[1,2]`, string(data))
+
+	err = json.Unmarshal([]byte(`[8,9]`), d)
+	assert.NoError(t, err)
+	assert.Equal(t, []int{8, 9}, d.ToSlice())
 
 	d.Clear()
 	assert.True(t, d.IsEmpty())

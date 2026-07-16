@@ -30,10 +30,11 @@
 //
 // # JSON
 //
-// Collections that implement json.Marshaler encode as JSON arrays. The module
-// intentionally does not implement json.Unmarshaler: JSON cannot describe
-// construction settings such as comparator and implementation strategy. Decode
-// into a slice first, then pass that slice to the appropriate factory.
+// Lists and deques implement json.Marshaler and json.Unmarshaler because a JSON
+// array completely defines their logical element order. Sorted lists and heaps
+// marshal as arrays but do not implement json.Unmarshaler because JSON cannot
+// describe their ordering configuration. Decode those structures into a slice
+// first, then pass that slice to the appropriate factory.
 //
 // # Concurrency
 //

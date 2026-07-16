@@ -33,6 +33,7 @@
 //		Pop() (T, bool)
 //		Clear()
 //		Readonly[T]
+//		json.Unmarshaler
 //	}
 //
 // # Implementations
@@ -56,9 +57,9 @@
 //
 // # JSON
 //
-// Deques marshal as arrays from front to back. To decode JSON, unmarshal into
-// []T and construct a deque with a factory; deque types do not implement
-// json.Unmarshaler.
+// Deques marshal and unmarshal as arrays from front to back. Unmarshal replaces
+// the current contents only after the complete JSON array is decoded
+// successfully.
 //
 // All traverses a deque from front to back. Enumerate uses the same order
 // and assigns consecutive indexes starting at zero.

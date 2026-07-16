@@ -72,6 +72,8 @@ type List[T any] interface {
 	// Implementation configuration is preserved; storage retention depends on
 	// the concrete list strategy.
 	Clear()
+
+	json.Unmarshaler
 }
 
 // AsReadonly returns a [Readonly] view of the provided [List].

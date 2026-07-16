@@ -31,8 +31,8 @@
 //
 // # JSON
 //
-// Lists marshal as arrays in index order. To decode JSON, unmarshal into []T and
-// construct a list with a factory; list types do not implement json.Unmarshaler.
+// Lists marshal and unmarshal as arrays in index order. Unmarshal replaces the
+// current contents only after the complete JSON array is decoded successfully.
 //
 // # Views And Iteration
 //

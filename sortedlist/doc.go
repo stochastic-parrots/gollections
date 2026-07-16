@@ -95,6 +95,6 @@
 // # JSON
 //
 // Sorted lists marshal as arrays in sorted order. They do not implement
-// json.Unmarshaler because JSON cannot preserve a custom comparator. Decode into
-// []T and pass the values to the same factory used to define the list order.
+// json.Unmarshaler; decode into []T and pass the values to the same factory so
+// the natural or custom ordering strategy remains explicit.
 package sortedlist

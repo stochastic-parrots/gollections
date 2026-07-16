@@ -10,8 +10,7 @@ import (
 )
 
 func ExampleArray() {
-	factory := list.Array[int]()
-	items := factory.New(5)
+	items := list.Array[int]().New(5)
 	items.Append(10, 20, 30)
 
 	val, _ := items.Get(1)
@@ -38,10 +37,8 @@ func ExampleArray() {
 	fmt.Println("Marshal:", string(data))
 
 	input := []byte(`[1,2,3]`)
-	var values []int
-	_ = json.Unmarshal(input, &values)
-	items = factory.From(values)
-	fmt.Println("Decoded:", slices.Collect(items.All()))
+	_ = json.Unmarshal(input, items)
+	fmt.Println("Unmarshal:", slices.Collect(items.All()))
 
 	// Output:
 	// Get(1): 20
@@ -53,12 +50,11 @@ func ExampleArray() {
 	// [10 25 30 50]
 	// [30 89 25 10]
 	// Marshal: [30,89,25,10]
-	// Decoded: [1 2 3]
+	// Unmarshal: [1 2 3]
 }
 
 func ExampleLinked() {
-	factory := list.Linked[string]()
-	items := factory.New()
+	items := list.Linked[string]().New()
 	items.Append("Go", "is", "fast")
 
 	fmt.Println(slices.Collect(items.All()))
@@ -76,10 +72,8 @@ func ExampleLinked() {
 	fmt.Println("Marshal:", string(data))
 
 	input := []byte(`["hello", "world"]`)
-	var values []string
-	_ = json.Unmarshal(input, &values)
-	items = factory.From(values)
-	fmt.Println("Decoded:", slices.Collect(items.All()))
+	_ = json.Unmarshal(input, items)
+	fmt.Println("Unmarshal:", slices.Collect(items.All()))
 
 	// Output:
 	// [Go is fast]
@@ -88,7 +82,7 @@ func ExampleLinked() {
 	// false
 	// [Java and Go are fast]
 	// Marshal: ["Java and","Go","are","fast"]
-	// Decoded: [hello world]
+	// Unmarshal: [hello world]
 }
 
 func ExampleArrayFactory_From() {

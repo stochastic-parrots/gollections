@@ -63,6 +63,7 @@ type Deque[T any] interface {
 	Clear()
 
 	Readonly[T]
+	json.Unmarshaler
 }
 
 // AsReadonly returns a [Readonly] view of the provided [Deque].

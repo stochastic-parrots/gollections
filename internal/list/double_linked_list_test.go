@@ -666,6 +666,40 @@ func TestDoubleLinkedList_MarshalJSON(t *testing.T) {
 	})
 }
 
+func TestDoubleLinkedList_UnmarshalJSON(t *testing.T) {
+	t.Run("ValidJSON", func(t *testing.T) {
+		data := []byte("[4,5,6]")
+		l := NewDoubleLinkedList[int]()
+		l.Append(1)
+
+		err := l.UnmarshalJSON(data)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
+
+		assert.Equal(t, 4, l.first.Value)
+		assert.Equal(t, 6, l.last.Value)
+	})
+
+	t.Run("Empty", func(t *testing.T) {
+		data := []byte("[]")
+		l := NewDoubleLinkedList[int]()
+		l.Append(1, 2)
+
+		err := l.UnmarshalJSON(data)
+		assert.NoError(t, err)
+		assert.True(t, l.IsEmpty())
+		assert.Nil(t, l.first)
+	})
+
+	t.Run("InvalidJSON", func(t *testing.T) {
+		data := []byte("[1, 2, 'error']")
+		l := NewDoubleLinkedList[int]()
+		err := l.UnmarshalJSON(data)
+		assert.Error(t, err)
+	})
+}
+
 func TestDoubleLinkedList_ToSlice(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()

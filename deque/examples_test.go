@@ -9,8 +9,7 @@ import (
 )
 
 func ExampleArray() {
-	factory := deque.Array[int]()
-	queue := factory.New(2)
+	queue := deque.Array[int]().New(2)
 	queue.Append(2, 3)
 	queue.Prepend(0, 1)
 
@@ -26,17 +25,15 @@ func ExampleArray() {
 	data, _ := json.Marshal(queue)
 	fmt.Println("Marshal:", string(data))
 
-	var values []int
-	_ = json.Unmarshal([]byte(`[8,9]`), &values)
-	queue = factory.From(values)
-	fmt.Println("Decoded:", slices.Collect(queue.All()))
+	_ = json.Unmarshal([]byte(`[8,9]`), queue)
+	fmt.Println("Unmarshal:", slices.Collect(queue.All()))
 
 	// Output:
 	// 0 3
 	// 0 3
 	// [1 2]
 	// Marshal: [1,2]
-	// Decoded: [8 9]
+	// Unmarshal: [8 9]
 }
 
 func ExampleLinked() {
