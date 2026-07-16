@@ -11,28 +11,31 @@ import (
 )
 
 func ExampleArray() {
-	list := sortedlist.Array(cmp.Compare[int]).New(0)
-	list.Add(3, 1, 2, 2)
+	factory := sortedlist.Array(cmp.Compare[int])
+	items := factory.New(0)
+	items.Add(3, 1, 2, 2)
 
-	fmt.Println(slices.Collect(list.All()))
-	fmt.Println(slices.Collect(list.Backward()))
+	fmt.Println(slices.Collect(items.All()))
+	fmt.Println(slices.Collect(items.Backward()))
 
-	first, _ := list.First()
-	last, _ := list.Last()
+	first, _ := items.First()
+	last, _ := items.Last()
 	fmt.Println(first, last)
 
-	data, _ := json.Marshal(list)
+	data, _ := json.Marshal(items)
 	fmt.Println("Marshal:", string(data))
 
-	_ = json.Unmarshal([]byte(`[9,7,8]`), list)
-	fmt.Println("Unmarshal:", slices.Collect(list.All()))
+	var values []int
+	_ = json.Unmarshal([]byte(`[9,7,8]`), &values)
+	items = factory.From(values)
+	fmt.Println("Decoded:", slices.Collect(items.All()))
 
 	// Output:
 	// [1 2 2 3]
 	// [3 2 2 1]
 	// 1 3
 	// Marshal: [1,2,2,3]
-	// Unmarshal: [7 8 9]
+	// Decoded: [7 8 9]
 }
 
 func ExampleOrderedArray() {

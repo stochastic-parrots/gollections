@@ -28,6 +28,16 @@
 // and linked structures without a freelist may release their nodes. Clear does
 // not guarantee that storage is shrunk or memory is returned to the Go runtime.
 //
+// # JSON
+//
+// Collections marshal without external construction input; each package
+// documents the traversal order used by its JSON array. Lists and deques also
+// implement json.Unmarshaler because the array completely defines their logical
+// element order. Sorted lists do not implement unmarshaling so their natural or
+// custom ordering strategy remains an explicit factory choice. Heaps do not
+// implement it because the array does not encode their comparator or min/max
+// selection. Decode those structures into a slice, then use the matching factory.
+//
 // # Concurrency
 //
 // Unless a type explicitly documents otherwise, collections in this module are

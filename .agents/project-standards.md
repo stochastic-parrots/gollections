@@ -246,6 +246,19 @@ alias and constructor from the public package.
 - Document behavioral contracts close to the API that depends on them. For
   example, radix priority maps must document their monotonicity requirement near
   the type and mutation methods.
+- Collection types may implement `json.Marshaler` without external construction
+  input. When the JSON representation is an array, document its traversal order.
+- Lists and deques implement `json.Unmarshaler` because the JSON array order
+  completely defines their logical state. Unmarshaling replaces the contents
+  only after the complete array is decoded successfully.
+- Sorted lists do not implement `json.Unmarshaler`, including naturally ordered
+  implementations. Callers decode into a slice and use the matching `Array` or
+  `OrderedArray` factory so the ordering strategy is explicit and the package
+  keeps one consistent decoding contract.
+- Heaps do not implement `json.Unmarshaler` because their priority comparator or
+  min/max selection is not encoded in the JSON array. Callers decode into a
+  slice and use the same `Binary` or `OrderedBinary` factory that defines heap
+  priority.
 - Examples live in `examples_test.go`, use `Example...` names, and include
   `// Output:` blocks when deterministic.
 - README changes should explain when to choose a structure, not only list that

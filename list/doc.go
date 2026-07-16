@@ -29,6 +29,11 @@
 // Linked factories provide New, From, and FromSeq. Linked construction always
 // copies values into newly allocated nodes and never retains a source slice.
 //
+// # JSON
+//
+// Lists marshal and unmarshal as arrays in index order. Unmarshal replaces the
+// current contents only after the complete JSON array is decoded successfully.
+//
 // # Views And Iteration
 //
 // [List] exposes mutation, while [Readonly] contains observation and traversal

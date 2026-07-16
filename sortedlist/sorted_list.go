@@ -112,8 +112,6 @@ type SortedList[T any] interface {
 	// Clear removes all elements and leaves the list ready for reuse with the
 	// same ordering configuration.
 	Clear()
-
-	json.Unmarshaler
 }
 
 // AsReadonly returns a [Readonly] view of the provided [SortedList].

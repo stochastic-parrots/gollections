@@ -277,17 +277,6 @@ func (heap *BinaryHeap[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(heap)
 }
 
-// UnmarshalJSON populates the heap from a JSON array.
-// It clears any existing elements before appending the new ones from the JSON data.
-//
-// Note: This operation is destructive; it calls Clear() to remove all existing
-// elements before appending the ones from the JSON data.
-//
-// Complexity: O(n + k) where k is the number of elements in the JSON.
-func (heap *BinaryHeap[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, heap.Clear, heap.Push)
-}
-
 // Format implements the fmt.Formatter interface, allowing custom formatting
 // with verbs like %v, %+v, and %#v.
 //

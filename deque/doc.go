@@ -55,6 +55,12 @@
 // values in front-to-back order. Clone preserves the source slice.
 // [LinkedFactory.From] never modifies or retains its source.
 //
+// # JSON
+//
+// Deques marshal and unmarshal as arrays from front to back. Unmarshal replaces
+// the current contents only after the complete JSON array is decoded
+// successfully.
+//
 // All traverses a deque from front to back. Enumerate uses the same order
 // and assigns consecutive indexes starting at zero.
 package deque

@@ -432,48 +432,6 @@ func TestOrderedArraySortedList_JSON(t *testing.T) {
 		assert.JSONEq(t, `[]`, string(data))
 	})
 
-	t.Run("Unmarshal", func(t *testing.T) {
-		l := NewOrderedArraySortedList[int](0)
-		l.Add(10)
-
-		err := json.Unmarshal([]byte(`[3,1,2]`), l)
-
-		assert.NoError(t, err)
-		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
-	})
-
-	t.Run("UnmarshalReusesCapacityAndClearsValues", func(t *testing.T) {
-		l := NewOrderedArraySortedList[string](4)
-		l.Add("b", "a")
-		backing := &l.data[:cap(l.data)][0]
-
-		err := json.Unmarshal([]byte(`["c"]`), l)
-
-		assert.NoError(t, err)
-		assert.Same(t, backing, &l.data[:cap(l.data)][0])
-		assert.Equal(t, 4, cap(l.data))
-		assert.Equal(t, "c", l.data[0])
-		assert.Empty(t, l.data[:cap(l.data)][1])
-	})
-
-	t.Run("UnmarshalReplacesStorageWhenCapacityIsSmall", func(t *testing.T) {
-		l := NewOrderedArraySortedList[int](0)
-
-		err := json.Unmarshal([]byte(`[3,1,2]`), l)
-
-		assert.NoError(t, err)
-		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
-	})
-
-	t.Run("UnmarshalInvalid", func(t *testing.T) {
-		l := NewOrderedArraySortedList[int](0)
-		l.Add(1)
-
-		err := json.Unmarshal([]byte(`{}`), l)
-
-		assert.Error(t, err)
-		assert.Equal(t, []int{1}, l.ToSlice())
-	})
 }
 
 func TestOrderedArraySortedList_Format(t *testing.T) {

@@ -51,8 +51,11 @@ Go documentation tools.
 - Concurrency: collections are not safe for concurrent use unless explicitly
   documented otherwise. Callers must synchronize shared access when any
   goroutine may mutate the collection.
-- JSON support: linear collections and heaps can marshal/unmarshal as arrays
-  where the operation makes sense.
+- JSON support: collections marshal as arrays without external construction
+  input, using the traversal order documented by each package. Lists and deques
+  also unmarshal because array order completely defines their logical state.
+  Sorted lists and heaps require slice decoding followed by the matching factory
+  so sorted-list strategy and heap priority remain explicit.
 
 ## Construction
 
@@ -64,6 +67,17 @@ items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
 scores := sortedlist.OrderedArray[int]().Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
+```
+
+Sorted lists and heaps intentionally do not implement `json.Unmarshaler`.
+Decode into a slice and use the selected factory to establish their invariants:
+
+```go
+var values []int
+if err := json.Unmarshal(data, &values); err != nil {
+	return err
+}
+scores := sortedlist.Array(cmp.Compare[int]).From(values)
 ```
 
 Array-backed `From` methods transfer ownership of the provided slice and may

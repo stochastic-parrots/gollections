@@ -61,6 +61,8 @@ func TestBinaryFactory_Clone(t *testing.T) {
 func assertHeapBehavior(t *testing.T, h heap.Heap[int], expectedDrain []int) {
 	t.Helper()
 
+	_, unmarshals := any(h).(json.Unmarshaler)
+	assert.False(t, unmarshals)
 	assert.True(t, h.IsEmpty())
 
 	h.Push(3, 1, 2)
@@ -83,10 +85,6 @@ func assertHeapBehavior(t *testing.T, h heap.Heap[int], expectedDrain []int) {
 	err = json.Unmarshal(data, &values)
 	assert.NoError(t, err)
 	assert.Len(t, values, 3)
-
-	err = json.Unmarshal([]byte(`[8,9]`), h)
-	assert.NoError(t, err)
-	assert.Equal(t, 2, h.Length())
 
 	h.Clear()
 	assert.True(t, h.IsEmpty())

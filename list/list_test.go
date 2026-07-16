@@ -26,11 +26,15 @@ func TestConcreteZeroValues(t *testing.T) {
 	var array list.ArrayList[int]
 	array.Append(1, 2)
 	assert.Equal(t, []int{1, 2}, array.ToSlice())
+	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &array))
+	assert.Equal(t, []int{3, 4}, array.ToSlice())
 
 	var linked list.LinkedList[int]
 	linked.Append(1, 2)
 	linked.Reverse()
 	assert.Equal(t, []int{2, 1}, linked.ToSlice())
+	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &linked))
+	assert.Equal(t, []int{3, 4}, linked.ToSlice())
 }
 
 func TestArrayFactory_From(t *testing.T) {
@@ -87,6 +91,8 @@ func TestAsReadonly(t *testing.T) {
 		mutable.Append(1, 2)
 
 		view := list.AsReadonly[int](mutable)
+		_, unmarshals := any(view).(json.Unmarshaler)
+		assert.False(t, unmarshals)
 
 		assert.Equal(t, []int{1, 2}, slices.Collect(view.All()))
 		assert.Equal(t, []int{2, 1}, slices.Collect(view.Backward()))

@@ -60,7 +60,14 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("InvalidJSON", func(t *testing.T) {
-		err := collection.Unmarshal([]byte("[1, 2, wrong]"), func() {}, func(...int) {})
+		clearCalled := false
+		err := collection.Unmarshal(
+			[]byte("[1, 2, wrong]"),
+			func() { clearCalled = true },
+			func(...int) {},
+		)
+
 		assert.Error(t, err)
+		assert.False(t, clearCalled)
 	})
 }
