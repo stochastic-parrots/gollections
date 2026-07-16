@@ -4,7 +4,7 @@ import (
 	"cmp"
 
 	"github.com/stochastic-parrots/gollections/internal/heap"
-	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 )
 
 // BinaryHeap is a comparator-backed binary [Heap]. Its zero value is invalid;
@@ -13,7 +13,7 @@ type BinaryHeap[T any] = heap.BinaryHeap[T]
 
 var _ Heap[any] = &heap.BinaryHeap[any]{}
 
-// BinaryFactory constructs binary heaps with a fixed priority comparator.
+// BinaryFactory constructs binary heaps with a fixed priority ordering.
 //
 // The comparator returns true when its first argument has higher priority than
 // its second argument. Binary heaps provide O(1) Peek, O(log N) Pop and Replace,
@@ -50,9 +50,9 @@ func Binary[T any](hasPriority func(T, T) bool) BinaryFactory[T] {
 // OrderedBinary returns a binary-heap factory using the natural order of T.
 func OrderedBinary[T cmp.Ordered](order Order) BinaryFactory[T] {
 	if order == Max {
-		return Binary(comparator.Max[T]())
+		return Binary(ordering.Max[T]())
 	}
-	return Binary(comparator.Min[T]())
+	return Binary(ordering.Min[T]())
 }
 
 // New creates an empty binary heap with space preallocated for capacity values.

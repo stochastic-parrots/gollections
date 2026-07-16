@@ -4,7 +4,7 @@ import (
 	"cmp"
 
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
-	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 )
 
 // PairingHeapPriorityMap is an indexed, pointer-based pairing heap. Its zero
@@ -13,7 +13,7 @@ type PairingHeapPriorityMap[K comparable, P any] = prioritymap.PairingPriorityMa
 
 var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 
-// PairingHeapFactory constructs pairing-heap priority maps with a fixed comparator.
+// PairingHeapFactory constructs pairing-heap priority maps with a fixed ordering.
 //
 // Pairing priority maps provide O(1) lookup and Peek. Priority improvements are
 // O(1) amortized, while Pop, removal, and arbitrary updates are O(log N)
@@ -51,9 +51,9 @@ func PairingHeap[K comparable, P any](hasPriority func(P, P) bool) PairingHeapFa
 // OrderedPairingHeap returns a pairing-heap factory using the natural order of P.
 func OrderedPairingHeap[K comparable, P cmp.Ordered](order Order) PairingHeapFactory[K, P] {
 	if order == Max {
-		return PairingHeap[K](comparator.Max[P]())
+		return PairingHeap[K](ordering.Max[P]())
 	}
-	return PairingHeap[K](comparator.Min[P]())
+	return PairingHeap[K](ordering.Min[P]())
 }
 
 // New creates an empty pairing priority map with the requested initial capacity.

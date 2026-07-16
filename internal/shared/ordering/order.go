@@ -1,6 +1,6 @@
-// Package comparator provides shared ordering functions for internal data
+// Package ordering provides shared ordering predicates for internal data
 // structures.
-package comparator
+package ordering
 
 import "cmp"
 

@@ -70,8 +70,8 @@ alias and constructor from the public package.
   where practical, freelists retain at most their configured limit, and linked
   implementations without a freelist may release detached nodes. Do not promise
   that `Clear` shrinks storage or returns memory to the Go runtime.
-- For ordered behavior, use `cmp.Ordered` or the shared comparator helpers in
-  `internal/shared/comparator`.
+- For ordered behavior, use `cmp.Ordered` or the shared ordering helpers in
+  `internal/shared/ordering`.
 - Public comparator factories must reject nil comparators immediately. Their
   comments must require a stable strict weak ordering for boolean priority
   predicates or a stable `cmp.Compare`-compatible ordering for three-way

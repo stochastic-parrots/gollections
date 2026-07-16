@@ -4,7 +4,7 @@ import (
 	"cmp"
 
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
-	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 )
 
 // BinaryHeapPriorityMap is an indexed, slice-backed binary heap. Its zero value
@@ -13,7 +13,7 @@ type BinaryHeapPriorityMap[K comparable, P any] = prioritymap.BinaryPriorityMap[
 
 var _ PriorityMap[int, any] = &prioritymap.BinaryPriorityMap[int, any]{}
 
-// BinaryHeapFactory constructs binary-heap priority maps with a fixed comparator.
+// BinaryHeapFactory constructs binary-heap priority maps with a fixed ordering.
 //
 // Binary priority maps provide O(1) lookup and Peek with predictable O(log N)
 // insertion, update, removal, and Pop.
@@ -49,9 +49,9 @@ func BinaryHeap[K comparable, P any](hasPriority func(P, P) bool) BinaryHeapFact
 // OrderedBinaryHeap returns a binary-heap priority-map factory using the natural order of P.
 func OrderedBinaryHeap[K comparable, P cmp.Ordered](order Order) BinaryHeapFactory[K, P] {
 	if order == Max {
-		return BinaryHeap[K](comparator.Max[P]())
+		return BinaryHeap[K](ordering.Max[P]())
 	}
-	return BinaryHeap[K](comparator.Min[P]())
+	return BinaryHeap[K](ordering.Min[P]())
 }
 
 // New creates an empty binary priority map with the requested initial capacity.

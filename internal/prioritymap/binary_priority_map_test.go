@@ -3,12 +3,12 @@ package prioritymap
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/internal/shared/comparator"
+	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBinaryPriorityMap(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](10, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[string](10, ordering.Min[int]())
 
 	assert.Equal(t, 0, pm.Length())
 	assert.True(t, pm.IsEmpty())
@@ -18,7 +18,7 @@ func TestNewBinaryPriorityMap(t *testing.T) {
 
 func TestBinaryPriorityMap_Set(t *testing.T) {
 	t.Run("Insert", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("B", 5)
 
@@ -29,7 +29,7 @@ func TestBinaryPriorityMap_Set(t *testing.T) {
 	})
 
 	t.Run("Update", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("A", 10)
 		pm.Set("A", 2) // Update priority to be higher
 
@@ -41,12 +41,12 @@ func TestBinaryPriorityMap_Set(t *testing.T) {
 
 func TestBinaryPriorityMap_Update(t *testing.T) {
 	t.Run("Nonexistent", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		assert.False(t, pm.Update("nonexistent", 1))
 	})
 
 	t.Run("Existent", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("apple", 50)
 		pm.Set("banana", 30)
 		pm.Set("cherry", 10)
@@ -60,7 +60,7 @@ func TestBinaryPriorityMap_Update(t *testing.T) {
 	})
 
 	t.Run("WorsePriority", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("root", 1)
 		pm.Set("a", 2)
 		pm.Set("b", 3)
@@ -76,7 +76,7 @@ func TestBinaryPriorityMap_Update(t *testing.T) {
 
 func TestBinaryPriorityMap_Improve(t *testing.T) {
 	t.Run("Insert", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 
 		assert.True(t, pm.Improve("A", 10))
 		assert.Equal(t, 1, pm.Length())
@@ -87,7 +87,7 @@ func TestBinaryPriorityMap_Improve(t *testing.T) {
 	})
 
 	t.Run("ImprovePriority", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("Root", 1)
 		pm.Set("A", 10)
 		pm.Set("B", 20)
@@ -108,7 +108,7 @@ func TestBinaryPriorityMap_Improve(t *testing.T) {
 	})
 
 	t.Run("WorsenPriority", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("A", 10)
 
 		assert.False(t, pm.Improve("A", 15))
@@ -118,7 +118,7 @@ func TestBinaryPriorityMap_Improve(t *testing.T) {
 	})
 
 	t.Run("SamePriority", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("A", 10)
 
 		assert.False(t, pm.Improve("A", 10))
@@ -126,7 +126,7 @@ func TestBinaryPriorityMap_Improve(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Get(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 	pm.Set("apple", 100)
 
 	val, ok := pm.Get("apple")
@@ -139,7 +139,7 @@ func TestBinaryPriorityMap_Get(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Remove(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 	pm.Set("A", 10)
 	pm.Set("B", 20)
 	pm.Set("C", 30)
@@ -167,7 +167,7 @@ func TestBinaryPriorityMap_RemoveClearsDiscardedSlot(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Pop(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[int](0, ordering.Min[int]())
 	pm.Set(1, 50)
 	pm.Set(2, 10)
 	pm.Set(3, 30)
@@ -200,7 +200,7 @@ func TestBinaryPriorityMap_PopClearsDiscardedSlot(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Peek(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 
 	_, _, ok := pm.Peek()
 	assert.False(t, ok)
@@ -213,7 +213,7 @@ func TestBinaryPriorityMap_Peek(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Contains(t *testing.T) {
-	pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 	pm.Set("a", 10)
 
 	assert.False(t, !pm.Contains("a"))
@@ -225,7 +225,7 @@ func TestBinaryPriorityMap_Contains(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_IsEmpty(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[int](0, ordering.Min[int]())
 	assert.True(t, pm.IsEmpty())
 
 	pm.Set(1, 10)
@@ -236,7 +236,7 @@ func TestBinaryPriorityMap_IsEmpty(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Length(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[int](0, ordering.Min[int]())
 	assert.Equal(t, 0, pm.Length())
 
 	pm.Set(1, 10)
@@ -246,7 +246,7 @@ func TestBinaryPriorityMap_Length(t *testing.T) {
 
 func TestBinaryPriorityMap_Keys(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -264,7 +264,7 @@ func TestBinaryPriorityMap_Keys(t *testing.T) {
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -283,7 +283,7 @@ func TestBinaryPriorityMap_Keys(t *testing.T) {
 	})
 
 	t.Run("EmptyMap", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		count := 0
 		for range pm.Keys() {
 			count++
@@ -294,7 +294,7 @@ func TestBinaryPriorityMap_Keys(t *testing.T) {
 
 func TestBinaryPriorityMap_Values(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -312,7 +312,7 @@ func TestBinaryPriorityMap_Values(t *testing.T) {
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -331,7 +331,7 @@ func TestBinaryPriorityMap_Values(t *testing.T) {
 	})
 
 	t.Run("EmptyMap", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		count := 0
 		for range pm.Values() {
 			count++
@@ -342,7 +342,7 @@ func TestBinaryPriorityMap_Values(t *testing.T) {
 
 func TestBinaryPriorityMap_All(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -360,7 +360,7 @@ func TestBinaryPriorityMap_All(t *testing.T) {
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -379,7 +379,7 @@ func TestBinaryPriorityMap_All(t *testing.T) {
 	})
 
 	t.Run("EmptyMap", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		count := 0
 		for range pm.Values() {
 			count++
@@ -390,7 +390,7 @@ func TestBinaryPriorityMap_All(t *testing.T) {
 
 func TestBinaryPriorityMap_Drain(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Max[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Max[int]())
 		items := map[string]int{"a": 30, "b": 10, "c": 20}
 		for k, v := range items {
 			pm.Set(k, v)
@@ -409,7 +409,7 @@ func TestBinaryPriorityMap_Drain(t *testing.T) {
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -427,7 +427,7 @@ func TestBinaryPriorityMap_Drain(t *testing.T) {
 	})
 
 	t.Run("EmptyMap", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		count := 0
 		for range pm.Drain() {
 			count++
@@ -437,7 +437,7 @@ func TestBinaryPriorityMap_Drain(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Integrity(t *testing.T) {
-	pm := NewBinaryPriorityMap[int](0, comparator.Min[int]())
+	pm := NewBinaryPriorityMap[int](0, ordering.Min[int]())
 
 	for i := 10; i > 0; i-- {
 		pm.Set(i, i)
@@ -454,7 +454,7 @@ func TestBinaryPriorityMap_Integrity(t *testing.T) {
 
 func TestBinaryPriorityMap_Clear(t *testing.T) {
 	t.Run("PopulatedMap", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](10, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](10, ordering.Min[int]())
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
@@ -480,7 +480,7 @@ func TestBinaryPriorityMap_Clear(t *testing.T) {
 	})
 
 	t.Run("Reuse", func(t *testing.T) {
-		pm := NewBinaryPriorityMap[string](0, comparator.Min[int]())
+		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 
 		pm.Set("old", 100)
 		pm.Clear()
