@@ -80,7 +80,8 @@
 //
 // Factories build sorted lists from empty capacity, slices, cloned slices, or
 // iterators. [ArrayFactory.From] and [OrderedArrayFactory.From] sort and retain
-// the provided slice; Clone preserves it. FromSeq makes it possible to sort any
-// collection in this module that exposes All(). Every factory method returns a
-// concrete sorted-list type.
+// the provided slice, transferring ownership of its backing array. The caller
+// must not use the slice or its aliases afterward. Clone preserves the source.
+// FromSeq makes it possible to sort any collection in this module that exposes
+// All(). Every factory method returns a concrete sorted-list type.
 package sortedlist

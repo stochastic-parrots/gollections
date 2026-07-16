@@ -238,6 +238,9 @@ alias and constructor from the public package.
 - Warnings should be explicit and near the constructor or method, for example
   `WARNING: This operation is In-Place and WILL modify the original slice
   order.`
+- Array-backed `From` methods transfer ownership of the source backing array.
+  Their public comments must tell callers not to use the slice or any alias
+  afterward and must point to `Clone` as the ownership-preserving alternative.
 
 ## Tests
 
