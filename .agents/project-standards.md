@@ -138,8 +138,10 @@ alias and constructor from the public package.
   - `K` for keys.
   - `V` for generic map values.
   - `P` for priorities.
-- Use `xs ...T` for variadic element inputs, matching `Append(xs ...T)` and
-  `Push(xs ...T)`.
+- When a mutation supports both single-value and batch forms, use the singular
+  verb for one value and its plural for the variadic form: `Add`/`Adds`,
+  `Append`/`Appends`, `Prepend`/`Prepends`, and `Push`/`Pushes`. Use `xs ...T`
+  for the variadic input.
 - Use `idx` for indexes, not `index`, in method signatures and tests.
 - Factory selectors should preserve the user-facing strategy vocabulary:
   - `Array` and `Linked` select list and deque implementations.
@@ -157,6 +159,13 @@ alias and constructor from the public package.
 
 - Keep implementations direct and data-structure oriented. This repo favors
   explicit slice/node/map manipulation over clever helper abstractions.
+- Outside an intentional capability or API boundary, do not add forwarding
+  methods whose entire body only calls another method or function with the same
+  behavior. Put the implementation in the method that owns the operation and
+  have related methods call that method only when they add behavior, such as
+  iteration for a batch operation. Readonly capability wrappers and adapters
+  that normalize an external API are intentional boundaries, not redundant
+  implementation wrappers.
 - Internal structs should expose fields only inside `internal` packages. Tests
   may inspect those fields directly to verify invariants.
 - Prefer pointer receivers for mutable data structures.
@@ -241,13 +250,27 @@ alias and constructor from the public package.
   //
   //	Operation           Time Complexity
   //	-----------------   ---------------
-  //	Push(xs... T)       O(K log N)
+  //	Push(x)             O(log N)
+  //	Pushes(xs... T)     O(len(xs) log N)
   //	Pop()               O(log N)
   //	Peek()              O(1)
   ```
 
 - Internal data-structure methods use shorter documentation with `Complexity:`
   blocks when the implementation is non-trivial.
+- Complexity documentation describes the total cost of one method call, not
+  only the per-element cost. Follow this notation in all new or changed docs:
+  - use uppercase `N` for the collection size and keep its case consistent
+    within the affected file, table, or documentation block;
+  - use the exact input expression for additional work, such as `len(xs)` for
+    a variadic batch, instead of an anonymous symbol such as `K`;
+  - qualify the total bound when it is amortized, for example
+    `Amortized O(len(xs))`, rather than replacing it with `O(1) per element`;
+  - describe output-sensitive work explicitly, for example
+    `O(log N + number of yielded values)`, when no concrete result slice exists.
+- AI-assisted documentation changes must verify each complexity expression
+  against the method signature and implementation, then search the affected
+  files for mixed notation or stale method names before finishing.
 - Document behavioral contracts close to the API that depends on them. For
   example, radix priority maps must document their monotonicity requirement near
   the type and mutation methods.
@@ -286,6 +309,9 @@ alias and constructor from the public package.
 
 - Use `github.com/stretchr/testify/assert` by default. Use `require` only when a
   failed assertion would make the rest of the test invalid.
+- Every new method must have a focused test that invokes it directly and checks
+  its behavior. Indirect coverage through another method is not sufficient.
+  Name the test `Test<Type>_<Method>` for consistency.
 - Internal implementation tests live in the same package so they can inspect
   internal invariants, freelists, backing slices, and node links.
 - Public package tests use the external `_test` package when validating public
@@ -370,9 +396,9 @@ alias and constructor from the public package.
   measure one method of one implementation, write a local `*_bench_test.go`
   beside that implementation.
 - Suite files should select data from `models`, select implementations from a
-  `get<Family>Suite(...)` helper, call the workload or structure operation, and
-  store results in a package-level sink when needed to avoid compiler
-  elimination.
+  `get<Family>Suite(...)` helper, and call the workload or structure operation.
+  Consume returned values with `_ =` inside `b.Loop()`; do not add package-level
+  benchmark sinks.
 - Benchmark input generation belongs in `models`. Generate inputs outside the
   measured section unless input construction is the operation being measured.
   Prefer deterministic data or fixed seeds when reproducibility matters.

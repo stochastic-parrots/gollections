@@ -7,6 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 )
 
+const bulkHeapifyThreshold = 64
+
 // BinaryHeap represents a priority queue implemented as a binary tree in a contiguous slice.
 // It is generic over type T and requires a 'less' function to define priority.
 type BinaryHeap[T any] struct {
@@ -22,7 +24,7 @@ func NewBinaryHeap[T any](capacity int, less func(a, b T) bool) *BinaryHeap[T] {
 }
 
 // NewBinaryHeapFromSlice creates a BinaryHeap using the provided slice directly as its storage.
-// Warning: This method modifies the original slice in-place to satisfy the heap property (O(n)).
+// Warning: This method modifies the original slice in-place to satisfy the heap property (O(N)).
 func NewBinaryHeapFromSlice[T any](data []T, less func(a, b T) bool) *BinaryHeap[T] {
 	heap := &BinaryHeap[T]{data, less}
 	heap.heapify()
@@ -30,7 +32,7 @@ func NewBinaryHeapFromSlice[T any](data []T, less func(a, b T) bool) *BinaryHeap
 }
 
 // NewBinaryHeapCloneSlice creates a BinaryHeap by cloning the provided slice.
-// The original slice remains unchanged. The new heap is built in O(n) time.
+// The original slice remains unchanged. The new heap is built in O(N) time.
 func NewBinaryHeapCloneSlice[T any](src []T, less func(a, b T) bool) *BinaryHeap[T] {
 	data := make([]T, len(src))
 	copy(data, src)
@@ -43,7 +45,7 @@ func NewBinaryHeapCloneSlice[T any](src []T, less func(a, b T) bool) *BinaryHeap
 // It uses the Floyd's heap construction algorithm, starting from the last
 // non-leaf node down to the root.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (heap *BinaryHeap[T]) heapify() {
 	n := len(heap.data)
 	if n < 2 {
@@ -58,7 +60,7 @@ func (heap *BinaryHeap[T]) heapify() {
 // fixdown restores the heap property by moving the element at idx down the tree.
 // Also known as "sift-down" or "sink".
 //
-// Complexity: O(log n).
+// Complexity: O(log N).
 func (heap *BinaryHeap[T]) fixdown(idx int) {
 	length, i := len(heap.data), idx
 	target := heap.data[i]
@@ -90,7 +92,7 @@ func (heap *BinaryHeap[T]) fixdown(idx int) {
 // fixup restores the heap property by moving the element at idx up the tree.
 // Also known as "sift-up" or "swim".
 //
-// Complexity: O(log n).
+// Complexity: O(log N).
 func (heap *BinaryHeap[T]) fixup(idx int) {
 	i := idx
 	target := heap.data[i]
@@ -111,7 +113,7 @@ func (heap *BinaryHeap[T]) fixup(idx int) {
 
 // Pop removes and returns the element with the highest priority.
 //
-// Complexity: O(log n).
+// Complexity: O(log N).
 // Returns the zero value of T and false if the heap is empty.
 func (heap *BinaryHeap[T]) Pop() (T, bool) {
 	var zero T
@@ -138,7 +140,7 @@ func (heap *BinaryHeap[T]) Pop() (T, bool) {
 // It is more efficient than a Pop followed by a Push as it only performs a downward
 // rebalance (sift-down) and avoids slice resizing.
 //
-// Complexity: O(log n).
+// Complexity: O(log N).
 // Returns the previous root and true, or the zero value of T and false if the heap is empty.
 func (heap *BinaryHeap[T]) Replace(x T) (T, bool) {
 	if len(heap.data) == 0 {
@@ -169,27 +171,37 @@ func (heap *BinaryHeap[T]) Peek() (T, bool) {
 	return heap.data[0], true
 }
 
-// Push inserts one or more elements into the heap.
+// Push inserts an element into the heap.
 //
-// Complexity: O(log n) per element inserted.
-// If multiple elements are provided and the heap is small or empty,
-// it uses an optimized O(n) heapify approach.
-func (heap *BinaryHeap[T]) Push(xs ...T) {
+// Complexity: O(log N).
+func (heap *BinaryHeap[T]) Push(x T) {
+	heap.data = append(heap.data, x)
+	heap.fixup(len(heap.data) - 1)
+}
+
+// Pushes inserts the given elements into the heap.
+//
+// Complexity: O(N + len(xs)) when the heap is empty or len(xs) exceeds both N
+// and 64; O(len(xs) log N) otherwise.
+func (heap *BinaryHeap[T]) Pushes(xs ...T) {
 	k := len(xs)
-	if k == 0 {
+	switch k {
+	case 0:
+		return
+	case 1:
+		heap.Push(xs[0])
 		return
 	}
 
 	n := len(heap.data)
-	if n == 0 || (k > 64 && k > n) {
+	if n == 0 || (k > bulkHeapifyThreshold && k > n) {
 		heap.data = append(heap.data, xs...)
 		heap.heapify()
 		return
 	}
 
 	for _, x := range xs {
-		heap.data = append(heap.data, x)
-		heap.fixup(len(heap.data) - 1)
+		heap.Push(x)
 	}
 }
 
@@ -209,7 +221,7 @@ func (heap *BinaryHeap[T]) Length() int {
 
 // All returns a sequence that yields elements in the underlying slice order.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (heap *BinaryHeap[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
@@ -224,7 +236,7 @@ func (heap *BinaryHeap[T]) All() iter.Seq[T] {
 // Enumerate returns a sequence that yields the index and value of elements
 // as stored in the underlying slice.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (heap *BinaryHeap[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
@@ -239,7 +251,7 @@ func (heap *BinaryHeap[T]) Enumerate() iter.Seq2[int, T] {
 // Drain returns a destructive iterator that removes and yields elements
 // in priority order (highest to lowest).
 //
-// Complexity: O(n log n) for a full traversal.
+// Complexity: O(N log N) for a full traversal.
 func (heap *BinaryHeap[T]) Drain() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		index := 0
@@ -262,7 +274,7 @@ func (heap *BinaryHeap[T]) Drain() iter.Seq2[int, T] {
 // This operation is typically more efficient than creating a new heap
 // as it may reuse the underlying storage.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(N) to zero out elements (avoiding memory leaks).
 func (heap *BinaryHeap[T]) Clear() {
 	clear(heap.data)
 	heap.data = heap.data[:0]
@@ -272,7 +284,7 @@ func (heap *BinaryHeap[T]) Clear() {
 // It uses the internal serialization utility to ensure elements are
 // encoded in their current underlying order.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (heap *BinaryHeap[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(heap)
 }

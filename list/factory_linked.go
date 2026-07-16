@@ -22,7 +22,8 @@ var _ List[any] = &list.DoubleLinkedList[any]{}
 //	-----------------   ---------------
 //	New()               O(1)
 //	From/FromSeq        O(N)
-//	Append(xs...T)      O(len(xs))
+//	Append(x)           O(1)
+//	Appends(xs...T)     O(len(xs))
 //	Insert/Remove       O(N)
 //	Get/Set             O(N)
 //	Find/Contains       O(N)

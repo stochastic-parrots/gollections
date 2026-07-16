@@ -69,7 +69,7 @@ func (l *ArrayList[T]) Get(index int) (T, error) {
 
 // Find locates the index of an element using a linear search.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *ArrayList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
 	if l.IsEmpty() {
 		return -1, false
@@ -86,7 +86,7 @@ func (l *ArrayList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
 
 // Contains returns true if the element exists in the list according to cmp.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *ArrayList[T]) Contains(x T, cmp func(a, b T) int) bool {
 	if l.IsEmpty() {
 		return false
@@ -114,18 +114,25 @@ func (l *ArrayList[T]) Set(index int, x T) error {
 	return nil
 }
 
-// Append adds one or more elements to the end of the list.
+// Append adds an element to the end of the list.
 //
-// Complexity: Amortized O(1) per element.
+// Complexity: Amortized O(1).
 // If the underlying capacity is exceeded, a new, larger array is allocated
-// and all elements are copied (O(n)).
-func (l *ArrayList[T]) Append(xs ...T) {
+// and all elements are copied (O(N)).
+func (l *ArrayList[T]) Append(x T) {
+	l.data = append(l.data, x)
+}
+
+// Appends adds the given elements to the end of the list.
+//
+// Complexity: Amortized O(len(xs)).
+func (l *ArrayList[T]) Appends(xs ...T) {
 	l.data = append(l.data, xs...)
 }
 
 // Insert places an element at the specified index.
 //
-// Complexity: O(n) as it requires shifting elements to the right.
+// Complexity: O(N) as it requires shifting elements to the right.
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *ArrayList[T]) Insert(index int, x T) error {
 	size := len(l.data)
@@ -148,7 +155,7 @@ func (l *ArrayList[T]) Insert(index int, x T) error {
 
 // Remove deletes the element at the specified index and returns its value.
 //
-// Complexity: O(n) as it requires shifting elements to the left.
+// Complexity: O(N) as it requires shifting elements to the left.
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *ArrayList[T]) Remove(index int) (T, error) {
 	size := len(l.data)
@@ -172,7 +179,7 @@ func (l *ArrayList[T]) Remove(index int) (T, error) {
 
 // Reverse inverts the order of the elements in the list in-place.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 // Note: This operation modifies the underlying slice using the optimized slices.Reverse.
 func (l *ArrayList[T]) Reverse() {
 	slices.Reverse(l.data)
@@ -180,7 +187,7 @@ func (l *ArrayList[T]) Reverse() {
 
 // All returns a sequence that yields elements in order from index 0 to length-1.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (l *ArrayList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range l.data {
@@ -193,7 +200,7 @@ func (l *ArrayList[T]) All() iter.Seq[T] {
 
 // Backward returns a sequence that yields elements in order from index length-1 to 0.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (l *ArrayList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for idx := l.Length() - 1; idx >= 0; idx-- {
@@ -206,7 +213,7 @@ func (l *ArrayList[T]) Backward() iter.Seq[T] {
 
 // Enumerate returns a sequence that yields the index and value of each element.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (l *ArrayList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		for idx, value := range l.data {
@@ -220,7 +227,7 @@ func (l *ArrayList[T]) Enumerate() iter.Seq2[int, T] {
 // ToSlice exports the list elements into a native Go slice.
 // It pre-allocates the slice based on the current list length for efficiency.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *ArrayList[T]) ToSlice() []T {
 	if len(l.data) == 0 {
 		return nil
@@ -237,7 +244,7 @@ func (l *ArrayList[T]) ToSlice() []T {
 // This operation is typically more efficient than creating a new array list
 // as it may reuse the underlying storage.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(N) to zero out elements (avoiding memory leaks).
 func (l *ArrayList[T]) Clear() {
 	clear(l.data)
 	l.data = l.data[:0]
@@ -247,7 +254,7 @@ func (l *ArrayList[T]) Clear() {
 // It uses the internal serialization utility to ensure elements are
 // encoded in their current logical order.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *ArrayList[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(l)
 }
@@ -258,9 +265,9 @@ func (l *ArrayList[T]) MarshalJSON() ([]byte, error) {
 // Note: This operation is destructive; it calls Clear() to remove all existing
 // elements before appending the ones from the JSON data.
 //
-// Complexity: O(n + k) where k is the number of elements in the JSON.
+// Complexity: O(N + len(data)).
 func (l *ArrayList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Append)
+	return collection.Unmarshal(data, l.Clear, l.Appends)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

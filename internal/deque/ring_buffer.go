@@ -66,8 +66,8 @@ func (rb *RingBufferDeque[T]) prev(idx int) int {
 // grow doubles the capacity of the ring buffer, reorganizing all elements
 // into contiguous logical order starting at index 0.
 //
-// This is called automatically by append and prepend when the buffer is full.
-// Complexity: O(n).
+// This is called automatically by Append and Prepend when the buffer is full.
+// Complexity: O(N).
 func (rb *RingBufferDeque[T]) grow() {
 	oldCap := len(rb.data)
 	newCap := 1
@@ -126,7 +126,7 @@ func (rb *RingBufferDeque[T]) Length() int {
 
 // All returns a sequence that yields elements in order from index 0 to length-1.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (rb *RingBufferDeque[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for i := range rb.count {
@@ -140,7 +140,7 @@ func (rb *RingBufferDeque[T]) All() iter.Seq[T] {
 
 // Enumerate returns a sequence that yields the index and value of each element.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (rb *RingBufferDeque[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		for i := range rb.count {
@@ -155,7 +155,7 @@ func (rb *RingBufferDeque[T]) Enumerate() iter.Seq2[int, T] {
 // ToSlice exports the list elements into a native Go slice.
 // It pre-allocates the slice based on the current list length for efficiency.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (rb *RingBufferDeque[T]) ToSlice() []T {
 	if rb.count == 0 {
 		return nil
@@ -187,7 +187,7 @@ func (rb *RingBufferDeque[T]) String() string {
 // It uses the internal serialization utility to ensure elements are
 // encoded in their current logical order.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (rb *RingBufferDeque[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(rb)
 }
@@ -198,7 +198,7 @@ func (rb *RingBufferDeque[T]) MarshalJSON() ([]byte, error) {
 // This operation is typically more efficient than creating a new deque
 // as it may reuse the underlying storage.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(N) to zero out elements (avoiding memory leaks).
 func (rb *RingBufferDeque[T]) Clear() {
 	clear(rb.data)
 	rb.count = 0
@@ -206,7 +206,10 @@ func (rb *RingBufferDeque[T]) Clear() {
 	rb.write = 0
 }
 
-func (rb *RingBufferDeque[T]) append(x T) {
+// Append adds an element to the end of the deque.
+//
+// Complexity: Amortized O(1).
+func (rb *RingBufferDeque[T]) Append(x T) {
 	if rb.count == len(rb.data) {
 		rb.grow()
 	}
@@ -216,16 +219,19 @@ func (rb *RingBufferDeque[T]) append(x T) {
 	rb.count++
 }
 
-// Append adds the given elements to the end of the deque.
+// Appends adds the given elements to the end of the deque.
 //
-// Complexity: O(k) where k is the number of elements.
-func (rb *RingBufferDeque[T]) Append(xs ...T) {
+// Complexity: Amortized O(len(xs)).
+func (rb *RingBufferDeque[T]) Appends(xs ...T) {
 	for _, x := range xs {
-		rb.append(x)
+		rb.Append(x)
 	}
 }
 
-func (rb *RingBufferDeque[T]) prepend(x T) {
+// Prepend adds an element to the beginning of the deque.
+//
+// Complexity: Amortized O(1).
+func (rb *RingBufferDeque[T]) Prepend(x T) {
 	if rb.count == len(rb.data) {
 		rb.grow()
 	}
@@ -235,13 +241,13 @@ func (rb *RingBufferDeque[T]) prepend(x T) {
 	rb.count++
 }
 
-// Prepend adds the given elements to the beginning of the deque.
+// Prepends adds the given elements to the beginning of the deque.
 // The relative order of the provided elements is preserved at the front.
 //
-// Complexity: O(k) where k is the number of elements.
-func (rb *RingBufferDeque[T]) Prepend(xs ...T) {
+// Complexity: Amortized O(len(xs)).
+func (rb *RingBufferDeque[T]) Prepends(xs ...T) {
 	for _, x := range slices.Backward(xs) {
-		rb.prepend(x)
+		rb.Prepend(x)
 	}
 }
 
@@ -295,7 +301,7 @@ func (rb *RingBufferDeque[T]) Pop() (T, bool) {
 // Note: This operation is destructive; it calls Clear() to remove all existing
 // elements before appending the ones from the JSON data.
 //
-// Complexity: O(n + k) where k is the number of elements in the JSON.
+// Complexity: O(N + len(data)).
 func (rb *RingBufferDeque[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, rb.Clear, rb.Append)
+	return collection.Unmarshal(data, rb.Clear, rb.Appends)
 }

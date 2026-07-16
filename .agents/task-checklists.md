@@ -8,10 +8,13 @@ Use these checklists for repeatable agent workflows. They supplement
 1. Read the relevant package docs, factory file, public interface, and internal
    implementation.
 2. Find the closest existing test pattern before adding new tests.
-3. Keep implementation, public constructors, examples, and README guidance in
+3. Reject forwarding methods that merely call another method or function
+   without added behavior or an intentional capability/API boundary.
+4. Add a focused, direct `Test<Type>_<Method>` test for every new method.
+5. Keep implementation, public constructors, examples, and README guidance in
    sync when behavior changes.
-4. Run `gofmt` on changed Go files.
-5. Run targeted tests, then broaden to `go test ./...` when needed.
+6. Run `gofmt` on changed Go files.
+7. Run targeted tests, then broaden to `go test ./...` when needed.
 
 ## New Data Structure Family
 
@@ -44,8 +47,13 @@ Use these checklists for repeatable agent workflows. They supplement
    invariants, ownership, error behavior, complexity, and performance tradeoffs
    near the API that owns them.
 5. Remove comments that merely repeat names or obvious code.
-6. Keep README updates focused on when to choose a structure.
-7. Run tests for examples when examples change.
+6. Verify complexity comments describe the total call cost, use `N` for the
+   collection size, and use exact input expressions such as `len(xs)` for
+   variadic batches.
+7. Search changed documentation for mixed complexity notation and stale method
+   names, especially after AI-assisted edits.
+8. Keep README updates focused on when to choose a structure.
+9. Run tests for examples when examples change.
 
 ## Benchmark Change
 
@@ -59,8 +67,8 @@ Use these checklists for repeatable agent workflows. They supplement
      `internal/benchmarks/models`;
    - algorithms that exercise a `datastructs` contract in
      `internal/benchmarks/algorithms`;
-   - benchmark entrypoints, suite selection, timer control, and result sinks in
-     `internal/benchmarks/suites`.
+   - benchmark entrypoints, suite selection, timer control, and result
+     consumption in `internal/benchmarks/suites`.
 4. Follow the existing `heap` and `prioritymap` suite shape with a
    `get<Family>Suite(...)` helper returning
    `datastructs.Implementations[...]`.

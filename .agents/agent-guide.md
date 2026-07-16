@@ -65,6 +65,10 @@ Use this file to orient quickly, then rely on
   use.
 - Prefer focused tests with `assert`; use `require` only when later assertions
   depend on the current one.
+- Do not add forwarding methods that only call another method or function
+  without introducing behavior or an intentional API boundary.
+- Add a focused, direct test for every new method; indirect coverage does not
+  replace `Test<Type>_<Method>`.
 - For benchmark suites, use a `get<Family>Suite(...)` helper and check that the
   benchmark abstraction itself does not introduce hot-loop allocations.
 - When interpreting benchmark output, separate implementation behavior from

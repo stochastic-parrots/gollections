@@ -2,24 +2,25 @@ package sortedlist
 
 import "testing"
 
-var orderedArraySortedListBoolSink bool
-var orderedArraySortedListIntSink int
-
-func BenchmarkOrderedArraySortedList_AddMany(b *testing.B) {
+func BenchmarkOrderedArraySortedList_Adds(b *testing.B) {
 	data := descendingInts(arraySortedListBenchmarkSize)
+	list := NewOrderedArraySortedList[int](len(data))
 
 	b.ReportAllocs()
 	for b.Loop() {
-		list := NewOrderedArraySortedList[int](len(data))
-		list.Add(data...)
-		orderedArraySortedListIntSink = list.Length()
+		list.Adds(data...)
+		_ = list.Length()
+
+		b.StopTimer()
+		list.Clear()
+		b.StartTimer()
 	}
 }
 
-func BenchmarkOrderedArraySortedList_AddSingle(b *testing.B) {
+func BenchmarkOrderedArraySortedList_Add(b *testing.B) {
 	data := descendingInts(arraySortedListBenchmarkSize)
 	list := NewOrderedArraySortedList[int](len(data) + 1)
-	list.Add(data...)
+	list.Adds(data...)
 	value := arraySortedListBenchmarkSize / 2
 
 	b.ReportAllocs()
@@ -40,7 +41,7 @@ func BenchmarkOrderedArraySortedList_Find(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; b.Loop(); i++ {
-		_, orderedArraySortedListBoolSink = list.Find(i % arraySortedListBenchmarkSize)
+		_, _ = list.Find(i % arraySortedListBenchmarkSize)
 	}
 }
 
@@ -51,7 +52,7 @@ func BenchmarkOrderedArraySortedList_Contains(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; b.Loop(); i++ {
-		orderedArraySortedListBoolSink = list.Contains(i % arraySortedListBenchmarkSize)
+		_ = list.Contains(i % arraySortedListBenchmarkSize)
 	}
 }
 
@@ -62,7 +63,7 @@ func BenchmarkOrderedArraySortedList_ContainsMissing(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for b.Loop() {
-		orderedArraySortedListBoolSink = list.Contains(-1)
+		_ = list.Contains(-1)
 	}
 }
 
@@ -73,7 +74,7 @@ func BenchmarkOrderedArraySortedList_LowerBound(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; b.Loop(); i++ {
-		orderedArraySortedListIntSink = list.LowerBound(i % arraySortedListBenchmarkSize)
+		_ = list.LowerBound(i % arraySortedListBenchmarkSize)
 	}
 }
 
@@ -84,7 +85,7 @@ func BenchmarkOrderedArraySortedList_UpperBound(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; b.Loop(); i++ {
-		orderedArraySortedListIntSink = list.UpperBound(i % arraySortedListBenchmarkSize)
+		_ = list.UpperBound(i % arraySortedListBenchmarkSize)
 	}
 }
 
@@ -95,7 +96,7 @@ func BenchmarkOrderedArraySortedList_Count(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; b.Loop(); i++ {
-		orderedArraySortedListIntSink = list.Count(i % arraySortedListBenchmarkSize)
+		_ = list.Count(i % arraySortedListBenchmarkSize)
 	}
 }
 
@@ -106,7 +107,7 @@ func BenchmarkOrderedArraySortedList_CountMissing(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for b.Loop() {
-		orderedArraySortedListIntSink = list.Count(-1)
+		_ = list.Count(-1)
 	}
 }
 
@@ -118,7 +119,7 @@ func BenchmarkOrderedArraySortedList_EqualRange(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; b.Loop(); i++ {
 		start, end := list.EqualRange(i % arraySortedListBenchmarkSize)
-		orderedArraySortedListIntSink = end - start
+		_ = end - start
 	}
 }
 
@@ -130,7 +131,7 @@ func BenchmarkOrderedArraySortedList_EqualRangeMissing(b *testing.B) {
 	b.ResetTimer()
 	for b.Loop() {
 		start, end := list.EqualRange(-1)
-		orderedArraySortedListIntSink = end - start
+		_ = end - start
 	}
 }
 
@@ -147,7 +148,7 @@ func BenchmarkOrderedArraySortedList_Range(b *testing.B) {
 		for range list.Range(from, to) {
 			count++
 		}
-		orderedArraySortedListIntSink = count
+		_ = count
 	}
 }
 
@@ -161,6 +162,6 @@ func BenchmarkOrderedArraySortedList_Remove(b *testing.B) {
 		list := NewOrderedArraySortedListCloneSlice(data)
 		b.StartTimer()
 
-		orderedArraySortedListBoolSink = list.Remove(value)
+		_ = list.Remove(value)
 	}
 }

@@ -15,23 +15,21 @@ func NewStdSortedList(capacity int) *StdSortedList {
 	return &StdSortedList{data: make([]int, 0, capacity)}
 }
 
-// NewStdSortedListClone creates a sorted-slice baseline from a cloned slice.
-func NewStdSortedListClone(data []int) *StdSortedList {
-	cloned := slices.Clone(data)
-	slices.Sort(cloned)
-	return &StdSortedList{data: cloned}
+// Add inserts x while preserving sorted order.
+func (l *StdSortedList) Add(x int) {
+	idx, _ := slices.BinarySearch(l.data, x)
+	l.data = append(l.data, 0)
+	copy(l.data[idx+1:], l.data[idx:])
+	l.data[idx] = x
 }
 
-// Add inserts all values while preserving sorted order.
-func (l *StdSortedList) Add(xs ...int) {
+// Adds inserts all values while preserving sorted order.
+func (l *StdSortedList) Adds(xs ...int) {
 	switch len(xs) {
 	case 0:
 		return
 	case 1:
-		idx, _ := slices.BinarySearch(l.data, xs[0])
-		l.data = append(l.data, 0)
-		copy(l.data[idx+1:], l.data[idx:])
-		l.data[idx] = xs[0]
+		l.Add(xs[0])
 	default:
 		l.data = append(l.data, xs...)
 		slices.Sort(l.data)

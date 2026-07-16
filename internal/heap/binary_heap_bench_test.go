@@ -7,7 +7,26 @@ import (
 )
 
 func BenchmarkBinaryHeap_Push(b *testing.B) {
-	n := 10_000
+	const capacity = 100_000
+
+	h := NewBinaryHeap(capacity, ordering.Min[int]())
+	value := capacity
+	b.ReportAllocs()
+	for b.Loop() {
+		if h.Length() == capacity {
+			b.StopTimer()
+			h.Clear()
+			value = capacity
+			b.StartTimer()
+		}
+		h.Push(value)
+		value--
+	}
+}
+
+func BenchmarkBinaryHeap_Pushes(b *testing.B) {
+	const n = 10_000
+
 	initialData := make([]int, n)
 	ratios := []struct {
 		name string
@@ -21,17 +40,18 @@ func BenchmarkBinaryHeap_Push(b *testing.B) {
 		{"x10", 10.0},
 	}
 
-	for _, r := range ratios {
-		k := int(float64(n) * r.val)
+	for _, ratio := range ratios {
+		k := int(float64(n) * ratio.val)
 		newItems := make([]int, k)
 
-		b.Run(r.name, func(b *testing.B) {
+		b.Run(ratio.name, func(b *testing.B) {
+			b.ReportAllocs()
 			for b.Loop() {
 				b.StopTimer()
 				h := NewBinaryHeap(n+k, ordering.Min[int]())
-				h.Push(initialData...)
+				h.Pushes(initialData...)
 				b.StartTimer()
-				h.Push(newItems...)
+				h.Pushes(newItems...)
 			}
 		})
 	}

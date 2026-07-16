@@ -30,7 +30,7 @@ func NewDoubleLinkedDeque[T any]() *DoubleLinkedDeque[T] {
 // Values are copied into newly allocated nodes and data is not retained.
 func NewDoubleLinkedDequeFromSlice[T any](data []T) *DoubleLinkedDeque[T] {
 	deque := NewDoubleLinkedDeque[T]()
-	deque.Append(data...)
+	deque.Appends(data...)
 	return deque
 }
 
@@ -57,8 +57,10 @@ func (d *DoubleLinkedDeque[T]) IsEmpty() bool {
 	return d.length == 0
 }
 
-// append is the internal implementation for adding a value to the end of the deque.
-func (d *DoubleLinkedDeque[T]) append(x T) {
+// Append inserts an element at the end of the deque.
+//
+// Complexity: O(1).
+func (d *DoubleLinkedDeque[T]) Append(x T) {
 	new := node.NewDoubleLinkedNode(x)
 	if d.IsEmpty() {
 		d.first = new
@@ -73,10 +75,12 @@ func (d *DoubleLinkedDeque[T]) append(x T) {
 	d.length++
 }
 
-// prepend is the internal implementation for adding a value to the start of the deque.
-func (d *DoubleLinkedDeque[T]) prepend(x T) {
+// Prepend inserts an element at the start of the deque.
+//
+// Complexity: O(1).
+func (d *DoubleLinkedDeque[T]) Prepend(x T) {
 	if d.IsEmpty() {
-		d.append(x)
+		d.Append(x)
 		return
 	}
 
@@ -87,21 +91,22 @@ func (d *DoubleLinkedDeque[T]) prepend(x T) {
 	d.length++
 }
 
-// Prepend inserts one or more elements at the start of the deque.
+// Prepends inserts the given elements at the start of the deque.
+// The relative order of the provided elements is preserved at the front.
 //
-// Complexity: O(k) where k is the number of elements provided.
-func (d *DoubleLinkedDeque[T]) Prepend(xs ...T) {
+// Complexity: O(len(xs)).
+func (d *DoubleLinkedDeque[T]) Prepends(xs ...T) {
 	for _, x := range slices.Backward(xs) {
-		d.prepend(x)
+		d.Prepend(x)
 	}
 }
 
-// Append inserts one or more elements at the end of the deque.
+// Appends inserts the given elements at the end of the deque.
 //
-// Complexity: O(k) where k is the number of elements provided.
-func (d *DoubleLinkedDeque[T]) Append(xs ...T) {
+// Complexity: O(len(xs)).
+func (d *DoubleLinkedDeque[T]) Appends(xs ...T) {
 	for _, x := range xs {
-		d.append(x)
+		d.Append(x)
 	}
 }
 
@@ -171,7 +176,7 @@ func (d *DoubleLinkedDeque[T]) Pop() (T, bool) {
 
 // All returns a sequence that yields elements in their logical order.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (d *DoubleLinkedDeque[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := d.first
@@ -188,7 +193,7 @@ func (d *DoubleLinkedDeque[T]) All() iter.Seq[T] {
 // Enumerate returns a sequence that yields the index and value of elements
 // in their logical order.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (d *DoubleLinkedDeque[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		current := d.first
@@ -205,7 +210,7 @@ func (d *DoubleLinkedDeque[T]) Enumerate() iter.Seq2[int, T] {
 // ToSlice exports the deque elements into a native Go slice.
 // It pre-allocates the slice based on the current deque length for efficiency.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (d *DoubleLinkedDeque[T]) ToSlice() []T {
 	if d.length == 0 {
 		return nil
@@ -223,7 +228,7 @@ func (d *DoubleLinkedDeque[T]) ToSlice() []T {
 // After calling Clear, the deque will be empty and its length will be zero.
 // Nodes are detached and cleared so they and their values can be collected.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(N) to zero out elements (avoiding memory leaks).
 func (d *DoubleLinkedDeque[T]) Clear() {
 	var zero T
 	current := d.first
@@ -243,7 +248,7 @@ func (d *DoubleLinkedDeque[T]) Clear() {
 // It uses the internal serialization utility to ensure elements are
 // encoded in their current logical order.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (d *DoubleLinkedDeque[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(d)
 }
@@ -254,9 +259,9 @@ func (d *DoubleLinkedDeque[T]) MarshalJSON() ([]byte, error) {
 // Note: This operation is destructive; it calls Clear() to remove all existing
 // elements before appending the ones from the JSON data.
 //
-// Complexity: O(n + k) where k is the number of elements in the JSON.
+// Complexity: O(N + len(data)).
 func (d *DoubleLinkedDeque[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, d.Clear, d.Append)
+	return collection.Unmarshal(data, d.Clear, d.Appends)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

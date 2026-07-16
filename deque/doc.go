@@ -27,8 +27,10 @@
 // Mutable deques implement the [Deque] interface:
 //
 //	type Deque[T any] interface {
-//		Prepend(xs ...T)
-//		Append(xs ...T)
+//		Prepend(x T)
+//		Prepends(xs ...T)
+//		Append(x T)
+//		Appends(xs ...T)
 //		Shift() (T, bool)
 //		Pop() (T, bool)
 //		Clear()

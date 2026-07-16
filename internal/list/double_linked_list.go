@@ -31,7 +31,7 @@ func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 // Values are copied into newly allocated nodes and data is not retained.
 func NewDoubleLinkedListFromSlice[T any](data []T) *DoubleLinkedList[T] {
 	list := NewDoubleLinkedList[T]()
-	list.Append(data...)
+	list.Appends(data...)
 	return list
 }
 
@@ -84,7 +84,7 @@ func (l *DoubleLinkedList[T]) backward(n *node.DoubleLinkedNode[T]) *node.Double
 // It optimizes search time by starting from either the head or the tail,
 // depending on which is closer to the requested index.
 //
-// Complexity: O(n/2) which simplifies to O(n).
+// Complexity: O(N/2) which simplifies to O(N).
 func (l *DoubleLinkedList[T]) get(idx int) *node.DoubleLinkedNode[T] {
 	size := l.Length()
 	var current *node.DoubleLinkedNode[T]
@@ -105,7 +105,7 @@ func (l *DoubleLinkedList[T]) get(idx int) *node.DoubleLinkedNode[T] {
 
 // Get retrieves the value at the specified index.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Get(idx int) (T, error) {
 	if idx < 0 || idx >= l.Length() {
@@ -118,7 +118,7 @@ func (l *DoubleLinkedList[T]) Get(idx int) (T, error) {
 
 // Find locates the index of an element using a linear search.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *DoubleLinkedList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
 	if l.IsEmpty() {
 		return -1, false
@@ -135,7 +135,7 @@ func (l *DoubleLinkedList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool)
 
 // Contains returns true if the element exists in the list according to cmp.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *DoubleLinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {
 	if l.IsEmpty() {
 		return false
@@ -152,7 +152,7 @@ func (l *DoubleLinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {
 
 // Set updates the value at the specified index.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 	if idx < 0 || idx >= l.Length() {
@@ -163,9 +163,10 @@ func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 	return nil
 }
 
-// append is the internal implementation for adding a value to the logical end of the list.
-// It handles pointer updates for both standard and reversed list states.
-func (l *DoubleLinkedList[T]) append(x T) {
+// Append inserts an element at the end of the list.
+//
+// Complexity: O(1).
+func (l *DoubleLinkedList[T]) Append(x T) {
 	if l.IsEmpty() {
 		l.first = node.NewDoubleLinkedNode(x)
 		l.last = l.first
@@ -193,7 +194,7 @@ func (l *DoubleLinkedList[T]) append(x T) {
 // It handles pointer updates for both standard and reversed list states.
 func (l *DoubleLinkedList[T]) prepend(x T) {
 	if l.IsEmpty() {
-		l.append(x)
+		l.Append(x)
 		return
 	}
 
@@ -214,7 +215,7 @@ func (l *DoubleLinkedList[T]) prepend(x T) {
 // If the index is equal to the current length, the value is appended to the end.
 // If the index is 0, the value becomes the new first element.
 //
-// Complexity: O(n) in the worst case; O(1) if inserting at the boundaries (0 or Length).
+// Complexity: O(N) in the worst case; O(1) if inserting at the boundaries (0 or Length).
 //
 // Returns an IndexOutOfBounds error if the index is out of range [0, Length].
 func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
@@ -260,7 +261,7 @@ func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
 // Remove deletes the element at the specified index and returns its value.
 // It optimizes removal by checking if the index is at the boundaries (0 or length-1).
 //
-// Complexity: O(n) in the worst case; O(1) if removing from the start or end.
+// Complexity: O(N) in the worst case; O(1) if removing from the start or end.
 //
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
@@ -297,12 +298,12 @@ func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
 	return val, nil
 }
 
-// Append inserts one or more elements at the end of the list.
+// Appends inserts the given elements at the end of the list.
 //
-// Complexity: O(k) where k is the number of elements provided.
-func (l *DoubleLinkedList[T]) Append(xs ...T) {
+// Complexity: O(len(xs)).
+func (l *DoubleLinkedList[T]) Appends(xs ...T) {
 	for _, x := range xs {
-		l.append(x)
+		l.Append(x)
 	}
 }
 
@@ -319,7 +320,7 @@ func (l *DoubleLinkedList[T]) Reverse() {
 
 // All returns a sequence that yields elements in their logical order.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (l *DoubleLinkedList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.first
@@ -339,7 +340,7 @@ func (l *DoubleLinkedList[T]) All() iter.Seq[T] {
 
 // Backward returns a sequence that yields elements in order from index length-1 to 0.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (l *DoubleLinkedList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.last
@@ -359,7 +360,7 @@ func (l *DoubleLinkedList[T]) Backward() iter.Seq[T] {
 // Enumerate returns a sequence that yields the index and value of elements
 // in their logical order.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(N) for a full traversal, O(1) per step.
 func (l *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		current := l.first
@@ -380,7 +381,7 @@ func (l *DoubleLinkedList[T]) Enumerate() iter.Seq2[int, T] {
 // ToSlice exports the list elements into a native Go slice.
 // It pre-allocates the slice based on the current list length for efficiency.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *DoubleLinkedList[T]) ToSlice() []T {
 	if l.length == 0 {
 		return nil
@@ -398,7 +399,7 @@ func (l *DoubleLinkedList[T]) ToSlice() []T {
 // After calling Clear, the list will be empty and its length will be zero.
 // Nodes are detached and cleared so they and their values can be collected.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(N) to zero out elements (avoiding memory leaks).
 func (l *DoubleLinkedList[T]) Clear() {
 	var zero T
 	current := l.first
@@ -422,7 +423,7 @@ func (l *DoubleLinkedList[T]) Clear() {
 // It uses the internal serialization utility to ensure elements are
 // encoded in their current logical order.
 //
-// Complexity: O(n).
+// Complexity: O(N).
 func (l *DoubleLinkedList[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(l)
 }
@@ -433,9 +434,9 @@ func (l *DoubleLinkedList[T]) MarshalJSON() ([]byte, error) {
 // Note: This operation is destructive; it calls Clear() to remove all existing
 // elements before appending the ones from the JSON data.
 //
-// Complexity: O(n + k) where k is the number of elements in the JSON.
+// Complexity: O(N + len(data)).
 func (l *DoubleLinkedList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Append)
+	return collection.Unmarshal(data, l.Clear, l.Appends)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

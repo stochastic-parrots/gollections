@@ -52,8 +52,11 @@ type Readonly[T any] interface {
 type List[T any] interface {
 	Readonly[T]
 
-	// Append adds the given elements to the end of the list.
-	Append(xs ...T)
+	// Append adds an element to the end of the list.
+	Append(x T)
+
+	// Appends adds the given elements to the end of the list.
+	Appends(xs ...T)
 
 	// Insert places an element at a specific index, shifting subsequent
 	// elements to the right.

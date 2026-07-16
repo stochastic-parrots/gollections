@@ -29,11 +29,15 @@ var _ Heap[any] = &heap.BinaryHeap[any]{}
 //	-----------------   ---------------
 //	New(capacity)       O(capacity)
 //	From/Clone          O(N)
-//	Push(xs...T)        O(K log N) or O(N+K)
+//	Push(x)             O(log N)
+//	Pushes(xs...T)      O(len(xs) log N) or O(N + len(xs))
 //	Pop/Replace         O(log N)
 //	Peek                O(1)
 //	Drain               O(N log N)
 //	Clear               O(N)
+//
+// Pushes uses the O(N + len(xs)) heapify path when the heap is empty or when
+// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
 type BinaryFactory[T any] struct {
 	hasPriority func(T, T) bool
 }
