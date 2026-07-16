@@ -23,9 +23,15 @@
 // of values considered equivalent by the comparator is unspecified; include a
 // tie-breaker in the comparator when that order matters.
 //
+// The zero value of [OrderedArraySortedList] is ready for use. An
+// [ArraySortedList] requires a comparator and must be constructed through
+// [Array]; its zero value is invalid.
+//
 // Bounds and range operations use list order. [Readonly.Range] is half-open:
 // it yields values in [from, to), including values equivalent to from and
 // excluding values equivalent to to.
+// All traverses values in sorted order, Enumerate uses the same order, and
+// Backward traverses it in reverse.
 //
 // # Readonly Interface
 //
@@ -82,7 +88,8 @@
 //
 // Factories build sorted lists from empty capacity, slices, cloned slices, or
 // iterators. [ArrayFactory.From] and [OrderedArrayFactory.From] sort and retain
-// the provided slice; Clone preserves it. FromSeq makes it possible to sort any
-// collection in this module that exposes All(). Every factory method returns a
-// concrete sorted-list type.
+// the provided slice, transferring ownership of its backing array. The caller
+// must not use the slice or its aliases afterward. Clone preserves the source.
+// FromSeq makes it possible to sort any collection in this module that exposes
+// All(). Every factory method returns a concrete sorted-list type.
 package sortedlist

@@ -5,7 +5,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
 )
 
-// RadixHeapPriorityMap is an indexed monotone min-priority map.
+// RadixHeapPriorityMap is an indexed monotone min-priority map. Its zero value
+// is invalid; construct one with [RadixHeap].
 type RadixHeapPriorityMap[K comparable, P constraint.Integer] = prioritymap.RadixPriorityMap[K, P]
 
 var _ PriorityMap[int, uint64] = &prioritymap.RadixPriorityMap[int, uint64]{}

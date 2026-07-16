@@ -6,7 +6,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/deque"
 )
 
-// ArrayDeque is a circular-array backed [Deque].
+// ArrayDeque is a circular-array backed [Deque]. Its zero value is ready for use.
 type ArrayDeque[T any] = deque.RingBufferDeque[T]
 
 var _ Deque[any] = &deque.RingBufferDeque[any]{}

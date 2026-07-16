@@ -25,6 +25,13 @@ func TestFactoriesImplementSortedList(t *testing.T) {
 	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().FromSeq(slices.Values([]int{1}))
 }
 
+func TestOrderedArraySortedList_ZeroValue(t *testing.T) {
+	var list sortedlist.OrderedArraySortedList[int]
+	list.Add(3, 1, 2)
+
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+}
+
 func TestArrayFactory_New(t *testing.T) {
 	assertSortedListBehavior(t, sortedlist.Array(cmp.Compare[int]).New(0))
 }
