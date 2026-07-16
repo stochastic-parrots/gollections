@@ -41,7 +41,11 @@ Go documentation tools.
   concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
-  allowing type assertion back to the mutable interface.
+  allowing type assertion back to the mutable interface. These wrappers are
+  capability restrictions, not snapshots or concurrency synchronization.
+- Concurrency: collections are not safe for concurrent use unless explicitly
+  documented otherwise. Callers must synchronize shared access when any
+  goroutine may mutate the collection.
 - JSON support: linear collections and heaps can marshal/unmarshal as arrays
   where the operation makes sense.
 

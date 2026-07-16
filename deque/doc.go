@@ -19,6 +19,9 @@
 //		json.Marshaler
 //	}
 //
+// A readonly view observes the same underlying deque. It restricts mutation
+// through that interface but is not a snapshot or concurrency mechanism.
+//
 // # Deque Interface
 //
 // Mutable deques implement the [Deque] interface:

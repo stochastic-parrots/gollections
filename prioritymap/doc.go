@@ -42,6 +42,9 @@
 // they are yielded; stopping iteration early leaves unvisited entries in the
 // map.
 //
+// A readonly view observes the same underlying priority map; it is not a
+// snapshot and does not make concurrent mutation safe.
+//
 // Keys, Values, and All do not guarantee priority order. Separate Keys and
 // Values iterations are not positionally related. Use All to retain key-priority
 // association and Drain for destructive priority-ordered traversal.

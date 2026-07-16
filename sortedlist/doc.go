@@ -59,6 +59,10 @@
 //		json.Marshaler
 //	}
 //
+// A readonly view observes the same underlying sorted list. It restricts
+// mutation through that interface but is not a snapshot or concurrency
+// mechanism.
+//
 // # SortedList Interface
 //
 // Mutable sorted lists implement the [SortedList] interface:

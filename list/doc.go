@@ -39,4 +39,7 @@
 // All traverses the current logical list order from first to last, including
 // after Reverse. Enumerate uses the same order and assigns consecutive indexes
 // starting at zero. Backward traverses that logical order in reverse.
+//
+// A readonly view observes the same underlying list; it is not a snapshot and
+// does not make concurrent mutation safe.
 package list
