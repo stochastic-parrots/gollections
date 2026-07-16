@@ -20,7 +20,7 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 | Package | Structures | Use when you need |
 | --- | --- | --- |
 | `list` | `ArrayList`, `LinkedList` | Indexed, ordered sequences with forward/backward traversal |
-| `sortedlist` | `ArraySortedList`, `OrderedArraySortedList` | Sorted sequences that allow duplicate values |
+| `sortedlist` | `ArraySortedList` | Sorted sequences that allow duplicate values |
 | `deque` | `ArrayDeque`, `LinkedDeque` | Fast insertion and removal at both ends |
 | `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
 | `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
@@ -55,7 +55,7 @@ Go documentation tools.
   input, using the traversal order documented by each package. Lists and deques
   also unmarshal because array order completely defines their logical state.
   Sorted lists and heaps require slice decoding followed by the matching factory
-  so sorted-list strategy and heap priority remain explicit.
+  so sorted-list ordering and heap priority remain explicit.
 
 ## Construction
 
@@ -65,7 +65,7 @@ Factory methods return concrete collection types without interface dispatch:
 ```go
 items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
-scores := sortedlist.OrderedArray[int]().Clone([]int{3, 1, 2})
+scores := sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
 ```
 
@@ -97,18 +97,20 @@ should stay ordered by value instead of by insertion position.
 
 ## Choosing a sorted list
 
-- `OrderedArraySortedList`: use by default when element values satisfy
-  `cmp.Ordered`; it uses standard-library ordered sort and binary search paths
-  without custom comparator calls.
-- `ArraySortedList`: use when values need a custom comparator, such as sorting
-  structs by one field or using descending order. This flexibility means each
-  search and sort comparison calls the comparator.
+`ArraySortedList` is the single slice-backed implementation. Choose its
+ordering through one of two factory selectors:
 
-Both sorted-list implementations are best for data that is built once or
-updated occasionally and queried many times. Lookups and bounds are O(log N),
-indexed access is O(1), and single-element insertion/removal shifts O(N) values.
-For custom comparators, values that compare equal may appear in any relative
-order; add a tie-breaker to the comparator when that order matters.
+- `OrderedArray(Ascending)` or `OrderedArray(Descending)` when element values
+  satisfy `cmp.Ordered` and natural order is enough.
+- `Array(compare)` for custom ordering, such as sorting structs by one or more
+  fields.
+
+Both selectors return `ArrayFactory` and build `ArraySortedList` values, so they
+have the same performance characteristics. Sorted lists are best for data that
+is built once or updated occasionally and queried many times. Lookups and bounds
+are O(log N), indexed access is O(1), and single-element insertion/removal
+shifts O(N) values. Values that compare equal may appear in any relative order;
+add a tie-breaker to the comparator when that order matters.
 
 ## Choosing a deque
 

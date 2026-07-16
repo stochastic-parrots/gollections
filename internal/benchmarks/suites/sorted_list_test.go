@@ -1,7 +1,6 @@
 package suites
 
 import (
-	"cmp"
 	"strconv"
 	"testing"
 
@@ -22,13 +21,7 @@ func getSortedListSuite(capacity int) datastructs.Implementations[datastructs.So
 		{
 			Name: "Gollections_ArraySortedList",
 			Factory: func() datastructs.SortedList {
-				return sortedlist.Array(cmp.Compare[int]).New(capacity)
-			},
-		},
-		{
-			Name: "Gollections_OrderedArraySortedList",
-			Factory: func() datastructs.SortedList {
-				return sortedlist.OrderedArray[int]().New(capacity)
+				return sortedlist.OrderedArray[int](sortedlist.Ascending).New(capacity)
 			},
 		},
 	}

@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"encoding/json"
 	"errors"
+	"math"
 	"slices"
 	"testing"
 
@@ -13,23 +14,17 @@ import (
 )
 
 func TestFactoriesImplementSortedList(t *testing.T) {
+	var _ sortedlist.ArrayFactory[int] = sortedlist.OrderedArray[int](sortedlist.Ascending)
 	var _ *sortedlist.ArraySortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
-	var _ *sortedlist.OrderedArraySortedList[int] = sortedlist.OrderedArray[int]().New(0)
+	var _ *sortedlist.ArraySortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).From([]int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).Clone([]int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).FromSeq(slices.Values([]int{1}))
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().New(0)
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().From([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().Clone([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int]().FromSeq(slices.Values([]int{1}))
-}
-
-func TestOrderedArraySortedList_ZeroValue(t *testing.T) {
-	var list sortedlist.OrderedArraySortedList[int]
-	list.Adds(3, 1, 2)
-
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).From([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).FromSeq(slices.Values([]int{1}))
 }
 
 func TestArray_NilComparator(t *testing.T) {
@@ -40,10 +35,6 @@ func TestArray_NilComparator(t *testing.T) {
 
 func TestArrayFactory_New(t *testing.T) {
 	assertSortedListBehavior(t, sortedlist.Array(cmp.Compare[int]).New(0))
-}
-
-func TestOrderedArrayFactory_New(t *testing.T) {
-	assertSortedListBehavior(t, sortedlist.OrderedArray[int]().New(0))
 }
 
 func TestArrayFactory_From(t *testing.T) {
@@ -74,32 +65,33 @@ func TestArrayFactory_FromSeq(t *testing.T) {
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
 }
 
-func TestOrderedArrayFactory_From(t *testing.T) {
-	data := []int{3, 1, 2}
+func TestOrderedArray(t *testing.T) {
+	t.Run("Ascending", func(t *testing.T) {
+		list := sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{3, 1, 2})
 
-	list := sortedlist.OrderedArray[int]().From(data)
+		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	})
 
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
-	assert.Equal(t, []int{1, 2, 3}, data)
-}
+	t.Run("Descending", func(t *testing.T) {
+		list := sortedlist.OrderedArray[int](sortedlist.Descending).Clone([]int{3, 1, 2})
 
-func TestOrderedArrayFactory_Clone(t *testing.T) {
-	data := []int{3, 1, 2}
+		assert.Equal(t, []int{3, 2, 1}, list.ToSlice())
+	})
 
-	list := sortedlist.OrderedArray[int]().Clone(data)
+	t.Run("FloatNaN", func(t *testing.T) {
+		nan := math.NaN()
 
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
-	assert.Equal(t, []int{3, 1, 2}, data)
-}
+		ascending := sortedlist.OrderedArray[float64](sortedlist.Ascending).Clone([]float64{1, nan, 2})
+		descending := sortedlist.OrderedArray[float64](sortedlist.Descending).Clone([]float64{1, nan, 2})
 
-func TestOrderedArrayFactory_FromSeq(t *testing.T) {
-	source := list.Array[int]().New(0)
-	source.Appends(3, 1, 2)
+		ascendingValues := ascending.ToSlice()
+		descendingValues := descending.ToSlice()
 
-	list := sortedlist.OrderedArray[int]().FromSeq(source.All())
-
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
-	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
+		assert.True(t, math.IsNaN(ascendingValues[0]))
+		assert.Equal(t, []float64{1, 2}, ascendingValues[1:])
+		assert.Equal(t, []float64{2, 1}, descendingValues[:2])
+		assert.True(t, math.IsNaN(descendingValues[2]))
+	})
 }
 
 func TestArraySortedList_GetError(t *testing.T) {

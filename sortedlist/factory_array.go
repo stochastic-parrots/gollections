@@ -1,13 +1,14 @@
 package sortedlist
 
 import (
+	"cmp"
 	"iter"
 
 	"github.com/stochastic-parrots/gollections/internal/sortedlist"
 )
 
-// ArraySortedList is a slice-backed [SortedList] with custom comparator order.
-// Its zero value is invalid; construct one with [Array].
+// ArraySortedList is a slice-backed [SortedList] with comparator-defined order.
+// Its zero value is invalid; construct one with [Array] or [OrderedArray].
 type ArraySortedList[T any] = sortedlist.ArraySortedList[T]
 
 var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}
@@ -20,7 +21,7 @@ var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}
 // The comparator must be non-nil, define a transitive ordering and equivalence
 // relation, and remain stable for the lifetime of every list from the factory.
 //
-// The zero value is invalid. Create a factory with [Array].
+// The zero value is invalid. Create a factory with [Array] or [OrderedArray].
 //
 // Performance Summary (Time Complexity):
 //
@@ -45,6 +46,15 @@ func Array[T any](compare func(a, b T) int) ArrayFactory[T] {
 		panic("sortedlist: nil comparator")
 	}
 	return ArrayFactory[T]{compare: compare}
+}
+
+// OrderedArray returns an array sorted-list factory using the natural order of
+// T in the selected direction.
+func OrderedArray[T cmp.Ordered](order Order) ArrayFactory[T] {
+	if order == Descending {
+		return Array(func(a, b T) int { return cmp.Compare(b, a) })
+	}
+	return Array(cmp.Compare[T])
 }
 
 // New creates an empty array sorted list with the requested initial capacity.
