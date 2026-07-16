@@ -83,6 +83,12 @@ alias and constructor from the public package.
   pointer to it. Factory construction methods return pointers to those aliases.
   For example, declare `type ArrayList[T any] = list.ArrayList[T]` and return
   `*ArrayList[T]` from `New`, `From`, `Clone`, and `FromSeq`.
+- Every public concrete alias must document whether its zero value is ready for
+  use. Zero values should be supported when no comparator or mandatory index
+  initialization is required; otherwise, direct callers to the matching factory.
+- Public contract tests must exercise every supported concrete zero value
+  without using a factory. Types with invalid zero values must keep the factory
+  requirement explicit in both alias and package documentation.
 
 ## Naming
 

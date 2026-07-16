@@ -46,6 +46,7 @@
 // through the returned factory. Array factories provide New, From, Clone, and
 // FromSeq. Linked factories provide New, From, and FromSeq because linked
 // construction always copies values into new nodes.
+// The zero values of [ArrayDeque] and [LinkedDeque] are ready for use.
 //
 // [ArrayFactory.From] takes ownership of the provided slice and interprets its
 // values in front-to-back order. Clone preserves the source slice.

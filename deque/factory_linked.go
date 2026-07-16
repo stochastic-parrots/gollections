@@ -6,7 +6,7 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/deque"
 )
 
-// LinkedDeque is a doubly linked [Deque].
+// LinkedDeque is a doubly linked [Deque]. Its zero value is ready for use.
 type LinkedDeque[T any] = deque.DoubleLinkedDeque[T]
 
 var _ Deque[any] = &deque.DoubleLinkedDeque[any]{}

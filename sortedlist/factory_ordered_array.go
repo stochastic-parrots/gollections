@@ -7,7 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/sortedlist"
 )
 
-// OrderedArraySortedList is a slice-backed [SortedList] for naturally ordered values.
+// OrderedArraySortedList is a slice-backed [SortedList] for naturally ordered
+// values. Its zero value is ready for use.
 type OrderedArraySortedList[T cmp.Ordered] = sortedlist.OrderedArraySortedList[T]
 
 var _ SortedList[int] = &sortedlist.OrderedArraySortedList[int]{}

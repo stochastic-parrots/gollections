@@ -7,6 +7,7 @@ import (
 )
 
 // ArraySortedList is a slice-backed [SortedList] with custom comparator order.
+// Its zero value is invalid; construct one with [Array].
 type ArraySortedList[T any] = sortedlist.ArraySortedList[T]
 
 var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}

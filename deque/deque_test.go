@@ -21,6 +21,18 @@ func TestFactoriesImplementDeque(t *testing.T) {
 	var _ deque.Deque[int] = deque.Linked[int]().New()
 }
 
+func TestConcreteZeroValues(t *testing.T) {
+	var array deque.ArrayDeque[int]
+	array.Append(1, 2)
+	array.Prepend(0)
+	assert.Equal(t, []int{0, 1, 2}, array.ToSlice())
+
+	var linked deque.LinkedDeque[int]
+	linked.Append(1, 2)
+	linked.Prepend(0)
+	assert.Equal(t, []int{0, 1, 2}, linked.ToSlice())
+}
+
 func TestArrayFactory_From(t *testing.T) {
 	data := []int{1, 2}
 	deque := deque.Array[int]().From(data)
