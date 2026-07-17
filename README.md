@@ -165,6 +165,8 @@ CI builds and tests every package with the minimum supported Go release and the
 latest stable release. The published coverage report measures library packages;
 the cross-implementation benchmark harness under `internal/benchmarks` remains
 part of the build and test suite but is excluded from the coverage percentage.
+Codecov requires at least 95% project coverage and 100% coverage for changed
+lines.
 
 ## Status
 

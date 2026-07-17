@@ -329,6 +329,10 @@ alias and constructor from the public package.
 - The project aims for complete coverage on core internal data-structure
   packages: `internal/list`, `internal/sortedlist`, `internal/deque`,
   `internal/heap`, and `internal/prioritymap`.
+- CI requires at least 95% coverage across library packages and 100% coverage
+  for changed lines. The cross-implementation benchmark harness under
+  `internal/benchmarks` remains part of build and test verification but is
+  excluded from the published coverage percentage.
 - Internal test files should mirror the implementation method order as much as
   practical. This makes coverage gaps easy to map back to code.
 - Prefer direct assertions over helper-heavy test DSLs.
