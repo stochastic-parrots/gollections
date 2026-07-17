@@ -1,8 +1,9 @@
 // Package heap provides mutable generic priority queues backed by binary heaps.
 //
-// The value at the top is selected by a priority comparator. Pop, Replace, and
-// Push maintain the heap property; Peek observes the current top value without
-// removing it. Drain is destructive and yields values in priority order.
+// The value at the top is selected by a priority comparator. Pop, Replace,
+// Push, and Pushes maintain the heap property; Peek observes the current top
+// value without removing it. Drain is destructive and yields values in
+// priority order.
 //
 // # Ordering
 //
@@ -34,8 +35,9 @@
 // # Complexity
 //
 // Peek is O(1). Pop and Replace are O(log N). From and Clone build a heap in
-// O(N). Push is O(K log N) for K inserted values, with a bulk heapify path when
-// rebuilding is cheaper. Drain is O(N log N) when fully consumed.
+// O(N). Push is O(log N). Pushes is O(N + len(xs)) when the heap is empty or
+// len(xs) exceeds both N and 64; otherwise it is O(len(xs) log N). Drain is
+// O(N log N) when fully consumed.
 //
 // All and Enumerate expose the internal heap representation and do not guarantee
 // priority order. Use Drain when destructive priority-ordered traversal is required.

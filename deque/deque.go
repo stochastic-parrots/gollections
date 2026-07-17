@@ -39,14 +39,19 @@ type Readonly[T any] interface {
 //
 // It supports highly efficient O(1) insertions and removals at both ends.
 type Deque[T any] interface {
-	// Prepend adds the given elements to the beginning of the deque.
-	//
-	// If multiple elements are provided, they are inserted such that their
-	// relative order is preserved at the front of the deque.
-	Prepend(xs ...T)
+	// Prepend adds an element to the beginning of the deque.
+	Prepend(x T)
 
-	// Append adds the given elements to the end of the deque.
-	Append(xs ...T)
+	// Prepends adds the given elements to the beginning of the deque.
+	//
+	// The relative order of the elements is preserved at the front of the deque.
+	Prepends(xs ...T)
+
+	// Append adds an element to the end of the deque.
+	Append(x T)
+
+	// Appends adds the given elements to the end of the deque.
+	Appends(xs ...T)
 
 	// Shift removes and returns the element from the beginning of the deque.
 	//

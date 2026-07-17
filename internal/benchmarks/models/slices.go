@@ -20,15 +20,6 @@ func NewRandomSliceWithMax(size, maxValue int) []int {
 	return slice
 }
 
-// NewRandomSliceFrom creates a slice by sampling values from data.
-func NewRandomSliceFrom(data []int, size int) []int {
-	slice := make([]int, size)
-	for i := range size {
-		slice[i] = data[rand.IntN(len(data))]
-	}
-	return slice
-}
-
 // NewReversedSlice creates a descending slice from size to 1.
 func NewReversedSlice(size int) []int {
 	slice := make([]int, size)

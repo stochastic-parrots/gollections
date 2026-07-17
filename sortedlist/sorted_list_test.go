@@ -27,7 +27,7 @@ func TestFactoriesImplementSortedList(t *testing.T) {
 
 func TestOrderedArraySortedList_ZeroValue(t *testing.T) {
 	var list sortedlist.OrderedArraySortedList[int]
-	list.Add(3, 1, 2)
+	list.Adds(3, 1, 2)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 }
@@ -66,7 +66,7 @@ func TestArrayFactory_Clone(t *testing.T) {
 
 func TestArrayFactory_FromSeq(t *testing.T) {
 	source := list.Array[int]().New(0)
-	source.Append(3, 1, 2)
+	source.Appends(3, 1, 2)
 
 	list := sortedlist.Array(cmp.Compare[int]).FromSeq(source.All())
 
@@ -94,7 +94,7 @@ func TestOrderedArrayFactory_Clone(t *testing.T) {
 
 func TestOrderedArrayFactory_FromSeq(t *testing.T) {
 	source := list.Array[int]().New(0)
-	source.Append(3, 1, 2)
+	source.Appends(3, 1, 2)
 
 	list := sortedlist.OrderedArray[int]().FromSeq(source.All())
 
@@ -118,7 +118,7 @@ func TestArraySortedList_GetError(t *testing.T) {
 
 func TestArraySortedList_ReplaceError(t *testing.T) {
 	list := sortedlist.Array(cmp.Compare[int]).New(0)
-	list.Add(1, 3, 5)
+	list.Adds(1, 3, 5)
 
 	err := list.Replace(1, 6)
 
@@ -133,7 +133,7 @@ func TestAsReadonly(t *testing.T) {
 
 	t.Run("View", func(t *testing.T) {
 		mutable := sortedlist.Array(cmp.Compare[int]).New(0)
-		mutable.Add(2, 1)
+		mutable.Adds(2, 1)
 
 		view := sortedlist.AsReadonly(mutable)
 
@@ -205,7 +205,7 @@ func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	assert.False(t, unmarshals)
 	assert.True(t, list.IsEmpty())
 
-	list.Add(3, 1, 2, 2)
+	list.Adds(3, 1, 2, 2)
 
 	assert.Equal(t, []int{1, 2, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{1, 2, 2, 3}, slices.Collect(list.All()))

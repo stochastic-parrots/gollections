@@ -23,7 +23,8 @@ var _ List[any] = &list.ArrayList[any]{}
 //	New(capacity)       O(capacity)
 //	From(data)          O(1)
 //	Clone/FromSeq       O(N)
-//	Append(xs...T)      O(len(xs)) amortized
+//	Append(x)           O(1) amortized
+//	Appends(xs...T)     O(len(xs)) amortized
 //	Insert/Remove       O(N)
 //	Get/Set             O(1)
 //	Find/Contains       O(N)

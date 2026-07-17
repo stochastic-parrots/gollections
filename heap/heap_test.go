@@ -71,7 +71,8 @@ func assertHeapBehavior(t *testing.T, h heap.Heap[int], expectedDrain []int) {
 	assert.False(t, unmarshals)
 	assert.True(t, h.IsEmpty())
 
-	h.Push(3, 1, 2)
+	h.Push(3)
+	h.Pushes(1, 2)
 
 	top, ok := h.Peek()
 	assert.True(t, ok)
@@ -95,7 +96,7 @@ func assertHeapBehavior(t *testing.T, h heap.Heap[int], expectedDrain []int) {
 	h.Clear()
 	assert.True(t, h.IsEmpty())
 
-	h.Push(3, 1, 2)
+	h.Pushes(3, 1, 2)
 	assert.Equal(t, expectedDrain, drain(h))
 	assert.True(t, h.IsEmpty())
 }

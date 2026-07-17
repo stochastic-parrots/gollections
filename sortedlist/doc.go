@@ -68,7 +68,8 @@
 // Mutable sorted lists implement the [SortedList] interface:
 //
 //	type SortedList[T any] interface {
-//		Add(xs ...T)
+//		Add(x T)
+//		Adds(xs ...T)
 //		Replace(idx int, x T) error
 //		Remove(x T) bool
 //		Clear()

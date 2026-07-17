@@ -263,21 +263,28 @@ func (l *ArraySortedList[T]) Last() (T, bool) {
 	return l.data[len(l.data)-1], true
 }
 
-// Add inserts one or more values while preserving the sorted invariant.
+// Add inserts x while preserving the sorted invariant.
 //
-// Complexity: O(N) for a single value, O((N+K) log (N+K)) for multiple values.
-func (l *ArraySortedList[T]) Add(xs ...T) {
-	if len(xs) == 0 {
+// Complexity: O(N).
+func (l *ArraySortedList[T]) Add(x T) {
+	idx := l.UpperBound(x)
+
+	var zero T
+	l.data = append(l.data, zero)
+	copy(l.data[idx+1:], l.data[idx:])
+	l.data[idx] = x
+}
+
+// Adds inserts zero or more values while preserving the sorted invariant.
+//
+// Complexity: O(N) for one value, or
+// O((N + len(xs)) log (N + len(xs))) for multiple values.
+func (l *ArraySortedList[T]) Adds(xs ...T) {
+	switch len(xs) {
+	case 0:
 		return
-	}
-
-	if len(xs) == 1 {
-		idx := l.UpperBound(xs[0])
-
-		var zero T
-		l.data = append(l.data, zero)
-		copy(l.data[idx+1:], l.data[idx:])
-		l.data[idx] = xs[0]
+	case 1:
+		l.Add(xs[0])
 		return
 	}
 
@@ -355,7 +362,7 @@ func (l *ArraySortedList[T]) Backward() iter.Seq[T] {
 // Values are selected according to comparator order: yielded values do not sort
 // before from and do sort before to.
 //
-// Complexity: O(log N + K), where K is the number of yielded values.
+// Complexity: O(log N + number of yielded values).
 func (l *ArraySortedList[T]) Range(from, to T) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		start := l.LowerBound(from)

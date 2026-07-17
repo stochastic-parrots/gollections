@@ -22,10 +22,19 @@ type StdLibHeap struct {
 	stdheap *stdLibIntHeap
 }
 
-// Push inserts values into the standard-library heap baseline.
-func (w *StdLibHeap) Push(xs ...int) {
+// Push inserts a value into the standard-library heap baseline.
+func (w *StdLibHeap) Push(x int) {
+	heap.Push(w.stdheap, x)
+}
+
+// Pushes inserts the given values into the standard-library heap baseline.
+func (w *StdLibHeap) Pushes(xs ...int) {
 	k := len(xs)
-	if k == 0 {
+	switch k {
+	case 0:
+		return
+	case 1:
+		w.Push(xs[0])
 		return
 	}
 
@@ -37,7 +46,7 @@ func (w *StdLibHeap) Push(xs ...int) {
 	}
 
 	for _, x := range xs {
-		heap.Push(w.stdheap, x)
+		w.Push(x)
 	}
 }
 

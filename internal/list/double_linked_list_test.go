@@ -37,7 +37,7 @@ func TestDoubleLinkedList_Length(t *testing.T) {
 	list := NewDoubleLinkedList[any]()
 
 	assert.Equal(t, 0, list.Length())
-	list.Append(1, 2, 3)
+	list.Appends(1, 2, 3)
 	assert.Equal(t, 3, list.Length())
 }
 
@@ -45,7 +45,7 @@ func TestDoubleLinkedList_IsEmpty(t *testing.T) {
 	list := NewDoubleLinkedList[any]()
 
 	assert.True(t, list.IsEmpty())
-	list.Append(1, 2, 3)
+	list.Appends(1, 2, 3)
 	assert.False(t, list.IsEmpty())
 }
 
@@ -53,7 +53,7 @@ func TestDoubleLinkedList_Get(t *testing.T) {
 	t.Run("ValidIndex", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 
 		for i := range 4 {
 			x, err := list.Get(i)
@@ -65,7 +65,7 @@ func TestDoubleLinkedList_Get(t *testing.T) {
 	t.Run("Reversed", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 		list.Reverse()
 
 		inversedIndex := 3
@@ -79,7 +79,7 @@ func TestDoubleLinkedList_Get(t *testing.T) {
 
 	t.Run("InvalidIndex", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(10, 1, 9, 100)
+		list.Appends(10, 1, 9, 100)
 
 		for _, i := range []int{-1, 4, 5} {
 			_, err := list.Get(i)
@@ -95,7 +95,7 @@ func TestDoubleLinkedList_Find(t *testing.T) {
 	t.Run("ElementExists", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 
 		for idx, value := range values {
 			fidx, exists := list.Find(value, cmp.Compare[int])
@@ -106,7 +106,7 @@ func TestDoubleLinkedList_Find(t *testing.T) {
 
 	t.Run("NonExistent", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 		idx, exists := list.Find(4, cmp.Compare[int])
 
 		assert.Equal(t, -1, idx)
@@ -126,7 +126,7 @@ func TestDoubleLinkedList_Contains(t *testing.T) {
 	t.Run("ElementExists", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 
 		for _, value := range values {
 			assert.True(t, list.Contains(value, cmp.Compare[int]))
@@ -135,7 +135,7 @@ func TestDoubleLinkedList_Contains(t *testing.T) {
 
 	t.Run("NonExistent", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 
 		assert.False(t, list.Contains(4, cmp.Compare[int]))
 	})
@@ -151,7 +151,7 @@ func TestDoubleLinkedList_Set(t *testing.T) {
 	t.Run("ValidIndex", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 
 		for i := range 4 {
 			err := list.Set(i, values[i]+1)
@@ -164,7 +164,7 @@ func TestDoubleLinkedList_Set(t *testing.T) {
 	t.Run("Reversed", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 		list.Reverse()
 
 		inversedIndex := 3
@@ -179,7 +179,7 @@ func TestDoubleLinkedList_Set(t *testing.T) {
 	t.Run("OutOfBounds", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		values := []int{10, 1, 9, 100}
-		list.Append(values...)
+		list.Appends(values...)
 
 		for _, i := range []int{-1, 4, 5} {
 			err := list.Set(i, 0)
@@ -206,7 +206,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 
 	t.Run("AtBeginning", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2)
+		list.Appends(1, 2)
 		err := list.Insert(0, 0)
 		assert.NoError(t, err)
 		assert.Equal(t, []int{0, 1, 2}, list.ToSlice())
@@ -214,7 +214,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 
 	t.Run("InMiddle", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 3)
+		list.Appends(1, 3)
 		err := list.Insert(1, 2)
 		assert.NoError(t, err)
 		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
@@ -222,7 +222,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 
 	t.Run("AtBeginning_Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2)
+		l.Appends(1, 2)
 		l.Reverse()
 
 		err := l.Insert(0, 3)
@@ -233,7 +233,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 
 	t.Run("InMiddle_Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 3)
+		l.Appends(1, 3)
 		l.Reverse()
 
 		err := l.Insert(1, 2)
@@ -243,7 +243,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 
 	t.Run("AtEnd", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2)
+		list.Appends(1, 2)
 		err := list.Insert(2, 3)
 		assert.NoError(t, err)
 		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
@@ -272,7 +272,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 	t.Run("Head", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 		val, err := list.Remove(0)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, val)
@@ -281,7 +281,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 	t.Run("Tail", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 		val, err := list.Remove(2)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, val)
@@ -290,7 +290,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 	t.Run("Middle", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 		val, err := list.Remove(1)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, val)
@@ -299,7 +299,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 	t.Run("Head_Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		l.Reverse()
 
 		val, err := l.Remove(0)
@@ -310,7 +310,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 	t.Run("Tail_Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		l.Reverse()
 
 		val, err := l.Remove(2)
@@ -321,7 +321,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 	t.Run("Middle_Reversed", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 		list.Reverse()
 
 		val, err := list.Remove(1)
@@ -340,7 +340,16 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 
 func TestDoubleLinkedList_Append(t *testing.T) {
 	list := NewDoubleLinkedList[int]()
-	list.Append(1, 2, 3)
+	list.Append(1)
+
+	assert.False(t, list.IsEmpty())
+	assert.Equal(t, 1, list.Length())
+	assert.Equal(t, []int{1}, list.ToSlice())
+}
+
+func TestDoubleLinkedList_Appends(t *testing.T) {
+	list := NewDoubleLinkedList[int]()
+	list.Appends(1, 2, 3)
 
 	assert.False(t, list.IsEmpty())
 	assert.Equal(t, 3, list.Length())
@@ -351,7 +360,7 @@ func TestDoubleLinkedList_Append(t *testing.T) {
 func TestDoubleLinkedList_Reverse(t *testing.T) {
 	t.Run("NonEmptyList", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(1, 2, 3)
+		list.Appends(1, 2, 3)
 		list.Reverse()
 		list.Append(4)
 
@@ -373,7 +382,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 
 		idx := 0
 		for value := range list.All() {
@@ -385,7 +394,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 	t.Run("PartialIteration", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 
 		idx := 0
 		for value := range list.All() {
@@ -403,7 +412,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -417,7 +426,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -451,7 +460,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 
 		for idx, value := range list.Enumerate() {
 			assert.Equal(t, items[idx], value)
@@ -463,7 +472,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 	t.Run("PartialIteration", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 
 		count := 0
 		for idx, value := range list.Enumerate() {
@@ -481,7 +490,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -495,7 +504,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		list.Append(items...)
+		list.Appends(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -529,7 +538,7 @@ func TestDoubleLinkedList_Backward(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
 		items := []int{1, 2, 3}
-		l.Append(items...)
+		l.Appends(items...)
 
 		var got []int
 		for v := range l.Backward() {
@@ -541,7 +550,7 @@ func TestDoubleLinkedList_Backward(t *testing.T) {
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3, 4)
+		l.Appends(1, 2, 3, 4)
 
 		count := 0
 		for v := range l.Backward() {
@@ -556,7 +565,7 @@ func TestDoubleLinkedList_Backward(t *testing.T) {
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		l.Reverse()
 
 		var got []int
@@ -569,7 +578,7 @@ func TestDoubleLinkedList_Backward(t *testing.T) {
 
 	t.Run("PartialIteration_Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3, 4)
+		l.Appends(1, 2, 3, 4)
 		l.Reverse()
 
 		count := 0
@@ -597,7 +606,7 @@ func TestDoubleLinkedList_Backward(t *testing.T) {
 func TestDoubleLinkedList_String(t *testing.T) {
 	t.Run("InLimit", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(30, 10, 20)
+		list.Appends(30, 10, 20)
 		got := list.String()
 		want := "[30 10 20]"
 		assert.Equal(t, want, got)
@@ -605,7 +614,7 @@ func TestDoubleLinkedList_String(t *testing.T) {
 
 	t.Run("ExceedsLimit", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		list.Appends(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := list.String()
 		want := "[30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
@@ -615,7 +624,7 @@ func TestDoubleLinkedList_String(t *testing.T) {
 func TestDoubleLinkedList_Format(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(30, 10, 20)
+		list.Appends(30, 10, 20)
 		got := fmt.Sprintf("%v", list)
 		want := "[30 10 20]"
 		assert.Equal(t, want, got)
@@ -623,7 +632,7 @@ func TestDoubleLinkedList_Format(t *testing.T) {
 
 	t.Run("Verbose", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		list.Appends(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", list)
 		want := "*list.DoubleLinkedList[int]{size:10, cap:10}"
 		assert.Equal(t, want, got)
@@ -631,7 +640,7 @@ func TestDoubleLinkedList_Format(t *testing.T) {
 
 	t.Run("GoSyntax", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		list.Appends(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", list)
 		want := "*list.DoubleLinkedList[int]{len:10, cap:10} [30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
@@ -641,7 +650,7 @@ func TestDoubleLinkedList_Format(t *testing.T) {
 func TestDoubleLinkedList_MarshalJSON(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(10, 20, 30)
+		l.Appends(10, 20, 30)
 
 		got, err := l.MarshalJSON()
 		assert.NoError(t, err)
@@ -650,7 +659,7 @@ func TestDoubleLinkedList_MarshalJSON(t *testing.T) {
 
 	t.Run("Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		l.Reverse()
 
 		got, err := l.MarshalJSON()
@@ -684,7 +693,7 @@ func TestDoubleLinkedList_UnmarshalJSON(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		data := []byte("[]")
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2)
+		l.Appends(1, 2)
 
 		err := l.UnmarshalJSON(data)
 		assert.NoError(t, err)
@@ -703,13 +712,13 @@ func TestDoubleLinkedList_UnmarshalJSON(t *testing.T) {
 func TestDoubleLinkedList_ToSlice(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	})
 
 	t.Run("Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		l.Reverse()
 
 		assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
@@ -725,7 +734,7 @@ func TestDoubleLinkedList_Clear(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		a, b := 1, 2
 		l := NewDoubleLinkedList[*int]()
-		l.Append(&a, &b)
+		l.Appends(&a, &b)
 		first := l.first
 		last := l.last
 
@@ -745,7 +754,7 @@ func TestDoubleLinkedList_Clear(t *testing.T) {
 
 	t.Run("Reversed", func(t *testing.T) {
 		l := NewDoubleLinkedList[int]()
-		l.Append(1, 2, 3)
+		l.Appends(1, 2, 3)
 		l.Reverse()
 		l.Clear()
 

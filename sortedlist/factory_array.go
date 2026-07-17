@@ -29,8 +29,9 @@ var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}
 //	New(capacity)       O(capacity)
 //	From/Clone/FromSeq  O(N log N)
 //	Add(x)/Remove(x)    O(N)
+//	Adds(xs...T)        O((N + len(xs)) log (N + len(xs)))
 //	Lookup/Bounds       O(log N)
-//	Range               O(log N + K)
+//	Range               O(log N + yielded values)
 //	Get                 O(1)
 //	Clear               O(N)
 type ArrayFactory[T any] struct {

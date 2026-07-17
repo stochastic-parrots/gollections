@@ -53,7 +53,7 @@ func TestRingBufferDeque_Length(t *testing.T) {
 	deque := NewRingBufferDeque[int](1)
 	assert.Equal(t, 0, deque.Length())
 
-	deque.Append(1, 2)
+	deque.Appends(1, 2)
 	assert.Equal(t, 2, deque.Length())
 }
 
@@ -77,7 +77,7 @@ func TestRingBufferDeque_Front(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](1)
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		x, ok := deque.Front()
 
@@ -98,7 +98,7 @@ func TestRingBufferDeque_Back(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](1)
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		x, ok := deque.Back()
 
@@ -108,41 +108,37 @@ func TestRingBufferDeque_Back(t *testing.T) {
 }
 
 func TestRingBufferDeque_Append(t *testing.T) {
-	t.Run("Single", func(t *testing.T) {
-		deque := NewRingBufferDeque[int](1)
+	deque := NewRingBufferDeque[int](1)
 
-		deque.Append(1)
+	deque.Append(1)
 
-		assert.Equal(t, []int{1}, deque.ToSlice())
-	})
+	assert.Equal(t, []int{1}, deque.ToSlice())
+}
 
-	t.Run("ManyWithGrowth", func(t *testing.T) {
-		deque := NewRingBufferDeque[int](0)
+func TestRingBufferDeque_Appends(t *testing.T) {
+	deque := NewRingBufferDeque[int](0)
 
-		deque.Append(1, 2, 3)
+	deque.Appends(1, 2, 3)
 
-		assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
-		assert.GreaterOrEqual(t, len(deque.data), 3)
-	})
+	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
+	assert.GreaterOrEqual(t, len(deque.data), 3)
 }
 
 func TestRingBufferDeque_Prepend(t *testing.T) {
-	t.Run("Single", func(t *testing.T) {
-		deque := NewRingBufferDeque[int](1)
+	deque := NewRingBufferDeque[int](1)
 
-		deque.Prepend(1)
+	deque.Prepend(1)
 
-		assert.Equal(t, []int{1}, deque.ToSlice())
-	})
+	assert.Equal(t, []int{1}, deque.ToSlice())
+}
 
-	t.Run("ManyPreservesInputOrder", func(t *testing.T) {
-		deque := NewRingBufferDeque[int](1)
-		deque.Append(4)
+func TestRingBufferDeque_Prepends(t *testing.T) {
+	deque := NewRingBufferDeque[int](1)
+	deque.Append(4)
 
-		deque.Prepend(1, 2, 3)
+	deque.Prepends(1, 2, 3)
 
-		assert.Equal(t, []int{1, 2, 3, 4}, deque.ToSlice())
-	})
+	assert.Equal(t, []int{1, 2, 3, 4}, deque.ToSlice())
 }
 
 func TestRingBufferDeque_Shift(t *testing.T) {
@@ -170,7 +166,7 @@ func TestRingBufferDeque_Shift(t *testing.T) {
 
 	t.Run("ManyElements", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](2)
-		deque.Append(1, 2, 3)
+		deque.Appends(1, 2, 3)
 
 		x, ok := deque.Shift()
 
@@ -205,7 +201,7 @@ func TestRingBufferDeque_Pop(t *testing.T) {
 
 	t.Run("ManyElements", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](2)
-		deque.Append(1, 2, 3)
+		deque.Appends(1, 2, 3)
 
 		x, ok := deque.Pop()
 
@@ -217,7 +213,7 @@ func TestRingBufferDeque_Pop(t *testing.T) {
 
 func TestRingBufferDeque_WrapAround(t *testing.T) {
 	deque := NewRingBufferDeque[int](3)
-	deque.Append(1, 2, 3)
+	deque.Appends(1, 2, 3)
 
 	x, ok := deque.Shift()
 	assert.True(t, ok)
@@ -227,7 +223,7 @@ func TestRingBufferDeque_WrapAround(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, 2, x)
 
-	deque.Append(4, 5, 6)
+	deque.Appends(4, 5, 6)
 
 	assert.Equal(t, []int{3, 4, 5, 6}, deque.ToSlice())
 }
@@ -235,14 +231,14 @@ func TestRingBufferDeque_WrapAround(t *testing.T) {
 func TestRingBufferDeque_All(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		deque := NewRingBufferDeque[string](2)
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		assert.Equal(t, []string{"a", "b", "c"}, slices.Collect(deque.All()))
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		deque := NewRingBufferDeque[string](2)
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		var collected []string
 		for value := range deque.All() {
@@ -257,7 +253,7 @@ func TestRingBufferDeque_All(t *testing.T) {
 func TestRingBufferDeque_Enumerate(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		deque := NewRingBufferDeque[string](2)
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		var indexes []int
 		var values []string
@@ -272,7 +268,7 @@ func TestRingBufferDeque_Enumerate(t *testing.T) {
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		deque := NewRingBufferDeque[string](2)
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		var indexes []int
 		var values []string
@@ -295,7 +291,7 @@ func TestRingBufferDeque_ToSlice(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](1)
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		got := deque.ToSlice()
 		got[0] = 100
@@ -306,14 +302,14 @@ func TestRingBufferDeque_ToSlice(t *testing.T) {
 
 func TestRingBufferDeque_String(t *testing.T) {
 	deque := NewRingBufferDeque[int](2)
-	deque.Append(1, 2)
+	deque.Appends(1, 2)
 
 	assert.Equal(t, "[1 2]", deque.String())
 }
 
 func TestRingBufferDeque_Format(t *testing.T) {
 	deque := NewRingBufferDeque[int](4)
-	deque.Append(1, 2)
+	deque.Appends(1, 2)
 
 	assert.Equal(t, "*deque.RingBufferDeque[int]{size:2, cap:4}", fmt.Sprintf("%#v", deque))
 	assert.Equal(t, "*deque.RingBufferDeque[int]{len:2, cap:4} [1 2]", fmt.Sprintf("%+v", deque))
@@ -331,7 +327,7 @@ func TestRingBufferDeque_MarshalJSON(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](2)
-		deque.Append(2, 3)
+		deque.Appends(2, 3)
 		deque.Prepend(1)
 
 		data, err := json.Marshal(deque)
@@ -344,7 +340,7 @@ func TestRingBufferDeque_MarshalJSON(t *testing.T) {
 func TestRingBufferDeque_UnmarshalJSON(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
 		deque := NewRingBufferDeque[int](1)
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		err := json.Unmarshal([]byte(`[8,9]`), deque)
 
@@ -366,7 +362,7 @@ func TestRingBufferDeque_UnmarshalJSON(t *testing.T) {
 func TestRingBufferDeque_Clear(t *testing.T) {
 	a, b := 1, 2
 	deque := NewRingBufferDeque[*int](4)
-	deque.Append(&a, &b)
+	deque.Appends(&a, &b)
 	backing := &deque.data[0]
 
 	deque.Clear()

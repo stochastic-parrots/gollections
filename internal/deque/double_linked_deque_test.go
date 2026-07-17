@@ -37,7 +37,7 @@ func TestDoubleLinkedDeque_Length(t *testing.T) {
 	deque := NewDoubleLinkedDeque[int]()
 	assert.Equal(t, 0, deque.Length())
 
-	deque.Append(1, 2)
+	deque.Appends(1, 2)
 	assert.Equal(t, 2, deque.Length())
 }
 
@@ -61,7 +61,7 @@ func TestDoubleLinkedDeque_Front(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		x, ok := deque.Front()
 
@@ -82,7 +82,7 @@ func TestDoubleLinkedDeque_Back(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		x, ok := deque.Back()
 
@@ -92,44 +92,40 @@ func TestDoubleLinkedDeque_Back(t *testing.T) {
 }
 
 func TestDoubleLinkedDeque_Append(t *testing.T) {
-	t.Run("Single", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
+	deque := NewDoubleLinkedDeque[int]()
 
-		deque.Append(1)
+	deque.Append(1)
 
-		assert.Equal(t, []int{1}, deque.ToSlice())
-		assert.Same(t, deque.first, deque.last)
-	})
+	assert.Equal(t, []int{1}, deque.ToSlice())
+	assert.Same(t, deque.first, deque.last)
+}
 
-	t.Run("Many", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
+func TestDoubleLinkedDeque_Appends(t *testing.T) {
+	deque := NewDoubleLinkedDeque[int]()
 
-		deque.Append(1, 2, 3)
+	deque.Appends(1, 2, 3)
 
-		assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
-		assert.Equal(t, 1, deque.first.Value)
-		assert.Equal(t, 3, deque.last.Value)
-	})
+	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
+	assert.Equal(t, 1, deque.first.Value)
+	assert.Equal(t, 3, deque.last.Value)
 }
 
 func TestDoubleLinkedDeque_Prepend(t *testing.T) {
-	t.Run("Single", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
+	deque := NewDoubleLinkedDeque[int]()
 
-		deque.Prepend(1)
+	deque.Prepend(1)
 
-		assert.Equal(t, []int{1}, deque.ToSlice())
-		assert.Same(t, deque.first, deque.last)
-	})
+	assert.Equal(t, []int{1}, deque.ToSlice())
+	assert.Same(t, deque.first, deque.last)
+}
 
-	t.Run("ManyPreservesInputOrder", func(t *testing.T) {
-		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(4)
+func TestDoubleLinkedDeque_Prepends(t *testing.T) {
+	deque := NewDoubleLinkedDeque[int]()
+	deque.Append(4)
 
-		deque.Prepend(1, 2, 3)
+	deque.Prepends(1, 2, 3)
 
-		assert.Equal(t, []int{1, 2, 3, 4}, deque.ToSlice())
-	})
+	assert.Equal(t, []int{1, 2, 3, 4}, deque.ToSlice())
 }
 
 func TestDoubleLinkedDeque_Shift(t *testing.T) {
@@ -157,7 +153,7 @@ func TestDoubleLinkedDeque_Shift(t *testing.T) {
 
 	t.Run("ManyElements", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2, 3)
+		deque.Appends(1, 2, 3)
 
 		x, ok := deque.Shift()
 
@@ -193,7 +189,7 @@ func TestDoubleLinkedDeque_Pop(t *testing.T) {
 
 	t.Run("ManyElements", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2, 3)
+		deque.Appends(1, 2, 3)
 
 		x, ok := deque.Pop()
 
@@ -207,14 +203,14 @@ func TestDoubleLinkedDeque_Pop(t *testing.T) {
 func TestDoubleLinkedDeque_All(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[string]()
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		assert.Equal(t, []string{"a", "b", "c"}, slices.Collect(deque.All()))
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[string]()
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		var collected []string
 		for value := range deque.All() {
@@ -230,7 +226,7 @@ func TestDoubleLinkedDeque_All(t *testing.T) {
 func TestDoubleLinkedDeque_Enumerate(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[string]()
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		var indexes []int
 		var values []string
@@ -245,7 +241,7 @@ func TestDoubleLinkedDeque_Enumerate(t *testing.T) {
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[string]()
-		deque.Append("a", "b", "c")
+		deque.Appends("a", "b", "c")
 
 		var indexes []int
 		var values []string
@@ -269,7 +265,7 @@ func TestDoubleLinkedDeque_ToSlice(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		got := deque.ToSlice()
 		got[0] = 100
@@ -280,14 +276,14 @@ func TestDoubleLinkedDeque_ToSlice(t *testing.T) {
 
 func TestDoubleLinkedDeque_String(t *testing.T) {
 	deque := NewDoubleLinkedDeque[int]()
-	deque.Append(1, 2)
+	deque.Appends(1, 2)
 
 	assert.Equal(t, "[1 2]", deque.String())
 }
 
 func TestDoubleLinkedDeque_Format(t *testing.T) {
 	deque := NewDoubleLinkedDeque[int]()
-	deque.Append(1, 2)
+	deque.Appends(1, 2)
 
 	assert.Equal(t, "*deque.DoubleLinkedDeque[int]{size:2, cap:2}", fmt.Sprintf("%#v", deque))
 	assert.Equal(t, "*deque.DoubleLinkedDeque[int]{len:2, cap:2} [1 2]", fmt.Sprintf("%+v", deque))
@@ -305,7 +301,7 @@ func TestDoubleLinkedDeque_MarshalJSON(t *testing.T) {
 
 	t.Run("Populated", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(2, 3)
+		deque.Appends(2, 3)
 		deque.Prepend(1)
 
 		data, err := json.Marshal(deque)
@@ -318,7 +314,7 @@ func TestDoubleLinkedDeque_MarshalJSON(t *testing.T) {
 func TestDoubleLinkedDeque_UnmarshalJSON(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
 		deque := NewDoubleLinkedDeque[int]()
-		deque.Append(1, 2)
+		deque.Appends(1, 2)
 
 		err := json.Unmarshal([]byte(`[8,9]`), deque)
 
@@ -351,7 +347,7 @@ func TestDoubleLinkedDeque_Clear(t *testing.T) {
 	t.Run("Populated", func(t *testing.T) {
 		a, b := 1, 2
 		deque := NewDoubleLinkedDeque[*int]()
-		deque.Append(&a, &b)
+		deque.Appends(&a, &b)
 		first := deque.first
 		last := deque.last
 
@@ -368,7 +364,7 @@ func TestDoubleLinkedDeque_Clear(t *testing.T) {
 		assert.Nil(t, last.Previous)
 		assert.Nil(t, last.Next)
 
-		deque.Prepend(&a, &b)
+		deque.Prepends(&a, &b)
 		assert.Equal(t, []*int{&a, &b}, deque.ToSlice())
 	})
 

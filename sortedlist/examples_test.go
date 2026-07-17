@@ -13,7 +13,7 @@ import (
 func ExampleArray() {
 	factory := sortedlist.Array(cmp.Compare[int])
 	items := factory.New(0)
-	items.Add(3, 1, 2, 2)
+	items.Adds(3, 1, 2, 2)
 
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
@@ -40,7 +40,7 @@ func ExampleArray() {
 
 func ExampleOrderedArray() {
 	list := sortedlist.OrderedArray[int]().New(0)
-	list.Add(3, 1, 2, 2)
+	list.Adds(3, 1, 2, 2)
 
 	fmt.Println(slices.Collect(list.All()))
 	fmt.Println(list.Contains(3))
@@ -52,7 +52,7 @@ func ExampleOrderedArray() {
 
 func ExampleOrderedArraySortedList_bounds() {
 	list := sortedlist.OrderedArray[int]().New(0)
-	list.Add(1, 2, 2, 2, 3)
+	list.Adds(1, 2, 2, 2, 3)
 
 	start, end := list.EqualRange(2)
 
@@ -70,7 +70,7 @@ func ExampleOrderedArraySortedList_bounds() {
 
 func ExampleOrderedArraySortedList_navigate() {
 	list := sortedlist.OrderedArray[int]().New(0)
-	list.Add(10, 20, 30)
+	list.Adds(10, 20, 30)
 
 	ceiling, ceilingIdx, _ := list.Ceiling(25)
 	floor, floorIdx, _ := list.Floor(25)
@@ -91,7 +91,7 @@ func ExampleOrderedArraySortedList_navigate() {
 
 func ExampleOrderedArraySortedList_Range() {
 	list := sortedlist.OrderedArray[int]().New(0)
-	list.Add(1, 2, 2, 3, 4)
+	list.Adds(1, 2, 2, 3, 4)
 
 	fmt.Println(slices.Collect(list.Range(2, 4)))
 
@@ -125,7 +125,7 @@ func ExampleArrayFactory_Clone() {
 
 func ExampleArrayFactory_FromSeq() {
 	source := list.Array[int]().New(0)
-	source.Append(3, 1, 2)
+	source.Appends(3, 1, 2)
 
 	list := sortedlist.Array(cmp.Compare[int]).FromSeq(source.All())
 
@@ -139,7 +139,7 @@ func ExampleArrayFactory_FromSeq() {
 
 func ExampleAsReadonly() {
 	mutable := sortedlist.Array(cmp.Compare[int]).New(0)
-	mutable.Add(2, 1)
+	mutable.Adds(2, 1)
 
 	view := sortedlist.AsReadonly(mutable)
 	fmt.Println("Readonly view:", slices.Collect(view.All()))

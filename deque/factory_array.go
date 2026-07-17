@@ -23,7 +23,8 @@ var _ Deque[any] = &deque.RingBufferDeque[any]{}
 //	New(capacity)       O(capacity)
 //	From(data)          O(1)
 //	Clone/FromSeq       O(N)
-//	Append/Prepend      O(K) amortized
+//	Append/Prepend      O(1) amortized
+//	Appends/Prepends    O(len(xs)) amortized
 //	Shift/Pop           O(1)
 //	Front/Back          O(1)
 //	Clear               O(N)

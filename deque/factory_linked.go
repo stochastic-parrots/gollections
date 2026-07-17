@@ -22,7 +22,8 @@ var _ Deque[any] = &deque.DoubleLinkedDeque[any]{}
 //	-----------------   ---------------
 //	New()               O(1)
 //	From/FromSeq        O(N)
-//	Append/Prepend      O(K)
+//	Append/Prepend      O(1)
+//	Appends/Prepends    O(len(xs))
 //	Shift/Pop           O(1)
 //	Front/Back          O(1)
 //	Clear               O(N)

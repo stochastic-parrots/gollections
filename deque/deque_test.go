@@ -23,14 +23,14 @@ func TestFactoriesImplementDeque(t *testing.T) {
 
 func TestConcreteZeroValues(t *testing.T) {
 	var array deque.ArrayDeque[int]
-	array.Append(1, 2)
+	array.Appends(1, 2)
 	array.Prepend(0)
 	assert.Equal(t, []int{0, 1, 2}, array.ToSlice())
 	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &array))
 	assert.Equal(t, []int{3, 4}, array.ToSlice())
 
 	var linked deque.LinkedDeque[int]
-	linked.Append(1, 2)
+	linked.Appends(1, 2)
 	linked.Prepend(0)
 	assert.Equal(t, []int{0, 1, 2}, linked.ToSlice())
 	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &linked))
@@ -88,7 +88,7 @@ func TestAsReadonly(t *testing.T) {
 
 	t.Run("View", func(t *testing.T) {
 		mutable := deque.Array[int]().New(0)
-		mutable.Append(1, 2)
+		mutable.Appends(1, 2)
 
 		view := deque.AsReadonly[int](mutable)
 		_, unmarshals := any(view).(json.Unmarshaler)
@@ -123,8 +123,8 @@ func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 
 	assert.True(t, d.IsEmpty())
 
-	d.Append(2, 3)
-	d.Prepend(0, 1)
+	d.Appends(2, 3)
+	d.Prepends(0, 1)
 
 	assert.Equal(t, []int{0, 1, 2, 3}, d.ToSlice())
 	assert.Equal(t, []int{0, 1, 2, 3}, slices.Collect(d.All()))

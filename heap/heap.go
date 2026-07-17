@@ -25,8 +25,11 @@ const (
 // priority" means, so the same interface supports min-heaps, max-heaps, and
 // custom ordering.
 type Heap[T any] interface {
-	// Push inserts one or more values into the heap while maintaining the heap property.
-	Push(xs ...T)
+	// Push inserts a value into the heap while maintaining the heap property.
+	Push(x T)
+
+	// Pushes inserts the given values into the heap while maintaining the heap property.
+	Pushes(xs ...T)
 
 	// Pop removes and returns the element at the top of the heap (the one with
 	// the highest priority).
