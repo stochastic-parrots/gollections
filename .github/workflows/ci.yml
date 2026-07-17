@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test (Go ${{ matrix.go-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version:
+          - 1.24.x
+          - stable
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: go.sum
+      - name: Build
+        run: go build ./...
+      - name: Test
+        run: go test -race ./...
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.24.x
+          cache-dependency-path: go.sum
+      - name: Collect library coverage
+        run: go list ./... | grep -v '/internal/benchmarks' | xargs go test -race -covermode=atomic -coverprofile=coverage.out
+      - name: Report library coverage
+        run: go tool cover -func=coverage.out
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          disable_search: true
+          fail_ci_if_error: true
+          files: coverage.out
+          use_oidc: true

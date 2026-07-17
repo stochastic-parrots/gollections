@@ -1,5 +1,8 @@
 # gollections
 
+[![CI](https://github.com/stochastic-parrots/gollections/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/stochastic-parrots/gollections/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/stochastic-parrots/gollections/branch/main/graph/badge.svg)](https://app.codecov.io/gh/stochastic-parrots/gollections)
+
 Generic collection data structures for Go, built around type safety, predictable
 APIs, and idiomatic iteration with `iter.Seq`.
 
@@ -157,6 +160,11 @@ go test -cover ./internal/heap
 go test -cover ./internal/prioritymap
 go test -cover ./internal/deque
 ```
+
+CI builds and tests every package with the minimum supported Go release and the
+latest stable release. The published coverage report measures library packages;
+the cross-implementation benchmark harness under `internal/benchmarks` remains
+part of the build and test suite but is excluded from the coverage percentage.
 
 ## Status
 
