@@ -1,11 +1,12 @@
-// Package sortedlist provides generic lists whose order is maintained by a comparator
-// or by the natural order of cmp.Ordered values.
+// Package sortedlist provides generic lists whose order is maintained by a
+// comparator.
 //
 // Unlike package list, sorted lists do not expose arbitrary positional mutation
 // operations such as Insert, Set, or Reverse. Replace is allowed only when the
-// new value preserves sorted order. The list order is derived from either the
-// comparator supplied at construction time or the natural order of the element
-// type, and is preserved after every mutation.
+// new value preserves sorted order. The list order is derived from the
+// comparator selected at construction time and is preserved after every
+// mutation. [OrderedArray] supplies that comparator for a cmp.Ordered type in
+// ascending or descending order.
 //
 // A sorted list is a good fit when data is built once or updated occasionally
 // and then queried many times. The slice-backed implementation provides O(log N)
@@ -14,18 +15,16 @@
 // a heap, priority map, or a future tree/skip-list implementation depending on
 // the access pattern.
 //
-// Use [OrderedArray] when T satisfies cmp.Ordered and natural order is enough.
-// Its factory uses standard-library ordered sort and search paths without
-// custom comparator calls. Use [Array] when values need a custom comparator.
-// Custom comparators
-// must define the same ordering for construction, lookup, replacement, and
-// removal, and are called during search and sort operations. The relative order
-// of values considered equivalent by the comparator is unspecified; include a
-// tie-breaker in the comparator when that order matters.
+// Use [OrderedArray] when T satisfies cmp.Ordered and ascending or descending
+// natural order is enough. Use [Array] when values need a custom comparator.
+// Both selectors return [ArrayFactory] and use the same implementation. The
+// comparator must define the same ordering for construction, lookup,
+// replacement, and removal. The relative order of values considered equivalent
+// by the comparator is unspecified; include a tie-breaker when that order
+// matters.
 //
-// The zero value of [OrderedArraySortedList] is ready for use. An
 // [ArraySortedList] requires a comparator and must be constructed through
-// [Array]; its zero value is invalid.
+// [Array] or [OrderedArray]; its zero value is invalid.
 //
 // Bounds and range operations use list order. [Readonly.Range] is half-open:
 // it yields values in [from, to), including values equivalent to from and
@@ -78,20 +77,17 @@
 //
 // # Implementations
 //
-// The package currently exposes two slice-backed implementations:
+// The package exposes one slice-backed implementation:
 //
-//   - [ArraySortedList]: A comparator-backed sorted list for custom ordering
-//     with O(log N) lookup and O(N) single-element insertion/removal.
-//   - [OrderedArraySortedList]: A sorted list for cmp.Ordered values that uses
-//     standard-library ordered search and sort paths without custom comparator
-//     calls.
+//   - [ArraySortedList]: A comparator-backed sorted list with O(log N) lookup
+//     and O(N) single-element insertion/removal.
 //
 // Factories build sorted lists from empty capacity, slices, cloned slices, or
-// iterators. [ArrayFactory.From] and [OrderedArrayFactory.From] sort and retain
-// the provided slice, transferring ownership of its backing array. The caller
-// must not use the slice or its aliases afterward. Clone preserves the source.
-// FromSeq makes it possible to sort any collection in this module that exposes
-// All(). Every factory method returns a concrete sorted-list type.
+// iterators. [ArrayFactory.From] sorts and retains the provided slice,
+// transferring ownership of its backing array. The caller must not use the
+// slice or its aliases afterward. Clone preserves the source. FromSeq makes it
+// possible to sort any collection in this module that exposes All(). Every
+// factory method returns an [ArraySortedList].
 //
 // # JSON
 //

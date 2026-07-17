@@ -55,7 +55,7 @@
 //     Indexed sequences like ArrayList and LinkedList.
 //
 //   - [github.com/stochastic-parrots/gollections/sortedlist]:
-//     Sorted sequences like ArraySortedList and OrderedArraySortedList.
+//     Sorted sequences like ArraySortedList.
 //
 //   - [github.com/stochastic-parrots/gollections/deque]:
 //     Double-ended queues backed by circular arrays or linked nodes.

@@ -8,6 +8,17 @@ import (
 	"github.com/stochastic-parrots/gollections"
 )
 
+// Order selects the direction of a type's natural order.
+type Order bool
+
+const (
+	// Asc places smaller values before larger values.
+	Asc Order = false
+
+	// Desc places larger values before smaller values.
+	Desc Order = true
+)
+
 // Readonly defines a non-mutable view of a sorted list.
 //
 // It provides access to elements by sorted position and allows efficient lookup

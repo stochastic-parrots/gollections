@@ -146,7 +146,7 @@ alias and constructor from the public package.
 - Factory selectors should preserve the user-facing strategy vocabulary:
   - `Array` and `Linked` select list and deque implementations.
   - `Binary` and `OrderedBinary` select binary heap implementations.
-  - `Array` and `OrderedArray` select sorted-list implementations.
+  - `Array` and `OrderedArray` configure array sorted-list ordering.
   - `BinaryHeap`, `OrderedBinaryHeap`, `PairingHeap`,
     `OrderedPairingHeap`, and `RadixHeap` select priority-map implementations.
 - Factory construction methods use `New`, `From`, `Clone`, and `FromSeq` where
@@ -279,10 +279,9 @@ alias and constructor from the public package.
 - Lists and deques implement `json.Unmarshaler` because the JSON array order
   completely defines their logical state. Unmarshaling replaces the contents
   only after the complete array is decoded successfully.
-- Sorted lists do not implement `json.Unmarshaler`, including naturally ordered
-  implementations. Callers decode into a slice and use the matching `Array` or
-  `OrderedArray` factory so the ordering strategy is explicit and the package
-  keeps one consistent decoding contract.
+- Sorted lists do not implement `json.Unmarshaler`. Callers decode into a slice
+  and use the matching `Array` or `OrderedArray` selector so the ordering
+  strategy is explicit and the package keeps one consistent decoding contract.
 - Heaps do not implement `json.Unmarshaler` because their priority comparator or
   min/max selection is not encoded in the JSON array. Callers decode into a
   slice and use the same `Binary` or `OrderedBinary` factory that defines heap
