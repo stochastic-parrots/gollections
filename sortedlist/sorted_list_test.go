@@ -14,17 +14,17 @@ import (
 )
 
 func TestFactoriesImplementSortedList(t *testing.T) {
-	var _ sortedlist.ArrayFactory[int] = sortedlist.OrderedArray[int](sortedlist.Ascending)
+	var _ sortedlist.ArrayFactory[int] = sortedlist.OrderedArray[int](sortedlist.Asc)
 	var _ *sortedlist.ArraySortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
-	var _ *sortedlist.ArraySortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
+	var _ *sortedlist.ArraySortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).From([]int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).Clone([]int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).FromSeq(slices.Values([]int{1}))
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).From([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Ascending).FromSeq(slices.Values([]int{1}))
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).From([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).FromSeq(slices.Values([]int{1}))
 }
 
 func TestArray_NilComparator(t *testing.T) {
@@ -67,13 +67,13 @@ func TestArrayFactory_FromSeq(t *testing.T) {
 
 func TestOrderedArray(t *testing.T) {
 	t.Run("Ascending", func(t *testing.T) {
-		list := sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{3, 1, 2})
+		list := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
 
 		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	})
 
 	t.Run("Descending", func(t *testing.T) {
-		list := sortedlist.OrderedArray[int](sortedlist.Descending).Clone([]int{3, 1, 2})
+		list := sortedlist.OrderedArray[int](sortedlist.Desc).Clone([]int{3, 1, 2})
 
 		assert.Equal(t, []int{3, 2, 1}, list.ToSlice())
 	})
@@ -81,8 +81,8 @@ func TestOrderedArray(t *testing.T) {
 	t.Run("FloatNaN", func(t *testing.T) {
 		nan := math.NaN()
 
-		ascending := sortedlist.OrderedArray[float64](sortedlist.Ascending).Clone([]float64{1, nan, 2})
-		descending := sortedlist.OrderedArray[float64](sortedlist.Descending).Clone([]float64{1, nan, 2})
+		ascending := sortedlist.OrderedArray[float64](sortedlist.Asc).Clone([]float64{1, nan, 2})
+		descending := sortedlist.OrderedArray[float64](sortedlist.Desc).Clone([]float64{1, nan, 2})
 
 		ascendingValues := ascending.ToSlice()
 		descendingValues := descending.ToSlice()

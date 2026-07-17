@@ -21,7 +21,7 @@ func getSortedListSuite(capacity int) datastructs.Implementations[datastructs.So
 		{
 			Name: "Gollections_ArraySortedList",
 			Factory: func() datastructs.SortedList {
-				return sortedlist.OrderedArray[int](sortedlist.Ascending).New(capacity)
+				return sortedlist.OrderedArray[int](sortedlist.Asc).New(capacity)
 			},
 		},
 	}

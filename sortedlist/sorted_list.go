@@ -12,11 +12,11 @@ import (
 type Order bool
 
 const (
-	// Ascending places smaller values before larger values.
-	Ascending Order = false
+	// Asc places smaller values before larger values.
+	Asc Order = false
 
-	// Descending places larger values before smaller values.
-	Descending Order = true
+	// Desc places larger values before smaller values.
+	Desc Order = true
 )
 
 // Readonly defines a non-mutable view of a sorted list.

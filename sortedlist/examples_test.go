@@ -39,8 +39,8 @@ func ExampleArray() {
 }
 
 func ExampleOrderedArray() {
-	ascending := sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{3, 1, 2, 2})
-	descending := sortedlist.OrderedArray[int](sortedlist.Descending).Clone([]int{3, 1, 2, 2})
+	ascending := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2, 2})
+	descending := sortedlist.OrderedArray[int](sortedlist.Desc).Clone([]int{3, 1, 2, 2})
 
 	fmt.Println(slices.Collect(ascending.All()))
 	fmt.Println(slices.Collect(descending.All()))
@@ -51,7 +51,7 @@ func ExampleOrderedArray() {
 }
 
 func ExampleArraySortedList_bounds() {
-	list := sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
+	list := sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
 	list.Adds(1, 2, 2, 2, 3)
 
 	start, end := list.EqualRange(2)
@@ -69,7 +69,7 @@ func ExampleArraySortedList_bounds() {
 }
 
 func ExampleArraySortedList_navigate() {
-	list := sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
+	list := sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
 	list.Adds(10, 20, 30)
 
 	ceiling, ceilingIdx, _ := list.Ceiling(25)
@@ -90,7 +90,7 @@ func ExampleArraySortedList_navigate() {
 }
 
 func ExampleArraySortedList_Range() {
-	list := sortedlist.OrderedArray[int](sortedlist.Ascending).New(0)
+	list := sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
 	list.Adds(1, 2, 2, 3, 4)
 
 	fmt.Println(slices.Collect(list.Range(2, 4)))

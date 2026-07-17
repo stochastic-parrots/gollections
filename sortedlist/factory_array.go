@@ -51,7 +51,7 @@ func Array[T any](compare func(a, b T) int) ArrayFactory[T] {
 // OrderedArray returns an array sorted-list factory using the natural order of
 // T in the selected direction.
 func OrderedArray[T cmp.Ordered](order Order) ArrayFactory[T] {
-	if order == Descending {
+	if order == Desc {
 		return Array(func(a, b T) int { return cmp.Compare(b, a) })
 	}
 	return Array(cmp.Compare[T])

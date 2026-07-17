@@ -65,7 +65,7 @@ Factory methods return concrete collection types without interface dispatch:
 ```go
 items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
-scores := sortedlist.OrderedArray[int](sortedlist.Ascending).Clone([]int{3, 1, 2})
+scores := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
 ```
 
@@ -100,7 +100,7 @@ should stay ordered by value instead of by insertion position.
 `ArraySortedList` is the single slice-backed implementation. Choose its
 ordering through one of two factory selectors:
 
-- `OrderedArray(Ascending)` or `OrderedArray(Descending)` when element values
+- `OrderedArray(Asc)` or `OrderedArray(Desc)` when element values
   satisfy `cmp.Ordered` and natural order is enough.
 - `Array(compare)` for custom ordering, such as sorting structs by one or more
   fields.
