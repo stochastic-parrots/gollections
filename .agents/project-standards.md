@@ -13,7 +13,6 @@ the relevant sections below.
 - The root package exposes shared read-only capability contracts:
   - `Collection[T]` for value collections.
   - `Map[K, V]` for key-value structures.
-  - `Set[T]` for collections with implementation-defined value identity.
 - Mutating operations belong in structure-specific subpackages such as `list`,
   `sortedlist`, `deque`, `set`, `heap`, and `prioritymap`.
 - Public subpackages expose stable constructors, type aliases, interfaces,
@@ -26,7 +25,7 @@ the relevant sections below.
 Follow the file layout already used by the library:
 
 - Root package:
-  - `collection.go`, `map.go`, and `set.go` contain read-only base interfaces.
+  - `collection.go` and `map.go` contain read-only base interfaces.
   - `doc.go` contains module-level package documentation.
 - Public collection package:
   - `<package>.go` contains the public interface, readonly interface, and
@@ -50,7 +49,7 @@ alias and constructor from the public package.
 ## API Design
 
 - Keep root interfaces observation-only. Do not add mutating methods to
-  `gollections.Collection`, `gollections.Map`, or `gollections.Set`.
+  `gollections.Collection` or `gollections.Map`.
 - Expose mutations through the domain interface where their semantics are clear,
   for example `list.List`, `sortedlist.SortedList`, `deque.Deque`,
   `heap.Heap`, `set.Set`, and `prioritymap.PriorityMap`.

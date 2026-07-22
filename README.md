@@ -35,10 +35,9 @@ Go documentation tools.
 ## Design
 
 - Generic APIs: no `interface{}` casting for stored values.
-- Read-only root interfaces: `gollections.Collection`, `gollections.Map`, and
-  `gollections.Set` are observation contracts. They expose inspection and
-  iteration, while mutating operations live in structure-specific interfaces
-  such as
+- Read-only root interfaces: `gollections.Collection` and `gollections.Map` are
+  observation contracts. They expose inspection and iteration, while mutating
+  operations live in structure-specific interfaces such as
   `list.List`, `sortedlist.SortedList`, `deque.Deque`, `set.Set`, `heap.Heap`,
   and `prioritymap.PriorityMap`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.

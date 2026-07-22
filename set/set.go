@@ -9,8 +9,12 @@ import (
 
 // Readonly defines a non-mutable view of a set.
 type Readonly[T any] interface {
-	gollections.Set[T]
+	gollections.Collection[T]
 	json.Marshaler
+
+	// Contains returns true if the set contains a value with the same identity
+	// as x according to the concrete implementation.
+	Contains(x T) bool
 }
 
 // Set defines a mutable collection of values that are unique according to its

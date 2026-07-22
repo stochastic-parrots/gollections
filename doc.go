@@ -7,12 +7,11 @@
 //
 // # Core Interfaces
 //
-// Most data structures in this module implement one of the three base interfaces,
+// Most data structures in this module implement one of the two base interfaces,
 // ensuring a predictable API across different implementations:
 //
 //   - [Collection]: Foundation for value collections like lists, heaps, and sets.
 //   - [Map]: Base operations for key-value based structures.
-//   - [Set]: Collection operations plus implementation-defined membership.
 //
 // Root-level interfaces are intentionally read-only capability contracts. They
 // describe how callers can inspect or iterate over a structure without changing

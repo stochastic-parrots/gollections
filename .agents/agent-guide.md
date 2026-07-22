@@ -6,8 +6,8 @@ Use this file to orient quickly, then rely on
 ## Repository Snapshot
 
 - `gollections` is a Go 1.24 generic collections library.
-- Root package interfaces are read-only contracts: `Collection[T]`, `Map[K, V]`,
-  and `Set[T]`.
+- Root package interfaces are read-only contracts: `Collection[T]` and
+  `Map[K, V]`.
 - Public mutable APIs live in focused packages such as `list`, `sortedlist`,
   `deque`, `set`, `heap`, and `prioritymap`.
 - Concrete implementations live under `internal/...`; public packages expose
