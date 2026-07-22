@@ -22,9 +22,11 @@ type Collection[T any] interface {
 	// The collection must not be mutated while the iterator is running.
 	All() iter.Seq[T]
 
-	// Enumerate returns an iterator that yields both the index and the element.
+	// Enumerate returns an iterator that yields both the zero-based iteration
+	// position and the element.
 	//
-	// Values are yielded in the same order as All.
+	// Values are yielded in the same order as All. For unordered collections,
+	// the yielded position is not a stable index into the collection.
 	// The collection must not be mutated while the iterator is running.
 	Enumerate() iter.Seq2[int, T]
 }
