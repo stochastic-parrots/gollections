@@ -11,10 +11,10 @@ the relevant sections below.
 
 - The module targets Go 1.24 and uses standard iterator APIs from `iter`.
 - The root package exposes shared read-only capability contracts:
-  - `Collection[T]` for linear collections.
+  - `Collection[T]` for value collections.
   - `Map[K, V]` for key-value structures.
 - Mutating operations belong in structure-specific subpackages such as `list`,
-  `sortedlist`, `deque`, `heap`, and `prioritymap`.
+  `sortedlist`, `deque`, `set`, `heap`, and `prioritymap`.
 - Public subpackages expose stable constructors, type aliases, interfaces,
   examples, and package documentation.
 - Concrete implementations live under `internal/...`.
@@ -52,7 +52,7 @@ alias and constructor from the public package.
   `gollections.Collection` or `gollections.Map`.
 - Expose mutations through the domain interface where their semantics are clear,
   for example `list.List`, `sortedlist.SortedList`, `deque.Deque`,
-  `heap.Heap`, and `prioritymap.PriorityMap`.
+  `heap.Heap`, `set.Set`, and `prioritymap.PriorityMap`.
 - Empty reads and removals should be safe. Methods such as `Pop`, `Peek`, `Get`,
   and indexed reads return zero values plus `false` or an explicit error rather
   than panicking.
@@ -108,16 +108,17 @@ alias and constructor from the public package.
 ## Naming
 
 - Public package names are short, singular, and domain-specific: `list`,
-  `sortedlist`, `deque`, `heap`, `prioritymap`.
+  `sortedlist`, `deque`, `set`, `heap`, `prioritymap`.
 - Public concrete type aliases use the data-structure name:
   `ArrayList`, `LinkedList`, `ArraySortedList`, `ArrayDeque`, `LinkedDeque`,
-  `BinaryHeap`, `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`,
-  `RadixHeapPriorityMap`.
+  `HashSet`, `KeyedHashSet`, `BinaryHeap`, `BinaryHeapPriorityMap`,
+  `PairingHeapPriorityMap`, `RadixHeapPriorityMap`.
 - Concrete aliases always name structs. Constructors and factory methods return
   pointers explicitly; do not hide pointer semantics inside an alias.
 - Internal implementation types include their backing strategy:
   `ArrayList`, `DoubleLinkedList`, `ArraySortedList`, `RingBufferDeque`,
-  `BinaryHeap`, `BinaryPriorityMap`, `PairingPriorityMap`, `RadixPriorityMap`.
+  `HashSet`, `KeyedHashSet`, `BinaryHeap`, `BinaryPriorityMap`,
+  `PairingPriorityMap`, `RadixPriorityMap`.
 - Constructors use predictable prefixes:
   - `New...` creates an empty structure.
   - `...From` may consume and reorder the provided slice in place.
@@ -131,6 +132,7 @@ alias and constructor from the public package.
   - sorted list implementations use `list` or a concise local name when clearer.
   - `deque` implementations use `deque`.
   - `heap` implementations use `heap`.
+  - set implementations use `set`.
   - priority maps use `pm`.
   - readonly wrappers use `w`.
 - Generic type parameter names are short and meaningful:
@@ -140,8 +142,8 @@ alias and constructor from the public package.
   - `P` for priorities.
 - When a mutation supports both single-value and batch forms, use the singular
   verb for one value and its plural for the variadic form: `Add`/`Adds`,
-  `Append`/`Appends`, `Prepend`/`Prepends`, and `Push`/`Pushes`. Use `xs ...T`
-  for the variadic input.
+  `Remove`/`Removes`, `Append`/`Appends`, `Prepend`/`Prepends`, and
+  `Push`/`Pushes`. Use `xs ...T` for the variadic input.
 - Use `idx` for indexes, not `index`, in method signatures and tests.
 - Factory selectors should preserve the user-facing strategy vocabulary:
   - `Array` and `Linked` select list and deque implementations.
@@ -149,6 +151,8 @@ alias and constructor from the public package.
   - `Array` and `OrderedArray` configure array sorted-list ordering.
   - `BinaryHeap`, `OrderedBinaryHeap`, `PairingHeap`,
     `OrderedPairingHeap`, and `RadixHeap` select priority-map implementations.
+  - `HashSetOf` and `HashSetBy` select direct-equality and derived-key set
+    implementations.
 - Factory construction methods use `New`, `From`, `Clone`, and `FromSeq` where
   supported by the implementation and its ownership contract.
 - Test names use `Test<Type>_<Method>` or `TestNew<Type>`. Subtests use compact
@@ -328,7 +332,7 @@ alias and constructor from the public package.
   the implementation stores pointers.
 - The project aims for complete coverage on core internal data-structure
   packages: `internal/list`, `internal/sortedlist`, `internal/deque`,
-  `internal/heap`, and `internal/prioritymap`.
+  `internal/set`, `internal/heap`, and `internal/prioritymap`.
 - CI requires at least 95% coverage across library packages and 100% coverage
   for changed lines. The cross-implementation benchmark harness under
   `internal/benchmarks` remains part of build and test verification but is

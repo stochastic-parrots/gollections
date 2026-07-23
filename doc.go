@@ -10,13 +10,13 @@
 // Most data structures in this module implement one of the two base interfaces,
 // ensuring a predictable API across different implementations:
 //
-//   - [Collection]: Foundation for linear structures like lists and heaps.
+//   - [Collection]: Foundation for value collections like lists, heaps, and sets.
 //   - [Map]: Base operations for key-value based structures.
 //
 // Root-level interfaces are intentionally read-only capability contracts. They
 // describe how callers can inspect or iterate over a structure without changing
-// its state. Mutating operations such as Append, Push, Set, Remove, Pop, or
-// Clear are exposed only by the structure-specific interfaces in each
+// its state. Mutating operations such as Add, Append, Push, Set, Remove, Pop,
+// or Clear are exposed only by the structure-specific interfaces in each
 // subpackage, where their semantics are precise and unambiguous.
 //
 // # Clearing And Reuse
@@ -36,7 +36,8 @@
 // element order. Sorted lists do not implement unmarshaling so their natural or
 // custom ordering strategy remains an explicit factory choice. Heaps do not
 // implement it because the array does not encode their comparator or min/max
-// selection. Decode those structures into a slice, then use the matching factory.
+// selection. Sets likewise require an explicit equality or derived-key policy.
+// Decode those structures into a slice, then use the matching factory.
 //
 // # Concurrency
 //
@@ -65,6 +66,9 @@
 //
 //   - [github.com/stochastic-parrots/gollections/prioritymap]:
 //     A hybrid structure combining Map lookups with Heap ordering.
+//
+//   - [github.com/stochastic-parrots/gollections/set]:
+//     Unique comparable values or arbitrary values identified by derived keys.
 //
 // # Design Principles
 //

@@ -8,7 +8,7 @@ APIs, and idiomatic iteration with `iter.Seq`.
 
 `gollections` provides focused implementations for common data-structure needs
 that are either missing from the standard library or awkward to use with
-generics, such as lists, deques, heaps, and priority maps.
+generics, such as lists, deques, sets, heaps, and priority maps.
 
 ## Install
 
@@ -25,6 +25,7 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 | `list` | `ArrayList`, `LinkedList` | Indexed, ordered sequences with forward/backward traversal |
 | `sortedlist` | `ArraySortedList` | Sorted sequences that allow duplicate values |
 | `deque` | `ArrayDeque`, `LinkedDeque` | Fast insertion and removal at both ends |
+| `set` | `HashSet`, `KeyedHashSet` | Unique values using Go equality or a derived identity key |
 | `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
 | `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
 
@@ -34,11 +35,11 @@ Go documentation tools.
 ## Design
 
 - Generic APIs: no `interface{}` casting for stored values.
-- Read-only root interfaces: `gollections.Collection` and `gollections.Map`
-  are observation contracts. They expose inspection and iteration, while
-  mutating operations live in structure-specific interfaces such as
-  `list.List`, `sortedlist.SortedList`, `deque.Deque`, `heap.Heap`, and
-  `prioritymap.PriorityMap`.
+- Read-only root interfaces: `gollections.Collection` and `gollections.Map` are
+  observation contracts. They expose inspection and iteration, while mutating
+  operations live in structure-specific interfaces such as
+  `list.List`, `sortedlist.SortedList`, `deque.Deque`, `set.Set`, `heap.Heap`,
+  and `prioritymap.PriorityMap`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.
 - Reusable clearing: `Clear` removes stored references, preserves construction
   configuration, and leaves the structure ready for reuse. It does not guarantee
@@ -47,7 +48,7 @@ Go documentation tools.
   limit, and linked structures without a freelist may release their nodes.
 - Internal implementations: public packages expose stable concrete factories while
   concrete internals live under `internal`.
-- Read-only views: packages such as `list`, `sortedlist`, `deque`, and
+- Read-only views: packages such as `list`, `sortedlist`, `deque`, `set`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
   allowing type assertion back to the mutable interface. These wrappers are
   capability restrictions, not snapshots or concurrency synchronization.
@@ -57,8 +58,8 @@ Go documentation tools.
 - JSON support: collections marshal as arrays without external construction
   input, using the traversal order documented by each package. Lists and deques
   also unmarshal because array order completely defines their logical state.
-  Sorted lists and heaps require slice decoding followed by the matching factory
-  so sorted-list ordering and heap priority remain explicit.
+  Sorted lists, heaps, and sets require slice decoding followed by the matching
+  factory so ordering, priority, and set identity remain explicit.
 
 ## Construction
 
@@ -70,9 +71,10 @@ items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
 scores := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
+visited := set.HashSetOf[string]().New(32)
 ```
 
-Sorted lists and heaps intentionally do not implement `json.Unmarshaler`.
+Sorted lists, heaps, and sets intentionally do not implement `json.Unmarshaler`.
 Decode into a slice and use the selected factory to establish their invariants:
 
 ```go
@@ -125,6 +127,24 @@ add a tie-breaker to the comparator when that order matters.
 Deques are the right fit for queue, stack, sliding-window, worklist, and small
 scheduling-buffer patterns.
 
+## Choosing a set
+
+- `HashSet`: use when values are comparable and Go equality defines membership.
+- `KeyedHashSet`: use for arbitrary values, or when a derived comparable key such
+  as an ID defines membership. The first value inserted for a key remains its
+  representative, and the derived key must remain stable while the value is in
+  the set.
+
+Set identities must have reflexive equality. Floating-point NaN cannot be used
+directly as a `HashSet` value or `KeyedHashSet` key because NaN is not equal to
+itself. Use `HashSetBy` with a canonical comparable key when NaN membership is
+required. When `HashSet` uses an interface type, its dynamic values must also be
+comparable, matching native Go map requirements.
+
+`Add` and `Remove` report whether one value changed membership; `Adds` and
+`Removes` report how many values in a batch changed membership. Iteration and
+JSON array order are unspecified.
+
 ## Choosing a priority map
 
 - `BinaryHeapPriorityMap`: predictable O(log N) updates with compact,
@@ -159,6 +179,7 @@ go test -cover ./internal/sortedlist
 go test -cover ./internal/heap
 go test -cover ./internal/prioritymap
 go test -cover ./internal/deque
+go test -cover ./internal/set
 ```
 
 CI builds and tests every package with the minimum supported Go release and the
@@ -170,6 +191,6 @@ lines.
 
 ## Status
 
-The available packages are `list`, `sortedlist`, `deque`, `heap`, and
-`prioritymap`. `queue`, `stack`, and set families are planned as focused APIs on
-top of the same collection foundations.
+The available packages are `list`, `sortedlist`, `deque`, `set`, `heap`, and
+`prioritymap`. `queue` and `stack` families are planned as focused APIs on top
+of the same collection foundations.

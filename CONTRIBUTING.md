@@ -50,6 +50,7 @@ For package-specific iteration, run the affected package first, for example:
 
 ```bash
 go test ./internal/prioritymap
+go test ./internal/set
 ```
 
 For coverage-sensitive internal changes, also inspect coverage:
@@ -57,6 +58,9 @@ For coverage-sensitive internal changes, also inspect coverage:
 ```bash
 go test ./internal/prioritymap -coverprofile=/tmp/internal_prioritymap.cover -covermode=count
 go tool cover -func=/tmp/internal_prioritymap.cover
+
+go test ./internal/set -coverprofile=/tmp/internal_set.cover -covermode=count
+go tool cover -func=/tmp/internal_set.cover
 ```
 
 For race-sensitive changes, run:
