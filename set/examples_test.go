@@ -8,8 +8,8 @@ import (
 	"github.com/stochastic-parrots/gollections/set"
 )
 
-func ExampleHash() {
-	values := set.Hash[string]().From([]string{"go", "collections", "go"})
+func ExampleHashSetOf() {
+	values := set.HashSetOf[string]().From([]string{"go", "collections", "go"})
 	fmt.Println("added:", values.Add("iterators"))
 	fmt.Println("added:", values.Add("go"))
 	fmt.Println("removed:", values.Removes("collections", "missing", "collections"))
@@ -56,7 +56,7 @@ func ExampleHashSetBy() {
 }
 
 func ExampleAsReadonly() {
-	mutable := set.Hash[int]().From([]int{1, 2})
+	mutable := set.HashSetOf[int]().From([]int{1, 2})
 	view := set.AsReadonly[int](mutable)
 
 	fmt.Println(slices.Sorted(view.All()))

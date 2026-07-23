@@ -71,7 +71,7 @@ items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
 scores := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
-visited := set.Hash[string]().New(32)
+visited := set.HashSetOf[string]().New(32)
 ```
 
 Sorted lists, heaps, and sets intentionally do not implement `json.Unmarshaler`.

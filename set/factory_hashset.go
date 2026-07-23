@@ -31,8 +31,8 @@ var _ Set[int] = &set.HashSet[int]{}
 //	All/Enumerate/Clear     O(N)
 type HashFactory[T comparable] struct{}
 
-// Hash returns a factory for hash sets using Go equality.
-func Hash[T comparable]() HashFactory[T] {
+// HashSetOf returns a factory for hash sets using Go equality.
+func HashSetOf[T comparable]() HashFactory[T] {
 	return HashFactory[T]{}
 }
 

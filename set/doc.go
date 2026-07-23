@@ -4,7 +4,7 @@
 //
 // [HashSet] stores comparable values directly as Go map keys. Choose it when Go
 // equality defines value identity. Its zero value is ready for use. Select it
-// with [Hash].
+// with [HashSetOf].
 //
 // [KeyedHashSet] stores arbitrary values and derives a comparable identity key
 // through a caller-provided function. Choose it for values that are not
@@ -25,9 +25,9 @@
 //
 // # Construction
 //
-// Hash and HashSetBy return reusable typed factories. New creates an empty set,
-// From copies values from a slice into map storage, and FromSeq collects an
-// iterator. From and FromSeq discard duplicates while preserving the first
+// HashSetOf and HashSetBy return reusable typed factories. New creates an empty
+// set, From copies values from a slice into map storage, and FromSeq collects
+// an iterator. From and FromSeq discard duplicates while preserving the first
 // value encountered for each identity.
 //
 // # Views, Iteration, And JSON
@@ -44,7 +44,7 @@
 //
 // Sets marshal as JSON arrays in unspecified iteration order. They do not
 // implement json.Unmarshaler because a JSON array does not encode the selected
-// identity policy. Decode into []T and pass the values to the same Hash or
+// identity policy. Decode into []T and pass the values to the same HashSetOf or
 // HashSetBy factory.
 //
 // Sets are not safe for concurrent use. Callers must synchronize access when

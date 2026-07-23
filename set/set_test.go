@@ -20,13 +20,13 @@ func memberID(value member) int {
 }
 
 func TestFactoriesImplementSet(t *testing.T) {
-	var _ *set.HashSet[int] = set.Hash[int]().New(0)
-	var _ *set.HashSet[int] = set.Hash[int]().From([]int{1})
-	var _ *set.HashSet[int] = set.Hash[int]().FromSeq(slices.Values([]int{1}))
+	var _ *set.HashSet[int] = set.HashSetOf[int]().New(0)
+	var _ *set.HashSet[int] = set.HashSetOf[int]().From([]int{1})
+	var _ *set.HashSet[int] = set.HashSetOf[int]().FromSeq(slices.Values([]int{1}))
 	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).New(0)
 	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).From([]member{{ID: 1}})
 	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).FromSeq(slices.Values([]member{{ID: 1}}))
-	var _ set.Set[int] = set.Hash[int]().New(0)
+	var _ set.Set[int] = set.HashSetOf[int]().New(0)
 	var _ set.Set[member] = set.HashSetBy(memberID).New(0)
 }
 
@@ -47,19 +47,19 @@ func TestHashSetBy_NilIdentityFunction(t *testing.T) {
 }
 
 func TestHashFactory_New(t *testing.T) {
-	assertSetBehavior(t, set.Hash[int]().New(2))
+	assertSetBehavior(t, set.HashSetOf[int]().New(2))
 }
 
 func TestHashFactory_From(t *testing.T) {
 	data := []int{1, 2, 1}
-	values := set.Hash[int]().From(data)
+	values := set.HashSetOf[int]().From(data)
 	data[0] = 3
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
 func TestHashFactory_FromSeq(t *testing.T) {
-	values := set.Hash[int]().FromSeq(slices.Values([]int{1, 2, 1}))
+	values := set.HashSetOf[int]().FromSeq(slices.Values([]int{1, 2, 1}))
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
@@ -101,7 +101,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := set.Hash[int]().From([]int{1, 2})
+		mutable := set.HashSetOf[int]().From([]int{1, 2})
 		view := set.AsReadonly[int](mutable)
 
 		_, mutableView := any(view).(set.Set[int])

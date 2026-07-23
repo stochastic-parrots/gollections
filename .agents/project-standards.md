@@ -151,7 +151,7 @@ alias and constructor from the public package.
   - `Array` and `OrderedArray` configure array sorted-list ordering.
   - `BinaryHeap`, `OrderedBinaryHeap`, `PairingHeap`,
     `OrderedPairingHeap`, and `RadixHeap` select priority-map implementations.
-  - `Hash` and `HashSetBy` select direct-equality and derived-key set
+  - `HashSetOf` and `HashSetBy` select direct-equality and derived-key set
     implementations.
 - Factory construction methods use `New`, `From`, `Clone`, and `FromSeq` where
   supported by the implementation and its ownership contract.
