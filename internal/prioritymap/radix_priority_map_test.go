@@ -3,7 +3,7 @@ package prioritymap
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/constraint"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 	"github.com/stretchr/testify/assert"
 )
 

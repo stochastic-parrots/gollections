@@ -3,7 +3,7 @@ package algorithms
 import (
 	"math"
 
-	"github.com/stochastic-parrots/gollections/constraint"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 func infinity[T constraint.Number]() T {

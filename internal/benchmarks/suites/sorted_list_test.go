@@ -1,13 +1,14 @@
 package suites
 
 import (
+	"cmp"
 	"strconv"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/algorithms"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
-	"github.com/stochastic-parrots/gollections/sortedlist"
+	"github.com/stochastic-parrots/gollections/internal/sortedlist"
 )
 
 func getSortedListSuite(capacity int) datastructs.Implementations[datastructs.SortedList] {
@@ -21,7 +22,7 @@ func getSortedListSuite(capacity int) datastructs.Implementations[datastructs.So
 		{
 			Name: "Gollections_ArraySortedList",
 			Factory: func() datastructs.SortedList {
-				return sortedlist.OrderedArray[int](sortedlist.Asc).New(capacity)
+				return sortedlist.NewArraySortedList(capacity, cmp.Compare[int])
 			},
 		},
 	}
