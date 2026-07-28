@@ -145,6 +145,15 @@ comparable, matching native Go map requirements.
 `Removes` report how many values in a batch changed membership. Iteration and
 JSON array order are unspecified.
 
+Both implementations provide pure set algebra (`Clone`, `Union`,
+`Intersection`, `Difference`, `SymmetricDifference`, and set relations).
+Factories expose the same algebra over arbitrary collections using the
+factory's identity policy. Destructive `UnionWith`, `IntersectWith`,
+`DifferenceWith`, and `SymmetricDifferenceWith` operations reuse the receiver
+and report how many memberships changed, which avoids allocating a second full
+set when mutation is appropriate. Keep and pass the set pointers returned by
+the factories; initialized set structs must not be copied.
+
 ## Choosing a priority map
 
 - `BinaryHeapPriorityMap`: predictable O(log N) updates with compact,

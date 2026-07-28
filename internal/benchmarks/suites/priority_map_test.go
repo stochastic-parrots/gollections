@@ -4,11 +4,11 @@ import (
 	"cmp"
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/constraint"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/algorithms"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
 	"github.com/stochastic-parrots/gollections/internal/prioritymap"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 func getPriorityMapSuite[T constraint.Number](size int) datastructs.Implementations[datastructs.PriorityMap[int, T]] {

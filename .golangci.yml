@@ -2,6 +2,7 @@ linters:
   enable:
     - asciicheck
     - copyloopvar
+    - depguard
     - errorlint
     - gofmt
     - goimports
@@ -12,6 +13,17 @@ linters:
     - unconvert
 
 linters-settings:
+  depguard:
+    rules:
+      internal:
+        list-mode: lax
+        files:
+          - "**/internal/**/*.go"
+        allow:
+          - github.com/stochastic-parrots/gollections/internal
+        deny:
+          - pkg: github.com/stochastic-parrots/gollections
+            desc: packages under internal may only import internal packages from this module
   importas:
     no-unaliased: false
     no-extra-aliases: true

@@ -3,16 +3,20 @@ package collection
 import (
 	"bytes"
 	"encoding/json"
-
-	"github.com/stochastic-parrots/gollections"
+	"iter"
 )
 
-// Marshal serializes any gollections.Collection[T] into a JSON array.
+type marshalSource[T any] interface {
+	All() iter.Seq[T]
+	IsEmpty() bool
+}
+
+// Marshal serializes a collection into a JSON array.
 // It performs a streaming-style serialization using a bytes.Buffer to minimize
 // memory allocations, avoiding the need to convert the collection to a slice first.
 //
 // Complexity: O(n) in time, O(n) in space for the resulting byte slice.
-func Marshal[T any](c gollections.Collection[T]) ([]byte, error) {
+func Marshal[T any](c marshalSource[T]) ([]byte, error) {
 	if c.IsEmpty() {
 		return []byte("[]"), nil
 	}
