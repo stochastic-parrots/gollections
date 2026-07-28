@@ -55,6 +55,35 @@ func ExampleHashSetBy() {
 	// 2 Grace [admin]
 }
 
+func ExampleHashFactory_Union() {
+	factory := set.HashSetOf[int]()
+	left := factory.From([]int{1, 2, 3})
+	right := factory.From([]int{3, 4})
+
+	union := factory.Union(left, right)
+
+	fmt.Println(slices.Sorted(union.All()))
+	fmt.Println(slices.Sorted(left.All()))
+
+	// Output:
+	// [1 2 3 4]
+	// [1 2 3]
+}
+
+func ExampleHashSet_IntersectWith() {
+	values := set.HashSetOf[int]().From([]int{1, 2, 3, 4})
+	allowed := set.HashSetOf[int]().From([]int{2, 4, 6})
+
+	removed := values.IntersectWith(allowed)
+
+	fmt.Println("removed:", removed)
+	fmt.Println(slices.Sorted(values.All()))
+
+	// Output:
+	// removed: 2
+	// [2 4]
+}
+
 func ExampleAsReadonly() {
 	mutable := set.HashSetOf[int]().From([]int{1, 2})
 	view := set.AsReadonly[int](mutable)

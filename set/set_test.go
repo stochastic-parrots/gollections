@@ -28,6 +28,10 @@ func TestFactoriesImplementSet(t *testing.T) {
 	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).FromSeq(slices.Values([]member{{ID: 1}}))
 	var _ set.Set[int] = set.HashSetOf[int]().New(0)
 	var _ set.Set[member] = set.HashSetBy(memberID).New(0)
+	var _ set.Algebra[int, *set.HashSet[int]] = set.HashSetOf[int]().New(0)
+	var _ set.Algebra[member, *set.KeyedHashSet[member, int]] = set.HashSetBy(memberID).New(0)
+	var _ set.InPlaceAlgebra[int] = set.HashSetOf[int]().New(0)
+	var _ set.InPlaceAlgebra[member] = set.HashSetBy(memberID).New(0)
 }
 
 func TestConcreteZeroValues(t *testing.T) {

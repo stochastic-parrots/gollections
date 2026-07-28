@@ -30,6 +30,50 @@
 // an iterator. From and FromSeq discard duplicates while preserving the first
 // value encountered for each identity.
 //
+// # Set Algebra
+//
+// HashSet and KeyedHashSet implement [Algebra]. Clone, Union, Intersection,
+// Difference, and SymmetricDifference return independent sets without modifying
+// their receivers. Calling a receiver operation without additional operands
+// returns a clone. The factories expose the same operations for arbitrary
+// [Source] values and return an empty set when called without sources. Source
+// requires only sized iteration; operands do not need to implement the full
+// [gollections.Collection] contract.
+//
+// Concrete sets in this package satisfy [gollections.Collection] through
+// pointer methods. Pass *HashSet or *KeyedHashSet operands, as returned by their
+// factories; the corresponding struct values do not implement the operand
+// interface, and initialized set structs must not be copied. Concrete pointer
+// operands also let the implementations traverse map storage directly instead
+// of allocating iterator adapters. Operations that normalize derived
+// identities may still allocate a compact membership map because the receiver's
+// key function must be reapplied.
+//
+// Every source is interpreted under the receiver's identity policy, or under
+// the factory's policy for factory operations. Duplicate identities within an
+// arbitrary collection are therefore treated as one membership. For
+// KeyedHashSet, Union preserves the first representative encountered;
+// Intersection and Difference preserve representatives from the receiver, or
+// from the first source when called through a factory. SymmetricDifference uses
+// the representative from the last source that toggles an identity into the
+// result. When that source has unspecified iteration order and multiple values
+// collapse to the same selected identity, the chosen representative is
+// unspecified.
+//
+// [InPlaceAlgebra] provides UnionWith, IntersectWith, DifferenceWith, and
+// SymmetricDifferenceWith when reusing an existing set is preferable to
+// allocating an independent result. These methods are destructive, are safe
+// when an operand aliases the receiver, and return the number of receiver
+// memberships changed. With no operands they leave the receiver unchanged. If
+// the expected final size of a union is known, creating an empty receiver with
+// New and that capacity before calling UnionWith avoids map growth.
+//
+// Equal, subset, superset, and disjoint relations also apply the selected
+// identity policy to both operands. Consequently, receiver relations are
+// directional when comparing sets constructed with different identity
+// policies; use a factory relation when both operands should be interpreted by
+// one explicitly selected policy.
+//
 // # Views, Iteration, And JSON
 //
 // [Set] exposes mutation, while [Readonly] contains observation and traversal
