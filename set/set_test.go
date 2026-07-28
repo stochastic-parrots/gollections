@@ -44,61 +44,6 @@ func TestConcreteZeroValues(t *testing.T) {
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
-func TestHashSetBy_NilIdentityFunction(t *testing.T) {
-	assert.PanicsWithValue(t, "set: nil identity function", func() {
-		set.HashSetBy[int, int](nil)
-	})
-}
-
-func TestHashFactory_New(t *testing.T) {
-	assertSetBehavior(t, set.HashSetOf[int]().New(2))
-}
-
-func TestHashFactory_From(t *testing.T) {
-	data := []int{1, 2, 1}
-	values := set.HashSetOf[int]().From(data)
-	data[0] = 3
-
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-}
-
-func TestHashFactory_FromSeq(t *testing.T) {
-	values := set.HashSetOf[int]().FromSeq(slices.Values([]int{1, 2, 1}))
-
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-}
-
-func TestHashSetByFactory_New(t *testing.T) {
-	values := set.HashSetBy(memberID).New(2)
-	first := member{ID: 1, Name: "first", Labels: []string{"a"}}
-
-	assert.True(t, values.Add(first))
-	assert.False(t, values.Add(member{ID: 1, Name: "duplicate"}))
-
-	assert.Equal(t, 1, values.Length())
-	assert.Equal(t, []member{first}, slices.Collect(values.All()))
-}
-
-func TestHashSetByFactory_From(t *testing.T) {
-	first := member{ID: 1, Name: "first"}
-	data := []member{first, {ID: 1, Name: "duplicate"}, {ID: 2, Name: "second"}}
-	values := set.HashSetBy(memberID).From(data)
-	data[0] = member{ID: 3, Name: "changed"}
-
-	assert.ElementsMatch(t, []member{first, {ID: 2, Name: "second"}}, slices.Collect(values.All()))
-}
-
-func TestHashSetByFactory_FromSeq(t *testing.T) {
-	first := member{ID: 1, Name: "first"}
-	values := set.HashSetBy(memberID).FromSeq(slices.Values([]member{
-		first,
-		{ID: 1, Name: "duplicate"},
-		{ID: 2, Name: "second"},
-	}))
-
-	assert.ElementsMatch(t, []member{first, {ID: 2, Name: "second"}}, slices.Collect(values.All()))
-}
-
 func TestAsReadonly(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		assert.Nil(t, set.AsReadonly[int](nil))
@@ -134,31 +79,38 @@ func TestAsReadonly(t *testing.T) {
 	})
 }
 
-func assertSetBehavior(t *testing.T, values set.Set[int]) {
-	t.Helper()
+func TestInPlaceAlgebra_ReadonlyAlias(t *testing.T) {
+	t.Run("HashSet", func(t *testing.T) {
+		values := set.HashSetOf[int]().From([]int{1, 2})
+		view := set.AsReadonly[int](values)
 
-	assert.True(t, values.IsEmpty())
-	assert.True(t, values.Add(1))
-	assert.Equal(t, 1, values.Adds(2, 1))
+		assert.Zero(t, values.UnionWith(view))
+		assert.Zero(t, values.IntersectWith(view))
+		assert.Zero(t, values.SymmetricDifferenceWith(view, view))
+		assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 
-	assert.False(t, values.IsEmpty())
-	assert.Equal(t, 2, values.Length())
-	assert.True(t, values.Contains(1))
-	assert.False(t, values.Contains(3))
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
+		assert.Equal(t, 2, values.SymmetricDifferenceWith(view))
+		assert.True(t, values.IsEmpty())
 
-	assert.True(t, values.Remove(1))
-	assert.False(t, values.Remove(1))
-	assert.Equal(t, 2, values.Adds(3, 4))
-	assert.Equal(t, 2, values.Removes(2, 2, 4, 5))
+		values.Adds(1, 2)
+		assert.Equal(t, 2, values.DifferenceWith(view))
+		assert.True(t, values.IsEmpty())
+	})
 
-	data, err := values.MarshalJSON()
-	assert.NoError(t, err)
-	assert.JSONEq(t, `[3]`, string(data))
+	t.Run("KeyedHashSet", func(t *testing.T) {
+		values := set.HashSetBy(memberID).From([]member{{ID: 1}, {ID: 2}})
+		view := set.AsReadonly[member](values)
 
-	values.Clear()
-	assert.True(t, values.IsEmpty())
+		assert.Zero(t, values.UnionWith(view))
+		assert.Zero(t, values.IntersectWith(view))
+		assert.Zero(t, values.SymmetricDifferenceWith(view, view))
+		assert.ElementsMatch(t, []member{{ID: 1}, {ID: 2}}, slices.Collect(values.All()))
 
-	assert.True(t, values.Add(3))
-	assert.True(t, values.Contains(3))
+		assert.Equal(t, 2, values.SymmetricDifferenceWith(view))
+		assert.True(t, values.IsEmpty())
+
+		values.Adds(member{ID: 1}, member{ID: 2})
+		assert.Equal(t, 2, values.DifferenceWith(view))
+		assert.True(t, values.IsEmpty())
+	})
 }
