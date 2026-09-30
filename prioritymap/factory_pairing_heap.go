@@ -28,7 +28,7 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 //	Values()                 O(N)
 //	All()                    O(N)
 //	IsEmpty()                O(1)
-//	Len()                 O(1)
+//	Len()                    O(1)
 //	Peek()                   O(1)
 //	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N) Amortized
@@ -58,7 +58,7 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 //	Values()                 O(N)
 //	All()                    O(N)
 //	IsEmpty()                O(1)
-//	Len()                 O(1)
+//	Len()                    O(1)
 //	Peek()                   O(1)
 //	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N) Amortized

@@ -36,7 +36,7 @@ func orderedCompare[T cmp.Ordered](order Order) func(T, T) int {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -78,7 +78,7 @@ func NewArray[T any](compare func(T, T) int, capacity int) *ArraySortedList[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -119,7 +119,7 @@ func ArrayFrom[T any](compare func(T, T) int, data []T) *ArraySortedList[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -160,7 +160,7 @@ func ArrayClone[T any](compare func(T, T) int, data []T) *ArraySortedList[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -200,7 +200,7 @@ func ArrayFromSeq[T any](compare func(T, T) int, seq iter.Seq[T]) *ArraySortedLi
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -240,7 +240,7 @@ func NewOrderedArray[T cmp.Ordered](order Order, capacity int) *ArraySortedList[
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -279,7 +279,7 @@ func OrderedArrayFrom[T cmp.Ordered](order Order, data []T) *ArraySortedList[T] 
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)
@@ -318,7 +318,7 @@ func OrderedArrayClone[T cmp.Ordered](order Order, data []T) *ArraySortedList[T]
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Len()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Get(idx)          O(1)

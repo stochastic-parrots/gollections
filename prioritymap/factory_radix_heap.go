@@ -25,7 +25,7 @@ var _ PriorityMap[int, uint64] = &prioritymap.RadixPriorityMap[int, uint64]{}
 //	Values()                 O(N)
 //	All()                    O(N)
 //	IsEmpty()                O(1)
-//	Len()                 O(1)
+//	Len()                    O(1)
 //	Peek()                   O(N)
 //	Set(key, priority)       O(1)
 //	Update(key, priority)    O(1)
