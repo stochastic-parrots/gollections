@@ -48,7 +48,7 @@ func (set *HashSet[T]) IsEmpty() bool {
 
 // Contains returns true if x belongs to the set.
 //
-// Complexity: Expected O(1).
+// Complexity: O(1) on average.
 func (set *HashSet[T]) Contains(x T) bool {
 	_, ok := set.values[x]
 	return ok
@@ -57,7 +57,7 @@ func (set *HashSet[T]) Contains(x T) bool {
 // Add inserts x if it is not already present and reports whether the set
 // changed.
 //
-// Complexity: Expected O(1).
+// Complexity: O(1) on average.
 func (set *HashSet[T]) Add(x T) bool {
 	if _, ok := set.values[x]; ok {
 		return false
@@ -72,7 +72,7 @@ func (set *HashSet[T]) Add(x T) bool {
 // Adds inserts every value in xs that is not already present and returns the
 // number of values added.
 //
-// Complexity: Expected O(len(xs)).
+// Complexity: O(len(xs)) on average.
 func (set *HashSet[T]) Adds(xs ...T) (added int) {
 	for _, x := range xs {
 		if set.Add(x) {
@@ -84,7 +84,7 @@ func (set *HashSet[T]) Adds(xs ...T) (added int) {
 
 // Remove deletes x and reports whether it was present.
 //
-// Complexity: Expected O(1).
+// Complexity: O(1) on average.
 func (set *HashSet[T]) Remove(x T) bool {
 	if _, ok := set.values[x]; !ok {
 		return false
@@ -96,7 +96,7 @@ func (set *HashSet[T]) Remove(x T) bool {
 // Removes deletes every value in xs that is present and returns the number of
 // values removed.
 //
-// Complexity: Expected O(len(xs)).
+// Complexity: O(len(xs)) on average.
 func (set *HashSet[T]) Removes(xs ...T) (removed int) {
 	for _, x := range xs {
 		if set.Remove(x) {

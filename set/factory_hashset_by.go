@@ -6,63 +6,89 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/set"
 )
 
-// KeyedHashSet is a map-backed [Set] for arbitrary values whose identity is a
-// derived comparable key. Derived keys must have reflexive equality;
-// floating-point NaN is therefore not a valid key without canonicalization.
-//
-// KeyedHashSet's zero value is invalid; construct one with [HashSetBy].
+// KeyedHashSet is a map-backed Set using a derived comparable key. Its zero value
+// is invalid; use NewKeyedHashSet. Derived keys must have reflexive equality.
 type KeyedHashSet[T any, K comparable] = set.KeyedHashSet[T, K]
 
 var _ Set[any] = &set.KeyedHashSet[any, int]{}
 
-// HashSetByFactory constructs hash sets using a derived comparable key for value
-// identity.
-//
-// The identity function must be non-nil and remain stable for the lifetime of
-// every set created by the factory. If mutable values are stored, the key
-// derived from a value must not change while that value belongs to a set. Keys
-// must have reflexive equality, so floating-point NaN values must be
-// canonicalized before they are returned as keys.
-//
-// The zero value is invalid. Create a factory with [HashSetBy].
-//
-// Performance Summary (Expected Time Complexity):
-//
-//	Operation               Time Complexity
-//	--------------------    ---------------
-//	New(capacity)           O(capacity)
-//	From/FromSeq            O(N)
-//	Add/Contains/Remove     O(1) + keyOf
-//	Adds/Removes(xs...T)    O(len(xs)) + keyOf calls
-//	All/Enumerate/Clear     O(N)
-type HashSetByFactory[T any, K comparable] struct {
-	keyOf func(T) K
-}
-
-// HashSetBy returns a factory that identifies values by the key returned by keyOf.
-// It panics if keyOf is nil.
-func HashSetBy[T any, K comparable](keyOf func(T) K) HashSetByFactory[T, K] {
+func checkKeyOf[T any, K comparable](keyOf func(T) K) {
 	if keyOf == nil {
 		panic("set: nil identity function")
 	}
-	return HashSetByFactory[T, K]{keyOf: keyOf}
 }
 
-// New creates an empty keyed hash set with the requested initial capacity.
-func (factory HashSetByFactory[T, K]) New(capacity int) *KeyedHashSet[T, K] {
-	return set.NewKeyedHashSet(capacity, factory.keyOf)
-}
-
-// From creates a keyed hash set containing values from data. The first value
-// encountered for each derived key is preserved.
+// NewKeyedHashSet creates an empty keyed set. keyOf must be non-nil and stable
+// for every stored value's lifetime in the set.
 //
-// From copies values into map storage and does not retain data.
-func (factory HashSetByFactory[T, K]) From(data []T) *KeyedHashSet[T, K] {
-	return set.NewKeyedHashSetFromSlice(data, factory.keyOf)
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Length()           O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(x)             O(1) on average + keyOf
+//	Adds(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(x)          O(1) on average + keyOf
+//	Removes(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(capacity).
+func NewKeyedHashSet[T any, K comparable](keyOf func(T) K, capacity int) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
+	return set.NewKeyedHashSet(capacity, keyOf)
 }
 
-// FromSeq collects values yielded by seq into a new keyed hash set. The first
-// value yielded for each derived key is preserved.
-func (factory HashSetByFactory[T, K]) FromSeq(seq iter.Seq[T]) *KeyedHashSet[T, K] {
-	return set.NewKeyedHashSetFromSeq(seq, factory.keyOf)
+// KeyedHashSetFrom copies values from data into map storage without retaining the slice.
+// The first value for each derived key is preserved. keyOf must be non-nil and stable.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Length()           O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(x)             O(1) on average + keyOf
+//	Adds(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(x)          O(1) on average + keyOf
+//	Removes(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(len(data)) on average plus len(data) keyOf calls.
+func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
+	return set.NewKeyedHashSetFromSlice(data, keyOf)
+}
+
+// KeyedHashSetFromSeq consumes seq once into map storage without guaranteeing iteration order. The first value for each
+// derived key is preserved. keyOf must be non-nil and stable.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Length()           O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(x)             O(1) on average + keyOf
+//	Adds(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(x)          O(1) on average + keyOf
+//	Removes(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(N) on average plus N keyOf calls, where N is the number of values yielded by seq.
+func KeyedHashSetFromSeq[T any, K comparable](keyOf func(T) K, seq iter.Seq[T]) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
+	return set.NewKeyedHashSetFromSeq(seq, keyOf)
 }

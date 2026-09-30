@@ -9,7 +9,7 @@ import (
 )
 
 func TestIndexOutOfBoundError(t *testing.T) {
-	l := list.Array[int]().New(0)
+	l := list.NewArray[int](0)
 
 	_, err := l.Get(0)
 

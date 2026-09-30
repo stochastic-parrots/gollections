@@ -27,7 +27,9 @@ and data-structure invariants.
 
 ## Development Workflow
 
-1. Create a focused branch for the change.
+1. Create a focused branch for the change, named with its kind and a short
+   description, such as `feature/hashset`, `fix/comparator-contracts`,
+   `refactor/direct-constructors`, or `docs/complexity-guidance`.
 2. Keep the diff scoped to one bug, feature, documentation update, test gap, or
    benchmark gap.
 3. Follow the existing package layout: public APIs live in focused packages,
@@ -37,6 +39,22 @@ and data-structure invariants.
 5. Run `gofmt` on changed Go files.
 6. Run the narrowest useful verification while iterating, then broaden checks
    before opening a PR.
+
+## Branch And Pull Request Flow
+
+- Open all change pull requests against `develop`.
+- The only pull request to `main` is the release promotion from `develop`.
+  GitHub Actions opens or updates it after pushes to `develop`.
+- Keep `develop` current with `main` after release promotions. Start a new
+  change branch from `develop`.
+- Use a Conventional Commit style PR title with a concise scope, for example
+  `feat(set): add set algebra operations` or
+  `refactor(api)!: replace collection factories with direct constructors`.
+- A CI check rejects pull requests with any other base/head combination.
+
+The release promotion workflow needs GitHub Actions' **Allow GitHub Actions to
+create and approve pull requests** repository setting. It grants the workflow
+only `contents: read` and `pull-requests: write`.
 
 ## Testing
 

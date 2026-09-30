@@ -7,12 +7,12 @@ import (
 	"github.com/stochastic-parrots/gollections/heap"
 )
 
-func ExampleBinary() {
+func ExampleNewBinary() {
 	byLength := func(a, b string) bool {
 		return len(a) < len(b)
 	}
 
-	h := heap.Binary(byLength).New(0)
+	h := heap.NewBinary(byLength, 0)
 	h.Pushes("apple", "kiwi", "banana", "pear")
 
 	for !h.IsEmpty() {
@@ -24,9 +24,9 @@ func ExampleBinary() {
 	// kiwi pear apple banana
 }
 
-func ExampleBinaryFactory_From() {
+func ExampleBinaryFrom() {
 	data := []int{10, 50, 5, 1}
-	h := heap.Binary(cmp.Less[int]).From(data)
+	h := heap.BinaryFrom(cmp.Less[int], data)
 
 	for !h.IsEmpty() {
 		val, _ := h.Pop()
@@ -37,9 +37,9 @@ func ExampleBinaryFactory_From() {
 	// 1 5 10 50
 }
 
-func ExampleBinaryFactory_Clone() {
+func ExampleBinaryClone() {
 	data := []int{10, 50, 5, 1}
-	h := heap.Binary(cmp.Less[int]).Clone(data)
+	h := heap.BinaryClone(cmp.Less[int], data)
 
 	for !h.IsEmpty() {
 		val, _ := h.Pop()
@@ -50,8 +50,8 @@ func ExampleBinaryFactory_Clone() {
 	// 1 5 10 50
 }
 
-func ExampleOrderedBinary_min() {
-	h := heap.OrderedBinary[int](heap.Min).New(5)
+func ExampleNewOrderedBinary_min() {
+	h := heap.NewOrderedBinary[int](heap.Min, 5)
 
 	h.Pushes(10, 50, 5, 1)
 
@@ -64,10 +64,10 @@ func ExampleOrderedBinary_min() {
 	// 1 5 10 50
 }
 
-func ExampleBinaryFactory_From_min() {
+func ExampleBinaryFrom_min() {
 	data := []int{42, 7, 13, 1, 99}
 
-	h := heap.OrderedBinary[int](heap.Min).From(data)
+	h := heap.OrderedBinaryFrom[int](heap.Min, data)
 
 	val, _ := h.Pop()
 	fmt.Printf("Pop: %d\n", val)
@@ -78,10 +78,10 @@ func ExampleBinaryFactory_From_min() {
 	// Slice: [7 42 13 99]
 }
 
-func ExampleBinaryFactory_Clone_min() {
+func ExampleBinaryClone_min() {
 	data := []int{42, 7, 13, 1, 99}
 
-	h := heap.OrderedBinary[int](heap.Min).Clone(data)
+	h := heap.OrderedBinaryClone[int](heap.Min, data)
 	h.Pop()
 
 	fmt.Printf("Length: %d\n", h.Length())
@@ -92,8 +92,8 @@ func ExampleBinaryFactory_Clone_min() {
 	// Data: [42 7 13 1 99]
 }
 
-func ExampleOrderedBinary_max() {
-	h := heap.OrderedBinary[float64](heap.Max).New(0)
+func ExampleNewOrderedBinary_max() {
+	h := heap.NewOrderedBinary[float64](heap.Max, 0)
 	h.Push(1.5)
 	h.Pushes(10.2, 3.7)
 
@@ -104,10 +104,10 @@ func ExampleOrderedBinary_max() {
 	// 10.2
 }
 
-func ExampleBinaryFactory_From_max() {
+func ExampleBinaryFrom_max() {
 	data := []int{1, 13, 7, 42, 99}
 
-	h := heap.OrderedBinary[int](heap.Max).From(data)
+	h := heap.OrderedBinaryFrom[int](heap.Max, data)
 
 	val, _ := h.Pop()
 	fmt.Printf("Pop: %d\n", val)
@@ -118,10 +118,10 @@ func ExampleBinaryFactory_From_max() {
 	// Slice: [42 13 7 1]
 }
 
-func ExampleBinaryFactory_Clone_max() {
+func ExampleBinaryClone_max() {
 	data := []int{1, 13, 7, 42, 99}
 
-	h := heap.OrderedBinary[int](heap.Max).Clone(data)
+	h := heap.OrderedBinaryClone[int](heap.Max, data)
 	h.Pop()
 
 	fmt.Printf("Length: %d\n", h.Length())

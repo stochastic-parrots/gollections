@@ -30,7 +30,7 @@ Follow the file layout already used by the library:
 - Public collection package:
   - `<package>.go` contains the public interface, readonly interface, and
     `AsReadonly` wrapper.
-  - `factory_<strategy>.go` exposes each concrete alias and its typed factory.
+  - `factory_<strategy>.go` exposes each concrete alias and direct constructors.
   - `doc.go` explains the package.
   - `examples_test.go` contains public examples.
   - `<package>_test.go` validates public contracts from the external test
@@ -72,7 +72,7 @@ alias and constructor from the public package.
   that `Clear` shrinks storage or returns memory to the Go runtime.
 - For ordered behavior, use `cmp.Ordered` or the shared ordering helpers in
   `internal/shared/ordering`.
-- Public comparator factories must reject nil comparators immediately. Their
+- Public comparator constructors must reject nil comparators immediately. Their
   comments must require a stable strict weak ordering for boolean priority
   predicates or a stable `cmp.Compare`-compatible ordering for three-way
   comparators. Ordered float helpers must preserve the `cmp` package treatment
@@ -92,18 +92,20 @@ alias and constructor from the public package.
 - Unless explicitly documented otherwise, public structures are not safe for
   concurrent use. Package documentation must tell callers to synchronize shared
   access when any goroutine may mutate the structure.
-- Public factory files should include compile-time assertions that internal
+- Public constructor files should include compile-time assertions that internal
   implementations satisfy the public interface.
 - Public concrete type aliases must alias the implementation struct, never a
-  pointer to it. Factory construction methods return pointers to those aliases.
+  pointer to it. Direct constructors return pointers to those aliases.
   For example, declare `type ArrayList[T any] = list.ArrayList[T]` and return
-  `*ArrayList[T]` from `New`, `From`, `Clone`, and `FromSeq`.
+  `*ArrayList[T]` from `NewArray`, `ArrayFrom`, `ArrayClone`, and
+  `ArrayFromSeq`.
 - Every public concrete alias must document whether its zero value is ready for
   use. Zero values should be supported when no comparator or mandatory index
-  initialization is required; otherwise, direct callers to the matching factory.
+  initialization is required; otherwise, direct callers to the matching
+  constructor.
 - Public contract tests must exercise every supported concrete zero value
-  without using a factory. Types with invalid zero values must keep the factory
-  requirement explicit in both alias and package documentation.
+  without using a constructor. Types with invalid zero values must keep the
+  constructor requirement explicit in both alias and package documentation.
 
 ## Naming
 
@@ -113,7 +115,7 @@ alias and constructor from the public package.
   `ArrayList`, `LinkedList`, `ArraySortedList`, `ArrayDeque`, `LinkedDeque`,
   `HashSet`, `KeyedHashSet`, `BinaryHeap`, `BinaryHeapPriorityMap`,
   `PairingHeapPriorityMap`, `RadixHeapPriorityMap`.
-- Concrete aliases always name structs. Constructors and factory methods return
+- Concrete aliases always name structs. Constructors return
   pointers explicitly; do not hide pointer semantics inside an alias.
 - Internal implementation types include their backing strategy:
   `ArrayList`, `DoubleLinkedList`, `ArraySortedList`, `RingBufferDeque`,
@@ -145,16 +147,19 @@ alias and constructor from the public package.
   `Remove`/`Removes`, `Append`/`Appends`, `Prepend`/`Prepends`, and
   `Push`/`Pushes`. Use `xs ...T` for the variadic input.
 - Use `idx` for indexes, not `index`, in method signatures and tests.
-- Factory selectors should preserve the user-facing strategy vocabulary:
-  - `Array` and `Linked` select list and deque implementations.
-  - `Binary` and `OrderedBinary` select binary heap implementations.
-  - `Array` and `OrderedArray` configure array sorted-list ordering.
-  - `BinaryHeap`, `OrderedBinaryHeap`, `PairingHeap`,
-    `OrderedPairingHeap`, and `RadixHeap` select priority-map implementations.
-  - `HashSetOf` and `HashSetBy` select direct-equality and derived-key set
-    implementations.
-- Factory construction methods use `New`, `From`, `Clone`, and `FromSeq` where
-  supported by the implementation and its ownership contract.
+- Direct constructor names include the implementation: `NewArray`, `ArrayFrom`,
+  `ArrayClone`, and `ArrayFromSeq`; `NewLinked`, `LinkedFrom`, and
+  `LinkedFromSeq`; `NewBinary`, `BinaryFrom`, `BinaryClone`, and
+  `BinaryFromSeq`; corresponding ordered and priority-map variants; and
+  `NewHashSet`/`NewKeyedHashSet` with their `From`/`FromSeq` variants.
+- Configuration arguments precede capacity or input. Comparator and identity
+  validation occurs when the direct constructor is called.
+- Every constructor has its own complete performance table and ends its doc
+  comment with a `Complexity:` line for that constructor.
+- Array-backed `From` transfers the input backing array. `Clone` makes an
+  independent shallow copy. Linked and set `From` constructors copy values into
+  nodes or maps without retaining the input slice. `FromSeq` consumes once.
+- Do not expose factory types or factory-returning selectors.
 - Test names use `Test<Type>_<Method>` or `TestNew<Type>`. Subtests use compact
   PascalCase names such as `FullIteration`, `PartialIteration`, `EmptyMap`,
   `WorsePriority`, or `Reuse`.
@@ -230,7 +235,7 @@ alias and constructor from the public package.
   mutation, complexity, or reason a caller should care. Do not add comments
   that merely restate names or obvious code.
 - Before adding or changing a comment, inspect the surrounding package docs,
-  public interface, factory comments, and nearest implementation comments.
+  public interface, constructor comments, and nearest implementation comments.
   Match their vocabulary and level of detail instead of introducing a new tone.
 - Keep comments factual and stable. Avoid marketing language, speculative
   claims, unsupported performance promises, version chatter, and phrases like
@@ -246,18 +251,90 @@ alias and constructor from the public package.
 - Keep comments close to the API or invariant they describe. Do not duplicate
   the same long warning in multiple files unless each public entrypoint needs
   to carry the warning independently.
-- Public constructors should include a performance table when they define a
-  data-structure choice. Use this style:
+- Every public constructor must have its own `Performance Summary (Time
+  Complexity)` table directly in its Go doc comment. The table lists only
+  methods in the concrete type's public mutable and readonly interfaces,
+  including inherited root methods and implemented `String`/JSON methods.
+  Include a separate row for each method; do not group methods or include any
+  constructor in the table. Repeat the method table for every constructor,
+  including `From`, `Clone`, and `FromSeq`.
+- Document a constructor's total cost exactly once, as the final comment line
+  immediately before its declaration: `// Complexity: <Big O cost>.` Do not
+  repeat that cost in the table or descriptive text. Put ownership, ordering,
+  and other explanations before the table.
+- Table cells contain complexity bounds. Omit commentary such as `full
+  iteration`, `N values yielded`, or `for the fixed display limit` from cells.
+  Validate iterator bounds for complete consumption and formatting bounds
+  against the actual display limit. Use output-sensitive expressions where
+  needed, such as `O(log N + number of yielded values)`.
+- When a bound is amortized, put `Amortized` after the Big O expression:
+  `O(log N) Amortized` or `O(len(xs)) Amortized`. Apply this format in
+  performance tables and `Complexity:` lines; never use `Amortized O(...)`.
+- Do not use `Expected` as a complexity label. Document the implementation's
+  actual bound and retain mathematically necessary distinctions between
+  worst-case, average-case, and amortized costs. Account separately for caller
+  functions whose cost is unknown, such as `keyOf`. Verify all bounds against
+  the implementation. For example:
 
   ```go
+  // NewLinked creates an empty doubly linked list. Choose it for O(1)
+  // reversal and boundary insertion or removal; indexed operations traverse O(N) nodes.
+  //
   // Performance Summary (Time Complexity):
   //
-  //	Operation           Time Complexity
-  //	-----------------   ---------------
-  //	Push(x)             O(log N)
-  //	Pushes(xs... T)     O(len(xs) log N)
-  //	Pop()               O(log N)
-  //	Peek()              O(1)
+  //	Operation             Time Complexity
+  //	-------------------   ---------------
+  //	IsEmpty()             O(1)
+  //	Length()              O(1)
+  //	All()                 O(N)
+  //	Enumerate()           O(N)
+  //	Get(idx)              O(N)
+  //	Find(x, cmp)          O(N)
+  //	Contains(x, cmp)      O(N)
+  //	Backward()            O(N)
+  //	ToSlice()             O(N)
+  //	Append(x)             O(1)
+  //	Appends(xs... T)      O(len(xs))
+  //	Insert(idx, x)        O(N)
+  //	Set(idx, x)           O(N)
+  //	Remove(idx)           O(N)
+  //	Reverse()             O(1)
+  //	Clear()               O(N)
+  //	UnmarshalJSON(data)   O(N + len(data))
+  //	MarshalJSON()         O(N)
+  //	String()              O(1)
+  //
+  // Complexity: O(1).
+  func NewLinked[T any]() *LinkedList[T] { return list.NewDoubleLinkedList[T]() }
+
+  // LinkedFrom copies values from data into new nodes without retaining the source slice.
+  //
+  // Performance Summary (Time Complexity):
+  //
+  //	Operation             Time Complexity
+  //	-------------------   ---------------
+  //	IsEmpty()             O(1)
+  //	Length()              O(1)
+  //	All()                 O(N)
+  //	Enumerate()           O(N)
+  //	Get(idx)              O(N)
+  //	Find(x, cmp)          O(N)
+  //	Contains(x, cmp)      O(N)
+  //	Backward()            O(N)
+  //	ToSlice()             O(N)
+  //	Append(x)             O(1)
+  //	Appends(xs... T)      O(len(xs))
+  //	Insert(idx, x)        O(N)
+  //	Set(idx, x)           O(N)
+  //	Remove(idx)           O(N)
+  //	Reverse()             O(1)
+  //	Clear()               O(N)
+  //	UnmarshalJSON(data)   O(N + len(data))
+  //	MarshalJSON()         O(N)
+  //	String()              O(1)
+  //
+  // Complexity: O(len(data)).
+  func LinkedFrom[T any](data []T) *LinkedList[T] { return list.NewDoubleLinkedListFromSlice(data) }
   ```
 
 - Internal data-structure methods use shorter documentation with `Complexity:`
@@ -269,7 +346,7 @@ alias and constructor from the public package.
   - use the exact input expression for additional work, such as `len(xs)` for
     a variadic batch, instead of an anonymous symbol such as `K`;
   - qualify the total bound when it is amortized, for example
-    `Amortized O(len(xs))`, rather than replacing it with `O(1) per element`;
+    `O(len(xs)) Amortized`, rather than replacing it with `O(1) per element`;
   - describe output-sensitive work explicitly, for example
     `O(log N + number of yielded values)`, when no concrete result slice exists.
 - AI-assisted documentation changes must verify each complexity expression
@@ -284,12 +361,13 @@ alias and constructor from the public package.
   completely defines their logical state. Unmarshaling replaces the contents
   only after the complete array is decoded successfully.
 - Sorted lists do not implement `json.Unmarshaler`. Callers decode into a slice
-  and use the matching `Array` or `OrderedArray` selector so the ordering
+  and use the matching `ArrayFrom` or `OrderedArrayFrom` constructor so the
+  ordering
   strategy is explicit and the package keeps one consistent decoding contract.
 - Heaps do not implement `json.Unmarshaler` because their priority comparator or
   min/max selection is not encoded in the JSON array. Callers decode into a
-  slice and use the same `Binary` or `OrderedBinary` factory that defines heap
-  priority.
+  slice and use the same `BinaryFrom` or `OrderedBinaryFrom` constructor
+  that defines heap priority.
 - Examples live in `examples_test.go`, use `Example...` names, and include
   `// Output:` blocks when deterministic.
 - README changes should explain when to choose a structure, not only list that

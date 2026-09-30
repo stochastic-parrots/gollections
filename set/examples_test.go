@@ -8,8 +8,8 @@ import (
 	"github.com/stochastic-parrots/gollections/set"
 )
 
-func ExampleHashSetOf() {
-	values := set.HashSetOf[string]().From([]string{"go", "collections", "go"})
+func ExampleNewHashSet() {
+	values := set.HashSetFrom[string]([]string{"go", "collections", "go"})
 	fmt.Println("added:", values.Add("iterators"))
 	fmt.Println("added:", values.Add("go"))
 	fmt.Println("removed:", values.Removes("collections", "missing", "collections"))
@@ -27,14 +27,14 @@ func ExampleHashSetOf() {
 	// false
 }
 
-func ExampleHashSetBy() {
+func ExampleNewKeyedHashSet() {
 	type user struct {
 		ID    int
 		Name  string
 		Roles []string
 	}
 
-	users := set.HashSetBy(func(value user) int { return value.ID }).New(0)
+	users := set.NewKeyedHashSet(func(value user) int { return value.ID }, 0)
 	added := users.Adds(
 		user{ID: 2, Name: "Grace", Roles: []string{"admin"}},
 		user{ID: 1, Name: "Ada", Roles: []string{"author"}},
@@ -56,7 +56,7 @@ func ExampleHashSetBy() {
 }
 
 func ExampleAsReadonly() {
-	mutable := set.HashSetOf[int]().From([]int{1, 2})
+	mutable := set.HashSetFrom[int]([]int{1, 2})
 	view := set.AsReadonly[int](mutable)
 
 	fmt.Println(slices.Sorted(view.All()))

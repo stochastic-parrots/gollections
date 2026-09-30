@@ -39,22 +39,27 @@ Use this file to orient quickly, then rely on
   `algorithms`; benchmark entrypoints and timer control go in `suites`. Model
   suites after the existing `heap` and `prioritymap` suites. Adapters normalize
   APIs only; they must not invent behavior.
-- Docs or examples: read `Documentation`; exported identifiers need comments
-  that start with the identifier. AI-written comments should explain contracts,
-  tradeoffs, invariants, mutation, errors, or complexity, and should not merely
-  restate obvious code.
+- Docs or examples: read `Documentation`; every constructor needs a table
+  containing only interface methods and their Big O costs. Document the
+  constructor's own cost only on the final `Complexity:` line before its
+  declaration. Omit table commentary such as `full iteration` or display-limit
+  explanations, and do not use `Expected` as a complexity label. Exported
+  identifier comments must start with the identifier. AI-written comments
+  should explain contracts, tradeoffs, invariants, mutation, errors, or
+  complexity, and should not merely restate obvious code.
 - Commits or tags: read `Commits And Tags`.
 
 ## Default Engineering Rules
 
 - Preserve existing public API names unless the user asks for a breaking
-  change.
+  change. Collections use direct package-level constructors, and each
+  constructor comment states its total time complexity.
 - Keep empty reads and removals safe: return zero values plus `false` or a
   package-owned error.
 - Keep root interfaces observation-only; mutations belong in structure-specific
   packages.
 - Alias public concrete types to implementation structs and return pointers to
-  those aliases from constructors and factory methods.
+  those aliases from direct package-level constructors.
 - Document whether each concrete alias has a usable zero value, and add a public
   contract test for every zero value the package supports.
 - Clear removed slots, nodes, and freelist entries so references do not leak.

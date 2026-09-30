@@ -21,12 +21,15 @@ func TestNewArraySortedList(t *testing.T) {
 }
 
 func TestNewArraySortedListFromSlice(t *testing.T) {
-	data := []int{3, 1, 2}
+	data := make([]int, 3, 5)
+	copy(data, []int{3, 1, 2})
 
 	l := NewArraySortedListFromSlice(data, cmp.Compare[int])
 
 	assert.Equal(t, []int{1, 2, 3}, data)
 	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
+	assert.Equal(t, 5, cap(l.data))
+	assert.Same(t, &data[0], &l.data[0])
 }
 
 func TestNewArraySortedListCloneSlice(t *testing.T) {

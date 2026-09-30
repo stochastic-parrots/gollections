@@ -20,14 +20,14 @@ func memberID(value member) int {
 }
 
 func TestFactoriesImplementSet(t *testing.T) {
-	var _ *set.HashSet[int] = set.HashSetOf[int]().New(0)
-	var _ *set.HashSet[int] = set.HashSetOf[int]().From([]int{1})
-	var _ *set.HashSet[int] = set.HashSetOf[int]().FromSeq(slices.Values([]int{1}))
-	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).New(0)
-	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).From([]member{{ID: 1}})
-	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).FromSeq(slices.Values([]member{{ID: 1}}))
-	var _ set.Set[int] = set.HashSetOf[int]().New(0)
-	var _ set.Set[member] = set.HashSetBy(memberID).New(0)
+	var _ *set.HashSet[int] = set.NewHashSet[int](0)
+	var _ *set.HashSet[int] = set.HashSetFrom[int]([]int{1})
+	var _ *set.HashSet[int] = set.HashSetFromSeq[int](slices.Values([]int{1}))
+	var _ *set.KeyedHashSet[member, int] = set.NewKeyedHashSet(memberID, 0)
+	var _ *set.KeyedHashSet[member, int] = set.KeyedHashSetFrom(memberID, []member{{ID: 1}})
+	var _ *set.KeyedHashSet[member, int] = set.KeyedHashSetFromSeq(memberID, slices.Values([]member{{ID: 1}}))
+	var _ set.Set[int] = set.NewHashSet[int](0)
+	var _ set.Set[member] = set.NewKeyedHashSet(memberID, 0)
 }
 
 func TestConcreteZeroValues(t *testing.T) {
@@ -40,32 +40,39 @@ func TestConcreteZeroValues(t *testing.T) {
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
-func TestHashSetBy_NilIdentityFunction(t *testing.T) {
-	assert.PanicsWithValue(t, "set: nil identity function", func() {
-		set.HashSetBy[int, int](nil)
-	})
+func TestKeyedHashSetConstructors_NilIdentityFunction(t *testing.T) {
+	constructors := map[string]func(){
+		"New":     func() { set.NewKeyedHashSet[int, int](nil, 0) },
+		"From":    func() { set.KeyedHashSetFrom[int, int](nil, nil) },
+		"FromSeq": func() { set.KeyedHashSetFromSeq[int, int](nil, slices.Values([]int(nil))) },
+	}
+	for name, construct := range constructors {
+		t.Run(name, func(t *testing.T) {
+			assert.PanicsWithValue(t, "set: nil identity function", construct)
+		})
+	}
 }
 
-func TestHashFactory_New(t *testing.T) {
-	assertSetBehavior(t, set.HashSetOf[int]().New(2))
+func TestNewHashSet(t *testing.T) {
+	assertSetBehavior(t, set.NewHashSet[int](2))
 }
 
-func TestHashFactory_From(t *testing.T) {
+func TestHashSetFrom(t *testing.T) {
 	data := []int{1, 2, 1}
-	values := set.HashSetOf[int]().From(data)
+	values := set.HashSetFrom[int](data)
 	data[0] = 3
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
-func TestHashFactory_FromSeq(t *testing.T) {
-	values := set.HashSetOf[int]().FromSeq(slices.Values([]int{1, 2, 1}))
+func TestHashSetFromSeq(t *testing.T) {
+	values := set.HashSetFromSeq[int](slices.Values([]int{1, 2, 1}))
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
-func TestHashSetByFactory_New(t *testing.T) {
-	values := set.HashSetBy(memberID).New(2)
+func TestNewKeyedHashSet(t *testing.T) {
+	values := set.NewKeyedHashSet(memberID, 2)
 	first := member{ID: 1, Name: "first", Labels: []string{"a"}}
 
 	assert.True(t, values.Add(first))
@@ -75,18 +82,18 @@ func TestHashSetByFactory_New(t *testing.T) {
 	assert.Equal(t, []member{first}, slices.Collect(values.All()))
 }
 
-func TestHashSetByFactory_From(t *testing.T) {
+func TestKeyedHashSetFrom(t *testing.T) {
 	first := member{ID: 1, Name: "first"}
 	data := []member{first, {ID: 1, Name: "duplicate"}, {ID: 2, Name: "second"}}
-	values := set.HashSetBy(memberID).From(data)
+	values := set.KeyedHashSetFrom(memberID, data)
 	data[0] = member{ID: 3, Name: "changed"}
 
 	assert.ElementsMatch(t, []member{first, {ID: 2, Name: "second"}}, slices.Collect(values.All()))
 }
 
-func TestHashSetByFactory_FromSeq(t *testing.T) {
+func TestKeyedHashSetFromSeq(t *testing.T) {
 	first := member{ID: 1, Name: "first"}
-	values := set.HashSetBy(memberID).FromSeq(slices.Values([]member{
+	values := set.KeyedHashSetFromSeq(memberID, slices.Values([]member{
 		first,
 		{ID: 1, Name: "duplicate"},
 		{ID: 2, Name: "second"},
@@ -95,13 +102,29 @@ func TestHashSetByFactory_FromSeq(t *testing.T) {
 	assert.ElementsMatch(t, []member{first, {ID: 2, Name: "second"}}, slices.Collect(values.All()))
 }
 
+func TestEmptySliceConstructors(t *testing.T) {
+	for name, construct := range map[string]func() set.Set[int]{
+		"HashSetFromNil":        func() set.Set[int] { return set.HashSetFrom([]int(nil)) },
+		"HashSetFromEmpty":      func() set.Set[int] { return set.HashSetFrom(make([]int, 0, 4)) },
+		"KeyedHashSetFromNil":   func() set.Set[int] { return set.KeyedHashSetFrom(func(x int) int { return x }, []int(nil)) },
+		"KeyedHashSetFromEmpty": func() set.Set[int] { return set.KeyedHashSetFrom(func(x int) int { return x }, make([]int, 0, 4)) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			values := construct()
+			assert.True(t, values.IsEmpty())
+			assert.True(t, values.Add(1))
+			assert.True(t, values.Contains(1))
+		})
+	}
+}
+
 func TestAsReadonly(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		assert.Nil(t, set.AsReadonly[int](nil))
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := set.HashSetOf[int]().From([]int{1, 2})
+		mutable := set.HashSetFrom[int]([]int{1, 2})
 		view := set.AsReadonly[int](mutable)
 
 		_, mutableView := any(view).(set.Set[int])

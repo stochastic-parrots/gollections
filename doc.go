@@ -34,10 +34,10 @@
 // documents the traversal order used by its JSON array. Lists and deques also
 // implement json.Unmarshaler because the array completely defines their logical
 // element order. Sorted lists do not implement unmarshaling so their natural or
-// custom ordering strategy remains an explicit factory choice. Heaps do not
+// custom ordering strategy remains an explicit constructor choice. Heaps do not
 // implement it because the array does not encode their comparator or min/max
 // selection. Sets likewise require an explicit equality or derived-key policy.
-// Decode those structures into a slice, then use the matching factory.
+// Decode those structures into a slice, then use the matching constructor.
 //
 // # Concurrency
 //
@@ -84,6 +84,6 @@
 // # Documentation Characteristics
 //
 // Each data structure includes detailed performance documentation in its subpackage.
-// Refer to the factory types (for example, [list.ArrayFactory]) for time
-// complexity tables covering all operations.
+// Refer to the package constructors (for example, [list.NewArray]) for
+// construction and ownership contracts.
 package gollections
