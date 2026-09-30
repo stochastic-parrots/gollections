@@ -405,7 +405,7 @@ func (pm *PairingPriorityMap[K, P]) Contains(key K) bool {
 
 // Keys returns an iterator for all keys in the collection.
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the index's allocated capacity.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *PairingPriorityMap[K, P]) Keys() iter.Seq[K] {
 	return func(yield func(K) bool) {
@@ -419,7 +419,7 @@ func (pm *PairingPriorityMap[K, P]) Keys() iter.Seq[K] {
 
 // Values returns an iterator for all values (priorities/data).
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the index's allocated capacity.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *PairingPriorityMap[K, P]) Values() iter.Seq[P] {
 	return func(yield func(P) bool) {
@@ -433,7 +433,7 @@ func (pm *PairingPriorityMap[K, P]) Values() iter.Seq[P] {
 
 // All returns an iterator for key-value pairs.
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the index's allocated capacity.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *PairingPriorityMap[K, P]) All() iter.Seq2[K, P] {
 	return func(yield func(K, P) bool) {
@@ -472,8 +472,7 @@ func (pm *PairingPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
 // This operation is typically more efficient than creating a new map
 // as it may reuse the underlying storage.
 //
-// Clearing visits N nodes and may scan the key index's retained storage.
-// Complexity: O(N + C), where C is the index's allocated capacity.
+// Complexity: O(C), where C is the index's allocated capacity.
 func (pm *PairingPriorityMap[K, P]) Clear() {
 	clear(pm.indexes)
 	root := pm.root
