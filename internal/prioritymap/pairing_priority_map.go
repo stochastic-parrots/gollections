@@ -16,9 +16,13 @@ type node[K comparable, P any] struct {
 }
 
 // PairingPriorityMap implements a priority‑map on top of a pairing heap.
-// It maintains a map from keys to node pointers, allowing O(1) amortized
-// insertion and priority updates (decrease-key), and O(log n) amortized
-// removal and extraction of the highest priority element.
+// It maintains a map from keys to node pointers. Insertion and priority
+// improvement use O(1) immediate heap-link work. Pop, Remove, and worsening
+// updates consolidate children later and can visit O(N) in one call. Set,
+// Update, Improve, Remove, and Pop have conservative O(log N) amortized bounds
+// across operation sequences. With O(log N) amortized Pop, this two-pass
+// pairing heap cannot guarantee O(1) amortized improvement across mixed
+// sequences.
 //
 // K must be comparable. P is the priority type; ordering is determined
 // by the hasPriority function passed to the constructor.
@@ -159,8 +163,10 @@ func (pm *PairingPriorityMap[K, P]) cut(n *node[K, P]) {
 
 // combine merges a list of siblings into a single heap using a two-pass
 // strategy (left-to-right pairs, then right-to-left reduction).
+// One call visits every sibling. Its work is charged to the enclosing mutation
+// for the pairing heap's O(log N) amortized bound.
 //
-// Complexity: O(log N) Amortized.
+// Complexity: O(N) for one call.
 func (pm *PairingPriorityMap[K, P]) combine(first *node[K, P]) *node[K, P] {
 	if first == nil {
 		return nil
@@ -231,10 +237,10 @@ func (pm *PairingPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 }
 
 // Set inserts a new key with the given priority or updates an existing
-// key’s priority. If the priority is improved, it is an O(1) operation.
-// If it is worsened, it is O(log n).
+// key's priority. Insertion and improvement do O(1) immediate heap work;
+// worsening may consolidate O(N) children in one call.
 //
-// Complexity: O(1) Amortized for insertions and priority improvements.
+// Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
 	_, exists := pm.indexes[key]
 	if !exists {
@@ -297,7 +303,11 @@ func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 //
 // It returns true if the map was modified (either by insertion or update).
 //
-// Complexity: O(1) Amortized for priority improvements.
+// An improvement performs at most one cut and one heap link, with O(1)
+// immediate heap work. The bound below is a conservative amortized upper bound
+// for mixed operation sequences.
+//
+// Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) Improve(key K, priority P) bool {
 	node, exists := pm.indexes[key]
 	if !exists {

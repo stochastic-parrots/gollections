@@ -17,6 +17,10 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 // strict-weak-order predicate. Choose it when priority improvements are frequent.
 // It panics for a nil predicate. The freelist retains at most capacity nodes;
 // zero capacity disables freelist retention.
+// An improvement performs a lookup, at most one cut, and one heap link, so its
+// immediate heap work is O(1). Pop later consolidates children in two passes.
+// The amortized rows account for this deferred work across mixed operations,
+// using a conservative O(log N) bound for Improve.
 //
 // Performance Summary (Time Complexity):
 //
@@ -32,7 +36,7 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 //	Peek()                   O(1)
 //	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N) Amortized
-//	Improve(key, priority)   O(1) Amortized
+//	Improve(key, priority)   O(log N) Amortized
 //	Remove(key)              O(log N) Amortized
 //	Pop()                    O(log N) Amortized
 //	Drain()                  O(N log N) Amortized
@@ -47,6 +51,10 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 }
 
 // NewOrderedPairingHeap creates an empty priority map using P's natural order.
+// An improvement performs a lookup, at most one cut, and one heap link, so its
+// immediate heap work is O(1). Pop later consolidates children in two passes.
+// The amortized rows account for this deferred work across mixed operations,
+// using a conservative O(log N) bound for Improve.
 //
 // Performance Summary (Time Complexity):
 //
@@ -62,7 +70,7 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 //	Peek()                   O(1)
 //	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N) Amortized
-//	Improve(key, priority)   O(1) Amortized
+//	Improve(key, priority)   O(log N) Amortized
 //	Remove(key)              O(log N) Amortized
 //	Pop()                    O(log N) Amortized
 //	Drain()                  O(N log N) Amortized
