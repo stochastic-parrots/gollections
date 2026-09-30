@@ -58,16 +58,16 @@ func (l *LinkedList[T]) Get(index int) (T, error) {
 	return current.Value, nil
 }
 
-// Find locates the index of an element using a linear search.
+// Find returns the index of the first value for which match returns true.
 //
 // Complexity: O(N).
-func (l *LinkedList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
+func (l *LinkedList[T]) Find(match func(T) bool) (idx int, ok bool) {
 	if l.IsEmpty() {
 		return -1, false
 	}
 
 	for idx, value := range l.Enumerate() {
-		if cmp(x, value) == 0 {
+		if match(value) {
 			return idx, true
 		}
 	}
@@ -75,16 +75,16 @@ func (l *LinkedList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
 	return -1, false
 }
 
-// Contains returns true if the element exists in the list according to cmp.
+// Contains reports whether match returns true for any value in list order.
 //
 // Complexity: O(N).
-func (l *LinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {
+func (l *LinkedList[T]) Contains(match func(T) bool) bool {
 	if l.IsEmpty() {
 		return false
 	}
 
 	for value := range l.All() {
-		if cmp(x, value) == 0 {
+		if match(value) {
 			return true
 		}
 	}

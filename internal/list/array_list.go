@@ -67,16 +67,16 @@ func (l *ArrayList[T]) Get(index int) (T, error) {
 	return l.data[index], nil
 }
 
-// Find locates the index of an element using a linear search.
+// Find returns the index of the first value for which match returns true.
 //
 // Complexity: O(N).
-func (l *ArrayList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
+func (l *ArrayList[T]) Find(match func(T) bool) (idx int, ok bool) {
 	if l.IsEmpty() {
 		return -1, false
 	}
 
-	for idx, value := range l.Enumerate() {
-		if cmp(x, value) == 0 {
+	for idx := range l.data {
+		if match(l.data[idx]) {
 			return idx, true
 		}
 	}
@@ -84,16 +84,16 @@ func (l *ArrayList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
 	return -1, false
 }
 
-// Contains returns true if the element exists in the list according to cmp.
+// Contains reports whether match returns true for any value in list order.
 //
 // Complexity: O(N).
-func (l *ArrayList[T]) Contains(x T, cmp func(a, b T) int) bool {
+func (l *ArrayList[T]) Contains(match func(T) bool) bool {
 	if l.IsEmpty() {
 		return false
 	}
 
-	for value := range l.All() {
-		if cmp(x, value) == 0 {
+	for idx := range len(l.data) {
+		if match(l.data[idx]) {
 			return true
 		}
 	}

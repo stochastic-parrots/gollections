@@ -1,7 +1,6 @@
 package list
 
 import (
-	"cmp"
 	"fmt"
 	"slices"
 	"testing"
@@ -98,7 +97,7 @@ func TestDoubleLinkedList_Find(t *testing.T) {
 		list.Appends(values...)
 
 		for idx, value := range values {
-			fidx, exists := list.Find(value, cmp.Compare[int])
+			fidx, exists := list.Find(func(x int) bool { return x == value })
 			assert.Equal(t, idx, fidx)
 			assert.True(t, exists)
 		}
@@ -107,7 +106,7 @@ func TestDoubleLinkedList_Find(t *testing.T) {
 	t.Run("NonExistent", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Appends(1, 2, 3)
-		idx, exists := list.Find(4, cmp.Compare[int])
+		idx, exists := list.Find(func(x int) bool { return x == 4 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -115,7 +114,7 @@ func TestDoubleLinkedList_Find(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
-		idx, exists := list.Find(2, cmp.Compare[int])
+		idx, exists := list.Find(func(x int) bool { return x == 2 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -129,7 +128,7 @@ func TestDoubleLinkedList_Contains(t *testing.T) {
 		list.Appends(values...)
 
 		for _, value := range values {
-			assert.True(t, list.Contains(value, cmp.Compare[int]))
+			assert.True(t, list.Contains(func(x int) bool { return x == value }))
 		}
 	})
 
@@ -137,13 +136,13 @@ func TestDoubleLinkedList_Contains(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Appends(1, 2, 3)
 
-		assert.False(t, list.Contains(4, cmp.Compare[int]))
+		assert.False(t, list.Contains(func(x int) bool { return x == 4 }))
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 
-		assert.False(t, list.Contains(4, cmp.Compare[int]))
+		assert.False(t, list.Contains(func(x int) bool { return x == 4 }))
 	})
 }
 

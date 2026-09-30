@@ -24,8 +24,8 @@ var _ List[int] = &list.ArrayList[int]{}
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
-//	Find(x, cmp)          O(N)
-//	Contains(x, cmp)      O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
 //	Append(x)             O(1) Amortized
@@ -53,8 +53,8 @@ func NewArray[T any](capacity int) *ArrayList[T] { return list.NewArrayList[T](c
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
-//	Find(x, cmp)          O(N)
-//	Contains(x, cmp)      O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
 //	Append(x)             O(1) Amortized
@@ -82,8 +82,8 @@ func ArrayFrom[T any](data []T) *ArrayList[T] { return list.NewArrayListFromSlic
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
-//	Find(x, cmp)          O(N)
-//	Contains(x, cmp)      O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
 //	Append(x)             O(1) Amortized
@@ -111,8 +111,8 @@ func ArrayClone[T any](data []T) *ArrayList[T] { return list.NewArrayListCloneSl
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
-//	Find(x, cmp)          O(N)
-//	Contains(x, cmp)      O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
 //	Append(x)             O(1) Amortized

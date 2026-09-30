@@ -1,7 +1,6 @@
 package list
 
 import (
-	"cmp"
 	"fmt"
 	"slices"
 	"testing"
@@ -83,16 +82,26 @@ func TestLinkedList_Find(t *testing.T) {
 		l.Appends(values...)
 
 		for idx, value := range values {
-			fidx, exists := l.Find(value, cmp.Compare[int])
+			fidx, exists := l.Find(func(x int) bool { return x == value })
 			assert.Equal(t, idx, fidx)
 			assert.True(t, exists)
 		}
 	})
 
+	t.Run("AfterReverse", func(t *testing.T) {
+		l := NewLinkedList[int]()
+		l.Appends(1, 2, 4)
+		l.Reverse()
+
+		idx, ok := l.Find(func(value int) bool { return value%2 == 0 })
+		assert.Equal(t, 0, idx)
+		assert.True(t, ok)
+	})
+
 	t.Run("NonExistent", func(t *testing.T) {
 		l := NewLinkedList[int]()
 		l.Appends(1, 2, 3)
-		idx, exists := l.Find(4, cmp.Compare[int])
+		idx, exists := l.Find(func(x int) bool { return x == 4 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -100,7 +109,7 @@ func TestLinkedList_Find(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		l := NewLinkedList[int]()
-		idx, exists := l.Find(2, cmp.Compare[int])
+		idx, exists := l.Find(func(x int) bool { return x == 2 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -114,21 +123,34 @@ func TestLinkedList_Contains(t *testing.T) {
 		l.Appends(values...)
 
 		for _, value := range values {
-			assert.True(t, l.Contains(value, cmp.Compare[int]))
+			assert.True(t, l.Contains(func(x int) bool { return x == value }))
 		}
+	})
+
+	t.Run("AfterReverse", func(t *testing.T) {
+		l := NewLinkedList[int]()
+		l.Appends(1, 2, 4)
+		l.Reverse()
+
+		calls := 0
+		assert.True(t, l.Contains(func(value int) bool {
+			calls++
+			return value%2 == 0
+		}))
+		assert.Equal(t, 1, calls)
 	})
 
 	t.Run("NonExistent", func(t *testing.T) {
 		l := NewLinkedList[int]()
 		l.Appends(1, 2, 3)
 
-		assert.False(t, l.Contains(4, cmp.Compare[int]))
+		assert.False(t, l.Contains(func(x int) bool { return x == 4 }))
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		l := NewLinkedList[int]()
 
-		assert.False(t, l.Contains(4, cmp.Compare[int]))
+		assert.False(t, l.Contains(func(x int) bool { return x == 4 }))
 	})
 }
 
