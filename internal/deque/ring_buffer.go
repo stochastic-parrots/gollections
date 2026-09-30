@@ -208,7 +208,7 @@ func (rb *RingBufferDeque[T]) Clear() {
 
 // Append adds an element to the end of the deque.
 //
-// Complexity: Amortized O(1).
+// Complexity: O(1) Amortized.
 func (rb *RingBufferDeque[T]) Append(x T) {
 	if rb.count == len(rb.data) {
 		rb.grow()
@@ -221,7 +221,7 @@ func (rb *RingBufferDeque[T]) Append(x T) {
 
 // Appends adds the given elements to the end of the deque.
 //
-// Complexity: Amortized O(len(xs)).
+// Complexity: O(len(xs)) Amortized.
 func (rb *RingBufferDeque[T]) Appends(xs ...T) {
 	for _, x := range xs {
 		rb.Append(x)
@@ -230,7 +230,7 @@ func (rb *RingBufferDeque[T]) Appends(xs ...T) {
 
 // Prepend adds an element to the beginning of the deque.
 //
-// Complexity: Amortized O(1).
+// Complexity: O(1) Amortized.
 func (rb *RingBufferDeque[T]) Prepend(x T) {
 	if rb.count == len(rb.data) {
 		rb.grow()
@@ -244,7 +244,7 @@ func (rb *RingBufferDeque[T]) Prepend(x T) {
 // Prepends adds the given elements to the beginning of the deque.
 // The relative order of the provided elements is preserved at the front.
 //
-// Complexity: Amortized O(len(xs)).
+// Complexity: O(len(xs)) Amortized.
 func (rb *RingBufferDeque[T]) Prepends(xs ...T) {
 	for _, x := range slices.Backward(xs) {
 		rb.Prepend(x)

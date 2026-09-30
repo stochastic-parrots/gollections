@@ -10,16 +10,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFactoriesImplementList(t *testing.T) {
-	var _ *list.ArrayList[int] = list.Array[int]().New(0)
-	var _ *list.ArrayList[int] = list.Array[int]().From([]int{1})
-	var _ *list.ArrayList[int] = list.Array[int]().Clone([]int{1})
-	var _ *list.ArrayList[int] = list.Array[int]().FromSeq(slices.Values([]int{1}))
-	var _ *list.LinkedList[int] = list.Linked[int]().New()
-	var _ *list.LinkedList[int] = list.Linked[int]().From([]int{1})
-	var _ *list.LinkedList[int] = list.Linked[int]().FromSeq(slices.Values([]int{1}))
-	var _ list.List[int] = list.Array[int]().New(0)
-	var _ list.List[int] = list.Linked[int]().New()
+func TestConstructorsImplementList(t *testing.T) {
+	var _ *list.ArrayList[int] = list.NewArray[int](0)
+	var _ *list.ArrayList[int] = list.ArrayFrom[int]([]int{1})
+	var _ *list.ArrayList[int] = list.ArrayClone[int]([]int{1})
+	var _ *list.ArrayList[int] = list.ArrayFromSeq[int](slices.Values([]int{1}))
+	var _ *list.LinkedList[int] = list.NewLinked[int]()
+	var _ *list.LinkedList[int] = list.LinkedFrom[int]([]int{1})
+	var _ *list.LinkedList[int] = list.LinkedFromSeq[int](slices.Values([]int{1}))
+	var _ list.List[int] = list.NewArray[int](0)
+	var _ list.List[int] = list.NewLinked[int]()
 }
 
 func TestConcreteZeroValues(t *testing.T) {
@@ -37,48 +37,67 @@ func TestConcreteZeroValues(t *testing.T) {
 	assert.Equal(t, []int{3, 4}, linked.ToSlice())
 }
 
-func TestArrayFactory_From(t *testing.T) {
+func TestArrayFrom(t *testing.T) {
 	data := []int{1, 2}
-	list := list.Array[int]().From(data)
-
-	assert.NoError(t, list.Set(0, 10))
-	assert.Equal(t, []int{10, 2}, data)
-}
-
-func TestArrayFactory_Clone(t *testing.T) {
-	data := []int{1, 2}
-	list := list.Array[int]().Clone(data)
-
-	assert.NoError(t, list.Set(0, 10))
-	assert.Equal(t, []int{1, 2}, data)
-}
-
-func TestArrayFactory_FromSeq(t *testing.T) {
-	list := list.Array[int]().FromSeq(slices.Values([]int{1, 2}))
+	list := list.ArrayFrom[int](data)
 
 	assert.Equal(t, []int{1, 2}, list.ToSlice())
 }
 
-func TestLinkedFactory_From(t *testing.T) {
+func TestArrayClone(t *testing.T) {
 	data := []int{1, 2}
-	list := list.Linked[int]().From(data)
+	list := list.ArrayClone[int](data)
+
+	assert.NoError(t, list.Set(0, 10))
+	assert.Equal(t, []int{1, 2}, data)
+	data[1] = 20
+	assert.Equal(t, []int{10, 2}, list.ToSlice())
+}
+
+func TestArrayFromSeq(t *testing.T) {
+	list := list.ArrayFromSeq[int](slices.Values([]int{1, 2}))
+
+	assert.Equal(t, []int{1, 2}, list.ToSlice())
+}
+
+func TestLinkedFrom(t *testing.T) {
+	data := []int{1, 2}
+	list := list.LinkedFrom[int](data)
 	data[0] = 10
 
 	assert.Equal(t, []int{1, 2}, list.ToSlice())
 }
 
-func TestLinkedFactory_FromSeq(t *testing.T) {
-	list := list.Linked[int]().FromSeq(slices.Values([]int{1, 2}))
+func TestLinkedFromSeq(t *testing.T) {
+	list := list.LinkedFromSeq[int](slices.Values([]int{1, 2}))
 
 	assert.Equal(t, []int{1, 2}, list.ToSlice())
 }
 
-func TestArrayFactory_New(t *testing.T) {
-	assertListBehavior(t, list.Array[int]().New(1))
+func TestNewArray(t *testing.T) {
+	assertListBehavior(t, list.NewArray[int](1))
 }
 
-func TestLinkedFactory_New(t *testing.T) {
-	assertListBehavior(t, list.Linked[int]().New())
+func TestNewLinked(t *testing.T) {
+	assertListBehavior(t, list.NewLinked[int]())
+}
+
+func TestEmptySliceConstructors(t *testing.T) {
+	for name, construct := range map[string]func() list.List[int]{
+		"ArrayFromNil":    func() list.List[int] { return list.ArrayFrom([]int(nil)) },
+		"ArrayFromEmpty":  func() list.List[int] { return list.ArrayFrom(make([]int, 0, 4)) },
+		"ArrayCloneNil":   func() list.List[int] { return list.ArrayClone([]int(nil)) },
+		"ArrayCloneEmpty": func() list.List[int] { return list.ArrayClone(make([]int, 0, 4)) },
+		"LinkedFromNil":   func() list.List[int] { return list.LinkedFrom([]int(nil)) },
+		"LinkedFromEmpty": func() list.List[int] { return list.LinkedFrom(make([]int, 0, 4)) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			values := construct()
+			assert.True(t, values.IsEmpty())
+			values.Append(1)
+			assert.Equal(t, []int{1}, values.ToSlice())
+		})
+	}
 }
 
 func TestAsReadonly(t *testing.T) {
@@ -87,7 +106,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := list.Array[int]().New(0)
+		mutable := list.NewArray[int](0)
 		mutable.Appends(1, 2)
 
 		view := list.AsReadonly[int](mutable)

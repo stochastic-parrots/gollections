@@ -27,10 +27,13 @@ func TestNewBinaryHeapFromSlice(t *testing.T) {
 	})
 
 	t.Run("Many", func(t *testing.T) {
-		data := []int{10, 5, 8, 2, 7}
+		data := make([]int, 5, 8)
+		copy(data, []int{10, 5, 8, 2, 7})
 		heap := NewBinaryHeapFromSlice(data, ordering.Min[int]())
 
 		assert.Equal(t, 5, heap.Length())
+		assert.Equal(t, 8, cap(heap.data))
+		assert.Same(t, &data[0], &heap.data[0])
 
 		val, ok := heap.Peek()
 		assert.True(t, ok)

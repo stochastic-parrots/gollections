@@ -160,7 +160,7 @@ func (pm *PairingPriorityMap[K, P]) cut(n *node[K, P]) {
 // combine merges a list of siblings into a single heap using a two-pass
 // strategy (left-to-right pairs, then right-to-left reduction).
 //
-// Complexity: O(log n) amortized.
+// Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) combine(first *node[K, P]) *node[K, P] {
 	if first == nil {
 		return nil
@@ -234,7 +234,7 @@ func (pm *PairingPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 // key’s priority. If the priority is improved, it is an O(1) operation.
 // If it is worsened, it is O(log n).
 //
-// Complexity: O(1) amortized for insertions and priority improvements.
+// Complexity: O(1) Amortized for insertions and priority improvements.
 func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
 	_, exists := pm.indexes[key]
 	if !exists {
@@ -252,7 +252,7 @@ func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
 // It returns true if the key was found and updated. If the key does not exist,
 // it performs no operation and returns false.
 //
-// Complexity: O(log n) amortized.
+// Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 	n, exists := pm.indexes[key]
 	if !exists {
@@ -297,7 +297,7 @@ func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 //
 // It returns true if the map was modified (either by insertion or update).
 //
-// Complexity: O(1) amortized for priority improvements.
+// Complexity: O(1) Amortized for priority improvements.
 func (pm *PairingPriorityMap[K, P]) Improve(key K, priority P) bool {
 	node, exists := pm.indexes[key]
 	if !exists {
@@ -323,7 +323,7 @@ func (pm *PairingPriorityMap[K, P]) Improve(key K, priority P) bool {
 // Remove deletes the entry for key if present, returning true if an entry
 // was removed.
 //
-// Complexity: O(log n) amortized.
+// Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) Remove(key K) bool {
 	node, ok := pm.indexes[key]
 	if !ok {
@@ -348,7 +348,7 @@ func (pm *PairingPriorityMap[K, P]) Remove(key K) bool {
 // Pop removes and returns the key‑priority pair with the highest
 // priority. If empty, it returns zero values and false.
 //
-// Complexity: O(log n) amortized.
+// Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) Pop() (key K, priority P, ok bool) {
 	if pm.root == nil {
 		var zK K
@@ -441,7 +441,7 @@ func (pm *PairingPriorityMap[K, P]) All() iter.Seq2[K, P] {
 // As a destructive operation, the map will be empty after a full traversal.
 // If the iteration is stopped early, the map will retain only the remaining elements.
 //
-// Complexity: O(n log n) amortized for a full traversal.
+// Complexity: O(N log N) Amortized for a full traversal.
 func (pm *PairingPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
 	return func(yield func(K, P) bool) {
 		for {

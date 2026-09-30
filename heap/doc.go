@@ -7,34 +7,33 @@
 //
 // # Ordering
 //
-// Use [Binary] when priority is defined by a custom function. The function must
-// return true when its first argument has higher priority than its second.
+// Use [NewBinary], [BinaryFrom], [BinaryClone], or [BinaryFromSeq] when
+// priority is defined by a custom predicate. It returns true when its first
+// argument has higher priority and must define a stable strict weak ordering.
 //
-// Use [OrderedBinary] for values satisfying cmp.Ordered. Pass [Min] to give
-// smaller values priority or [Max] to give larger values priority. Both
-// selectors return a reusable [BinaryFactory] whose methods return
-// *[BinaryHeap].
-// Binary heaps require a priority comparator, so the zero values of
-// [BinaryFactory] and [BinaryHeap] are invalid.
+// Use the corresponding OrderedBinary constructors for cmp.Ordered values.
+// Pass [Min] to give smaller values priority or [Max] for larger values.
+// [BinaryHeap] requires a comparator, so its zero value is invalid.
 //
 // # Construction And Ownership
 //
-// [BinaryFactory.New] creates an empty heap with the requested capacity.
-// [BinaryFactory.From] heapifies a slice in place and transfers ownership of its
-// backing storage; the caller must not use the slice or aliases of its backing
-// array afterward. [BinaryFactory.Clone] makes a shallow copy before heapifying
-// and does not retain the source slice.
+// [NewBinary] creates an empty heap with the requested capacity. [BinaryFrom]
+// heapifies a slice in place and transfers ownership of its backing array;
+// the caller must stop using the slice and all aliases afterward. [BinaryClone]
+// makes an independent shallow copy before heapifying. [BinaryFromSeq] consumes
+// an iterator once into new storage and heapifies in O(N) time. OrderedBinary
+// variants follow the same ownership and complexity contracts.
 //
 // # JSON
 //
 // Heaps marshal as arrays in internal heap order, not Pop or Drain order. They
 // do not implement json.Unmarshaler because JSON cannot preserve the comparator.
-// Decode into []T and pass the values to the same factory used to define heap
+// Decode into []T and pass the values to the same constructor family used to define heap
 // priority.
 //
 // # Complexity
 //
-// Peek is O(1). Pop and Replace are O(log N). From and Clone build a heap in
+// Peek is O(1). Pop and Replace are O(log N). From, Clone, and FromSeq build a heap in
 // O(N). Push is O(log N). Pushes is O(N + len(xs)) when the heap is empty or
 // len(xs) exceeds both N and 64; otherwise it is O(len(xs) log N). Drain is
 // O(N log N) when fully consumed.

@@ -116,7 +116,7 @@ func (l *ArrayList[T]) Set(index int, x T) error {
 
 // Append adds an element to the end of the list.
 //
-// Complexity: Amortized O(1).
+// Complexity: O(1) Amortized.
 // If the underlying capacity is exceeded, a new, larger array is allocated
 // and all elements are copied (O(N)).
 func (l *ArrayList[T]) Append(x T) {
@@ -125,7 +125,7 @@ func (l *ArrayList[T]) Append(x T) {
 
 // Appends adds the given elements to the end of the list.
 //
-// Complexity: Amortized O(len(xs)).
+// Complexity: O(len(xs)) Amortized.
 func (l *ArrayList[T]) Appends(xs ...T) {
 	l.data = append(l.data, xs...)
 }

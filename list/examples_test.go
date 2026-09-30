@@ -9,8 +9,8 @@ import (
 	"github.com/stochastic-parrots/gollections/list"
 )
 
-func ExampleArray() {
-	items := list.Array[int]().New(5)
+func ExampleNewArray() {
+	items := list.NewArray[int](5)
 	items.Appends(10, 20, 30)
 
 	val, _ := items.Get(1)
@@ -53,8 +53,8 @@ func ExampleArray() {
 	// Unmarshal: [1 2 3]
 }
 
-func ExampleLinked() {
-	items := list.Linked[string]().New()
+func ExampleNewLinked() {
+	items := list.NewLinked[string]()
 	items.Appends("Go", "is", "fast")
 
 	fmt.Println(slices.Collect(items.All()))
@@ -85,9 +85,9 @@ func ExampleLinked() {
 	// Unmarshal: [hello world]
 }
 
-func ExampleArrayFactory_From() {
+func ExampleArrayFrom() {
 	values := []int{10, 20, 30}
-	list := list.Array[int]().From(values)
+	list := list.ArrayFrom[int](values)
 
 	list.Append(40)
 	fmt.Println(list.ToSlice())
@@ -96,9 +96,9 @@ func ExampleArrayFactory_From() {
 	// [10 20 30 40]
 }
 
-func ExampleArrayFactory_Clone() {
+func ExampleArrayClone() {
 	values := []int{10, 20, 30}
-	list := list.Array[int]().Clone(values)
+	list := list.ArrayClone[int](values)
 	_ = list.Set(0, 100)
 
 	fmt.Println(list.ToSlice())
@@ -109,8 +109,8 @@ func ExampleArrayFactory_Clone() {
 	// [10 20 30]
 }
 
-func ExampleLinkedFactory_FromSeq() {
-	list := list.Linked[int]().FromSeq(slices.Values([]int{10, 20, 30}))
+func ExampleLinkedFromSeq() {
+	list := list.LinkedFromSeq[int](slices.Values([]int{10, 20, 30}))
 
 	fmt.Println(list.ToSlice())
 
@@ -119,7 +119,7 @@ func ExampleLinkedFactory_FromSeq() {
 }
 
 func ExampleAsReadonly() {
-	mutable := list.Array[int]().New(0)
+	mutable := list.NewArray[int](0)
 	mutable.Appends(10, 20)
 
 	data := list.AsReadonly(mutable)

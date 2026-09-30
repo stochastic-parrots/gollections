@@ -8,8 +8,8 @@ import (
 	"github.com/stochastic-parrots/gollections/deque"
 )
 
-func ExampleArray() {
-	queue := deque.Array[int]().New(2)
+func ExampleNewArray() {
+	queue := deque.NewArray[int](2)
 	queue.Appends(2, 3)
 	queue.Prepends(0, 1)
 
@@ -36,8 +36,8 @@ func ExampleArray() {
 	// Unmarshal: [8 9]
 }
 
-func ExampleLinked() {
-	deque := deque.Linked[string]().New()
+func ExampleNewLinked() {
+	deque := deque.NewLinked[string]()
 	deque.Appends("middle", "back")
 	deque.Prepend("front")
 
@@ -57,9 +57,9 @@ func ExampleLinked() {
 	// [middle back tail]
 }
 
-func ExampleArrayFactory_From() {
+func ExampleArrayFrom() {
 	values := []int{10, 20, 30}
-	deque := deque.Array[int]().From(values)
+	deque := deque.ArrayFrom[int](values)
 	deque.Prepend(5)
 	deque.Append(40)
 
@@ -69,9 +69,9 @@ func ExampleArrayFactory_From() {
 	// [5 10 20 30 40]
 }
 
-func ExampleArrayFactory_Clone() {
+func ExampleArrayClone() {
 	values := []int{10, 20, 30}
-	deque := deque.Array[int]().Clone(values)
+	deque := deque.ArrayClone[int](values)
 	_, _ = deque.Shift()
 
 	fmt.Println(deque.ToSlice())
@@ -82,8 +82,8 @@ func ExampleArrayFactory_Clone() {
 	// [10 20 30]
 }
 
-func ExampleLinkedFactory_FromSeq() {
-	deque := deque.Linked[int]().FromSeq(slices.Values([]int{10, 20, 30}))
+func ExampleLinkedFromSeq() {
+	deque := deque.LinkedFromSeq[int](slices.Values([]int{10, 20, 30}))
 
 	fmt.Println(deque.ToSlice())
 
@@ -92,7 +92,7 @@ func ExampleLinkedFactory_FromSeq() {
 }
 
 func ExampleAsReadonly() {
-	mutable := deque.Array[int]().New(0)
+	mutable := deque.NewArray[int](0)
 	mutable.Appends(10, 20)
 
 	view := deque.AsReadonly(mutable)

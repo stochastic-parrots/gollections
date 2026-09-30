@@ -5,7 +5,7 @@ Use these checklists for repeatable agent workflows. They supplement
 
 ## Code Change
 
-1. Read the relevant package docs, factory file, public interface, and internal
+1. Read the relevant package docs, constructor file, public interface, and internal
    implementation.
 2. Find the closest existing test pattern before adding new tests.
 3. Reject forwarding methods that merely call another method or function
@@ -24,7 +24,7 @@ Use these checklists for repeatable agent workflows. They supplement
 3. Keep concrete types under `internal/...`; public aliases name structs and
    constructors return pointers to those aliases.
 4. Document zero-value support for each concrete alias and test every supported
-   zero value without constructing it through a factory.
+   zero value without constructing it through a constructor.
 5. Add internal same-package tests for invariants and cleanup.
 6. Add benchmarks beside implementations and suite wrappers when comparisons
    are meaningful.
@@ -41,19 +41,23 @@ Use these checklists for repeatable agent workflows. They supplement
 
 1. Keep public Go docs in English.
 2. Start exported comments with the exported identifier.
-3. Inspect nearby package docs, public interfaces, factory comments, and
+3. Inspect nearby package docs, public interfaces, constructor comments, and
    implementation comments before adding new wording.
-4. Explain behavioral contracts, empty results, destructive operations,
+4. Ensure every constructor has a table containing only interface methods
+   and their Big O costs, without constructor rows or explanatory cell text.
+   Document its own cost only on the final `Complexity:` line immediately
+   before the function. Verify no `Expected` complexity labels remain.
+5. Explain behavioral contracts, empty results, destructive operations,
    invariants, ownership, error behavior, complexity, and performance tradeoffs
    near the API that owns them.
-5. Remove comments that merely repeat names or obvious code.
-6. Verify complexity comments describe the total call cost, use `N` for the
+6. Remove comments that merely repeat names or obvious code.
+7. Verify complexity comments describe the total call cost, use `N` for the
    collection size, and use exact input expressions such as `len(xs)` for
-   variadic batches.
-7. Search changed documentation for mixed complexity notation and stale method
+   variadic batches. Place `Amortized` after the Big O bound when applicable.
+8. Search changed documentation for mixed complexity notation and stale method
    names, especially after AI-assisted edits.
-8. Keep README updates focused on when to choose a structure.
-9. Run tests for examples when examples change.
+9. Keep README updates focused on when to choose a structure.
+10. Run tests for examples when examples change.
 
 ## Benchmark Change
 

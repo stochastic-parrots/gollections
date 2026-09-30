@@ -57,7 +57,7 @@ func (set *KeyedHashSet[T, K]) IsEmpty() bool {
 
 // Contains returns true if the key derived from x belongs to the set.
 //
-// Complexity: Expected O(1) plus the cost of the identity function.
+// Complexity: O(1) on average plus the cost of the identity function.
 func (set *KeyedHashSet[T, K]) Contains(x T) bool {
 	_, ok := set.values[set.keyOf(x)]
 	return ok
@@ -66,7 +66,7 @@ func (set *KeyedHashSet[T, K]) Contains(x T) bool {
 // Add inserts x unless its derived key is already present, reports whether the
 // set changed, and preserves existing representatives.
 //
-// Complexity: Expected O(1) plus the cost of the identity function.
+// Complexity: O(1) on average plus the cost of the identity function.
 func (set *KeyedHashSet[T, K]) Add(x T) bool {
 	key := set.keyOf(x)
 	if _, ok := set.values[key]; ok {
@@ -82,7 +82,7 @@ func (set *KeyedHashSet[T, K]) Add(x T) bool {
 // Adds inserts every value in xs whose derived key is not already present and
 // returns the number of values added.
 //
-// Complexity: Expected O(len(xs)) plus the identity-function calls.
+// Complexity: O(len(xs)) on average plus the identity-function calls.
 func (set *KeyedHashSet[T, K]) Adds(xs ...T) (added int) {
 	for _, x := range xs {
 		if set.Add(x) {
@@ -95,7 +95,7 @@ func (set *KeyedHashSet[T, K]) Adds(xs ...T) (added int) {
 // Remove deletes the value with the same derived key as x and reports whether
 // it was present.
 //
-// Complexity: Expected O(1) plus the cost of the identity function.
+// Complexity: O(1) on average plus the cost of the identity function.
 func (set *KeyedHashSet[T, K]) Remove(x T) bool {
 	key := set.keyOf(x)
 	if _, ok := set.values[key]; !ok {
@@ -108,7 +108,7 @@ func (set *KeyedHashSet[T, K]) Remove(x T) bool {
 // Removes deletes every value in xs whose derived key is present and returns
 // the number of values removed.
 //
-// Complexity: Expected O(len(xs)) plus the identity-function calls.
+// Complexity: O(len(xs)) on average plus the identity-function calls.
 func (set *KeyedHashSet[T, K]) Removes(xs ...T) (removed int) {
 	for _, x := range xs {
 		if set.Remove(x) {

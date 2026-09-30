@@ -46,7 +46,7 @@ Go documentation tools.
   storage shrinkage or return memory to the Go runtime. Slice-backed structures
   retain capacity where practical, freelists retain at most their construction
   limit, and linked structures without a freelist may release their nodes.
-- Internal implementations: public packages expose stable concrete factories while
+- Internal implementations: public packages expose direct constructors and concrete aliases while
   concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, `set`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
@@ -59,36 +59,59 @@ Go documentation tools.
   input, using the traversal order documented by each package. Lists and deques
   also unmarshal because array order completely defines their logical state.
   Sorted lists, heaps, and sets require slice decoding followed by the matching
-  factory so ordering, priority, and set identity remain explicit.
+  constructor so ordering, priority, and set identity remain explicit.
 
 ## Construction
 
-Public packages select an implementation through a reusable typed factory.
-Factory methods return concrete collection types without interface dispatch:
+Public packages expose direct constructors returning concrete collection pointers:
 
 ```go
-items := list.Array[string]().New(16)
-queue := deque.Linked[int]().From([]int{1, 2, 3})
-scores := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
-pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
-visited := set.HashSetOf[string]().New(32)
+items := list.NewArray[string](16)
+queue := deque.LinkedFrom([]int{1, 2, 3})
+scores := sortedlist.OrderedArrayClone(sortedlist.Asc, []int{3, 1, 2})
+pending := prioritymap.NewOrderedBinaryHeap[string, int](prioritymap.Min, 32)
+visited := set.NewHashSet[string](32)
 ```
 
-Sorted lists, heaps, and sets intentionally do not implement `json.Unmarshaler`.
-Decode into a slice and use the selected factory to establish their invariants:
+Sorted lists, heaps, and sets do not implement `json.Unmarshaler`. Decode
+into a slice and use a constructor that establishes the collection invariant:
 
 ```go
 var values []int
 if err := json.Unmarshal(data, &values); err != nil {
-	return err
+    return err
 }
-scores := sortedlist.Array(cmp.Compare[int]).From(values)
+scores := sortedlist.ArrayFrom(cmp.Compare[int], values)
 ```
 
-Array-backed `From` methods transfer ownership of the provided slice and may
-reorder it. The caller must not use the slice or aliases of its backing array
-afterward. Use `Clone` when the source must remain available. Linked structures
-always copy values into nodes, so their `From` methods do not retain the source.
+Array-backed `From` functions transfer ownership of the provided slice and may
+reorder it. Stop using the slice and all aliases of its backing array after
+construction. `Clone` functions make independent shallow copies of slice
+storage. Linked `From` functions copy values into nodes. Set `From` functions
+copy values into map storage. `FromSeq` functions consume an iterator once.
+
+### Migration from factories
+
+| Package | Previous factory calls | Direct constructors |
+| --- | --- | --- |
+| `list` | `Array[T]().New/Clone/From/FromSeq` | `NewArray[T]` / `ArrayClone` / `ArrayFrom` / `ArrayFromSeq` |
+| `list` | `Linked[T]().New/From/FromSeq` | `NewLinked[T]` / `LinkedFrom` / `LinkedFromSeq` |
+| `deque` | `Array[T]().New/Clone/From/FromSeq` | `NewArray[T]` / `ArrayClone` / `ArrayFrom` / `ArrayFromSeq` |
+| `deque` | `Linked[T]().New/From/FromSeq` | `NewLinked[T]` / `LinkedFrom` / `LinkedFromSeq` |
+| `sortedlist` | `Array(cmp).New/Clone/From/FromSeq` | `NewArray(cmp, cap)` / `ArrayClone(cmp, xs)` / `ArrayFrom(cmp, xs)` / `ArrayFromSeq(cmp, seq)` |
+| `sortedlist` | `OrderedArray[T](order).New/Clone/From/FromSeq` | `NewOrderedArray[T](order, cap)` / `OrderedArrayClone(order, xs)` / `OrderedArrayFrom(order, xs)` / `OrderedArrayFromSeq(order, seq)` |
+| `heap` | `Binary(hasPriority).New/Clone/From` | `NewBinary(hasPriority, cap)` / `BinaryClone(hasPriority, xs)` / `BinaryFrom(hasPriority, xs)` |
+| `heap` | `OrderedBinary[T](order).New/Clone/From` | `NewOrderedBinary[T](order, cap)` / `OrderedBinaryClone(order, xs)` / `OrderedBinaryFrom(order, xs)` |
+| `prioritymap` | `BinaryHeap[K, P](hasPriority).New` | `NewBinaryHeap[K, P](hasPriority, cap)` |
+| `prioritymap` | `OrderedBinaryHeap[K, P](order).New` | `NewOrderedBinaryHeap[K, P](order, cap)` |
+| `prioritymap` | `PairingHeap[K, P](hasPriority).New` | `NewPairingHeap[K, P](hasPriority, cap)` |
+| `prioritymap` | `OrderedPairingHeap[K, P](order).New` | `NewOrderedPairingHeap[K, P](order, cap)` |
+| `prioritymap` | `RadixHeap[K, P]().New` | `NewRadixHeap[K, P](cap)` |
+| `set` | `HashSetOf[T]().New/From/FromSeq` | `NewHashSet[T]` / `HashSetFrom` / `HashSetFromSeq` |
+| `set` | `HashSetBy(keyOf).New/From/FromSeq` | `NewKeyedHashSet(keyOf, cap)` / `KeyedHashSetFrom(keyOf, xs)` / `KeyedHashSetFromSeq(keyOf, seq)` |
+
+`heap.BinaryFromSeq(hasPriority, seq)` and
+`heap.OrderedBinaryFromSeq(order, seq)` are new O(N) constructors.
 
 ## Choosing a list
 
@@ -103,14 +126,14 @@ should stay ordered by value instead of by insertion position.
 ## Choosing a sorted list
 
 `ArraySortedList` is the single slice-backed implementation. Choose its
-ordering through one of two factory selectors:
+ordering through one of two constructor families:
 
-- `OrderedArray(Asc)` or `OrderedArray(Desc)` when element values
+- `NewOrderedArray`, `OrderedArrayFrom`, or `OrderedArrayClone` when element values
   satisfy `cmp.Ordered` and natural order is enough.
-- `Array(compare)` for custom ordering, such as sorting structs by one or more
+- `NewArray`, `ArrayFrom`, or `ArrayClone` for custom ordering, such as sorting structs by one or more
   fields.
 
-Both selectors return `ArrayFactory` and build `ArraySortedList` values, so they
+Both constructor families build `ArraySortedList` values, so they
 have the same performance characteristics. Sorted lists are best for data that
 is built once or updated occasionally and queried many times. Lookups and bounds
 are O(log N), indexed access is O(1), and single-element insertion/removal
@@ -137,7 +160,7 @@ scheduling-buffer patterns.
 
 Set identities must have reflexive equality. Floating-point NaN cannot be used
 directly as a `HashSet` value or `KeyedHashSet` key because NaN is not equal to
-itself. Use `HashSetBy` with a canonical comparable key when NaN membership is
+itself. Use `NewKeyedHashSet` with a canonical comparable key when NaN membership is
 required. When `HashSet` uses an interface type, its dynamic values must also be
 comparable, matching native Go map requirements.
 

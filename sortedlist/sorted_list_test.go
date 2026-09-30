@@ -14,52 +14,63 @@ import (
 )
 
 func TestFactoriesImplementSortedList(t *testing.T) {
-	var _ sortedlist.ArrayFactory[int] = sortedlist.OrderedArray[int](sortedlist.Asc)
-	var _ *sortedlist.ArraySortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
-	var _ *sortedlist.ArraySortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
-	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).New(0)
-	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).From([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).Clone([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.Array(cmp.Compare[int]).FromSeq(slices.Values([]int{1}))
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).From([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArray[int](sortedlist.Asc).FromSeq(slices.Values([]int{1}))
+	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewArray(cmp.Compare[int], 0)
+	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	var _ sortedlist.SortedList[int] = sortedlist.NewArray(cmp.Compare[int], 0)
+	var _ sortedlist.SortedList[int] = sortedlist.ArrayFrom(cmp.Compare[int], []int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.ArrayClone(cmp.Compare[int], []int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.ArrayFromSeq(cmp.Compare[int], slices.Values([]int{1}))
+	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayFrom[int](sortedlist.Asc, []int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayClone[int](sortedlist.Asc, []int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayFromSeq[int](sortedlist.Asc, slices.Values([]int{1}))
 }
 
-func TestArray_NilComparator(t *testing.T) {
-	assert.PanicsWithValue(t, "sortedlist: nil comparator", func() {
-		sortedlist.Array[int](nil)
-	})
+func TestArrayConstructors_NilComparator(t *testing.T) {
+	constructors := map[string]func(){
+		"New":     func() { sortedlist.NewArray[int](nil, 0) },
+		"From":    func() { sortedlist.ArrayFrom[int](nil, nil) },
+		"Clone":   func() { sortedlist.ArrayClone[int](nil, nil) },
+		"FromSeq": func() { sortedlist.ArrayFromSeq[int](nil, slices.Values([]int(nil))) },
+	}
+	for name, construct := range constructors {
+		t.Run(name, func(t *testing.T) {
+			assert.PanicsWithValue(t, "sortedlist: nil comparator", construct)
+		})
+	}
 }
 
-func TestArrayFactory_New(t *testing.T) {
-	assertSortedListBehavior(t, sortedlist.Array(cmp.Compare[int]).New(0))
+func TestNewArray(t *testing.T) {
+	assertSortedListBehavior(t, sortedlist.NewArray(cmp.Compare[int], 0))
 }
 
-func TestArrayFactory_From(t *testing.T) {
+func TestArrayFrom(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.Array(cmp.Compare[int]).From(data)
+	list := sortedlist.ArrayFrom(cmp.Compare[int], data)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
-	assert.Equal(t, []int{1, 2, 3}, data)
 }
 
-func TestArrayFactory_Clone(t *testing.T) {
+func TestArrayClone(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.Array(cmp.Compare[int]).Clone(data)
+	list := sortedlist.ArrayClone(cmp.Compare[int], data)
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, data)
+	data[0] = 9
+	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.NoError(t, list.Replace(0, 0))
+	assert.Equal(t, []int{9, 1, 2}, data)
 }
 
-func TestArrayFactory_FromSeq(t *testing.T) {
-	source := list.Array[int]().New(0)
+func TestArrayFromSeq(t *testing.T) {
+	source := list.NewArray[int](0)
 	source.Appends(3, 1, 2)
 
-	list := sortedlist.Array(cmp.Compare[int]).FromSeq(source.All())
+	list := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
@@ -67,13 +78,13 @@ func TestArrayFactory_FromSeq(t *testing.T) {
 
 func TestOrderedArray(t *testing.T) {
 	t.Run("Ascending", func(t *testing.T) {
-		list := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
+		list := sortedlist.OrderedArrayClone[int](sortedlist.Asc, []int{3, 1, 2})
 
 		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 	})
 
 	t.Run("Descending", func(t *testing.T) {
-		list := sortedlist.OrderedArray[int](sortedlist.Desc).Clone([]int{3, 1, 2})
+		list := sortedlist.OrderedArrayClone[int](sortedlist.Desc, []int{3, 1, 2})
 
 		assert.Equal(t, []int{3, 2, 1}, list.ToSlice())
 	})
@@ -81,8 +92,8 @@ func TestOrderedArray(t *testing.T) {
 	t.Run("FloatNaN", func(t *testing.T) {
 		nan := math.NaN()
 
-		ascending := sortedlist.OrderedArray[float64](sortedlist.Asc).Clone([]float64{1, nan, 2})
-		descending := sortedlist.OrderedArray[float64](sortedlist.Desc).Clone([]float64{1, nan, 2})
+		ascending := sortedlist.OrderedArrayClone[float64](sortedlist.Asc, []float64{1, nan, 2})
+		descending := sortedlist.OrderedArrayClone[float64](sortedlist.Desc, []float64{1, nan, 2})
 
 		ascendingValues := ascending.ToSlice()
 		descendingValues := descending.ToSlice()
@@ -95,7 +106,7 @@ func TestOrderedArray(t *testing.T) {
 }
 
 func TestArraySortedList_GetError(t *testing.T) {
-	list := sortedlist.Array(cmp.Compare[int]).New(0)
+	list := sortedlist.NewArray(cmp.Compare[int], 0)
 
 	_, err := list.Get(0)
 
@@ -109,7 +120,7 @@ func TestArraySortedList_GetError(t *testing.T) {
 }
 
 func TestArraySortedList_ReplaceError(t *testing.T) {
-	list := sortedlist.Array(cmp.Compare[int]).New(0)
+	list := sortedlist.NewArray(cmp.Compare[int], 0)
 	list.Adds(1, 3, 5)
 
 	err := list.Replace(1, 6)
@@ -118,13 +129,29 @@ func TestArraySortedList_ReplaceError(t *testing.T) {
 	assert.Equal(t, []int{1, 3, 5}, list.ToSlice())
 }
 
+func TestEmptySliceConstructors(t *testing.T) {
+	for name, construct := range map[string]func() sortedlist.SortedList[int]{
+		"ArrayFromNil":    func() sortedlist.SortedList[int] { return sortedlist.ArrayFrom(cmp.Compare[int], []int(nil)) },
+		"ArrayFromEmpty":  func() sortedlist.SortedList[int] { return sortedlist.ArrayFrom(cmp.Compare[int], make([]int, 0, 4)) },
+		"ArrayCloneNil":   func() sortedlist.SortedList[int] { return sortedlist.ArrayClone(cmp.Compare[int], []int(nil)) },
+		"ArrayCloneEmpty": func() sortedlist.SortedList[int] { return sortedlist.ArrayClone(cmp.Compare[int], make([]int, 0, 4)) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			values := construct()
+			assert.True(t, values.IsEmpty())
+			values.Add(1)
+			assert.Equal(t, []int{1}, values.ToSlice())
+		})
+	}
+}
+
 func TestAsReadonly(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		assert.Nil(t, sortedlist.AsReadonly[int](nil))
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := sortedlist.Array(cmp.Compare[int]).New(0)
+		mutable := sortedlist.NewArray(cmp.Compare[int], 0)
 		mutable.Adds(2, 1)
 
 		view := sortedlist.AsReadonly(mutable)
