@@ -266,7 +266,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		l := NewLinkedList[int]()
 		l.Append(1)
 		err := l.Insert(5, 10)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot insert at index 5 out of range for length 1")
 		assert.Equal(t, 1, l.Len())
 		assert.Equal(t, []int{1}, l.ToSlice())
 	})
@@ -348,7 +348,7 @@ func TestLinkedList_Remove(t *testing.T) {
 		l := NewLinkedList[int]()
 		l.Append(1)
 		_, err := l.Remove(1)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot remove index 1 out of range for length 1")
 	})
 }
 

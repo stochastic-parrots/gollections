@@ -373,6 +373,7 @@ func TestArraySortedList_Replace(t *testing.T) {
 		for _, idx := range []int{-1, 1} {
 			err := l.Replace(idx, 1)
 			assert.ErrorIs(t, err, list.ErrIndexOutOfBounds)
+			assert.EqualError(t, err, fmt.Sprintf("cannot replace index %d out of range for length 1", idx))
 		}
 	})
 

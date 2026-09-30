@@ -252,7 +252,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Append(1)
 		err := list.Insert(5, 10)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot insert at index 5 out of range for length 1")
 		assert.Equal(t, []int{1}, list.ToSlice())
 	})
 }
@@ -333,7 +333,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Append(1)
 		_, err := list.Remove(1)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot remove index 1 out of range for length 1")
 	})
 }
 
