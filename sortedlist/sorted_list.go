@@ -26,17 +26,17 @@ const (
 type Readonly[T any] interface {
 	// Get returns the element at the specified sorted index.
 	//
-	// Returns an error if the index is out of bounds [0, Length).
+	// Returns an error if the index is out of bounds [0, Len).
 	Get(idx int) (x T, err error)
 
 	// LowerBound returns the first index whose value does not sort before x.
 	//
-	// It returns Length when every value sorts before x.
+	// It returns Len when every value sorts before x.
 	LowerBound(x T) int
 
 	// UpperBound returns the first index whose value sorts after x.
 	//
-	// It returns Length when no value sorts after x.
+	// It returns Len when no value sorts after x.
 	UpperBound(x T) int
 
 	// EqualRange returns the half-open index range containing values equivalent to x.
@@ -181,7 +181,7 @@ func (w readonly[T]) Enumerate() iter.Seq2[int, T] { return w.inner.Enumerate() 
 
 func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[T]) Length() int { return w.inner.Length() }
+func (w readonly[T]) Len() int { return w.inner.Len() }
 
 func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
 

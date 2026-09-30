@@ -40,7 +40,7 @@ func orderedPriority[T cmp.Ordered](order Order) func(T, T) bool {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -71,7 +71,7 @@ func NewBinary[T any](hasPriority func(T, T) bool, capacity int) *BinaryHeap[T] 
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -102,7 +102,7 @@ func BinaryFrom[T any](hasPriority func(T, T) bool, data []T) *BinaryHeap[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -132,7 +132,7 @@ func BinaryClone[T any](hasPriority func(T, T) bool, data []T) *BinaryHeap[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -161,7 +161,7 @@ func BinaryFromSeq[T any](hasPriority func(T, T) bool, seq iter.Seq[T]) *BinaryH
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -190,7 +190,7 @@ func NewOrderedBinary[T cmp.Ordered](order Order, capacity int) *BinaryHeap[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -218,7 +218,7 @@ func OrderedBinaryFrom[T cmp.Ordered](order Order, data []T) *BinaryHeap[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)
@@ -246,7 +246,7 @@ func OrderedBinaryClone[T cmp.Ordered](order Order, data []T) *BinaryHeap[T] {
 //	Operation         Time Complexity
 //	---------------   ---------------
 //	IsEmpty()         O(1)
-//	Length()          O(1)
+//	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
 //	Push(x)           O(log N)

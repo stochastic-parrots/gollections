@@ -11,7 +11,7 @@ type IndexOutOfBoundError struct {
 	// index is the invalid index that the user attempted to access.
 	index int
 
-	// limit is the maximum valid index allowed in the collection (Length - 1).
+	// limit is the maximum valid index allowed in the collection (Len - 1).
 	limit int
 }
 
@@ -23,7 +23,7 @@ type IndexOutOfBoundError struct {
 // Parameters:
 //
 //	index  The invalid index that was requested.
-//	limit  The largest valid index allowed in the collection (Length - 1).
+//	limit  The largest valid index allowed in the collection (Len - 1).
 func NewIndexOutOfBoundError(index, limit int) *IndexOutOfBoundError {
 	return &IndexOutOfBoundError{index, limit}
 }

@@ -59,11 +59,11 @@ func TestArraySortedList_IsEmpty(t *testing.T) {
 	assert.False(t, l.IsEmpty())
 }
 
-func TestArraySortedList_Length(t *testing.T) {
+func TestArraySortedList_Len(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
 	l.Adds(3, 1, 2)
 
-	assert.Equal(t, 3, l.Length())
+	assert.Equal(t, 3, l.Len())
 }
 
 func TestArraySortedList_Get(t *testing.T) {
@@ -433,7 +433,7 @@ func TestArraySortedList_Remove(t *testing.T) {
 		l.Adds(&x, &y)
 
 		assert.True(t, l.Remove(&x))
-		assert.Nil(t, l.data[:cap(l.data)][l.Length()])
+		assert.Nil(t, l.data[:cap(l.data)][l.Len()])
 	})
 }
 
@@ -491,8 +491,8 @@ func TestArraySortedList_Enumerate(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
 	l.Adds(3, 1, 2)
 
-	indexes := make([]int, 0, l.Length())
-	values := make([]int, 0, l.Length())
+	indexes := make([]int, 0, l.Len())
+	values := make([]int, 0, l.Len())
 	for idx, value := range l.Enumerate() {
 		indexes = append(indexes, idx)
 		values = append(values, value)

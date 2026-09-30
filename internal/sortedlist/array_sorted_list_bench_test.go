@@ -14,7 +14,7 @@ func BenchmarkArraySortedList_Adds(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		list.Adds(data...)
-		_ = list.Length()
+		_ = list.Len()
 
 		b.StopTimer()
 		list.Clear()

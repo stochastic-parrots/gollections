@@ -129,13 +129,13 @@ func assertHeapBehavior(t *testing.T, h heap.Heap[int], expectedDrain []int) {
 	top, ok := h.Peek()
 	assert.True(t, ok)
 	assert.Equal(t, expectedDrain[0], top)
-	assert.Equal(t, 3, h.Length())
+	assert.Equal(t, 3, h.Len())
 	assert.Len(t, slices.Collect(h.All()), 3)
 
 	old, ok := h.Replace(4)
 	assert.True(t, ok)
 	assert.Equal(t, expectedDrain[0], old)
-	assert.Equal(t, 3, h.Length())
+	assert.Equal(t, 3, h.Len())
 
 	data, err := json.Marshal(h)
 	assert.NoError(t, err)

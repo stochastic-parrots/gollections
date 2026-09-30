@@ -108,7 +108,7 @@ func BenchmarkHeaps_Pop(b *testing.B) {
 			b.ReportAllocs()
 			h := implementation.Factory()
 			for range b.N {
-				if h.Length() == 0 {
+				if h.Len() == 0 {
 					b.StopTimer()
 					h = implementation.Factory()
 					b.StartTimer()

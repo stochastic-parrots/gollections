@@ -22,7 +22,7 @@ var _ Set[int] = &set.HashSet[int]{}
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()              O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average
@@ -43,7 +43,7 @@ func NewHashSet[T comparable](capacity int) *HashSet[T] { return set.NewHashSet[
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()              O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average
@@ -64,7 +64,7 @@ func HashSetFrom[T comparable](data []T) *HashSet[T] { return set.NewHashSetFrom
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()              O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average

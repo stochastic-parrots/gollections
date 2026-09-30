@@ -44,10 +44,10 @@ func NewDoubleLinkedListFromSeq[T any](seq iter.Seq[T]) *DoubleLinkedList[T] {
 	return list
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (l *DoubleLinkedList[T]) Length() int {
+func (l *DoubleLinkedList[T]) Len() int {
 	return l.length
 }
 
@@ -86,7 +86,7 @@ func (l *DoubleLinkedList[T]) backward(n *node.DoubleLinkedNode[T]) *node.Double
 //
 // Complexity: O(N/2) which simplifies to O(N).
 func (l *DoubleLinkedList[T]) get(idx int) *node.DoubleLinkedNode[T] {
-	size := l.Length()
+	size := l.Len()
 	var current *node.DoubleLinkedNode[T]
 
 	if idx < size/2 {
@@ -108,9 +108,9 @@ func (l *DoubleLinkedList[T]) get(idx int) *node.DoubleLinkedNode[T] {
 // Complexity: O(N).
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Get(idx int) (T, error) {
-	if idx < 0 || idx >= l.Length() {
+	if idx < 0 || idx >= l.Len() {
 		var zero T
-		return zero, NewIndexOutOfBoundError(idx, l.Length()-1)
+		return zero, NewIndexOutOfBoundError(idx, l.Len()-1)
 	}
 
 	return l.get(idx).Value, nil
@@ -155,8 +155,8 @@ func (l *DoubleLinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {
 // Complexity: O(N).
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
-	if idx < 0 || idx >= l.Length() {
-		return NewIndexOutOfBoundError(idx, l.Length()-1)
+	if idx < 0 || idx >= l.Len() {
+		return NewIndexOutOfBoundError(idx, l.Len()-1)
 	}
 
 	l.get(idx).Value = x
@@ -215,11 +215,11 @@ func (l *DoubleLinkedList[T]) prepend(x T) {
 // If the index is equal to the current length, the value is appended to the end.
 // If the index is 0, the value becomes the new first element.
 //
-// Complexity: O(N) in the worst case; O(1) if inserting at the boundaries (0 or Length).
+// Complexity: O(N) in the worst case; O(1) if inserting at the boundaries (0 or Len).
 //
-// Returns an IndexOutOfBounds error if the index is out of range [0, Length].
+// Returns an IndexOutOfBounds error if the index is out of range [0, Len].
 func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
-	size := l.Length()
+	size := l.Len()
 	if idx < 0 || idx > size {
 		return NewIndexOutOfBoundError(idx, size)
 	}
@@ -265,7 +265,7 @@ func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
 //
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
-	size := l.Length()
+	size := l.Len()
 	if idx < 0 || idx >= size {
 		var zero T
 		return zero, NewIndexOutOfBoundError(idx, size-1)
@@ -444,7 +444,7 @@ func (l *DoubleLinkedList[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (l *DoubleLinkedList[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, l, l.Length())
+	collection.Format(s, verb, l, l.Len())
 }
 
 // String returns a string representation of the list.

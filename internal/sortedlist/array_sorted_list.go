@@ -47,10 +47,10 @@ func NewArraySortedListFromSeq[T any](seq iter.Seq[T], compare func(a, b T) int)
 	return NewArraySortedListFromSlice(slices.Collect(seq), compare)
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (l *ArraySortedList[T]) Length() int {
+func (l *ArraySortedList[T]) Len() int {
 	return len(l.data)
 }
 
@@ -75,7 +75,7 @@ func (l *ArraySortedList[T]) Get(idx int) (T, error) {
 
 // LowerBound returns the first index whose value does not sort before x.
 //
-// It returns Length when every value sorts before x.
+// It returns Len when every value sorts before x.
 //
 // Complexity: O(log N).
 func (l *ArraySortedList[T]) LowerBound(x T) int {
@@ -97,7 +97,7 @@ func (l *ArraySortedList[T]) LowerBound(x T) int {
 
 // UpperBound returns the first index whose value sorts after x.
 //
-// It returns Length when no value sorts after x.
+// It returns Len when no value sorts after x.
 //
 // Complexity: O(log N).
 func (l *ArraySortedList[T]) UpperBound(x T) int {

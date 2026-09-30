@@ -43,10 +43,10 @@ func NewDoubleLinkedDequeFromSeq[T any](seq iter.Seq[T]) *DoubleLinkedDeque[T] {
 	return deque
 }
 
-// Length returns the current number of elements in the deque.
+// Len returns the current number of elements in the deque.
 //
 // Complexity: O(1).
-func (d *DoubleLinkedDeque[T]) Length() int {
+func (d *DoubleLinkedDeque[T]) Len() int {
 	return d.length
 }
 
@@ -269,7 +269,7 @@ func (d *DoubleLinkedDeque[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (d *DoubleLinkedDeque[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, d, d.Length())
+	collection.Format(s, verb, d, d.Len())
 }
 
 // String returns a string representation of the deque.

@@ -19,7 +19,7 @@ var _ List[int] = &list.DoubleLinkedList[int]{}
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()                 O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(N)
@@ -48,7 +48,7 @@ func NewLinked[T any]() *LinkedList[T] { return list.NewDoubleLinkedList[T]() }
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()                 O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(N)
@@ -77,7 +77,7 @@ func LinkedFrom[T any](data []T) *LinkedList[T] { return list.NewDoubleLinkedLis
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()                 O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(N)

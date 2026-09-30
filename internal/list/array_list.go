@@ -40,10 +40,10 @@ func NewArrayListFromSeq[T any](seq iter.Seq[T]) *ArrayList[T] {
 	return NewArrayListFromSlice(slices.Collect(seq))
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (l *ArrayList[T]) Length() int {
+func (l *ArrayList[T]) Len() int {
 	return len(l.data)
 }
 
@@ -203,7 +203,7 @@ func (l *ArrayList[T]) All() iter.Seq[T] {
 // Complexity: O(N) for a full traversal, O(1) per step.
 func (l *ArrayList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for idx := l.Length() - 1; idx >= 0; idx-- {
+		for idx := l.Len() - 1; idx >= 0; idx-- {
 			if !yield(l.data[idx]) {
 				return
 			}

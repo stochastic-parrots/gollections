@@ -15,7 +15,7 @@ import (
 type Readonly[T any] interface {
 	// Get returns the element at the specified index.
 	//
-	// Returns an error if the index is out of bounds [0, Length).
+	// Returns an error if the index is out of bounds [0, Len).
 	Get(idx int) (x T, err error)
 
 	// Find locates the index of an element using a linear search.
@@ -110,7 +110,7 @@ func (w readonly[T]) ToSlice() []T { return w.inner.ToSlice() }
 
 func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[T]) Length() int { return w.inner.Length() }
+func (w readonly[T]) Len() int { return w.inner.Len() }
 
 func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
 

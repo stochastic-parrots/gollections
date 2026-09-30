@@ -17,7 +17,7 @@ func Dijkstra[T constraint.Number](graph models.Graph[T], start int, pm datastru
 	dist[start] = 0
 	pm.Set(start, 0)
 
-	for pm.Length() > 0 {
+	for pm.Len() > 0 {
 		u, d, _ := pm.Pop()
 		if d > dist[u] {
 			continue

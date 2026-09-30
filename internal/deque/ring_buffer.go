@@ -117,10 +117,10 @@ func (rb *RingBufferDeque[T]) IsEmpty() bool {
 	return rb.count == 0
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (rb *RingBufferDeque[T]) Length() int {
+func (rb *RingBufferDeque[T]) Len() int {
 	return rb.count
 }
 

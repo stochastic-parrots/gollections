@@ -210,10 +210,10 @@ func (pm *PairingPriorityMap[K, P]) IsEmpty() bool {
 	return len(pm.indexes) == 0
 }
 
-// Length returns the current number of elements in the heap.
+// Len returns the current number of elements in the heap.
 //
 // Complexity: O(1).
-func (pm *PairingPriorityMap[K, P]) Length() int {
+func (pm *PairingPriorityMap[K, P]) Len() int {
 	return len(pm.indexes)
 }
 

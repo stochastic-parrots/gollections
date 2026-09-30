@@ -151,7 +151,7 @@ func ExampleAsReadonly() {
 
 	// view.Pop() => compiler(MissingFieldOrMethod)
 
-	fmt.Println(view.Length())
+	fmt.Println(view.Len())
 	fmt.Println(view.IsEmpty())
 
 	priority, _ := view.Get("Feature Request")
