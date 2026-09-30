@@ -84,7 +84,7 @@ func TestArraySortedList_Get(t *testing.T) {
 		for _, idx := range []int{-1, 1, 2} {
 			_, err := l.Get(idx)
 			assert.Error(t, err)
-			assert.True(t, errors.Is(err, list.ErrIndexOutOfBound))
+			assert.True(t, errors.Is(err, list.ErrIndexOutOfBounds))
 		}
 	})
 }
@@ -372,7 +372,8 @@ func TestArraySortedList_Replace(t *testing.T) {
 
 		for _, idx := range []int{-1, 1} {
 			err := l.Replace(idx, 1)
-			assert.ErrorIs(t, err, list.ErrIndexOutOfBound)
+			assert.ErrorIs(t, err, list.ErrIndexOutOfBounds)
+			assert.EqualError(t, err, fmt.Sprintf("cannot replace index %d out of range for length 1", idx))
 		}
 	})
 

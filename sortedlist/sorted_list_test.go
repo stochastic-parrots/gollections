@@ -111,9 +111,10 @@ func TestArraySortedList_GetError(t *testing.T) {
 	_, err := list.Get(0)
 
 	assert.Error(t, err)
-	assert.True(t, errors.Is(err, sortedlist.ErrIndexOutOfBound))
+	assert.True(t, errors.Is(err, sortedlist.ErrIndexOutOfBounds))
+	assert.EqualError(t, err, "cannot get index 0 because list is empty")
 
-	var bounds *sortedlist.IndexOutOfBoundError
+	var bounds *sortedlist.IndexOutOfBoundsError
 	assert.True(t, errors.As(err, &bounds))
 	assert.Equal(t, 0, bounds.Index())
 	assert.Equal(t, -1, bounds.Limit())

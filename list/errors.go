@@ -2,8 +2,8 @@ package list
 
 import "github.com/stochastic-parrots/gollections/internal/list"
 
-// IndexOutOfBoundError reports an index outside the valid list range.
-type IndexOutOfBoundError = list.IndexOutOfBoundError
+// IndexOutOfBoundsError reports an index outside the valid list range.
+type IndexOutOfBoundsError = list.IndexOutOfBoundsError
 
-// ErrIndexOutOfBound identifies list index bounds errors.
-var ErrIndexOutOfBound = list.ErrIndexOutOfBound
+// ErrIndexOutOfBounds identifies list index bounds errors.
+var ErrIndexOutOfBounds = list.ErrIndexOutOfBounds

@@ -82,10 +82,10 @@ func TestDoubleLinkedList_Get(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			_, err := list.Get(i)
-			target := NewIndexOutOfBoundError(i, list.length)
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot get index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, list.length)
-			assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+			assert.EqualError(t, err, fmt.Sprintf(template, i, list.length))
 		}
 	})
 }
@@ -182,10 +182,10 @@ func TestDoubleLinkedList_Set(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			err := list.Set(i, 0)
-			target := NewIndexOutOfBoundError(i, list.length)
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot set index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, list.length)
-			assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+			assert.EqualError(t, err, fmt.Sprintf(template, i, list.length))
 		}
 
 		for i := range list.length {
@@ -252,7 +252,7 @@ func TestDoubleLinkedList_Insert(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Append(1)
 		err := list.Insert(5, 10)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot insert at index 5 out of range for length 1")
 		assert.Equal(t, []int{1}, list.ToSlice())
 	})
 }
@@ -333,7 +333,7 @@ func TestDoubleLinkedList_Remove(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Append(1)
 		_, err := list.Remove(1)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot remove index 1 out of range for length 1")
 	})
 }
 
