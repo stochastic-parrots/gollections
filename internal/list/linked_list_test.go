@@ -67,10 +67,10 @@ func TestLinkedList_Get(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			_, err := l.Get(i)
-			target := NewIndexOutOfBoundError(i, l.length)
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot get index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, l.length)
-			assert.EqualErrorf(t, err, err.Error(), template, i, l.length)
+			assert.EqualError(t, err, fmt.Sprintf(template, i, l.length))
 		}
 	})
 }
@@ -190,10 +190,10 @@ func TestLinkedList_Set(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			err := l.Set(i, 0)
-			target := NewIndexOutOfBoundError(i, l.length)
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot set index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, l.length)
-			assert.EqualErrorf(t, err, err.Error(), template, i, l.length)
+			assert.EqualError(t, err, fmt.Sprintf(template, i, l.length))
 		}
 
 		for i := range l.length {

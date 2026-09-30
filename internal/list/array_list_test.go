@@ -92,10 +92,10 @@ func TestArrayList_Get(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			_, err := list.Get(i)
-			target := NewIndexOutOfBoundError(i, len(list.data))
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot get index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, len(list.data))
-			assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
+			assert.EqualError(t, err, fmt.Sprintf(template, i, len(list.data)))
 		}
 	})
 }
@@ -192,10 +192,10 @@ func TestArrayList_Set(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			err := list.Set(i, 0)
-			target := NewIndexOutOfBoundError(i, len(list.data))
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot set index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, len(list.data))
-			assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
+			assert.EqualError(t, err, fmt.Sprintf(template, i, len(list.data)))
 		}
 
 		for i := range len(list.data) {

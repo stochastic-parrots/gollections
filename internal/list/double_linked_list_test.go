@@ -82,10 +82,10 @@ func TestDoubleLinkedList_Get(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			_, err := list.Get(i)
-			target := NewIndexOutOfBoundError(i, list.length)
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot get index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, list.length)
-			assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+			assert.EqualError(t, err, fmt.Sprintf(template, i, list.length))
 		}
 	})
 }
@@ -182,10 +182,10 @@ func TestDoubleLinkedList_Set(t *testing.T) {
 
 		for _, i := range []int{-1, 4, 5} {
 			err := list.Set(i, 0)
-			target := NewIndexOutOfBoundError(i, list.length)
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot set index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, list.length)
-			assert.EqualErrorf(t, err, err.Error(), template, i, list.length)
+			assert.EqualError(t, err, fmt.Sprintf(template, i, list.length))
 		}
 
 		for i := range list.length {

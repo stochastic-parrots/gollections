@@ -5,11 +5,11 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/sortedlist"
 )
 
-// IndexOutOfBoundError reports an index outside the valid sorted-list range.
-type IndexOutOfBoundError = list.IndexOutOfBoundError
+// IndexOutOfBoundsError reports an index outside the valid sorted-list range.
+type IndexOutOfBoundsError = list.IndexOutOfBoundsError
 
-// ErrIndexOutOfBound identifies sorted-list index bounds errors.
-var ErrIndexOutOfBound = list.ErrIndexOutOfBound
+// ErrIndexOutOfBounds identifies sorted-list index bounds errors.
+var ErrIndexOutOfBounds = list.ErrIndexOutOfBounds
 
 // ErrOrderViolation identifies replacements that would break sorted order.
 var ErrOrderViolation = sortedlist.ErrOrderViolation

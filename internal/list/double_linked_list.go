@@ -110,7 +110,7 @@ func (l *DoubleLinkedList[T]) get(idx int) *node.DoubleLinkedNode[T] {
 func (l *DoubleLinkedList[T]) Get(idx int) (T, error) {
 	if idx < 0 || idx >= l.Len() {
 		var zero T
-		return zero, NewIndexOutOfBoundError(idx, l.Len()-1)
+		return zero, NewIndexOperationOutOfBoundsError(IndexOperationGet, idx, l.Len()-1)
 	}
 
 	return l.get(idx).Value, nil
@@ -156,7 +156,7 @@ func (l *DoubleLinkedList[T]) Contains(match func(T) bool) bool {
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 	if idx < 0 || idx >= l.Len() {
-		return NewIndexOutOfBoundError(idx, l.Len()-1)
+		return NewIndexOperationOutOfBoundsError(IndexOperationSet, idx, l.Len()-1)
 	}
 
 	l.get(idx).Value = x
@@ -221,7 +221,7 @@ func (l *DoubleLinkedList[T]) prepend(x T) {
 func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
 	size := l.Len()
 	if idx < 0 || idx > size {
-		return NewIndexOutOfBoundError(idx, size)
+		return NewIndexOperationOutOfBoundsError(IndexOperationInsert, idx, size)
 	}
 
 	if idx == 0 {
@@ -268,7 +268,7 @@ func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
 	size := l.Len()
 	if idx < 0 || idx >= size {
 		var zero T
-		return zero, NewIndexOutOfBoundError(idx, size-1)
+		return zero, NewIndexOperationOutOfBoundsError(IndexOperationRemove, idx, size-1)
 	}
 
 	current := l.get(idx)

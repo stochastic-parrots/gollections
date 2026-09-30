@@ -47,7 +47,7 @@ func (l *LinkedList[T]) IsEmpty() bool {
 func (l *LinkedList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= l.Len() {
 		var zero T
-		return zero, NewIndexOutOfBoundError(index, l.Len()-1)
+		return zero, NewIndexOperationOutOfBoundsError(IndexOperationGet, index, l.Len()-1)
 	}
 
 	current := l.first
@@ -98,7 +98,7 @@ func (l *LinkedList[T]) Contains(match func(T) bool) bool {
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Set(index int, x T) error {
 	if index < 0 || index >= l.Len() {
-		return NewIndexOutOfBoundError(index, l.Len()-1)
+		return NewIndexOperationOutOfBoundsError(IndexOperationSet, index, l.Len()-1)
 	}
 
 	current := l.first
@@ -143,7 +143,7 @@ func (l *LinkedList[T]) Appends(xs ...T) {
 func (l *LinkedList[T]) Insert(idx int, x T) error {
 	size := l.Len()
 	if idx < 0 || idx > size {
-		return NewIndexOutOfBoundError(idx, size)
+		return NewIndexOperationOutOfBoundsError(IndexOperationInsert, idx, size)
 	}
 
 	if idx == size {
@@ -181,7 +181,7 @@ func (l *LinkedList[T]) Remove(idx int) (T, error) {
 	size := l.Len()
 	if idx < 0 || idx >= size {
 		var zero T
-		return zero, NewIndexOutOfBoundError(idx, size-1)
+		return zero, NewIndexOperationOutOfBoundsError(IndexOperationRemove, idx, size-1)
 	}
 
 	var val T
