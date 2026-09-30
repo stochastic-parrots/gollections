@@ -44,6 +44,8 @@
 // All traverses the current logical list order from first to last, including
 // after Reverse. Enumerate uses the same order and assigns consecutive indexes
 // starting at zero. Backward traverses that logical order in reverse.
+// Find returns the index of the first value matching a predicate;
+// Contains reports whether any value matches. Both search in logical order.
 //
 // A readonly view observes the same underlying list; it is not a snapshot and
 // does not make concurrent mutation safe.

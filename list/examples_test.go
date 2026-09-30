@@ -1,7 +1,6 @@
 package list_test
 
 import (
-	"cmp"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -21,9 +20,9 @@ func ExampleNewArray() {
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
 
-	fmt.Println(items.Contains(50, cmp.Compare[int]))
+	fmt.Println(items.Contains(func(x int) bool { return x == 50 }))
 	items.Append(50)
-	fmt.Println(items.Contains(50, cmp.Compare[int]))
+	fmt.Println(items.Contains(func(x int) bool { return x == 50 }))
 
 	items.Reverse()
 	fmt.Println(slices.Collect(items.All()))
@@ -60,8 +59,8 @@ func ExampleNewLinked() {
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
 
-	fmt.Println(items.Contains("Go", cmp.Compare[string]))
-	fmt.Println(items.Contains("Java", cmp.Compare[string]))
+	fmt.Println(items.Contains(func(x string) bool { return x == "Go" }))
+	fmt.Println(items.Contains(func(x string) bool { return x == "Java" }))
 
 	_ = items.Insert(0, "Java and")
 	_, _ = items.Remove(2)

@@ -1,7 +1,6 @@
 package list
 
 import (
-	"cmp"
 	"fmt"
 	"slices"
 	"testing"
@@ -108,7 +107,7 @@ func TestArrayList_Find(t *testing.T) {
 		list.Appends(values...)
 
 		for idx, value := range values {
-			fidx, exists := list.Find(value, cmp.Compare[int])
+			fidx, exists := list.Find(func(x int) bool { return x == value })
 			assert.Equal(t, idx, fidx)
 			assert.True(t, exists)
 		}
@@ -117,7 +116,7 @@ func TestArrayList_Find(t *testing.T) {
 	t.Run("NonExistent", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		list.Appends(1, 2, 3)
-		idx, exists := list.Find(4, cmp.Compare[int])
+		idx, exists := list.Find(func(x int) bool { return x == 4 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -125,7 +124,7 @@ func TestArrayList_Find(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		list := NewArrayList[int](0)
-		idx, exists := list.Find(2, cmp.Compare[int])
+		idx, exists := list.Find(func(x int) bool { return x == 2 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -139,7 +138,7 @@ func TestArrayList_Contains(t *testing.T) {
 		list.Appends(values...)
 
 		for _, value := range values {
-			assert.True(t, list.Contains(value, cmp.Compare[int]))
+			assert.True(t, list.Contains(func(x int) bool { return x == value }))
 		}
 	})
 
@@ -147,13 +146,13 @@ func TestArrayList_Contains(t *testing.T) {
 		list := NewArrayList[int](3)
 		list.Appends(1, 2, 3)
 
-		assert.False(t, list.Contains(4, cmp.Compare[int]))
+		assert.False(t, list.Contains(func(x int) bool { return x == 4 }))
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		list := NewArrayList[int](0)
 
-		assert.False(t, list.Contains(4, cmp.Compare[int]))
+		assert.False(t, list.Contains(func(x int) bool { return x == 4 }))
 	})
 }
 

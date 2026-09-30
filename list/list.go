@@ -18,13 +18,13 @@ type Readonly[T any] interface {
 	// Returns an error if the index is out of bounds [0, Length).
 	Get(idx int) (x T, err error)
 
-	// Find locates the index of an element using a linear search.
-	// It returns the index and true if found; otherwise, -1 and false.
-	Find(x T, cmp func(a, b T) int) (idx int, ok bool)
+	// Find returns the index of the first value for which match returns true,
+	// searching in list order.
+	// It returns -1 and false when no value matches.
+	Find(match func(T) bool) (idx int, ok bool)
 
-	// Contains returns true if the element exists in the list according
-	// to the provided comparator. This is typically an O(N) operation.
-	Contains(x T, cmp func(a, b T) int) bool
+	// Contains reports whether match returns true for any value in list order.
+	Contains(match func(T) bool) bool
 
 	// Backward returns an iterator that traverses the list in reverse order.
 	//
@@ -96,9 +96,9 @@ type readonly[T any] struct {
 
 func (w readonly[T]) Get(idx int) (x T, err error) { return w.inner.Get(idx) }
 
-func (w readonly[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) { return w.inner.Find(x, cmp) }
+func (w readonly[T]) Find(match func(T) bool) (idx int, ok bool) { return w.inner.Find(match) }
 
-func (w readonly[T]) Contains(x T, cmp func(a, b T) int) bool { return w.inner.Contains(x, cmp) }
+func (w readonly[T]) Contains(match func(T) bool) bool { return w.inner.Contains(match) }
 
 func (w readonly[T]) Backward() iter.Seq[T] { return w.inner.Backward() }
 

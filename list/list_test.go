@@ -1,7 +1,6 @@
 package list_test
 
 import (
-	"cmp"
 	"encoding/json"
 	"slices"
 	"testing"
@@ -123,11 +122,11 @@ func TestAsReadonly(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 2, x)
 
-		idx, ok := view.Find(2, cmp.Compare[int])
+		idx, ok := view.Find(func(x int) bool { return x == 2 })
 		assert.True(t, ok)
 		assert.Equal(t, 1, idx)
 
-		assert.True(t, view.Contains(2, cmp.Compare[int]))
+		assert.True(t, view.Contains(func(x int) bool { return x == 2 }))
 		assert.Equal(t, "[1 2]", view.String())
 
 		mutable.Append(3)
@@ -137,6 +136,67 @@ func TestAsReadonly(t *testing.T) {
 		assert.NoError(t, err)
 		assert.JSONEq(t, `[1,2,3]`, string(data))
 	})
+}
+
+func TestList_Find(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		list list.List[int]
+	}{
+		{"Array", list.NewArray[int](0)},
+		{"Linked", list.NewLinked[int]()},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			match := func(value int) bool { return value%2 == 0 }
+			idx, ok := test.list.Find(match)
+			assert.Equal(t, -1, idx)
+			assert.False(t, ok)
+
+			test.list.Appends(1, 2, 4, 6)
+			idx, ok = test.list.Find(match)
+			assert.Equal(t, 1, idx)
+			assert.True(t, ok)
+
+			test.list.Reverse()
+			idx, ok = test.list.Find(match)
+			assert.Equal(t, 0, idx)
+			assert.True(t, ok)
+
+			idx, ok = test.list.Find(func(value int) bool { return value < 0 })
+			assert.Equal(t, -1, idx)
+			assert.False(t, ok)
+		})
+	}
+}
+
+func TestList_Contains(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		list list.List[int]
+	}{
+		{"Array", list.NewArray[int](0)},
+		{"Linked", list.NewLinked[int]()},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			calls := 0
+			match := func(value int) bool {
+				calls++
+				return value%2 == 0
+			}
+			assert.False(t, test.list.Contains(match))
+			assert.Equal(t, 0, calls)
+
+			test.list.Appends(1, 2, 4)
+			assert.True(t, test.list.Contains(match))
+			assert.Equal(t, 2, calls)
+
+			test.list.Reverse()
+			calls = 0
+			assert.True(t, test.list.Contains(match))
+			assert.Equal(t, 1, calls)
+			assert.False(t, test.list.Contains(func(value int) bool { return value < 0 }))
+		})
+	}
 }
 
 func assertListBehavior(t *testing.T, l list.List[int]) {
@@ -156,11 +216,11 @@ func assertListBehavior(t *testing.T, l list.List[int]) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, x)
 
-	idx, ok := l.Find(3, cmp.Compare[int])
+	idx, ok := l.Find(func(x int) bool { return x == 3 })
 	assert.True(t, ok)
 	assert.Equal(t, 2, idx)
 
-	assert.True(t, l.Contains(2, cmp.Compare[int]))
+	assert.True(t, l.Contains(func(x int) bool { return x == 2 }))
 
 	err = l.Set(1, 20)
 	assert.NoError(t, err)
