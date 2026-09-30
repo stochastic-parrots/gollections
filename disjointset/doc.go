@@ -20,9 +20,11 @@
 // operation can still take O(log N) time; Reset takes O(N).
 //
 // [AsReadonly] restricts access to observation operations but is not a
-// snapshot. Find and Connected may compress internal paths. These structures
-// are not safe for concurrent use; callers must synchronize shared access
-// when any goroutine may call an operation that changes internal paths or sets.
+// snapshot. Find and Connected may compress internal paths; Rank and Size do
+// the same on their respective implementations. Path compression rewrites
+// parent links, so these queries are not safe to call concurrently on a shared
+// structure. Callers must synchronize shared access whenever any goroutine may
+// call a query that compresses paths or a method that changes sets.
 //
 // The partition has no JSON representation in this package. An array of range
 // values alone would not identify which values belong to the same set.

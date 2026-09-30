@@ -40,27 +40,33 @@ type DisjointSet[T constraint.Integer] interface {
 }
 
 // RankDisjointSet adds a rank query to the common disjoint-set operations.
-// Rank is a union heuristic and does not report the size of a set.
+// Rank is a union heuristic and does not report the size of a set. It may
+// compress paths, so callers must synchronize concurrent access.
 type RankDisjointSet[T constraint.Integer] interface {
 	DisjointSet[T]
 
 	// Rank returns the rank of the set containing x, or zero and false when x
-	// is outside the range.
+	// is outside the range. Finding the set may compress paths and write parent
+	// links.
 	Rank(x T) (rank int, ok bool)
 }
 
 // SizeDisjointSet adds a set-size query to the common disjoint-set operations.
+// Size may compress paths, so callers must synchronize concurrent access.
 type SizeDisjointSet[T constraint.Integer] interface {
 	DisjointSet[T]
 
 	// Size returns the number of values in the set containing x, or zero and
-	// false when x is outside the range.
+	// false when x is outside the range. Finding the set may compress paths and
+	// write parent links.
 	Size(x T) (size int, ok bool)
 }
 
 // AsReadonly returns a [Readonly] view of the provided [DisjointSet]. The view
 // observes the same underlying partition, but does not expose Union or Reset.
-// It is neither a snapshot nor synchronization. Nil input returns nil.
+// Find and Connected can write parent links through path compression, so the
+// view does not make concurrent access safe. It is not a snapshot. Nil input
+// returns nil.
 func AsReadonly[T constraint.Integer](set DisjointSet[T]) *readonly[T] {
 	if set == nil {
 		return nil
