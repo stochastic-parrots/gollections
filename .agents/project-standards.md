@@ -285,7 +285,7 @@ alias and constructor from the public package.
   //	Operation             Time Complexity
   //	-------------------   ---------------
   //	IsEmpty()             O(1)
-  //	Length()              O(1)
+  //	Len()                 O(1)
   //	All()                 O(N)
   //	Enumerate()           O(N)
   //	Get(idx)              O(N)
@@ -314,7 +314,7 @@ alias and constructor from the public package.
   //	Operation             Time Complexity
   //	-------------------   ---------------
   //	IsEmpty()             O(1)
-  //	Length()              O(1)
+  //	Len()                 O(1)
   //	All()                 O(N)
   //	Enumerate()           O(N)
   //	Get(idx)              O(N)
