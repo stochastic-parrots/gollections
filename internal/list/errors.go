@@ -2,20 +2,20 @@ package list
 
 import "fmt"
 
-// IndexOperation identifies an indexed list operation.
-type IndexOperation uint8
+// Operation identifies a list operation that uses an index.
+type Operation uint8
 
 const (
-	// IndexOperationGet identifies an indexed read.
-	IndexOperationGet IndexOperation = iota + 1
-	// IndexOperationSet identifies an indexed update.
-	IndexOperationSet
-	// IndexOperationInsert identifies an indexed insertion.
-	IndexOperationInsert
-	// IndexOperationRemove identifies an indexed removal.
-	IndexOperationRemove
-	// IndexOperationReplace identifies an indexed replacement in a sorted list.
-	IndexOperationReplace
+	// OperationGet identifies an indexed read.
+	OperationGet Operation = iota + 1
+	// OperationSet identifies an indexed update.
+	OperationSet
+	// OperationInsert identifies an indexed insertion.
+	OperationInsert
+	// OperationRemove identifies an indexed removal.
+	OperationRemove
+	// OperationReplace identifies an indexed replacement in a sorted list.
+	OperationReplace
 )
 
 // IndexOutOfBoundsError reports an index outside the valid range [0, limit].
@@ -24,22 +24,20 @@ type IndexOutOfBoundsError struct {
 	index     int
 	limit     int
 	length    int
-	operation IndexOperation
+	operation Operation
 }
 
-// NewIndexOutOfBoundsError reports an invalid index and the largest valid index.
-// For indexed reads, updates, and removals, limit is the collection length minus one.
-func NewIndexOutOfBoundsError(index, limit int) *IndexOutOfBoundsError {
-	return &IndexOutOfBoundsError{index: index, limit: limit, length: limit + 1}
-}
-
-// NewIndexOperationOutOfBoundsError reports an invalid index for a specific operation.
+// NewIndexOutOfBoundsError reports an invalid index for an operation.
 // limit is the largest valid index; for insertion, it is the collection length.
-func NewIndexOperationOutOfBoundsError(operation IndexOperation, index, limit int) *IndexOutOfBoundsError {
+func NewIndexOutOfBoundsError(operation Operation, index, limit int) *IndexOutOfBoundsError {
+	length := limit + 1
+	if operation == OperationInsert {
+		length = limit
+	}
 	return &IndexOutOfBoundsError{
 		index:     index,
 		limit:     limit,
-		length:    limit + 1,
+		length:    length,
 		operation: operation,
 	}
 }
@@ -48,15 +46,15 @@ func NewIndexOperationOutOfBoundsError(operation IndexOperation, index, limit in
 func (e *IndexOutOfBoundsError) Error() string {
 	operation := ""
 	switch e.operation {
-	case IndexOperationGet:
+	case OperationGet:
 		operation = "cannot get "
-	case IndexOperationSet:
+	case OperationSet:
 		operation = "cannot set "
-	case IndexOperationInsert:
+	case OperationInsert:
 		operation = "cannot insert at "
-	case IndexOperationRemove:
+	case OperationRemove:
 		operation = "cannot remove "
-	case IndexOperationReplace:
+	case OperationReplace:
 		operation = "cannot replace "
 	}
 	return fmt.Sprintf("%sindex %d out of range for length %d", operation, e.index, e.length)

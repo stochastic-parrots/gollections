@@ -67,7 +67,7 @@ func (l *ArraySortedList[T]) IsEmpty() bool {
 func (l *ArraySortedList[T]) Get(idx int) (T, error) {
 	if idx < 0 || idx >= len(l.data) {
 		var zero T
-		return zero, list.NewIndexOperationOutOfBoundsError(list.IndexOperationGet, idx, len(l.data)-1)
+		return zero, list.NewIndexOutOfBoundsError(list.OperationGet, idx, len(l.data)-1)
 	}
 
 	return l.data[idx], nil
@@ -300,7 +300,7 @@ func (l *ArraySortedList[T]) Adds(xs ...T) {
 // Complexity: O(1).
 func (l *ArraySortedList[T]) Replace(idx int, x T) error {
 	if idx < 0 || idx >= len(l.data) {
-		return list.NewIndexOperationOutOfBoundsError(list.IndexOperationReplace, idx, len(l.data)-1)
+		return list.NewIndexOutOfBoundsError(list.OperationReplace, idx, len(l.data)-1)
 	}
 	if idx > 0 && l.compare(l.data[idx-1], x) > 0 {
 		return ErrOrderViolation

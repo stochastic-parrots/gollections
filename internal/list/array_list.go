@@ -61,7 +61,7 @@ func (l *ArrayList[T]) IsEmpty() bool {
 func (l *ArrayList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= len(l.data) {
 		var zero T
-		return zero, NewIndexOperationOutOfBoundsError(IndexOperationGet, index, len(l.data)-1)
+		return zero, NewIndexOutOfBoundsError(OperationGet, index, len(l.data)-1)
 	}
 
 	return l.data[index], nil
@@ -107,7 +107,7 @@ func (l *ArrayList[T]) Contains(match func(T) bool) bool {
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *ArrayList[T]) Set(index int, x T) error {
 	if index < 0 || index >= len(l.data) {
-		return NewIndexOperationOutOfBoundsError(IndexOperationSet, index, len(l.data)-1)
+		return NewIndexOutOfBoundsError(OperationSet, index, len(l.data)-1)
 	}
 
 	l.data[index] = x
@@ -137,7 +137,7 @@ func (l *ArrayList[T]) Appends(xs ...T) {
 func (l *ArrayList[T]) Insert(index int, x T) error {
 	size := len(l.data)
 	if index < 0 || index > size {
-		return NewIndexOperationOutOfBoundsError(IndexOperationInsert, index, size)
+		return NewIndexOutOfBoundsError(OperationInsert, index, size)
 	}
 
 	if index == size {
@@ -161,7 +161,7 @@ func (l *ArrayList[T]) Remove(index int) (T, error) {
 	size := len(l.data)
 	if index < 0 || index >= size {
 		var zero T
-		return zero, NewIndexOperationOutOfBoundsError(IndexOperationRemove, index, size-1)
+		return zero, NewIndexOutOfBoundsError(OperationRemove, index, size-1)
 	}
 
 	val := l.data[index]
