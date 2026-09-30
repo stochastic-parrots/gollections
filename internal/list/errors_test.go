@@ -37,3 +37,8 @@ func TestNewIndexOutOfBoundsError(t *testing.T) {
 		})
 	}
 }
+
+func TestErrIndexOutOfBounds(t *testing.T) {
+	assert.EqualError(t, ErrIndexOutOfBounds, "index 0 out of range for length 0")
+	assert.Equal(t, -1, ErrIndexOutOfBounds.Limit())
+}

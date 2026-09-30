@@ -23,27 +23,21 @@ const (
 type IndexOutOfBoundsError struct {
 	index     int
 	limit     int
-	length    int
 	operation Operation
 }
 
 // NewIndexOutOfBoundsError reports an invalid index for an operation.
 // limit is the largest valid index; for insertion, it is the collection length.
 func NewIndexOutOfBoundsError(operation Operation, index, limit int) *IndexOutOfBoundsError {
-	length := limit + 1
-	if operation == OperationInsert {
-		length = limit
-	}
-	return &IndexOutOfBoundsError{
-		index:     index,
-		limit:     limit,
-		length:    length,
-		operation: operation,
-	}
+	return &IndexOutOfBoundsError{index: index, limit: limit, operation: operation}
 }
 
 // Error reports the invalid index and the collection length.
 func (e *IndexOutOfBoundsError) Error() string {
+	length := e.limit + 1
+	if e.operation == OperationInsert {
+		length = e.limit
+	}
 	operation := ""
 	switch e.operation {
 	case OperationGet:
@@ -57,7 +51,7 @@ func (e *IndexOutOfBoundsError) Error() string {
 	case OperationReplace:
 		operation = "cannot replace "
 	}
-	return fmt.Sprintf("%sindex %d out of range for length %d", operation, e.index, e.length)
+	return fmt.Sprintf("%sindex %d out of range for length %d", operation, e.index, length)
 }
 
 // Is reports whether the target is an IndexOutOfBoundsError.
@@ -82,4 +76,4 @@ func (e *IndexOutOfBoundsError) Limit() int {
 // to check if the returned error is an IndexOutOfBoundsError.
 //
 // To extract the index and limit values, use errors.As and the Index/Limit methods.
-var ErrIndexOutOfBounds = &IndexOutOfBoundsError{}
+var ErrIndexOutOfBounds = &IndexOutOfBoundsError{limit: -1}
