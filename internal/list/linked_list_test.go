@@ -12,18 +12,18 @@ import (
 func TestNewLinkedList(t *testing.T) {
 	l := NewLinkedList[any]()
 
-	assert.Equal(t, 0, l.Length())
+	assert.Equal(t, 0, l.Len())
 	assert.True(t, l.IsEmpty())
 	assert.Nil(t, l.first)
 	assert.Nil(t, l.last)
 }
 
-func TestLinkedList_Length(t *testing.T) {
+func TestLinkedList_Len(t *testing.T) {
 	l := NewLinkedList[any]()
 
-	assert.Equal(t, 0, l.Length())
+	assert.Equal(t, 0, l.Len())
 	l.Appends(1, 2, 3)
-	assert.Equal(t, 3, l.Length())
+	assert.Equal(t, 3, l.Len())
 }
 
 func TestLinkedList_IsEmpty(t *testing.T) {
@@ -186,7 +186,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		l := NewLinkedList[int]()
 		err := l.Insert(0, 0)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, l.Length())
+		assert.Equal(t, 1, l.Len())
 		assert.Equal(t, []int{0}, l.ToSlice())
 	})
 
@@ -195,7 +195,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		l.Appends(1, 2)
 		err := l.Insert(0, 0)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{0, 1, 2}, l.ToSlice())
 	})
 
@@ -204,7 +204,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		l.Appends(1, 3, 4, 5)
 		err := l.Insert(2, 2)
 		assert.NoError(t, err)
-		assert.Equal(t, 5, l.Length())
+		assert.Equal(t, 5, l.Len())
 		assert.Equal(t, []int{1, 3, 2, 4, 5}, l.ToSlice())
 	})
 
@@ -215,7 +215,7 @@ func TestLinkedList_Insert(t *testing.T) {
 
 		err := l.Insert(0, 3)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
 		assert.Equal(t, 3, l.first.Value)
 	})
@@ -227,7 +227,7 @@ func TestLinkedList_Insert(t *testing.T) {
 
 		err := l.Insert(1, 2)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
 	})
 
@@ -236,7 +236,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		l.Appends(1, 2)
 		err := l.Insert(2, 3)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	})
 
@@ -245,7 +245,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		l.Append(1)
 		err := l.Insert(5, 10)
 		assert.Error(t, err)
-		assert.Equal(t, 1, l.Length())
+		assert.Equal(t, 1, l.Len())
 		assert.Equal(t, []int{1}, l.ToSlice())
 	})
 }
@@ -335,7 +335,7 @@ func TestLinkedList_Append(t *testing.T) {
 	l.Append(1)
 
 	assert.False(t, l.IsEmpty())
-	assert.Equal(t, 1, l.Length())
+	assert.Equal(t, 1, l.Len())
 	assert.Equal(t, []int{1}, l.ToSlice())
 }
 
@@ -344,7 +344,7 @@ func TestLinkedList_Appends(t *testing.T) {
 	l.Appends(1, 2, 3)
 
 	assert.False(t, l.IsEmpty())
-	assert.Equal(t, 3, l.Length())
+	assert.Equal(t, 3, l.Len())
 	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 }
 
@@ -362,7 +362,7 @@ func TestLinkedList_Reverse(t *testing.T) {
 		l := NewLinkedList[int]()
 		l.Reverse()
 
-		assert.Equal(t, 0, l.Length())
+		assert.Equal(t, 0, l.Len())
 		assert.True(t, l.IsEmpty())
 		assert.Nil(t, l.first)
 		assert.Nil(t, l.last)
@@ -397,7 +397,7 @@ func TestLinkedList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
@@ -431,7 +431,7 @@ func TestLinkedList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -442,7 +442,7 @@ func TestLinkedList_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, l.Length())
+		assert.Equal(t, 0, l.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -457,7 +457,7 @@ func TestLinkedList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
@@ -475,7 +475,7 @@ func TestLinkedList_Enumerate(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, count)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
@@ -489,7 +489,7 @@ func TestLinkedList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 	})
 
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
@@ -508,7 +508,7 @@ func TestLinkedList_Enumerate(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, 2, count)
 	})
 
@@ -520,7 +520,7 @@ func TestLinkedList_Enumerate(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, l.Length())
+		assert.Equal(t, 0, l.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -674,7 +674,7 @@ func TestLinkedList_UnmarshalJSON(t *testing.T) {
 
 		err := l.UnmarshalJSON(data)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
 
 		assert.Equal(t, 4, l.first.Value)

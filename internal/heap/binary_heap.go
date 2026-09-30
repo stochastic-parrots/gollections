@@ -212,10 +212,10 @@ func (heap *BinaryHeap[T]) IsEmpty() bool {
 	return len(heap.data) == 0
 }
 
-// Length returns the current number of elements in the heap.
+// Len returns the current number of elements in the heap.
 //
 // Complexity: O(1).
-func (heap *BinaryHeap[T]) Length() int {
+func (heap *BinaryHeap[T]) Len() int {
 	return len(heap.data)
 }
 

@@ -36,7 +36,7 @@ func TestConcreteZeroValues(t *testing.T) {
 	assert.True(t, values.Add(1))
 	assert.Equal(t, 1, values.Adds(2, 1))
 
-	assert.Equal(t, 2, values.Length())
+	assert.Equal(t, 2, values.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
@@ -78,7 +78,7 @@ func TestNewKeyedHashSet(t *testing.T) {
 	assert.True(t, values.Add(first))
 	assert.False(t, values.Add(member{ID: 1, Name: "duplicate"}))
 
-	assert.Equal(t, 1, values.Length())
+	assert.Equal(t, 1, values.Len())
 	assert.Equal(t, []member{first}, slices.Collect(values.All()))
 }
 
@@ -133,7 +133,7 @@ func TestAsReadonly(t *testing.T) {
 		assert.False(t, unmarshals)
 		assert.True(t, view.Contains(1))
 		assert.False(t, view.IsEmpty())
-		assert.Equal(t, 2, view.Length())
+		assert.Equal(t, 2, view.Len())
 		assert.ElementsMatch(t, []int{1, 2}, slices.Collect(view.All()))
 
 		var indexes []int
@@ -161,7 +161,7 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	assert.Equal(t, 1, values.Adds(2, 1))
 
 	assert.False(t, values.IsEmpty())
-	assert.Equal(t, 2, values.Length())
+	assert.Equal(t, 2, values.Len())
 	assert.True(t, values.Contains(1))
 	assert.False(t, values.Contains(3))
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))

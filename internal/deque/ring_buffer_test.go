@@ -12,7 +12,7 @@ import (
 func TestNewRingBufferDeque(t *testing.T) {
 	deque := NewRingBufferDeque[int](10)
 
-	assert.Equal(t, 0, deque.Length())
+	assert.Equal(t, 0, deque.Len())
 	assert.True(t, deque.IsEmpty())
 	assert.Len(t, deque.data, 10)
 	assert.Equal(t, 0, deque.read)
@@ -49,12 +49,12 @@ func TestNewRingBufferDequeFromSeq(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
 }
 
-func TestRingBufferDeque_Length(t *testing.T) {
+func TestRingBufferDeque_Len(t *testing.T) {
 	deque := NewRingBufferDeque[int](1)
-	assert.Equal(t, 0, deque.Length())
+	assert.Equal(t, 0, deque.Len())
 
 	deque.Appends(1, 2)
-	assert.Equal(t, 2, deque.Length())
+	assert.Equal(t, 2, deque.Len())
 }
 
 func TestRingBufferDeque_IsEmpty(t *testing.T) {

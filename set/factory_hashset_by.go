@@ -26,7 +26,7 @@ func checkKeyOf[T any, K comparable](keyOf func(T) K) {
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()           O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average + keyOf
@@ -51,7 +51,7 @@ func NewKeyedHashSet[T any, K comparable](keyOf func(T) K, capacity int) *KeyedH
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()           O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average + keyOf
@@ -76,7 +76,7 @@ func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHash
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()           O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average + keyOf

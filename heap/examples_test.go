@@ -84,11 +84,11 @@ func ExampleBinaryClone_min() {
 	h := heap.OrderedBinaryClone[int](heap.Min, data)
 	h.Pop()
 
-	fmt.Printf("Length: %d\n", h.Length())
+	fmt.Printf("Len: %d\n", h.Len())
 	fmt.Printf("Data: %v\n", data)
 
 	// Output:
-	// Length: 4
+	// Len: 4
 	// Data: [42 7 13 1 99]
 }
 
@@ -124,10 +124,10 @@ func ExampleBinaryClone_max() {
 	h := heap.OrderedBinaryClone[int](heap.Max, data)
 	h.Pop()
 
-	fmt.Printf("Length: %d\n", h.Length())
+	fmt.Printf("Len: %d\n", h.Len())
 	fmt.Printf("Data: %v\n", data)
 
 	// Output:
-	// Length: 4
+	// Len: 4
 	// Data: [1 13 7 42 99]
 }

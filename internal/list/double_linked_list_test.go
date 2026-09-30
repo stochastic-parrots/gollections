@@ -12,7 +12,7 @@ import (
 func TestNewDoubleLinkedList(t *testing.T) {
 	list := NewDoubleLinkedList[any]()
 
-	assert.Equal(t, 0, list.Length())
+	assert.Equal(t, 0, list.Len())
 	assert.True(t, list.IsEmpty())
 	assert.Nil(t, list.first)
 	assert.Nil(t, list.last)
@@ -33,12 +33,12 @@ func TestNewDoubleLinkedListFromSeq(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 }
 
-func TestDoubleLinkedList_Length(t *testing.T) {
+func TestDoubleLinkedList_Len(t *testing.T) {
 	list := NewDoubleLinkedList[any]()
 
-	assert.Equal(t, 0, list.Length())
+	assert.Equal(t, 0, list.Len())
 	list.Appends(1, 2, 3)
-	assert.Equal(t, 3, list.Length())
+	assert.Equal(t, 3, list.Len())
 }
 
 func TestDoubleLinkedList_IsEmpty(t *testing.T) {
@@ -343,7 +343,7 @@ func TestDoubleLinkedList_Append(t *testing.T) {
 	list.Append(1)
 
 	assert.False(t, list.IsEmpty())
-	assert.Equal(t, 1, list.Length())
+	assert.Equal(t, 1, list.Len())
 	assert.Equal(t, []int{1}, list.ToSlice())
 }
 
@@ -352,7 +352,7 @@ func TestDoubleLinkedList_Appends(t *testing.T) {
 	list.Appends(1, 2, 3)
 
 	assert.False(t, list.IsEmpty())
-	assert.Equal(t, 3, list.Length())
+	assert.Equal(t, 3, list.Len())
 
 	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
 }
@@ -371,7 +371,7 @@ func TestDoubleLinkedList_Reverse(t *testing.T) {
 		list := NewDoubleLinkedList[int]()
 		list.Reverse()
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.True(t, list.IsEmpty())
 		assert.Nil(t, list.first)
 		assert.Nil(t, list.last)
@@ -406,7 +406,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
@@ -440,7 +440,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -451,7 +451,7 @@ func TestDoubleLinkedList_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -466,7 +466,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
@@ -484,7 +484,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, count)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
@@ -498,7 +498,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
@@ -517,7 +517,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 		assert.Equal(t, 2, count)
 	})
 
@@ -529,7 +529,7 @@ func TestDoubleLinkedList_Enumerate(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -683,7 +683,7 @@ func TestDoubleLinkedList_UnmarshalJSON(t *testing.T) {
 
 		err := l.UnmarshalJSON(data)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
 
 		assert.Equal(t, 4, l.first.Value)
@@ -758,7 +758,7 @@ func TestDoubleLinkedList_Clear(t *testing.T) {
 		l.Reverse()
 		l.Clear()
 
-		assert.Equal(t, 0, l.Length())
+		assert.Equal(t, 0, l.Len())
 		assert.Nil(t, l.first)
 		assert.Nil(t, l.last)
 		assert.False(t, l.reversed)

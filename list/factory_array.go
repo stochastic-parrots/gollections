@@ -20,7 +20,7 @@ var _ List[int] = &list.ArrayList[int]{}
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
@@ -49,7 +49,7 @@ func NewArray[T any](capacity int) *ArrayList[T] { return list.NewArrayList[T](c
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
@@ -78,7 +78,7 @@ func ArrayFrom[T any](data []T) *ArrayList[T] { return list.NewArrayListFromSlic
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)
@@ -107,7 +107,7 @@ func ArrayClone[T any](data []T) *ArrayList[T] { return list.NewArrayListCloneSl
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Get(idx)              O(1)

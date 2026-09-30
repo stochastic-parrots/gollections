@@ -41,10 +41,10 @@ func NewKeyedHashSetFromSeq[T any, K comparable](seq iter.Seq[T], keyOf func(T) 
 	return set
 }
 
-// Length returns the number of distinct keys in the set.
+// Len returns the number of distinct keys in the set.
 //
 // Complexity: O(1).
-func (set *KeyedHashSet[T, K]) Length() int {
+func (set *KeyedHashSet[T, K]) Len() int {
 	return len(set.values)
 }
 

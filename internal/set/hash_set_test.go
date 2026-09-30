@@ -18,21 +18,21 @@ func TestNewHashSet(t *testing.T) {
 func TestNewHashSetFromSlice(t *testing.T) {
 	set := NewHashSetFromSlice([]int{1, 2, 1})
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(set.All()))
 }
 
 func TestNewHashSetFromSeq(t *testing.T) {
 	set := NewHashSetFromSeq(slices.Values([]int{1, 2, 1}))
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(set.All()))
 }
 
-func TestHashSet_Length(t *testing.T) {
+func TestHashSet_Len(t *testing.T) {
 	set := NewHashSetFromSlice([]int{1, 2})
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 }
 
 func TestHashSet_IsEmpty(t *testing.T) {
@@ -56,7 +56,7 @@ func TestHashSet_Add(t *testing.T) {
 	assert.True(t, set.Add(1))
 	assert.False(t, set.Add(1))
 
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 	assert.True(t, set.Contains(1))
 }
 
@@ -67,7 +67,7 @@ func TestHashSet_Adds(t *testing.T) {
 	assert.Zero(t, set.Adds())
 	assert.Zero(t, set.Adds(1, 2))
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(set.All()))
 }
 
@@ -77,7 +77,7 @@ func TestHashSet_Remove(t *testing.T) {
 	assert.True(t, set.Remove(1))
 	assert.False(t, set.Remove(1))
 	assert.False(t, set.Contains(1))
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 }
 
 func TestHashSet_Removes(t *testing.T) {

@@ -5,7 +5,6 @@ import "container/heap"
 type stdLibIntHeap []int
 
 func (h stdLibIntHeap) Len() int           { return len(h) }
-func (h stdLibIntHeap) Length() int        { return len(h) }
 func (h stdLibIntHeap) Less(i, j int) bool { return h[i] < h[j] }
 func (h stdLibIntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 func (h *stdLibIntHeap) Push(x any)        { *h = append(*h, x.(int)) }
@@ -80,8 +79,8 @@ func (w *StdLibHeap) Replace(v int) (int, bool) {
 	return root, true
 }
 
-// Length returns the number of values in the heap baseline.
-func (w *StdLibHeap) Length() int {
+// Len returns the number of values in the heap baseline.
+func (w *StdLibHeap) Len() int {
 	return len(*w.stdheap)
 }
 

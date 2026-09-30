@@ -94,7 +94,7 @@ func TestAsReadonly(t *testing.T) {
 
 		view := prioritymap.AsReadonly(mutable)
 
-		assert.Equal(t, 2, view.Length())
+		assert.Equal(t, 2, view.Len())
 		assert.True(t, view.Contains("slow"))
 
 		priority, ok := view.Get("slow")
@@ -134,7 +134,7 @@ func assertPriorityMapBehavior(
 	pm.Set("two", 2)
 	pm.Set("three", 3)
 
-	assert.Equal(t, 3, pm.Length())
+	assert.Equal(t, 3, pm.Len())
 	assert.True(t, pm.Contains("two"))
 	assert.False(t, pm.Contains("missing"))
 

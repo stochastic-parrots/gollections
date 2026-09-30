@@ -33,7 +33,7 @@ func TestNewKeyedHashSetFromSlice(t *testing.T) {
 
 	set := NewKeyedHashSetFromSlice([]record{first, duplicate, second}, recordID)
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []record{first, second}, slices.Collect(set.All()))
 }
 
@@ -44,14 +44,14 @@ func TestNewKeyedHashSetFromSeq(t *testing.T) {
 
 	set := NewKeyedHashSetFromSeq(slices.Values([]record{first, duplicate, second}), recordID)
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []record{first, second}, slices.Collect(set.All()))
 }
 
-func TestKeyedHashSet_Length(t *testing.T) {
+func TestKeyedHashSet_Len(t *testing.T) {
 	set := NewKeyedHashSetFromSlice([]record{{ID: 1}, {ID: 2}}, recordID)
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 }
 
 func TestKeyedHashSet_IsEmpty(t *testing.T) {
@@ -76,7 +76,7 @@ func TestKeyedHashSet_Add(t *testing.T) {
 	assert.True(t, set.Add(first))
 	assert.False(t, set.Add(record{ID: 1, Name: "duplicate"}))
 
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 	assert.Equal(t, []record{first}, slices.Collect(set.All()))
 }
 
@@ -88,7 +88,7 @@ func TestKeyedHashSet_Adds(t *testing.T) {
 	assert.Zero(t, set.Adds())
 	assert.Zero(t, set.Adds(record{ID: 1}, record{ID: 2}))
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.Contains(t, slices.Collect(set.All()), first)
 }
 
@@ -98,7 +98,7 @@ func TestKeyedHashSet_Remove(t *testing.T) {
 	assert.True(t, set.Remove(record{ID: 1, Name: "query"}))
 	assert.False(t, set.Remove(record{ID: 1}))
 	assert.False(t, set.Contains(record{ID: 1}))
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 }
 
 func TestKeyedHashSet_Removes(t *testing.T) {

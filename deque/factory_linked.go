@@ -19,7 +19,7 @@ var _ Deque[int] = &deque.DoubleLinkedDeque[int]{}
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Front()               O(1)
@@ -46,7 +46,7 @@ func NewLinked[T any]() *LinkedDeque[T] { return deque.NewDoubleLinkedDeque[T]()
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Front()               O(1)
@@ -73,7 +73,7 @@ func LinkedFrom[T any](data []T) *LinkedDeque[T] { return deque.NewDoubleLinkedD
 //	Operation             Time Complexity
 //	-------------------   ---------------
 //	IsEmpty()             O(1)
-//	Length()              O(1)
+//	Len()              O(1)
 //	All()                 O(N)
 //	Enumerate()           O(N)
 //	Front()               O(1)

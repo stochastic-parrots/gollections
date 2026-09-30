@@ -12,7 +12,7 @@ import (
 func TestNewDoubleLinkedDeque(t *testing.T) {
 	deque := NewDoubleLinkedDeque[int]()
 
-	assert.Equal(t, 0, deque.Length())
+	assert.Equal(t, 0, deque.Len())
 	assert.True(t, deque.IsEmpty())
 	assert.Nil(t, deque.first)
 	assert.Nil(t, deque.last)
@@ -33,12 +33,12 @@ func TestNewDoubleLinkedDequeFromSeq(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, deque.ToSlice())
 }
 
-func TestDoubleLinkedDeque_Length(t *testing.T) {
+func TestDoubleLinkedDeque_Len(t *testing.T) {
 	deque := NewDoubleLinkedDeque[int]()
-	assert.Equal(t, 0, deque.Length())
+	assert.Equal(t, 0, deque.Len())
 
 	deque.Appends(1, 2)
-	assert.Equal(t, 2, deque.Length())
+	assert.Equal(t, 2, deque.Len())
 }
 
 func TestDoubleLinkedDeque_IsEmpty(t *testing.T) {
@@ -160,7 +160,7 @@ func TestDoubleLinkedDeque_Shift(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, 1, x)
 		assert.Equal(t, []int{2, 3}, deque.ToSlice())
-		assert.Equal(t, 2, deque.Length())
+		assert.Equal(t, 2, deque.Len())
 	})
 }
 
@@ -196,7 +196,7 @@ func TestDoubleLinkedDeque_Pop(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, 3, x)
 		assert.Equal(t, []int{1, 2}, deque.ToSlice())
-		assert.Equal(t, 2, deque.Length())
+		assert.Equal(t, 2, deque.Len())
 	})
 }
 

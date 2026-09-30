@@ -115,7 +115,7 @@ func TestAsReadonly(t *testing.T) {
 
 		assert.Equal(t, []int{1, 2}, slices.Collect(view.All()))
 		assert.Equal(t, []int{0, 1}, collectIndexes(view.Enumerate()))
-		assert.Equal(t, 2, view.Length())
+		assert.Equal(t, 2, view.Len())
 		assert.False(t, view.IsEmpty())
 
 		front, ok := view.Front()

@@ -32,10 +32,10 @@ func NewHashSetFromSeq[T comparable](seq iter.Seq[T]) *HashSet[T] {
 	return set
 }
 
-// Length returns the number of values in the set.
+// Len returns the number of values in the set.
 //
 // Complexity: O(1).
-func (set *HashSet[T]) Length() int {
+func (set *HashSet[T]) Len() int {
 	return len(set.values)
 }
 

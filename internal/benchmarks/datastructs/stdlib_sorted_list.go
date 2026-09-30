@@ -69,8 +69,8 @@ func (l *StdSortedList) Contains(x int) bool {
 	return ok
 }
 
-// Length returns the number of values in the list.
-func (l *StdSortedList) Length() int {
+// Len returns the number of values in the list.
+func (l *StdSortedList) Len() int {
 	return len(l.data)
 }
 

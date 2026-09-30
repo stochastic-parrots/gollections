@@ -26,10 +26,10 @@ func NewLinkedList[T any]() *LinkedList[T] {
 	}
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (l *LinkedList[T]) Length() int {
+func (l *LinkedList[T]) Len() int {
 	return l.length
 }
 
@@ -45,9 +45,9 @@ func (l *LinkedList[T]) IsEmpty() bool {
 // Complexity: O(N).
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Get(index int) (T, error) {
-	if index < 0 || index >= l.Length() {
+	if index < 0 || index >= l.Len() {
 		var zero T
-		return zero, NewIndexOutOfBoundError(index, l.Length()-1)
+		return zero, NewIndexOutOfBoundError(index, l.Len()-1)
 	}
 
 	current := l.first
@@ -97,8 +97,8 @@ func (l *LinkedList[T]) Contains(x T, cmp func(a, b T) int) bool {
 // Complexity: O(N).
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Set(index int, x T) error {
-	if index < 0 || index >= l.Length() {
-		return NewIndexOutOfBoundError(index, l.Length()-1)
+	if index < 0 || index >= l.Len() {
+		return NewIndexOutOfBoundError(index, l.Len()-1)
 	}
 
 	current := l.first
@@ -138,10 +138,10 @@ func (l *LinkedList[T]) Appends(xs ...T) {
 // If the index is equal to the current length, the value is appended to the end.
 // If the index is 0, the value becomes the new first element.
 //
-// Complexity: O(N) in the worst case; O(1) if inserting at the boundaries (0 or Length).
-// Returns an IndexOutOfBounds error if the index is out of range [0, Length].
+// Complexity: O(N) in the worst case; O(1) if inserting at the boundaries (0 or Len).
+// Returns an IndexOutOfBounds error if the index is out of range [0, Len].
 func (l *LinkedList[T]) Insert(idx int, x T) error {
-	size := l.Length()
+	size := l.Len()
 	if idx < 0 || idx > size {
 		return NewIndexOutOfBoundError(idx, size)
 	}
@@ -178,7 +178,7 @@ func (l *LinkedList[T]) Insert(idx int, x T) error {
 // Complexity: O(N) in the worst case; O(1) if removing from the start or end.
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *LinkedList[T]) Remove(idx int) (T, error) {
-	size := l.Length()
+	size := l.Len()
 	if idx < 0 || idx >= size {
 		var zero T
 		return zero, NewIndexOutOfBoundError(idx, size-1)
@@ -223,7 +223,7 @@ func (l *LinkedList[T]) Remove(idx int) (T, error) {
 // Complexity: O(N).
 // Note: Unlike DoubleLinkedList, this requires a full traversal to update pointers.
 func (l *LinkedList[T]) Reverse() {
-	if l.Length() <= 1 {
+	if l.Len() <= 1 {
 		return
 	}
 
@@ -344,7 +344,7 @@ func (l *LinkedList[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (l *LinkedList[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, l, l.Length())
+	collection.Format(s, verb, l, l.Len())
 }
 
 // String returns a string representation of the list.

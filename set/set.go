@@ -68,7 +68,7 @@ func (w readonly[T]) Enumerate() iter.Seq2[int, T] { return w.inner.Enumerate() 
 
 func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[T]) Length() int { return w.inner.Length() }
+func (w readonly[T]) Len() int { return w.inner.Len() }
 
 func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
 

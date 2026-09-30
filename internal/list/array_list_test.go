@@ -51,7 +51,7 @@ func TestArrayList_IsEmpty(t *testing.T) {
 	assert.True(t, list.IsEmpty())
 }
 
-func TestArrayList_Length(t *testing.T) {
+func TestArrayList_Len(t *testing.T) {
 	list := NewArrayList[int](100)
 	list.Appends(10, 1, 9, 100)
 
@@ -444,7 +444,7 @@ func TestArrayList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
@@ -478,7 +478,7 @@ func TestArrayList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -489,7 +489,7 @@ func TestArrayList_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -504,7 +504,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
@@ -522,7 +522,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, count)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
@@ -536,7 +536,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
@@ -555,7 +555,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 		assert.Equal(t, 2, count)
 	})
 
@@ -567,7 +567,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -677,7 +677,7 @@ func TestArrayList_UnmarshalJSON(t *testing.T) {
 
 		err := l.UnmarshalJSON(data)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
 	})
 

@@ -13,7 +13,7 @@ func BenchmarkBinaryHeap_Push(b *testing.B) {
 	value := capacity
 	b.ReportAllocs()
 	for b.Loop() {
-		if h.Length() == capacity {
+		if h.Len() == capacity {
 			b.StopTimer()
 			h.Clear()
 			value = capacity
