@@ -32,12 +32,8 @@ func NewIndexOutOfBoundsError(operation Operation, index, limit int) *IndexOutOf
 	return &IndexOutOfBoundsError{index: index, limit: limit, operation: operation}
 }
 
-// Error reports the invalid index and the collection length.
+// Error reports the invalid index and the collection length or empty state.
 func (e *IndexOutOfBoundsError) Error() string {
-	length := e.limit + 1
-	if e.operation == OperationInsert {
-		length = e.limit
-	}
 	operation := ""
 	switch e.operation {
 	case OperationGet:
@@ -50,6 +46,16 @@ func (e *IndexOutOfBoundsError) Error() string {
 		operation = "cannot remove "
 	case OperationReplace:
 		operation = "cannot replace "
+	}
+	if e.limit == -1 {
+		if operation == "" {
+			return fmt.Sprintf("index %d out of range because list is empty", e.index)
+		}
+		return fmt.Sprintf("%sindex %d because list is empty", operation, e.index)
+	}
+	length := e.limit + 1
+	if e.operation == OperationInsert {
+		length = e.limit
 	}
 	return fmt.Sprintf("%sindex %d out of range for length %d", operation, e.index, length)
 }

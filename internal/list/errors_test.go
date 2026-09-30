@@ -15,7 +15,10 @@ func TestNewIndexOutOfBoundsError(t *testing.T) {
 		limit     int
 		message   string
 	}{
-		{"Get", OperationGet, 0, -1, "cannot get index 0 out of range for length 0"},
+		{"GetEmpty", OperationGet, 0, -1, "cannot get index 0 because list is empty"},
+		{"SetEmpty", OperationSet, 0, -1, "cannot set index 0 because list is empty"},
+		{"RemoveEmpty", OperationRemove, 0, -1, "cannot remove index 0 because list is empty"},
+		{"ReplaceEmpty", OperationReplace, 0, -1, "cannot replace index 0 because list is empty"},
 		{"Set", OperationSet, -1, 3, "cannot set index -1 out of range for length 4"},
 		{"Insert", OperationInsert, 1, 0, "cannot insert at index 1 out of range for length 0"},
 		{"Remove", OperationRemove, 4, 3, "cannot remove index 4 out of range for length 4"},
@@ -39,6 +42,6 @@ func TestNewIndexOutOfBoundsError(t *testing.T) {
 }
 
 func TestErrIndexOutOfBounds(t *testing.T) {
-	assert.EqualError(t, ErrIndexOutOfBounds, "index 0 out of range for length 0")
+	assert.EqualError(t, ErrIndexOutOfBounds, "index 0 out of range because list is empty")
 	assert.Equal(t, -1, ErrIndexOutOfBounds.Limit())
 }

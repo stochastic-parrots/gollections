@@ -14,7 +14,7 @@ func TestIndexOutOfBoundsError(t *testing.T) {
 	_, err := l.Get(0)
 
 	assert.True(t, errors.Is(err, list.ErrIndexOutOfBounds))
-	assert.EqualError(t, err, "cannot get index 0 out of range for length 0")
+	assert.EqualError(t, err, "cannot get index 0 because list is empty")
 
 	var target *list.IndexOutOfBoundsError
 	assert.True(t, errors.As(err, &target))
