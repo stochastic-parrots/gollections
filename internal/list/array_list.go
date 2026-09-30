@@ -75,8 +75,8 @@ func (l *ArrayList[T]) Find(match func(T) bool) (idx int, ok bool) {
 		return -1, false
 	}
 
-	for idx, value := range l.Enumerate() {
-		if match(value) {
+	for idx := range l.data {
+		if match(l.data[idx]) {
 			return idx, true
 		}
 	}
@@ -92,8 +92,8 @@ func (l *ArrayList[T]) Contains(match func(T) bool) bool {
 		return false
 	}
 
-	for value := range l.All() {
-		if match(value) {
+	for idx := range len(l.data) {
+		if match(l.data[idx]) {
 			return true
 		}
 	}
