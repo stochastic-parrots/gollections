@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
 
 permissions:
@@ -14,6 +15,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pr-target:
+    name: Pull request target
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require develop as the target
+        env:
+          PR_BASE: ${{ github.base_ref }}
+          PR_HEAD: ${{ github.head_ref }}
+          PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [[ "$PR_BASE" == "develop" ]]; then
+            exit 0
+          fi
+
+          if [[ "$PR_BASE" == "main" && "$PR_HEAD" == "develop" && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" ]]; then
+            exit 0
+          fi
+
+          echo "Pull requests must target develop. Only the develop branch may target main."
+          exit 1
+
   build:
     name: Build and test (Go ${{ matrix.go-version }})
     runs-on: ubuntu-latest

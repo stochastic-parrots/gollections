@@ -96,5 +96,10 @@ Use these checklists for repeatable agent workflows. They supplement
 1. Review `git status --short`.
 2. Inspect the final diff.
 3. Run the appropriate verification.
-4. Use Conventional Commits with concise scopes, such as
+4. Create a focused branch named `<kind>/<short-description>`, such as
+   `feature/hashset` or `refactor/direct-constructors`.
+5. Open change pull requests against `develop`; only the automated release
+   promotion from `develop` targets `main`.
+6. Use a Conventional Commit style PR title with a concise scope, such as
    `feat(priority map): add radix heap priority map`.
+7. Use a Conventional Commit message with a concise scope for each commit.
