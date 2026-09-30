@@ -504,7 +504,7 @@ func TestPairingPriorityMap_All(t *testing.T) {
 	t.Run("EmptyMap", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](ordering.Min[int]())
 		count := 0
-		for range pm.Values() {
+		for range pm.All() {
 			count++
 		}
 		assert.Equal(t, 0, count)

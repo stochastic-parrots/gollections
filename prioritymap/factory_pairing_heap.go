@@ -21,6 +21,8 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 // immediate heap work is O(1). Pop later consolidates children in two passes.
 // The amortized rows account for this deferred work across mixed operations,
 // using a conservative O(log N) bound for Improve.
+// For Clear, C is the number of allocated key-index slots, which can exceed N
+// after preallocation or growth.
 //
 // Performance Summary (Time Complexity):
 //
@@ -40,7 +42,7 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 //	Remove(key)              O(log N) Amortized
 //	Pop()                    O(log N) Amortized
 //	Drain()                  O(N log N) Amortized
-//	Clear()                  O(N)
+//	Clear()                  O(N + C)
 //
 // Complexity: O(capacity).
 func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity int) *PairingHeapPriorityMap[K, P] {
@@ -55,6 +57,8 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 // immediate heap work is O(1). Pop later consolidates children in two passes.
 // The amortized rows account for this deferred work across mixed operations,
 // using a conservative O(log N) bound for Improve.
+// For Clear, C is the number of allocated key-index slots, which can exceed N
+// after preallocation or growth.
 //
 // Performance Summary (Time Complexity):
 //
@@ -74,7 +78,7 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 //	Remove(key)              O(log N) Amortized
 //	Pop()                    O(log N) Amortized
 //	Drain()                  O(N log N) Amortized
-//	Clear()                  O(N)
+//	Clear()                  O(N + C)
 //
 // Complexity: O(capacity).
 func NewOrderedPairingHeap[K comparable, P cmp.Ordered](order Order, capacity int) *PairingHeapPriorityMap[K, P] {
