@@ -20,9 +20,9 @@ func TestKruskal(t *testing.T) {
 			graph: models.WeightedUndirectedGraph[int64]{
 				Nodes: 4,
 				Edges: []models.WeightedUndirectedEdge[int64]{
+					{From: 0, To: 2, Weight: 4},
 					{From: 0, To: 1, Weight: 1},
 					{From: 1, To: 2, Weight: 2},
-					{From: 0, To: 2, Weight: 4},
 					{From: 2, To: 3, Weight: 3},
 				},
 			},
