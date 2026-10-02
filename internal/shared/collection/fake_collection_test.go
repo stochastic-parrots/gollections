@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/stochastic-parrots/gollections"
 	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 )
-
-var _ gollections.Collection[int] = &FakeCollection[int]{}
 
 type FakeCollection[T any] struct {
 	data []T

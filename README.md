@@ -46,8 +46,8 @@ Go documentation tools.
   storage shrinkage or return memory to the Go runtime. Slice-backed structures
   retain capacity where practical, freelists retain at most their construction
   limit, and linked structures without a freelist may release their nodes.
-- Internal implementations: public packages expose stable concrete factories while
-  concrete internals live under `internal`.
+- Internal implementations: public packages expose stable constructors and
+  factories while concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, `set`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
   allowing type assertion back to the mutable interface. These wrappers are
@@ -59,23 +59,25 @@ Go documentation tools.
   input, using the traversal order documented by each package. Lists and deques
   also unmarshal because array order completely defines their logical state.
   Sorted lists, heaps, and sets require slice decoding followed by the matching
-  factory so ordering, priority, and set identity remain explicit.
+  constructor or factory so ordering, priority, and set identity remain explicit.
 
 ## Construction
 
-Public packages select an implementation through a reusable typed factory.
-Factory methods return concrete collection types without interface dispatch:
+Most public packages select an implementation through a reusable typed
+factory. Set constructors return concrete collection types without interface
+dispatch:
 
 ```go
 items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
 scores := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
-visited := set.HashSetOf[string]().New(32)
+visited := set.NewHashSet[string](32)
 ```
 
 Sorted lists, heaps, and sets intentionally do not implement `json.Unmarshaler`.
-Decode into a slice and use the selected factory to establish their invariants:
+Decode into a slice and use the matching constructor or factory to establish
+their invariants:
 
 ```go
 var values []int
@@ -89,6 +91,29 @@ Array-backed `From` methods transfer ownership of the provided slice and may
 reorder it. The caller must not use the slice or aliases of its backing array
 afterward. Use `Clone` when the source must remain available. Linked structures
 always copy values into nodes, so their `From` methods do not retain the source.
+
+## Set API migration
+
+The set API intentionally replaces its previous factory selectors and changes
+`KeyedHashSet`'s type-parameter order. These are breaking API changes. Migrate
+existing code using the following mapping:
+
+| Previous API | Current API |
+| --- | --- |
+| `set.HashSetOf[T]().New(capacity)` | `set.NewHashSet[T](capacity)` |
+| `set.HashSetOf[T]().From(values)` | `set.HashSetFrom(values)` |
+| `set.HashSetOf[T]().FromSeq(seq)` | `set.HashSetFromSeq(seq)` |
+| `set.HashSetBy(keyOf).New(capacity)` | `set.NewKeyedHashSet[K, T](capacity, keyOf)` |
+| `set.HashSetBy(keyOf).From(values)` | `set.KeyedHashSetFrom(values, keyOf)` |
+| `set.HashSetBy(keyOf).FromSeq(seq)` | `set.KeyedHashSetFromSeq(seq, keyOf)` |
+| `set.KeyedHashSet[T, K]` | `set.KeyedHashSet[K, T]` |
+
+Factory set algebra is now receiver-based. For example, replace
+`set.HashSetOf[T]().Union(left, right)` with `leftSet.Union(right)` and use
+`set.EqualBy(keyOf, first, others...)` when a relation should apply an explicit
+identity function to arbitrary values. `EqualBy` compares every operand with
+the first; `IsDisjointBy(keyOf, first, others...)` checks every pair. The `By`
+functions accept public `set.Readonly[T]` operands.
 
 ## Choosing a list
 
@@ -137,13 +162,27 @@ scheduling-buffer patterns.
 
 Set identities must have reflexive equality. Floating-point NaN cannot be used
 directly as a `HashSet` value or `KeyedHashSet` key because NaN is not equal to
-itself. Use `HashSetBy` with a canonical comparable key when NaN membership is
-required. When `HashSet` uses an interface type, its dynamic values must also be
-comparable, matching native Go map requirements.
+itself. Use `NewKeyedHashSet` with a canonical comparable key when NaN
+membership is required. When `HashSet` uses an interface type, its dynamic
+values must also be comparable, matching native Go map requirements.
 
 `Add` and `Remove` report whether one value changed membership; `Adds` and
 `Removes` report how many values in a batch changed membership. Iteration and
 JSON array order are unspecified.
+
+Both implementations provide pure set algebra (`Clone`, `Union`,
+`Intersection`, `Difference`, and `SymmetricDifference`) as receiver methods.
+The package-level `Equal`, `IsSubset`, `IsProperSubset`, `IsSuperset`,
+`IsProperSuperset`, and `IsDisjoint` functions compare `Readonly` sets using Go
+equality. Their `...By` counterparts take a shared identity function for both
+operands. `Equal` compares each operand with the first, while `IsDisjoint`
+requires every pair of operands to be disjoint. `KeyedHashSet` methods use the
+receiver's identity function.
+Destructive `UnionWith`, `IntersectWith`,
+`DifferenceWith`, and `SymmetricDifferenceWith` operations reuse the receiver
+and report how many memberships changed, which avoids allocating a second full
+set when mutation is appropriate. Keep and pass the set pointers returned by
+the constructors; initialized set structs must not be copied.
 
 ## Choosing a priority map
 

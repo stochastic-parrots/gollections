@@ -4,7 +4,7 @@ import (
 	"iter"
 	"math/bits"
 
-	"github.com/stochastic-parrots/gollections/constraint"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 const radixBucketsCount = 65
