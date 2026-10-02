@@ -61,7 +61,7 @@ func TestNewKeyedHashSetFromMap(t *testing.T) {
 }
 
 func TestNewKeyedHashSetFromMap_Nil(t *testing.T) {
-	set := NewKeyedHashSetFromMap[int, record](nil, recordID)
+	set := NewKeyedHashSetFromMap(nil, recordID)
 
 	assert.NotNil(t, set.values)
 	assert.True(t, set.Add(record{ID: 1}))
@@ -80,7 +80,7 @@ func TestNewKeyedHashSetCloneMap(t *testing.T) {
 }
 
 func TestNewKeyedHashSetCloneMap_Nil(t *testing.T) {
-	set := NewKeyedHashSetCloneMap[int, record](nil, recordID)
+	set := NewKeyedHashSetCloneMap(nil, recordID)
 
 	assert.NotNil(t, set.values)
 }
