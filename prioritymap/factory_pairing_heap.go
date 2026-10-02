@@ -17,6 +17,15 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 // strict-weak-order predicate. Choose it when priority improvements are frequent.
 // It panics for a nil predicate. The freelist retains at most capacity nodes;
 // zero capacity disables freelist retention.
+// An improvement performs a lookup, at most one cut, and one heap link, so its
+// immediate heap work is O(1). Pop later consolidates children in two passes.
+// The amortized rows account for this deferred work across mixed operations,
+// using a conservative O(log N) bound for Improve.
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which may differ from the constructor's capacity argument.
+// Preallocation or growth followed by removals can leave C much larger than N.
+// The O(C) iterator rows describe full traversal: iteration examines index
+// slots, including empty ones. Clear scans the index and visits N heap nodes.
 //
 // Performance Summary (Time Complexity):
 //
@@ -24,19 +33,19 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 //	----------------------   ---------------
 //	Get(key)                 O(1)
 //	Contains(key)            O(1)
-//	Keys()                   O(N)
-//	Values()                 O(N)
-//	All()                    O(N)
+//	Keys()                   O(C)
+//	Values()                 O(C)
+//	All()                    O(C)
 //	IsEmpty()                O(1)
 //	Len()                    O(1)
 //	Peek()                   O(1)
 //	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N) Amortized
-//	Improve(key, priority)   O(1) Amortized
+//	Improve(key, priority)   O(log N) Amortized
 //	Remove(key)              O(log N) Amortized
 //	Pop()                    O(log N) Amortized
 //	Drain()                  O(N log N) Amortized
-//	Clear()                  O(N)
+//	Clear()                  O(C)
 //
 // Complexity: O(capacity).
 func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity int) *PairingHeapPriorityMap[K, P] {
@@ -47,6 +56,15 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 }
 
 // NewOrderedPairingHeap creates an empty priority map using P's natural order.
+// An improvement performs a lookup, at most one cut, and one heap link, so its
+// immediate heap work is O(1). Pop later consolidates children in two passes.
+// The amortized rows account for this deferred work across mixed operations,
+// using a conservative O(log N) bound for Improve.
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which may differ from the constructor's capacity argument.
+// Preallocation or growth followed by removals can leave C much larger than N.
+// The O(C) iterator rows describe full traversal: iteration examines index
+// slots, including empty ones. Clear scans the index and visits N heap nodes.
 //
 // Performance Summary (Time Complexity):
 //
@@ -54,19 +72,19 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 //	----------------------   ---------------
 //	Get(key)                 O(1)
 //	Contains(key)            O(1)
-//	Keys()                   O(N)
-//	Values()                 O(N)
-//	All()                    O(N)
+//	Keys()                   O(C)
+//	Values()                 O(C)
+//	All()                    O(C)
 //	IsEmpty()                O(1)
 //	Len()                    O(1)
 //	Peek()                   O(1)
 //	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N) Amortized
-//	Improve(key, priority)   O(1) Amortized
+//	Improve(key, priority)   O(log N) Amortized
 //	Remove(key)              O(log N) Amortized
 //	Pop()                    O(log N) Amortized
 //	Drain()                  O(N log N) Amortized
-//	Clear()                  O(N)
+//	Clear()                  O(C)
 //
 // Complexity: O(capacity).
 func NewOrderedPairingHeap[K comparable, P cmp.Ordered](order Order, capacity int) *PairingHeapPriorityMap[K, P] {

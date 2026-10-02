@@ -172,8 +172,9 @@ JSON array order are unspecified.
 
 - `BinaryHeapPriorityMap`: predictable O(log N) updates with compact,
   contiguous storage.
-- `PairingHeapPriorityMap`: a strong general-purpose choice for workloads with
-  frequent priority improvements.
+- `PairingHeapPriorityMap`: useful when priority improvements are frequent; each
+  improvement does constant immediate heap-link work. Pop consolidates children
+  later; use the conservative O(log N) amortized bound for mixed workloads.
 - `RadixHeapPriorityMap`: optimized for unsigned integer priorities where
   popped priorities never decrease, such as Dijkstra with non-negative integer
   edge weights. After `Pop` returns `p`, callers must never insert or update an
