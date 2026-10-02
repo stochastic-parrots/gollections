@@ -19,19 +19,19 @@ func memberID(value member) int {
 	return value.ID
 }
 
-func TestFactoriesImplementSet(t *testing.T) {
-	var _ *set.HashSet[int] = set.HashSetOf[int]().New(0)
-	var _ *set.HashSet[int] = set.HashSetOf[int]().From([]int{1})
-	var _ *set.HashSet[int] = set.HashSetOf[int]().FromSeq(slices.Values([]int{1}))
-	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).New(0)
-	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).From([]member{{ID: 1}})
-	var _ *set.KeyedHashSet[member, int] = set.HashSetBy(memberID).FromSeq(slices.Values([]member{{ID: 1}}))
-	var _ set.Set[int] = set.HashSetOf[int]().New(0)
-	var _ set.Set[member] = set.HashSetBy(memberID).New(0)
-	var _ set.Algebra[int, *set.HashSet[int]] = set.HashSetOf[int]().New(0)
-	var _ set.Algebra[member, *set.KeyedHashSet[member, int]] = set.HashSetBy(memberID).New(0)
-	var _ set.InPlaceAlgebra[int] = set.HashSetOf[int]().New(0)
-	var _ set.InPlaceAlgebra[member] = set.HashSetBy(memberID).New(0)
+func TestConstructorsImplementSet(t *testing.T) {
+	var _ *set.HashSet[int] = set.NewHashSet[int](0)
+	var _ *set.HashSet[int] = set.HashSetFrom([]int{1})
+	var _ *set.HashSet[int] = set.HashSetFromSeq(slices.Values([]int{1}))
+	var _ *set.KeyedHashSet[int, member] = set.NewKeyedHashSet(0, memberID)
+	var _ *set.KeyedHashSet[int, member] = set.KeyedHashSetFrom([]member{{ID: 1}}, memberID)
+	var _ *set.KeyedHashSet[int, member] = set.KeyedHashSetFromSeq(slices.Values([]member{{ID: 1}}), memberID)
+	var _ set.Set[int] = set.NewHashSet[int](0)
+	var _ set.Set[member] = set.NewKeyedHashSet(0, memberID)
+	var _ set.Algebra[int, *set.HashSet[int]] = set.NewHashSet[int](0)
+	var _ set.Algebra[member, *set.KeyedHashSet[int, member]] = set.NewKeyedHashSet(0, memberID)
+	var _ set.InPlaceAlgebra[int] = set.NewHashSet[int](0)
+	var _ set.InPlaceAlgebra[member] = set.NewKeyedHashSet(0, memberID)
 }
 
 func TestConcreteZeroValues(t *testing.T) {
@@ -55,7 +55,7 @@ func TestSourceFromSlice(t *testing.T) {
 
 func TestConcreteZeroValue_SymmetricDifferenceWith(t *testing.T) {
 	var values set.HashSet[int]
-	other := set.HashSetOf[int]().From([]int{1})
+	other := set.HashSetFrom([]int{1})
 
 	assert.Equal(t, 1, values.SymmetricDifferenceWith(other))
 	assert.True(t, values.Contains(1))
@@ -67,7 +67,7 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := set.HashSetOf[int]().From([]int{1, 2})
+		mutable := set.HashSetFrom([]int{1, 2})
 		view := set.AsReadonly[int](mutable)
 
 		_, mutableView := any(view).(set.Set[int])
@@ -98,7 +98,7 @@ func TestAsReadonly(t *testing.T) {
 
 func TestInPlaceAlgebra_ReadonlyAlias(t *testing.T) {
 	t.Run("HashSet", func(t *testing.T) {
-		values := set.HashSetOf[int]().From([]int{1, 2})
+		values := set.HashSetFrom([]int{1, 2})
 		view := set.AsReadonly[int](values)
 
 		assert.Zero(t, values.UnionWith(view))
@@ -115,7 +115,7 @@ func TestInPlaceAlgebra_ReadonlyAlias(t *testing.T) {
 	})
 
 	t.Run("KeyedHashSet", func(t *testing.T) {
-		values := set.HashSetBy(memberID).From([]member{{ID: 1}, {ID: 2}})
+		values := set.KeyedHashSetFrom([]member{{ID: 1}, {ID: 2}}, memberID)
 		view := set.AsReadonly[member](values)
 
 		assert.Zero(t, values.UnionWith(view))

@@ -19,20 +19,20 @@ func (values hashValueSource[T]) Length() int {
 	return len(values)
 }
 
-func TestHashFactory_New(t *testing.T) {
-	assertSetBehavior(t, set.HashSetOf[int]().New(2))
+func TestNewHashSet(t *testing.T) {
+	assertSetBehavior(t, set.NewHashSet[int](2))
 }
 
-func TestHashFactory_From(t *testing.T) {
+func TestHashSet_From(t *testing.T) {
 	data := []int{1, 2, 1}
-	values := set.HashSetOf[int]().From(data)
+	values := set.HashSetFrom(data)
 	data[0] = 3
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
-func TestHashFactory_FromSeq(t *testing.T) {
-	values := set.HashSetOf[int]().FromSeq(slices.Values([]int{1, 2, 1}))
+func TestHashSet_FromSeq(t *testing.T) {
+	values := set.HashSetFromSeq(slices.Values([]int{1, 2, 1}))
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
@@ -66,186 +66,79 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	assert.True(t, values.Contains(3))
 }
 
-func TestHashFactory_Union(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	result := factory.Union(
-		hashValueSource[int]{1, 1, 2},
-		hashValueSource[int]{2, 3},
-	)
+func TestHashSet_Union(t *testing.T) {
+	left := set.HashSetFrom([]int{1, 1, 2})
+	result := left.Union(hashValueSource[int]{2, 3})
 
 	assert.ElementsMatch(t, []int{1, 2, 3}, slices.Collect(result.All()))
-	assert.True(t, factory.Union().IsEmpty())
+	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(left.All()))
 }
 
-func TestHashFactory_Intersection(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	result := factory.Intersection(
-		hashValueSource[int]{1, 2, 2, 3},
+func TestHashSet_Intersection(t *testing.T) {
+	left := set.HashSetFrom([]int{1, 2, 2, 3})
+	result := left.Intersection(
 		hashValueSource[int]{2, 3, 4},
 		hashValueSource[int]{3, 3},
 	)
 
 	assert.Equal(t, []int{3}, slices.Collect(result.All()))
-	assert.True(t, factory.Intersection().IsEmpty())
 }
 
-func TestHashFactory_Difference(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	result := factory.Difference(
-		hashValueSource[int]{1, 2, 2, 3},
+func TestHashSet_Difference(t *testing.T) {
+	left := set.HashSetFrom([]int{1, 2, 2, 3})
+	result := left.Difference(
 		hashValueSource[int]{2},
 		hashValueSource[int]{4},
 	)
 
 	assert.ElementsMatch(t, []int{1, 3}, slices.Collect(result.All()))
-	assert.True(t, factory.Difference().IsEmpty())
 }
 
-func TestHashFactory_SymmetricDifference(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	result := factory.SymmetricDifference(
-		hashValueSource[int]{1, 1, 2},
+func TestHashSet_SymmetricDifference(t *testing.T) {
+	left := set.HashSetFrom([]int{1, 1, 2})
+	result := left.SymmetricDifference(
 		hashValueSource[int]{2, 3},
 		hashValueSource[int]{3, 4},
 	)
 
 	assert.ElementsMatch(t, []int{1, 4}, slices.Collect(result.All()))
-	assert.True(t, factory.SymmetricDifference().IsEmpty())
 }
 
-func TestHashFactory_Equal(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	assert.True(t, factory.Equal(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{2, 1, 1},
-	))
-	assert.False(t, factory.Equal(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{1, 3},
-	))
+func readonlyHashSet(values ...int) set.Readonly[int] {
+	return set.AsReadonly(set.HashSetFrom(values))
 }
 
-func TestHashFactory_IsSubset(t *testing.T) {
-	factory := set.HashSetOf[int]()
+func TestRelations_Equal(t *testing.T) {
+	left := set.HashSetFrom([]int{1, 2})
+	right := readonlyHashSet(2, 1)
 
-	assert.True(t, factory.IsSubset(
-		hashValueSource[int]{1, 1},
-		hashValueSource[int]{1, 2},
-	))
-	assert.False(t, factory.IsSubset(
-		hashValueSource[int]{1, 3},
-		hashValueSource[int]{1, 2},
-	))
+	assert.True(t, set.Equal(left, right))
+	assert.False(t, set.Equal(left, readonlyHashSet(1, 3)))
 }
 
-func TestHashFactory_IsProperSubset(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	assert.True(t, factory.IsProperSubset(
-		hashValueSource[int]{1},
-		hashValueSource[int]{1, 2},
-	))
-	assert.False(t, factory.IsProperSubset(
-		hashValueSource[int]{1, 1},
-		hashValueSource[int]{1},
-	))
+func TestRelations_IsSubset(t *testing.T) {
+	assert.True(t, set.IsSubset(readonlyHashSet(1), readonlyHashSet(1, 2)))
+	assert.False(t, set.IsSubset(readonlyHashSet(3), readonlyHashSet(1, 2)))
+	assert.True(t, set.IsSubset(readonlyHashSet(), readonlyHashSet(1)))
 }
 
-func TestHashFactory_IsSuperset(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	assert.True(t, factory.IsSuperset(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{1, 1},
-	))
-	assert.False(t, factory.IsSuperset(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{3},
-	))
+func TestRelations_IsProperSubset(t *testing.T) {
+	assert.True(t, set.IsProperSubset(readonlyHashSet(1), readonlyHashSet(1, 2)))
+	assert.False(t, set.IsProperSubset(readonlyHashSet(1), readonlyHashSet(1)))
+	assert.False(t, set.IsProperSubset(readonlyHashSet(), readonlyHashSet()))
 }
 
-func TestHashFactory_IsProperSuperset(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	assert.True(t, factory.IsProperSuperset(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{1},
-	))
-	assert.False(t, factory.IsProperSuperset(
-		hashValueSource[int]{1},
-		hashValueSource[int]{1, 1},
-	))
+func TestRelations_IsSuperset(t *testing.T) {
+	assert.True(t, set.IsSuperset(readonlyHashSet(1, 2), readonlyHashSet(1)))
+	assert.False(t, set.IsSuperset(readonlyHashSet(1, 2), readonlyHashSet(3)))
 }
 
-func TestHashFactory_IsDisjoint(t *testing.T) {
-	factory := set.HashSetOf[int]()
-
-	assert.True(t, factory.IsDisjoint(
-		hashValueSource[int]{1},
-		hashValueSource[int]{2, 3},
-	))
-	assert.False(t, factory.IsDisjoint(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{2},
-	))
+func TestRelations_IsProperSuperset(t *testing.T) {
+	assert.True(t, set.IsProperSuperset(readonlyHashSet(1, 2), readonlyHashSet(1)))
+	assert.False(t, set.IsProperSuperset(readonlyHashSet(1), readonlyHashSet(1)))
 }
 
-func TestHashFactory_RelationOperandStrategies(t *testing.T) {
-	factory := set.HashSetOf[int]()
-	oneTwo := factory.From([]int{1, 2})
-	twoThree := factory.From([]int{2, 3})
-
-	assert.True(t, factory.Equal(oneTwo, hashValueSource[int]{2, 1}))
-	assert.True(t, factory.Equal(hashValueSource[int]{2, 1}, oneTwo))
-	assert.True(t, factory.Equal(
-		hashValueSource[int]{1, 1, 2},
-		hashValueSource[int]{2, 1},
-	))
-
-	assert.True(t, factory.IsSubset(oneTwo, hashValueSource[int]{1, 2, 3}))
-	assert.True(t, factory.IsSubset(hashValueSource[int]{1}, oneTwo))
-	assert.False(t, factory.IsSubset(hashValueSource[int]{3}, oneTwo))
-	assert.True(t, factory.IsSubset(
-		hashValueSource[int]{1, 1, 1},
-		hashValueSource[int]{1, 2},
-	))
-	assert.False(t, factory.IsSubset(
-		hashValueSource[int]{1, 3, 3},
-		hashValueSource[int]{1, 2},
-	))
-	assert.True(t, factory.IsSubset(
-		hashValueSource[int]{},
-		hashValueSource[int]{1},
-	))
-
-	assert.True(t, factory.IsProperSubset(
-		factory.From([]int{1}),
-		hashValueSource[int]{1, 2},
-	))
-	assert.False(t, factory.IsProperSubset(
-		hashValueSource[int]{},
-		hashValueSource[int]{},
-	))
-
-	assert.True(t, factory.IsSuperset(oneTwo, hashValueSource[int]{1}))
-	assert.True(t, factory.IsSuperset(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{1, 1, 1},
-	))
-	assert.False(t, factory.IsSuperset(
-		hashValueSource[int]{1, 2},
-		hashValueSource[int]{1, 3, 3},
-	))
-	assert.True(t, factory.IsProperSuperset(
-		oneTwo,
-		hashValueSource[int]{1},
-	))
-
-	assert.False(t, factory.IsDisjoint(oneTwo, twoThree))
-	assert.False(t, factory.IsDisjoint(hashValueSource[int]{2}, oneTwo))
+func TestRelations_IsDisjoint(t *testing.T) {
+	assert.True(t, set.IsDisjoint(readonlyHashSet(1), readonlyHashSet(2, 3)))
+	assert.False(t, set.IsDisjoint(readonlyHashSet(1, 2), readonlyHashSet(2)))
 }

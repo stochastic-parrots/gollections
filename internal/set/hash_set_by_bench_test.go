@@ -298,8 +298,8 @@ func BenchmarkKeyedHashSet_IsDisjoint(b *testing.B) {
 }
 
 func benchmarkKeyedHashSets() (
-	*KeyedHashSet[benchmarkRecord, int],
-	*KeyedHashSet[benchmarkRecord, int],
+	*KeyedHashSet[int, benchmarkRecord],
+	*KeyedHashSet[int, benchmarkRecord],
 ) {
 	const size = 10_000
 	leftValues := make([]benchmarkRecord, size)
@@ -313,8 +313,8 @@ func benchmarkKeyedHashSets() (
 }
 
 func benchmarkKeyedHashSubset() (
-	*KeyedHashSet[benchmarkRecord, int],
-	*KeyedHashSet[benchmarkRecord, int],
+	*KeyedHashSet[int, benchmarkRecord],
+	*KeyedHashSet[int, benchmarkRecord],
 ) {
 	const size = 10_000
 	subsetValues := make([]benchmarkRecord, size)

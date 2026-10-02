@@ -91,7 +91,7 @@ type Set[T any] interface {
 // so duplicate identities in arbitrary collections are normalized. Relations
 // are directional when operands use different identity policies. HashSet and
 // KeyedHashSet satisfy operand interfaces through pointers; callers should pass
-// the pointers returned by their factories rather than struct values.
+// the pointers returned by their constructors rather than struct values.
 type Algebra[T any, S Readonly[T]] interface {
 	// Clone returns an independent set containing the receiver's values and
 	// preserving its identity policy.

@@ -59,23 +59,25 @@ Go documentation tools.
   input, using the traversal order documented by each package. Lists and deques
   also unmarshal because array order completely defines their logical state.
   Sorted lists, heaps, and sets require slice decoding followed by the matching
-  factory so ordering, priority, and set identity remain explicit.
+  constructor or factory so ordering, priority, and set identity remain explicit.
 
 ## Construction
 
-Public packages select an implementation through a reusable typed factory.
-Factory methods return concrete collection types without interface dispatch:
+Most public packages select an implementation through a reusable typed
+factory. Set constructors return concrete collection types without interface
+dispatch:
 
 ```go
 items := list.Array[string]().New(16)
 queue := deque.Linked[int]().From([]int{1, 2, 3})
 scores := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2})
 pending := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(32)
-visited := set.HashSetOf[string]().New(32)
+visited := set.NewHashSet[string](32)
 ```
 
 Sorted lists, heaps, and sets intentionally do not implement `json.Unmarshaler`.
-Decode into a slice and use the selected factory to establish their invariants:
+Decode into a slice and use the matching constructor or factory to establish
+their invariants:
 
 ```go
 var values []int
@@ -137,22 +139,23 @@ scheduling-buffer patterns.
 
 Set identities must have reflexive equality. Floating-point NaN cannot be used
 directly as a `HashSet` value or `KeyedHashSet` key because NaN is not equal to
-itself. Use `HashSetBy` with a canonical comparable key when NaN membership is
-required. When `HashSet` uses an interface type, its dynamic values must also be
-comparable, matching native Go map requirements.
+itself. Use `NewKeyedHashSet` with a canonical comparable key when NaN
+membership is required. When `HashSet` uses an interface type, its dynamic
+values must also be comparable, matching native Go map requirements.
 
 `Add` and `Remove` report whether one value changed membership; `Adds` and
 `Removes` report how many values in a batch changed membership. Iteration and
 JSON array order are unspecified.
 
 Both implementations provide pure set algebra (`Clone`, `Union`,
-`Intersection`, `Difference`, `SymmetricDifference`, and set relations).
-Factories expose the same algebra over arbitrary collections using the
-factory's identity policy. Destructive `UnionWith`, `IntersectWith`,
+`Intersection`, `Difference`, and `SymmetricDifference`) as receiver methods.
+The package-level `Equal`, `IsSubset`, `IsProperSubset`, `IsSuperset`,
+`IsProperSuperset`, and `IsDisjoint` functions compare `Readonly` sets using Go
+equality. Destructive `UnionWith`, `IntersectWith`,
 `DifferenceWith`, and `SymmetricDifferenceWith` operations reuse the receiver
 and report how many memberships changed, which avoids allocating a second full
 set when mutation is appropriate. Keep and pass the set pointers returned by
-the factories; initialized set structs must not be copied.
+the constructors; initialized set structs must not be copied.
 
 ## Choosing a priority map
 

@@ -71,7 +71,7 @@ func TestKeyedHashSet_Contains(t *testing.T) {
 }
 
 func TestKeyedHashSet_Add(t *testing.T) {
-	set := KeyedHashSet[record, int]{keyOf: recordID}
+	set := KeyedHashSet[int, record]{keyOf: recordID}
 	first := record{ID: 1, Name: "first"}
 
 	assert.True(t, set.Add(first))
@@ -783,7 +783,7 @@ func TestKeyedHashSet_DifferenceWith(t *testing.T) {
 }
 
 func TestKeyedHashSet_SymmetricDifferenceWith(t *testing.T) {
-	set := KeyedHashSet[record, int]{keyOf: recordID}
+	set := KeyedHashSet[int, record]{keyOf: recordID}
 
 	assert.Equal(t, 1, set.SymmetricDifferenceWith(
 		NewKeyedHashSetFromSlice([]record{{ID: 4}}, recordID),
