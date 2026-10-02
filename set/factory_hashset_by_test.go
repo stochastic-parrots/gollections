@@ -18,6 +18,12 @@ func TestNewKeyedHashSet_NilIdentityFunction(t *testing.T) {
 	assert.PanicsWithValue(t, "set: nil identity function", func() {
 		set.KeyedHashSetFromSeq[int, member](nil, nil)
 	})
+	assert.PanicsWithValue(t, "set: nil identity function", func() {
+		set.KeyedHashSetFromMap[int, member](nil, nil)
+	})
+	assert.PanicsWithValue(t, "set: nil identity function", func() {
+		set.KeyedHashSetCloneMap[int, member](nil, nil)
+	})
 }
 
 func TestNewKeyedHashSet(t *testing.T) {
@@ -61,6 +67,19 @@ func TestKeyedHashSet_FromMap(t *testing.T) {
 
 	input[3] = member{ID: 3, Name: "map mutation"}
 	assert.True(t, values.Contains(member{ID: 3}))
+}
+
+func TestKeyedHashSet_FromMap_SymmetricDifferenceWithPreservesMap(t *testing.T) {
+	input := map[int]member{}
+	values := set.KeyedHashSetFromMap(input, memberID)
+
+	assert.Equal(t, 1, values.SymmetricDifferenceWith(
+		set.SourceFromSlice([]member{{ID: 1, Name: "inserted"}}),
+	))
+	assert.Equal(t, member{ID: 1, Name: "inserted"}, input[1])
+
+	input[2] = member{ID: 2, Name: "external"}
+	assert.True(t, values.Contains(member{ID: 2}))
 }
 
 func TestKeyedHashSet_CloneMap(t *testing.T) {

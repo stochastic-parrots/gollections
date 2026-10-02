@@ -631,6 +631,9 @@ func TestHashSet_DifferenceWith(t *testing.T) {
 
 func TestHashSet_SymmetricDifferenceWith(t *testing.T) {
 	var set HashSet[int]
+	var zeroValue HashSet[int]
+	assert.Equal(t, 1, zeroValue.SymmetricDifferenceWith(NewHashSetFromSlice([]int{9})))
+	assert.True(t, zeroValue.Contains(9))
 
 	assert.Equal(t, 2, set.SymmetricDifferenceWith(
 		hashSource[int]{1, 2, 2},

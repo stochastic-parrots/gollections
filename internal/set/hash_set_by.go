@@ -716,56 +716,90 @@ func (set *KeyedHashSet[K, T]) SymmetricDifferenceWith(
 			}
 			return len(seen)
 		}
+
+		toggles := collectKeyedIdentities(others[0], set.keyOf)
+		if set.values == nil && len(toggles) > 0 {
+			set.values = make(map[K]T, len(toggles))
+		}
+		for key, value := range toggles {
+			if _, exists := set.values[key]; exists {
+				delete(set.values, key)
+			} else {
+				set.values[key] = value
+			}
+		}
+		return len(toggles)
 	}
 
-	toggles := collectKeyedIdentities(others[0], set.keyOf)
+	type toggleState struct {
+		initialPresent bool
+		present        bool
+		value          T
+	}
+
+	states := make(map[K]toggleState)
 	var seen map[K]struct{}
-	for _, other := range others[1:] {
+	for _, other := range others {
 		if seen == nil {
 			seen = make(map[K]struct{}, other.Length())
 		} else {
 			clear(seen)
 		}
+
+		toggle := func(value T) {
+			key := set.keyOf(value)
+			if _, duplicate := seen[key]; duplicate {
+				return
+			}
+			seen[key] = struct{}{}
+
+			state, known := states[key]
+			if !known {
+				_, state.initialPresent = set.values[key]
+				state.present = state.initialPresent
+			}
+			if state.present {
+				state.present = false
+			} else {
+				state.present = true
+				state.value = value
+			}
+			states[key] = state
+		}
+
 		if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
 			for _, value := range otherSet.values {
-				key := set.keyOf(value)
-				if _, exists := seen[key]; exists {
-					continue
-				}
-				seen[key] = struct{}{}
-				if _, exists := toggles[key]; exists {
-					delete(toggles, key)
-				} else {
-					toggles[key] = value
-				}
+				toggle(value)
 			}
 		} else {
 			for value := range other.All() {
-				key := set.keyOf(value)
-				if _, exists := seen[key]; exists {
-					continue
-				}
-				seen[key] = struct{}{}
-				if _, exists := toggles[key]; exists {
-					delete(toggles, key)
-				} else {
-					toggles[key] = value
-				}
+				toggle(value)
 			}
 		}
 	}
 
-	if len(set.values) == 0 && len(toggles) > 0 {
-		set.values = make(map[K]T, len(toggles))
-	}
-	for key, value := range toggles {
-		if _, ok := set.values[key]; ok {
-			delete(set.values, key)
-		} else {
-			set.values[key] = value
+	if set.values == nil {
+		for _, state := range states {
+			if state.present {
+				set.values = make(map[K]T, len(states))
+				break
+			}
 		}
 	}
-	return len(toggles)
+
+	changed := 0
+	for key, state := range states {
+		if state.present {
+			set.values[key] = state.value
+			if !state.initialPresent {
+				changed++
+			}
+		} else if state.initialPresent {
+			delete(set.values, key)
+			changed++
+		}
+	}
+	return changed
 }
 
 func (set *KeyedHashSet[K, T]) intersectWith(
@@ -886,19 +920,10 @@ func collectKeyedIdentities[T any, K comparable](
 	keyOf func(T) K,
 ) map[K]T {
 	identities := make(map[K]T, source.Length())
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
-		for _, value := range sourceSet.values {
-			key := keyOf(value)
-			if _, exists := identities[key]; !exists {
-				identities[key] = value
-			}
-		}
-	} else {
-		for value := range source.All() {
-			key := keyOf(value)
-			if _, exists := identities[key]; !exists {
-				identities[key] = value
-			}
+	for value := range source.All() {
+		key := keyOf(value)
+		if _, exists := identities[key]; !exists {
+			identities[key] = value
 		}
 	}
 	return identities

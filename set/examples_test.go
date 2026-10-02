@@ -65,7 +65,7 @@ func ExampleEqualBy() {
 	left := set.KeyedHashSetFrom([]user{{ID: 1, Name: "Ada"}}, byName)
 	right := set.KeyedHashSetFrom([]user{{ID: 1, Name: "Ada Lovelace"}}, byName)
 
-	fmt.Println(set.EqualBy(left, right, func(value user) int { return value.ID }))
+	fmt.Println(set.EqualBy(func(value user) int { return value.ID }, left, right))
 
 	// Output:
 	// true

@@ -78,11 +78,12 @@
 // are package functions over [Readonly] sets that use direct Go equality.
 // Their EqualBy, IsSubsetBy, IsProperSubsetBy, IsSupersetBy,
 // IsProperSupersetBy, and IsDisjointBy counterparts accept an identity
-// function and apply it to both operands. KeyedHashSet also exposes relations
-// as methods that use the receiver's identity function. Receiver relations are
-// directional when comparing sets constructed with different identity
-// policies. The By functions require a non-nil keyOf that returns reflexive
-// comparable keys.
+// function and apply it to all operands. Equality functions compare each
+// operand with the first; disjointness functions require every pair to be
+// disjoint. KeyedHashSet also exposes relations as methods that use the
+// receiver's identity function. Receiver relations are directional when
+// comparing sets constructed with different identity policies. The By
+// functions require a non-nil keyOf that returns reflexive comparable keys.
 //
 // # Views, Iteration, And JSON
 //

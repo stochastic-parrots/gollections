@@ -1,20 +1,34 @@
 package set
 
-import "github.com/stochastic-parrots/gollections/internal/set"
+import (
+	"maps"
 
-// Equal reports whether left and right contain the same values.
+	"github.com/stochastic-parrots/gollections/internal/set"
+)
+
+// Equal reports whether first and every additional set contain the same
+// values.
 //
-// Complexity: Expected O(N + M), where N = left.Length() and M =
-// right.Length().
-func Equal[T comparable](left, right Readonly[T]) bool {
+// Complexity: Expected O(Q*N + M), where Q is the number of additional sets,
+// N is first.Length(), and M is the sum of their lengths.
+func Equal[T comparable](first Readonly[T], others ...Readonly[T]) bool {
+	for _, other := range others {
+		if !equal(first, other) {
+			return false
+		}
+	}
+	return true
+}
+
+func equal[T comparable](left, right Readonly[T]) bool {
+	if left.Length() != right.Length() {
+		return false
+	}
 	if leftSet, ok := left.(*HashSet[T]); ok {
 		return leftSet.Equal(right)
 	}
 	if rightSet, ok := right.(*HashSet[T]); ok {
 		return rightSet.Equal(left)
-	}
-	if left.Length() > right.Length() {
-		left, right = right, left
 	}
 	membership := set.CollectHashMembership(left)
 	matched, contained := set.MatchHashMembership(membership, right)
@@ -26,6 +40,9 @@ func Equal[T comparable](left, right Readonly[T]) bool {
 // Complexity: Expected O(N + M), where N = subset.Length() and M =
 // superset.Length().
 func IsSubset[T comparable](subset, superset Readonly[T]) bool {
+	if subset.Length() > superset.Length() {
+		return false
+	}
 	if subsetSet, ok := subset.(*HashSet[T]); ok {
 		return subsetSet.IsSubset(superset)
 	}
@@ -37,19 +54,10 @@ func IsSubset[T comparable](subset, superset Readonly[T]) bool {
 		}
 		return true
 	}
-	if subset.Length() <= superset.Length() {
-		return set.MatchHashSubset(
-			set.CollectHashMembership(subset),
-			superset,
-		)
-	}
-	keys := set.CollectHashKeys(superset)
-	for value := range subset.All() {
-		if _, exists := keys[value]; !exists {
-			return false
-		}
-	}
-	return true
+	return set.MatchHashSubset(
+		set.CollectHashMembership(subset),
+		superset,
+	)
 }
 
 // IsProperSubset reports whether subset is contained in superset and the two
@@ -58,17 +66,15 @@ func IsSubset[T comparable](subset, superset Readonly[T]) bool {
 // Complexity: Expected O(N + M), where N = subset.Length() and M =
 // superset.Length().
 func IsProperSubset[T comparable](subset, superset Readonly[T]) bool {
+	if subset.Length() >= superset.Length() {
+		return false
+	}
 	if subsetSet, ok := subset.(*HashSet[T]); ok {
 		return subsetSet.IsProperSubset(superset)
 	}
-	if subset.Length() <= superset.Length() {
-		membership := set.CollectHashMembership(subset)
-		matched, hasExtra := set.MatchHashContainedMembership(membership, superset)
-		return matched == len(membership) && hasExtra
-	}
-	membership := set.CollectHashMembership(superset)
-	matched, contained := set.MatchHashMembership(membership, subset)
-	return contained && matched < len(membership)
+	membership := set.CollectHashMembership(subset)
+	matched, hasExtra := set.MatchHashContainedMembership(membership, superset)
+	return matched == len(membership) && hasExtra
 }
 
 // IsSuperset reports whether every value in subset is present in superset.
@@ -76,22 +82,16 @@ func IsProperSubset[T comparable](subset, superset Readonly[T]) bool {
 // Complexity: Expected O(N + M), where N = subset.Length() and M =
 // superset.Length().
 func IsSuperset[T comparable](superset, subset Readonly[T]) bool {
+	if subset.Length() > superset.Length() {
+		return false
+	}
 	if supersetSet, ok := superset.(*HashSet[T]); ok {
 		return supersetSet.IsSuperset(subset)
 	}
-	if subset.Length() <= superset.Length() {
-		return set.MatchHashSubset(
-			set.CollectHashMembership(subset),
-			superset,
-		)
-	}
-	keys := set.CollectHashKeys(superset)
-	for value := range subset.All() {
-		if _, exists := keys[value]; !exists {
-			return false
-		}
-	}
-	return true
+	return set.MatchHashSubset(
+		set.CollectHashMembership(subset),
+		superset,
+	)
 }
 
 // IsProperSuperset reports whether superset contains subset and the two
@@ -100,49 +100,62 @@ func IsSuperset[T comparable](superset, subset Readonly[T]) bool {
 // Complexity: Expected O(N + M), where N = superset.Length() and M =
 // subset.Length().
 func IsProperSuperset[T comparable](superset, subset Readonly[T]) bool {
+	if subset.Length() >= superset.Length() {
+		return false
+	}
 	if supersetSet, ok := superset.(*HashSet[T]); ok {
 		return supersetSet.IsProperSuperset(subset)
 	}
-	if subset.Length() <= superset.Length() {
-		membership := set.CollectHashMembership(subset)
-		matched, hasExtra := set.MatchHashContainedMembership(membership, superset)
-		return matched == len(membership) && hasExtra
-	}
-	membership := set.CollectHashMembership(superset)
-	matched, contained := set.MatchHashMembership(membership, subset)
-	return contained && matched < len(membership)
+	membership := set.CollectHashMembership(subset)
+	matched, hasExtra := set.MatchHashContainedMembership(membership, superset)
+	return matched == len(membership) && hasExtra
 }
 
-// IsDisjoint reports whether left and right share no values.
+// IsDisjoint reports whether first and every additional set are pairwise
+// disjoint.
 //
-// Complexity: Expected O(N + M), where N = left.Length() and M =
-// right.Length().
-func IsDisjoint[T comparable](left, right Readonly[T]) bool {
-	if leftSet, ok := left.(*HashSet[T]); ok {
-		return leftSet.IsDisjoint(right)
-	}
-	if rightSet, ok := right.(*HashSet[T]); ok {
-		return rightSet.IsDisjoint(left)
-	}
-	if left.Length() > right.Length() {
-		left, right = right, left
-	}
-	keys := set.CollectHashKeys(left)
-	for value := range right.All() {
-		if _, exists := keys[value]; exists {
+// Complexity: Expected O(M), where M is the sum of all operand lengths.
+func IsDisjoint[T comparable](first Readonly[T], others ...Readonly[T]) bool {
+	values := set.CollectHashKeys(first)
+	for _, other := range others {
+		if !addHashValues(values, other) {
 			return false
 		}
 	}
 	return true
 }
 
-// EqualBy reports whether left and right contain the same identities derived
-// by keyOf. It panics if keyOf is nil.
+func addHashValues[T comparable](known map[T]struct{}, source Readonly[T]) bool {
+	current := set.CollectHashKeys(source)
+	for value := range current {
+		if _, exists := known[value]; exists {
+			return false
+		}
+	}
+	maps.Copy(known, current)
+	return true
+}
+
+// EqualBy reports whether first and every additional set contain the same
+// identities derived by keyOf. It panics if keyOf is nil.
 //
-// Complexity: Expected O(N + M), where N = left.Length() and M =
-// right.Length().
-func EqualBy[T any, K comparable](left, right Readonly[T], keyOf func(T) K) bool {
+// Complexity: Expected O(Q*N + M), where Q is the number of additional sets,
+// N is first.Length(), and M is the sum of their lengths.
+func EqualBy[T any, K comparable](
+	keyOf func(T) K,
+	first Readonly[T],
+	others ...Readonly[T],
+) bool {
 	requireKeyOf(keyOf)
+	for _, other := range others {
+		if !equalBy(first, other, keyOf) {
+			return false
+		}
+	}
+	return true
+}
+
+func equalBy[T any, K comparable](left, right Readonly[T], keyOf func(T) K) bool {
 	if left.Length() > right.Length() {
 		left, right = right, left
 	}
@@ -205,22 +218,37 @@ func IsProperSupersetBy[T any, K comparable](superset, subset Readonly[T], keyOf
 	return IsProperSubsetBy(subset, superset, keyOf)
 }
 
-// IsDisjointBy reports whether left and right share no identity derived by
-// keyOf. It panics if keyOf is nil.
+// IsDisjointBy reports whether first and every additional set are pairwise
+// disjoint under identities derived by keyOf. It panics if keyOf is nil.
 //
-// Complexity: Expected O(N + M), where N = left.Length() and M =
-// right.Length().
-func IsDisjointBy[T any, K comparable](left, right Readonly[T], keyOf func(T) K) bool {
+// Complexity: Expected O(M), where M is the sum of all operand lengths.
+func IsDisjointBy[T any, K comparable](
+	keyOf func(T) K,
+	first Readonly[T],
+	others ...Readonly[T],
+) bool {
 	requireKeyOf(keyOf)
-	if left.Length() > right.Length() {
-		left, right = right, left
-	}
-	keys := set.CollectKeyedKeys(left, keyOf)
-	for value := range right.All() {
-		if _, exists := keys[keyOf(value)]; exists {
+	keys := set.CollectKeyedKeys(first, keyOf)
+	for _, other := range others {
+		if !addKeyedIdentities(keys, other, keyOf) {
 			return false
 		}
 	}
+	return true
+}
+
+func addKeyedIdentities[T any, K comparable](
+	known map[K]struct{},
+	source Readonly[T],
+	keyOf func(T) K,
+) bool {
+	current := set.CollectKeyedKeys(source, keyOf)
+	for key := range current {
+		if _, exists := known[key]; exists {
+			return false
+		}
+	}
+	maps.Copy(known, current)
 	return true
 }
 

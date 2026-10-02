@@ -46,8 +46,8 @@ Go documentation tools.
   storage shrinkage or return memory to the Go runtime. Slice-backed structures
   retain capacity where practical, freelists retain at most their construction
   limit, and linked structures without a freelist may release their nodes.
-- Internal implementations: public packages expose stable concrete factories while
-  concrete internals live under `internal`.
+- Internal implementations: public packages expose stable constructors and
+  factories while concrete internals live under `internal`.
 - Read-only views: packages such as `list`, `sortedlist`, `deque`, `set`, and
   `prioritymap` expose wrappers for sharing non-mutating access without
   allowing type assertion back to the mutable interface. These wrappers are
@@ -91,6 +91,29 @@ Array-backed `From` methods transfer ownership of the provided slice and may
 reorder it. The caller must not use the slice or aliases of its backing array
 afterward. Use `Clone` when the source must remain available. Linked structures
 always copy values into nodes, so their `From` methods do not retain the source.
+
+## Set API migration
+
+The set API intentionally replaces its previous factory selectors and changes
+`KeyedHashSet`'s type-parameter order. These are breaking API changes. Migrate
+existing code using the following mapping:
+
+| Previous API | Current API |
+| --- | --- |
+| `set.HashSetOf[T]().New(capacity)` | `set.NewHashSet[T](capacity)` |
+| `set.HashSetOf[T]().From(values)` | `set.HashSetFrom(values)` |
+| `set.HashSetOf[T]().FromSeq(seq)` | `set.HashSetFromSeq(seq)` |
+| `set.HashSetBy(keyOf).New(capacity)` | `set.NewKeyedHashSet[K, T](capacity, keyOf)` |
+| `set.HashSetBy(keyOf).From(values)` | `set.KeyedHashSetFrom(values, keyOf)` |
+| `set.HashSetBy(keyOf).FromSeq(seq)` | `set.KeyedHashSetFromSeq(seq, keyOf)` |
+| `set.KeyedHashSet[T, K]` | `set.KeyedHashSet[K, T]` |
+
+Factory set algebra is now receiver-based. For example, replace
+`set.HashSetOf[T]().Union(left, right)` with `leftSet.Union(right)` and use
+`set.EqualBy(keyOf, first, others...)` when a relation should apply an explicit
+identity function to arbitrary values. `EqualBy` compares every operand with
+the first; `IsDisjointBy(keyOf, first, others...)` checks every pair. The `By`
+functions accept public `set.Readonly[T]` operands.
 
 ## Choosing a list
 
@@ -151,7 +174,11 @@ Both implementations provide pure set algebra (`Clone`, `Union`,
 `Intersection`, `Difference`, and `SymmetricDifference`) as receiver methods.
 The package-level `Equal`, `IsSubset`, `IsProperSubset`, `IsSuperset`,
 `IsProperSuperset`, and `IsDisjoint` functions compare `Readonly` sets using Go
-equality. Destructive `UnionWith`, `IntersectWith`,
+equality. Their `...By` counterparts take a shared identity function for both
+operands. `Equal` compares each operand with the first, while `IsDisjoint`
+requires every pair of operands to be disjoint. `KeyedHashSet` methods use the
+receiver's identity function.
+Destructive `UnionWith`, `IntersectWith`,
 `DifferenceWith`, and `SymmetricDifferenceWith` operations reuse the receiver
 and report how many memberships changed, which avoids allocating a second full
 set when mutation is appropriate. Keep and pass the set pointers returned by
