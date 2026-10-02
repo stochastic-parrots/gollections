@@ -61,7 +61,7 @@ func TestArraySortedList_IsEmpty(t *testing.T) {
 
 func TestArraySortedList_Len(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(3, 1, 2)
+	l.Add(3, 1, 2)
 
 	assert.Equal(t, 3, l.Len())
 }
@@ -69,7 +69,7 @@ func TestArraySortedList_Len(t *testing.T) {
 func TestArraySortedList_Get(t *testing.T) {
 	t.Run("ValidIndex", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(3, 1, 2)
+		l.Add(3, 1, 2)
 
 		for idx, value := range []int{1, 2, 3} {
 			x, err := l.Get(idx)
@@ -91,7 +91,7 @@ func TestArraySortedList_Get(t *testing.T) {
 
 func TestArraySortedList_LowerBound(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(1, 3, 3, 5)
+	l.Add(1, 3, 3, 5)
 
 	tests := []struct {
 		name  string
@@ -116,7 +116,7 @@ func TestArraySortedList_LowerBound(t *testing.T) {
 
 func TestArraySortedList_UpperBound(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(1, 3, 3, 5)
+	l.Add(1, 3, 3, 5)
 
 	tests := []struct {
 		name  string
@@ -142,7 +142,7 @@ func TestArraySortedList_UpperBound(t *testing.T) {
 
 func TestArraySortedList_EqualRange(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(1, 3, 3, 5)
+	l.Add(1, 3, 3, 5)
 
 	tests := []struct {
 		name      string
@@ -167,7 +167,7 @@ func TestArraySortedList_EqualRange(t *testing.T) {
 
 func TestArraySortedList_Count(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(1, 3, 3, 5)
+	l.Add(1, 3, 3, 5)
 
 	assert.Equal(t, 2, l.Count(3))
 	assert.Zero(t, l.Count(0))
@@ -178,7 +178,7 @@ func TestArraySortedList_Count(t *testing.T) {
 func TestArraySortedList_Find(t *testing.T) {
 	t.Run("ElementExists", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(3, 1, 2, 2)
+		l.Add(3, 1, 2, 2)
 
 		idx, ok := l.Find(2)
 
@@ -188,7 +188,7 @@ func TestArraySortedList_Find(t *testing.T) {
 
 	t.Run("NonExistent", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(1, 2, 3)
+		l.Add(1, 2, 3)
 
 		idx, ok := l.Find(4)
 
@@ -208,7 +208,7 @@ func TestArraySortedList_Find(t *testing.T) {
 
 func TestArraySortedList_Navigation(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(1, 3, 3, 5)
+	l.Add(1, 3, 3, 5)
 
 	value, idx, ok := l.Ceiling(2)
 	assert.True(t, ok)
@@ -253,7 +253,7 @@ func TestArraySortedList_Navigation(t *testing.T) {
 
 func TestArraySortedList_Contains(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(3, 1, 2)
+	l.Add(3, 1, 2)
 
 	assert.True(t, l.Contains(2))
 	assert.False(t, l.Contains(4))
@@ -271,7 +271,7 @@ func TestArraySortedList_First(t *testing.T) {
 
 	t.Run("NonEmpty", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(3, 1, 2)
+		l.Add(3, 1, 2)
 
 		x, ok := l.First()
 
@@ -292,7 +292,7 @@ func TestArraySortedList_Last(t *testing.T) {
 
 	t.Run("NonEmpty", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(3, 1, 2)
+		l.Add(3, 1, 2)
 
 		x, ok := l.Last()
 
@@ -302,44 +302,46 @@ func TestArraySortedList_Last(t *testing.T) {
 }
 
 func TestArraySortedList_Add(t *testing.T) {
-	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Add(2)
-	l.Add(1)
-	l.Add(3)
-
-	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
-}
-
-func TestArraySortedList_Adds(t *testing.T) {
-	t.Run("EmptyInput", func(t *testing.T) {
+	t.Run("Incremental", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
+		l.Add(2)
+		l.Add(1)
+		l.Add(3)
 
-		l.Adds()
-
-		assert.Nil(t, l.ToSlice())
+		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	})
 
-	t.Run("SingleValue", func(t *testing.T) {
-		l := NewArraySortedList(0, cmp.Compare[int])
+	t.Run("Batch", func(t *testing.T) {
+		t.Run("EmptyInput", func(t *testing.T) {
+			l := NewArraySortedList(0, cmp.Compare[int])
 
-		l.Adds(2)
+			l.Add()
 
-		assert.Equal(t, []int{2}, l.ToSlice())
-	})
+			assert.Nil(t, l.ToSlice())
+		})
 
-	t.Run("MultipleValues", func(t *testing.T) {
-		l := NewArraySortedList(0, cmp.Compare[int])
+		t.Run("SingleValue", func(t *testing.T) {
+			l := NewArraySortedList(0, cmp.Compare[int])
 
-		l.Adds(3, 1, 2, 2)
+			l.Add(2)
 
-		assert.Equal(t, []int{1, 2, 2, 3}, l.ToSlice())
+			assert.Equal(t, []int{2}, l.ToSlice())
+		})
+
+		t.Run("MultipleValues", func(t *testing.T) {
+			l := NewArraySortedList(0, cmp.Compare[int])
+
+			l.Add(3, 1, 2, 2)
+
+			assert.Equal(t, []int{1, 2, 2, 3}, l.ToSlice())
+		})
 	})
 }
 
 func TestArraySortedList_Replace(t *testing.T) {
 	t.Run("PreservesOrder", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(1, 3, 5)
+		l.Add(1, 3, 5)
 
 		err := l.Replace(1, 4)
 
@@ -379,7 +381,7 @@ func TestArraySortedList_Replace(t *testing.T) {
 
 	t.Run("BeforePrevious", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(1, 3, 5)
+		l.Add(1, 3, 5)
 
 		err := l.Replace(1, 0)
 
@@ -389,7 +391,7 @@ func TestArraySortedList_Replace(t *testing.T) {
 
 	t.Run("AfterNext", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(1, 3, 5)
+		l.Add(1, 3, 5)
 
 		err := l.Replace(1, 6)
 
@@ -401,7 +403,7 @@ func TestArraySortedList_Replace(t *testing.T) {
 func TestArraySortedList_Remove(t *testing.T) {
 	t.Run("ElementExists", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(3, 1, 2, 2)
+		l.Add(3, 1, 2, 2)
 
 		ok := l.Remove(2)
 
@@ -411,7 +413,7 @@ func TestArraySortedList_Remove(t *testing.T) {
 
 	t.Run("NonExistent", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(1, 2, 3)
+		l.Add(1, 2, 3)
 
 		ok := l.Remove(4)
 
@@ -431,7 +433,7 @@ func TestArraySortedList_Remove(t *testing.T) {
 		})
 		x := 1
 		y := 2
-		l.Adds(&x, &y)
+		l.Add(&x, &y)
 
 		assert.True(t, l.Remove(&x))
 		assert.Nil(t, l.data[:cap(l.data)][l.Len()])
@@ -440,7 +442,7 @@ func TestArraySortedList_Remove(t *testing.T) {
 
 func TestArraySortedList_All(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(3, 1, 2)
+	l.Add(3, 1, 2)
 
 	assert.Equal(t, []int{1, 2, 3}, slices.Collect(l.All()))
 
@@ -457,7 +459,7 @@ func TestArraySortedList_All(t *testing.T) {
 
 func TestArraySortedList_Backward(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(3, 1, 2)
+	l.Add(3, 1, 2)
 
 	assert.Equal(t, []int{3, 2, 1}, slices.Collect(l.Backward()))
 
@@ -474,7 +476,7 @@ func TestArraySortedList_Backward(t *testing.T) {
 
 func TestArraySortedList_Range(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(1, 3, 3, 5)
+	l.Add(1, 3, 3, 5)
 
 	assert.Equal(t, []int{3, 3}, slices.Collect(l.Range(2, 5)))
 	assert.Equal(t, []int{3, 3}, slices.Collect(l.Range(3, 4)))
@@ -490,7 +492,7 @@ func TestArraySortedList_Range(t *testing.T) {
 
 func TestArraySortedList_Enumerate(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
-	l.Adds(3, 1, 2)
+	l.Add(3, 1, 2)
 
 	indexes := make([]int, 0, l.Len())
 	values := make([]int, 0, l.Len())
@@ -521,7 +523,7 @@ func TestArraySortedList_ToSlice(t *testing.T) {
 	l := NewArraySortedList(0, cmp.Compare[int])
 	assert.Nil(t, l.ToSlice())
 
-	l.Adds(2, 1)
+	l.Add(2, 1)
 	slice := l.ToSlice()
 	slice[0] = 99
 
@@ -534,7 +536,7 @@ func TestArraySortedList_Clear(t *testing.T) {
 	})
 	x := 1
 	y := 2
-	l.Adds(&x, &y)
+	l.Add(&x, &y)
 	backing := &l.data[:cap(l.data)][0]
 
 	l.Clear()
@@ -546,7 +548,7 @@ func TestArraySortedList_Clear(t *testing.T) {
 	assert.Nil(t, l.data[:cap(l.data)][0])
 	assert.Nil(t, l.data[:cap(l.data)][1])
 
-	l.Adds(&y, &x)
+	l.Add(&y, &x)
 	assert.Equal(t, []*int{&x, &y}, l.ToSlice())
 	assert.Same(t, backing, &l.data[:cap(l.data)][0])
 }
@@ -554,7 +556,7 @@ func TestArraySortedList_Clear(t *testing.T) {
 func TestArraySortedList_JSON(t *testing.T) {
 	t.Run("Marshal", func(t *testing.T) {
 		l := NewArraySortedList(0, cmp.Compare[int])
-		l.Adds(3, 1, 2)
+		l.Add(3, 1, 2)
 
 		data, err := json.Marshal(l)
 
@@ -575,7 +577,7 @@ func TestArraySortedList_JSON(t *testing.T) {
 
 func TestArraySortedList_Format(t *testing.T) {
 	l := NewArraySortedList(10, cmp.Compare[int])
-	l.Adds(5, 4, 3, 2, 1, 0)
+	l.Add(5, 4, 3, 2, 1, 0)
 
 	assert.Equal(t, "[0 1 2 3 4 ...(+1 more)]", l.String())
 	assert.Equal(t, "[0 1 2 3 4 ...(+1 more)]", fmt.Sprintf("%v", l))
@@ -588,7 +590,7 @@ func TestArraySortedList_DescendingComparator(t *testing.T) {
 		return cmp.Compare(b, a)
 	})
 
-	l.Adds(1, 3, 2)
+	l.Add(1, 3, 2)
 
 	assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
 	first, ok := l.First()

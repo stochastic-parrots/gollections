@@ -10,7 +10,7 @@ import (
 
 func ExampleNewArray() {
 	items := list.NewArray[int](5)
-	items.Appends(10, 20, 30)
+	items.Append(10, 20, 30)
 
 	val, _ := items.Get(1)
 	fmt.Printf("Get(1): %d\n", val)
@@ -54,7 +54,7 @@ func ExampleNewArray() {
 
 func ExampleNewLinked() {
 	items := list.NewLinked[string]()
-	items.Appends("Go", "is", "fast")
+	items.Append("Go", "is", "fast")
 
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
@@ -119,7 +119,7 @@ func ExampleLinkedFromSeq() {
 
 func ExampleAsReadonly() {
 	mutable := list.NewArray[int](0)
-	mutable.Appends(10, 20)
+	mutable.Append(10, 20)
 
 	data := list.AsReadonly(mutable)
 

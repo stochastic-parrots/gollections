@@ -34,7 +34,7 @@ func getHeapSuite(size int, data []int) datastructs.Implementations[datastructs.
 	}
 }
 
-func BenchmarkHeaps_Pushes_Random(b *testing.B) {
+func BenchmarkHeaps_PushBatch_Random(b *testing.B) {
 	N := 10_000
 	data := models.NewRandomSlice(N)
 	ratios := []struct {
@@ -59,7 +59,7 @@ func BenchmarkHeaps_Pushes_Random(b *testing.B) {
 						b.StopTimer()
 						h := implementation.Factory()
 						b.StartTimer()
-						h.Pushes(items...)
+						h.Push(items...)
 					}
 				})
 			}
@@ -67,7 +67,7 @@ func BenchmarkHeaps_Pushes_Random(b *testing.B) {
 	}
 }
 
-func BenchmarkHeaps_Pushes_Reverse(b *testing.B) {
+func BenchmarkHeaps_PushBatch_Reverse(b *testing.B) {
 	N := 10_000
 	data := models.NewReversedSlice(N)
 	ratios := []struct {
@@ -92,7 +92,7 @@ func BenchmarkHeaps_Pushes_Reverse(b *testing.B) {
 						b.StopTimer()
 						h := implementation.Factory()
 						b.StartTimer()
-						h.Pushes(items...)
+						h.Push(items...)
 					}
 				})
 			}

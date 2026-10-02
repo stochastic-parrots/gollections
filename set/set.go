@@ -22,22 +22,16 @@ type Readonly[T any] interface {
 type Set[T any] interface {
 	Readonly[T]
 
-	// Add inserts x if the set does not already contain a value with the same
-	// identity. Existing values are preserved. It returns true if x was added.
-	Add(x T) (added bool)
-
-	// Adds inserts every value in xs that does not already exist in the set.
+	// Add inserts every value in xs that does not already exist in the set.
+	// Existing values are preserved.
 	// When multiple values have the same identity, the first one is preserved.
-	// It returns the number of values added.
-	Adds(xs ...T) (added int)
+	// It returns the number of values added, or zero when xs is empty.
+	Add(xs ...T) (added int)
 
-	// Remove deletes the value with the same identity as x.
-	// It returns true if a value was removed.
-	Remove(x T) bool
-
-	// Removes deletes every value in xs whose identity belongs to the set.
-	// It returns the number of values removed.
-	Removes(xs ...T) (removed int)
+	// Remove deletes every value in xs whose identity belongs to the set.
+	// It returns the number of values removed, or zero when xs is empty.
+	// Repeated identities and absent values do not increase the count.
+	Remove(xs ...T) (removed int)
 
 	// Clear removes all values and leaves the set ready for reuse with the same
 	// identity policy.

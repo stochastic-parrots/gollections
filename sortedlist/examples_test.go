@@ -12,7 +12,7 @@ import (
 
 func ExampleNewArray() {
 	items := sortedlist.NewArray(cmp.Compare[int], 0)
-	items.Adds(3, 1, 2, 2)
+	items.Add(3, 1, 2, 2)
 
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
@@ -51,7 +51,7 @@ func ExampleNewOrderedArray() {
 
 func ExampleArraySortedList_bounds() {
 	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	list.Adds(1, 2, 2, 2, 3)
+	list.Add(1, 2, 2, 2, 3)
 
 	start, end := list.EqualRange(2)
 
@@ -69,7 +69,7 @@ func ExampleArraySortedList_bounds() {
 
 func ExampleArraySortedList_navigate() {
 	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	list.Adds(10, 20, 30)
+	list.Add(10, 20, 30)
 
 	ceiling, ceilingIdx, _ := list.Ceiling(25)
 	floor, floorIdx, _ := list.Floor(25)
@@ -90,7 +90,7 @@ func ExampleArraySortedList_navigate() {
 
 func ExampleArraySortedList_Range() {
 	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	list.Adds(1, 2, 2, 3, 4)
+	list.Add(1, 2, 2, 3, 4)
 
 	fmt.Println(slices.Collect(list.Range(2, 4)))
 
@@ -124,7 +124,7 @@ func ExampleArrayClone() {
 
 func ExampleArrayFromSeq() {
 	source := list.NewArray[int](0)
-	source.Appends(3, 1, 2)
+	source.Append(3, 1, 2)
 
 	list := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
 
@@ -138,7 +138,7 @@ func ExampleArrayFromSeq() {
 
 func ExampleAsReadonly() {
 	mutable := sortedlist.NewArray(cmp.Compare[int], 0)
-	mutable.Adds(2, 1)
+	mutable.Add(2, 1)
 
 	view := sortedlist.AsReadonly(mutable)
 	fmt.Println("Readonly view:", slices.Collect(view.All()))

@@ -11,7 +11,7 @@ func benchmarkRecordID(value benchmarkRecord) int {
 	return value.ID
 }
 
-func BenchmarkKeyedHashSet_Adds(b *testing.B) {
+func BenchmarkKeyedHashSet_AddBatch(b *testing.B) {
 	const size = 10_000
 	values := make([]benchmarkRecord, size)
 	for idx := range values {
@@ -23,7 +23,7 @@ func BenchmarkKeyedHashSet_Adds(b *testing.B) {
 		b.StopTimer()
 		set := NewKeyedHashSet(size, benchmarkRecordID)
 		b.StartTimer()
-		set.Adds(values...)
+		set.Add(values...)
 	}
 }
 
@@ -59,7 +59,7 @@ func BenchmarkKeyedHashSet_Remove(b *testing.B) {
 	}
 }
 
-func BenchmarkKeyedHashSet_Removes(b *testing.B) {
+func BenchmarkKeyedHashSet_RemoveBatch(b *testing.B) {
 	const size = 10_000
 	values := make([]benchmarkRecord, size)
 	for idx := range values {
@@ -71,6 +71,6 @@ func BenchmarkKeyedHashSet_Removes(b *testing.B) {
 		b.StopTimer()
 		set := NewKeyedHashSetFromSlice(values, benchmarkRecordID)
 		b.StartTimer()
-		set.Removes(values...)
+		set.Remove(values...)
 	}
 }

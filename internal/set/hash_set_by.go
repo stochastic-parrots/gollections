@@ -27,7 +27,7 @@ func NewKeyedHashSet[T any, K comparable](capacity int, keyOf func(T) K) *KeyedH
 // data. The first value for each derived key is preserved.
 func NewKeyedHashSetFromSlice[T any, K comparable](data []T, keyOf func(T) K) *KeyedHashSet[T, K] {
 	set := NewKeyedHashSet(len(data), keyOf)
-	set.Adds(data...)
+	set.Add(data...)
 	return set
 }
 
@@ -63,57 +63,38 @@ func (set *KeyedHashSet[T, K]) Contains(x T) bool {
 	return ok
 }
 
-// Add inserts x unless its derived key is already present, reports whether the
-// set changed, and preserves existing representatives.
-//
-// Complexity: O(1) on average plus the cost of the identity function.
-func (set *KeyedHashSet[T, K]) Add(x T) bool {
-	key := set.keyOf(x)
-	if _, ok := set.values[key]; ok {
-		return false
-	}
-	if set.values == nil {
-		set.values = make(map[K]T)
-	}
-	set.values[key] = x
-	return true
-}
-
-// Adds inserts every value in xs whose derived key is not already present and
-// returns the number of values added.
+// Add inserts every value in xs whose derived key is not already present and
+// returns the number of values added. Existing representatives are preserved.
+// Empty input leaves the set unchanged.
 //
 // Complexity: O(len(xs)) on average plus the identity-function calls.
-func (set *KeyedHashSet[T, K]) Adds(xs ...T) (added int) {
+func (set *KeyedHashSet[T, K]) Add(xs ...T) (added int) {
 	for _, x := range xs {
-		if set.Add(x) {
-			added++
+		key := set.keyOf(x)
+		if _, ok := set.values[key]; ok {
+			continue
 		}
+		if set.values == nil {
+			set.values = make(map[K]T)
+		}
+		set.values[key] = x
+		added++
 	}
 	return added
 }
 
-// Remove deletes the value with the same derived key as x and reports whether
-// it was present.
-//
-// Complexity: O(1) on average plus the cost of the identity function.
-func (set *KeyedHashSet[T, K]) Remove(x T) bool {
-	key := set.keyOf(x)
-	if _, ok := set.values[key]; !ok {
-		return false
-	}
-	delete(set.values, key)
-	return true
-}
-
-// Removes deletes every value in xs whose derived key is present and returns
-// the number of values removed.
+// Remove deletes every value in xs whose derived key is present and returns
+// the number of values removed. Empty input leaves the set unchanged.
 //
 // Complexity: O(len(xs)) on average plus the identity-function calls.
-func (set *KeyedHashSet[T, K]) Removes(xs ...T) (removed int) {
+func (set *KeyedHashSet[T, K]) Remove(xs ...T) (removed int) {
 	for _, x := range xs {
-		if set.Remove(x) {
-			removed++
+		key := set.keyOf(x)
+		if _, ok := set.values[key]; !ok {
+			continue
 		}
+		delete(set.values, key)
+		removed++
 	}
 	return removed
 }

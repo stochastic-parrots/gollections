@@ -30,10 +30,8 @@ func checkKeyOf[T any, K comparable](keyOf func(T) K) {
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average + keyOf
-//	Add(x)             O(1) on average + keyOf
-//	Adds(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
-//	Remove(x)          O(1) on average + keyOf
-//	Removes(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
+//	Add(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
@@ -55,10 +53,8 @@ func NewKeyedHashSet[T any, K comparable](keyOf func(T) K, capacity int) *KeyedH
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average + keyOf
-//	Add(x)             O(1) on average + keyOf
-//	Adds(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
-//	Remove(x)          O(1) on average + keyOf
-//	Removes(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
+//	Add(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
@@ -80,10 +76,8 @@ func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHash
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average + keyOf
-//	Add(x)             O(1) on average + keyOf
-//	Adds(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
-//	Remove(x)          O(1) on average + keyOf
-//	Removes(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
+//	Add(xs... T)      O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)   O(len(xs)) on average + len(xs) keyOf calls
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //

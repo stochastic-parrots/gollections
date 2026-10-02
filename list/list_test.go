@@ -23,13 +23,13 @@ func TestConstructorsImplementList(t *testing.T) {
 
 func TestConcreteZeroValues(t *testing.T) {
 	var array list.ArrayList[int]
-	array.Appends(1, 2)
+	array.Append(1, 2)
 	assert.Equal(t, []int{1, 2}, array.ToSlice())
 	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &array))
 	assert.Equal(t, []int{3, 4}, array.ToSlice())
 
 	var linked list.LinkedList[int]
-	linked.Appends(1, 2)
+	linked.Append(1, 2)
 	linked.Reverse()
 	assert.Equal(t, []int{2, 1}, linked.ToSlice())
 	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &linked))
@@ -106,7 +106,7 @@ func TestAsReadonly(t *testing.T) {
 
 	t.Run("View", func(t *testing.T) {
 		mutable := list.NewArray[int](0)
-		mutable.Appends(1, 2)
+		mutable.Append(1, 2)
 
 		view := list.AsReadonly[int](mutable)
 		_, unmarshals := any(view).(json.Unmarshaler)
@@ -152,7 +152,7 @@ func TestList_Find(t *testing.T) {
 			assert.Equal(t, -1, idx)
 			assert.False(t, ok)
 
-			test.list.Appends(1, 2, 4, 6)
+			test.list.Append(1, 2, 4, 6)
 			idx, ok = test.list.Find(match)
 			assert.Equal(t, 1, idx)
 			assert.True(t, ok)
@@ -186,7 +186,7 @@ func TestList_Contains(t *testing.T) {
 			assert.False(t, test.list.Contains(match))
 			assert.Equal(t, 0, calls)
 
-			test.list.Appends(1, 2, 4)
+			test.list.Append(1, 2, 4)
 			assert.True(t, test.list.Contains(match))
 			assert.Equal(t, 2, calls)
 
@@ -204,7 +204,7 @@ func assertListBehavior(t *testing.T, l list.List[int]) {
 
 	assert.True(t, l.IsEmpty())
 
-	l.Appends(1, 3)
+	l.Append(1, 3)
 	err := l.Insert(1, 2)
 	assert.NoError(t, err)
 

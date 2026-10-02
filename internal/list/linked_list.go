@@ -110,26 +110,20 @@ func (l *LinkedList[T]) Set(index int, x T) error {
 	return nil
 }
 
-// Append adds an element to the end of the list.
-//
-// Complexity: O(1).
-func (l *LinkedList[T]) Append(x T) {
-	new := node.NewLinkedNode(x)
-	if l.first == nil {
-		l.first = new
-	} else {
-		l.last.Next = new
-	}
-	l.last = new
-	l.length++
-}
-
-// Appends adds the given elements to the end of the list.
+// Append adds the given elements to the end of the list in input order.
+// Empty input leaves the list unchanged.
 //
 // Complexity: O(len(xs)).
-func (l *LinkedList[T]) Appends(xs ...T) {
+func (l *LinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
-		l.Append(x)
+		new := node.NewLinkedNode(x)
+		if l.first == nil {
+			l.first = new
+		} else {
+			l.last.Next = new
+		}
+		l.last = new
+		l.length++
 	}
 }
 
@@ -336,7 +330,7 @@ func (l *LinkedList[T]) MarshalJSON() ([]byte, error) {
 //
 // Complexity: O(N + len(data)).
 func (l *LinkedList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Appends)
+	return collection.Unmarshal(data, l.Clear, l.Append)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

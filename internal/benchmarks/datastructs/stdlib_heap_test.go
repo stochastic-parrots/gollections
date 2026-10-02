@@ -23,7 +23,7 @@ func TestStdLibHeap_Pushes(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		heap := NewStdLibHeap(0)
 
-		heap.Pushes()
+		heap.Push()
 
 		assert.Zero(t, heap.Len())
 	})
@@ -31,7 +31,7 @@ func TestStdLibHeap_Pushes(t *testing.T) {
 	t.Run("Single", func(t *testing.T) {
 		heap := NewStdLibHeap(0)
 
-		heap.Pushes(2)
+		heap.Push(2)
 
 		value, ok := heap.Peek()
 		assert.True(t, ok)
@@ -42,7 +42,7 @@ func TestStdLibHeap_Pushes(t *testing.T) {
 		heap := NewStdLibHeap(0)
 		heap.Push(3)
 
-		heap.Pushes(4, 1, 2)
+		heap.Push(4, 1, 2)
 
 		values := make([]int, 0, heap.Len())
 		for heap.Len() > 0 {

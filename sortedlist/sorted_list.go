@@ -108,11 +108,9 @@ type Readonly[T any] interface {
 type SortedList[T any] interface {
 	Readonly[T]
 
-	// Add inserts x while preserving the sorted invariant.
-	Add(x T)
-
-	// Adds inserts zero or more values while preserving the sorted invariant.
-	Adds(xs ...T)
+	// Add inserts the given values while preserving the sorted invariant.
+	// With no values, it leaves the list unchanged.
+	Add(xs ...T)
 
 	// Replace changes the value at idx while preserving the sorted invariant.
 	//

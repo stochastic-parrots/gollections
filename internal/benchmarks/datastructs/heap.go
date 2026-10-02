@@ -2,8 +2,7 @@ package datastructs
 
 // Heap is the heap capability required by benchmark algorithms.
 type Heap[T any] interface {
-	Push(T)
-	Pushes(...T)
+	Push(...T)
 	Len() int
 	Pop() (T, bool)
 	Peek() (T, bool)
