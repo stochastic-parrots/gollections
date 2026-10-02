@@ -52,6 +52,9 @@
 // Keys, Values, and All do not guarantee priority order. Separate Keys and
 // Values iterations are not positionally related. Use All to retain key-priority
 // association and Drain for destructive priority-ordered traversal.
+// For a pairing heap, full map iteration and Clear depend on the key index's
+// allocated slots (C), which can exceed the number of current entries
+// (N = Len()) after preallocation or removals.
 //
 // Priority maps require initialized indexes and, except for radix heaps, a
 // priority comparator. Their concrete zero values are invalid and must be

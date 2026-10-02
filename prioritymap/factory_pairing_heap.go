@@ -21,8 +21,11 @@ var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 // immediate heap work is O(1). Pop later consolidates children in two passes.
 // The amortized rows account for this deferred work across mixed operations,
 // using a conservative O(log N) bound for Improve.
-// Full iteration and Clear may scan C allocated key-index slots; preallocation
-// or growth can make C exceed N.
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which may differ from the constructor's capacity argument.
+// Preallocation or growth followed by removals can leave C much larger than N.
+// The O(C) iterator rows describe full traversal: iteration examines index
+// slots, including empty ones. Clear scans the index and visits N heap nodes.
 //
 // Performance Summary (Time Complexity):
 //
@@ -57,8 +60,11 @@ func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity i
 // immediate heap work is O(1). Pop later consolidates children in two passes.
 // The amortized rows account for this deferred work across mixed operations,
 // using a conservative O(log N) bound for Improve.
-// Full iteration and Clear may scan C allocated key-index slots; preallocation
-// or growth can make C exceed N.
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which may differ from the constructor's capacity argument.
+// Preallocation or growth followed by removals can leave C much larger than N.
+// The O(C) iterator rows describe full traversal: iteration examines index
+// slots, including empty ones. Clear scans the index and visits N heap nodes.
 //
 // Performance Summary (Time Complexity):
 //
