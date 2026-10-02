@@ -28,6 +28,7 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 | `set` | `HashSet`, `KeyedHashSet` | Unique values using Go equality or a derived identity key |
 | `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
 | `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
+| `disjointset` | `IntsRangeByRank`, `IntsRangeBySize` | Track connectivity among all integers in a fixed inclusive range |
 
 Package-level examples live alongside each public package and are rendered by
 Go documentation tools.
@@ -39,27 +40,30 @@ Go documentation tools.
   observation contracts. They expose inspection and iteration, while mutating
   operations live in structure-specific interfaces such as
   `list.List`, `sortedlist.SortedList`, `deque.Deque`, `set.Set`, `heap.Heap`,
-  and `prioritymap.PriorityMap`.
+  `prioritymap.PriorityMap`, and `disjointset.DisjointSet`.
 - Go iterators: collections expose `All` and `Enumerate` for `range` loops.
 - Reusable clearing: `Clear` removes stored references, preserves construction
   configuration, and leaves the structure ready for reuse. It does not guarantee
   storage shrinkage or return memory to the Go runtime. Slice-backed structures
   retain capacity where practical, freelists retain at most their construction
   limit, and linked structures without a freelist may release their nodes.
+  Fixed-range disjoint sets use `Reset` to restore singleton sets instead.
 - Internal implementations: public packages expose direct constructors and concrete aliases while
   concrete internals live under `internal`.
-- Read-only views: packages such as `list`, `sortedlist`, `deque`, `set`, and
-  `prioritymap` expose wrappers for sharing non-mutating access without
+- Read-only views: packages such as `list`, `sortedlist`, `deque`, `set`,
+  `prioritymap`, and `disjointset` expose wrappers for sharing observation without
   allowing type assertion back to the mutable interface. These wrappers are
   capability restrictions, not snapshots or concurrency synchronization.
 - Concurrency: collections are not safe for concurrent use unless explicitly
   documented otherwise. Callers must synchronize shared access when any
   goroutine may mutate the collection.
-- JSON support: collections marshal as arrays without external construction
+- JSON support: most collections marshal as arrays without external construction
   input, using the traversal order documented by each package. Lists and deques
   also unmarshal because array order completely defines their logical state.
   Sorted lists, heaps, and sets require slice decoding followed by the matching
   constructor so ordering, priority, and set identity remain explicit.
+  Disjoint sets have no JSON representation because an array of elements does
+  not encode the partition.
 
 ## Construction
 
@@ -71,6 +75,7 @@ queue := deque.LinkedFrom([]int{1, 2, 3})
 scores := sortedlist.OrderedArrayClone(sortedlist.Asc, []int{3, 1, 2})
 pending := prioritymap.NewOrderedBinaryHeap[string, int](prioritymap.Min, 32)
 visited := set.NewHashSet[string](32)
+groups := disjointset.NewIntsRangeBySize(0, 99)
 ```
 
 Sorted lists, heaps, and sets do not implement `json.Unmarshaler`. Decode
@@ -168,6 +173,20 @@ comparable, matching native Go map requirements.
 `Removes` report how many values in a batch changed membership. Iteration and
 JSON array order are unspecified.
 
+## Choosing a disjoint set
+
+Use `disjointset` when every integer in an inclusive range is known up front
+and you need to merge groups or test connectivity, such as components of a
+graph whose vertices have contiguous integer IDs. `IntsRangeByRank` exposes
+the rank heuristic; `IntsRangeBySize` reports how many integers belong to a
+group. Both keep the range fixed, so `Reset` restores singleton groups rather
+than removing elements.
+
+With path compression and union by rank or size, `Find`, `Connected`, `Union`,
+and the corresponding `Rank` or `Size` query take O(α(N)) amortized time, where
+N is the number of integers and α is the inverse Ackermann function. A single
+operation can take O(log N) time; `Reset` takes O(N).
+
 ## Choosing a priority map
 
 - `BinaryHeapPriorityMap`: predictable O(log N) updates with compact,
@@ -204,6 +223,7 @@ go test -cover ./internal/heap
 go test -cover ./internal/prioritymap
 go test -cover ./internal/deque
 go test -cover ./internal/set
+go test -cover ./internal/disjointset
 ```
 
 CI builds and tests every package with the minimum supported Go release and the
@@ -216,5 +236,6 @@ lines.
 ## Status
 
 The available packages are `list`, `sortedlist`, `deque`, `set`, `heap`, and
-`prioritymap`. `queue` and `stack` families are planned as focused APIs on top
-of the same collection foundations.
+`prioritymap`, plus `disjointset` for fixed integer ranges. `queue` and
+`stack` families are planned as focused APIs on top of the same collection
+foundations.
