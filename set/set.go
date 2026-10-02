@@ -3,6 +3,7 @@ package set
 import (
 	"encoding/json"
 	"iter"
+	"slices"
 
 	"github.com/stochastic-parrots/gollections"
 	"github.com/stochastic-parrots/gollections/internal/set"
@@ -10,6 +11,41 @@ import (
 
 // Source defines the sized iteration required by set algebra operands.
 type Source[T any] = set.Source[T]
+
+// SourceFromSlice wraps values as a sized [Source] for set algebra without
+// copying the slice. Element updates made before iteration begins are visible
+// to the source; callers must not mutate the slice while it is being iterated.
+// Use it to pass a slice directly as an algebra operand.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	All()              O(N)
+//	Length()           O(1)
+//
+// Complexity: O(1).
+func SourceFromSlice[T any](values []T) *SliceSource[T] {
+	return &SliceSource[T]{values: values}
+}
+
+// SliceSource iterates over a slice as a [Source] without copying it. Its zero
+// value represents an empty source; use [SourceFromSlice] to wrap a slice.
+type SliceSource[T any] struct {
+	values []T
+}
+
+// All returns a lazy iterator over the wrapped slice.
+func (source *SliceSource[T]) All() iter.Seq[T] {
+	return slices.Values(source.values)
+}
+
+// Length returns the number of values in the wrapped slice.
+func (source *SliceSource[T]) Length() int {
+	return len(source.values)
+}
+
+var _ Source[any] = (*SliceSource[any])(nil)
 
 // Readonly defines a non-mutable view of a set.
 type Readonly[T any] interface {

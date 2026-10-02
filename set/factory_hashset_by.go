@@ -31,20 +31,6 @@ var (
 // canonicalized before they are returned as keys.
 //
 // The zero value is invalid. Create a factory with [HashSetBy].
-//
-// Performance Summary (Expected Time Complexity):
-//
-//	Operation                    Time Complexity
-//	-------------------------    ---------------
-//	New(capacity)                O(capacity)
-//	From/FromSeq                 O(N)
-//	Add/Contains/Remove          O(1) + keyOf
-//	Adds/Removes(xs...T)         O(len(xs)) + keyOf calls
-//	Union/Difference/SymDiff     O(sum of operand lengths) + keyOf calls
-//	Intersection                 O(N * sources + sum of source lengths) + keyOf calls
-//	Set relations                O(N + M) + keyOf calls
-//	All/Enumerate                O(N)
-//	Clear                        O(allocated map storage)
 type HashSetByFactory[T any, K comparable] struct {
 	keyOf func(T) K
 }
@@ -59,6 +45,24 @@ func HashSetBy[T any, K comparable](keyOf func(T) K) HashSetByFactory[T, K] {
 }
 
 // New creates an empty keyed hash set with the requested initial capacity.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Length()           O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average
+//	Add(x)             O(1) on average
+//	Adds(xs... T)      O(len(xs)) on average
+//	Remove(x)          O(1) on average
+//	Removes(xs... T)   O(len(xs)) on average
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(capacity).
 func (factory HashSetByFactory[T, K]) New(capacity int) *KeyedHashSet[T, K] {
 	return set.NewKeyedHashSet(capacity, factory.keyOf)
 }
@@ -67,12 +71,48 @@ func (factory HashSetByFactory[T, K]) New(capacity int) *KeyedHashSet[T, K] {
 // encountered for each derived key is preserved.
 //
 // From copies values into map storage and does not retain data.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Length()           O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average
+//	Add(x)             O(1) on average
+//	Adds(xs... T)      O(len(xs)) on average
+//	Remove(x)          O(1) on average
+//	Removes(xs... T)   O(len(xs)) on average
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(len(data)) on average.
 func (factory HashSetByFactory[T, K]) From(data []T) *KeyedHashSet[T, K] {
 	return set.NewKeyedHashSetFromSlice(data, factory.keyOf)
 }
 
 // FromSeq collects values yielded by seq into a new keyed hash set. The first
 // value yielded for each derived key is preserved.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Length()           O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average
+//	Add(x)             O(1) on average
+//	Adds(xs... T)      O(len(xs)) on average
+//	Remove(x)          O(1) on average
+//	Removes(xs... T)   O(len(xs)) on average
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(N) on average, where N is the number of values yielded by seq.
 func (factory HashSetByFactory[T, K]) FromSeq(seq iter.Seq[T]) *KeyedHashSet[T, K] {
 	return set.NewKeyedHashSetFromSeq(seq, factory.keyOf)
 }
@@ -82,9 +122,10 @@ func (factory HashSetByFactory[T, K]) FromSeq(seq iter.Seq[T]) *KeyedHashSet[T, 
 func (factory HashSetByFactory[T, K]) Union(
 	sources ...Source[T],
 ) *KeyedHashSet[T, K] {
+	// A largest-source hint avoids reserving the sum of overlapping sources.
 	capacity := 0
 	for _, source := range sources {
-		capacity += source.Length()
+		capacity = max(capacity, source.Length())
 	}
 	result := factory.New(capacity)
 	result.UnionWith(sources...)

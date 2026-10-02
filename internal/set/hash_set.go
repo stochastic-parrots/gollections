@@ -247,11 +247,14 @@ func (set *HashSet[T]) Union(others ...Source[T]) *HashSet[T] {
 		}
 	}
 
+	// Reserve for the receiver and one largest source; summing overlaps can
+	// allocate far more map storage than the union needs.
 	capacity := len(set.values)
+	largestSource := 0
 	for _, other := range others {
-		capacity += other.Length()
+		largestSource = max(largestSource, other.Length())
 	}
-	result := NewHashSet[T](capacity)
+	result := NewHashSet[T](capacity + largestSource)
 	maps.Copy(result.values, set.values)
 	result.UnionWith(others...)
 	return result
@@ -719,6 +722,9 @@ func (set *HashSet[T]) SymmetricDifferenceWith(
 				changed := len(set.values)
 				clear(set.values)
 				return changed
+			}
+			if set.values == nil {
+				set.values = make(map[T]struct{}, len(otherSet.values))
 			}
 			for value := range otherSet.values {
 				if _, exists := set.values[value]; exists {

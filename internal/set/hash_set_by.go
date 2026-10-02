@@ -247,11 +247,14 @@ func (set *KeyedHashSet[T, K]) Union(
 		}
 	}
 
+	// Reserve for the receiver and one largest source; summing overlaps can
+	// allocate far more map storage than the union needs.
 	capacity := len(set.values)
+	largestSource := 0
 	for _, other := range others {
-		capacity += other.Length()
+		largestSource = max(largestSource, other.Length())
 	}
-	result := NewKeyedHashSet(capacity, set.keyOf)
+	result := NewKeyedHashSet(capacity+largestSource, set.keyOf)
 	maps.Copy(result.values, set.values)
 	result.UnionWith(others...)
 	return result

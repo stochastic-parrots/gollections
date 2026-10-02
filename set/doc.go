@@ -39,6 +39,8 @@
 // [Source] values and return an empty set when called without sources. Source
 // requires only sized iteration; operands do not need to implement the full
 // [gollections.Collection] contract.
+// [SourceFromSlice] returns a [SliceSource] that wraps a slice as an operand
+// without copying it.
 //
 // Concrete sets in this package satisfy [gollections.Collection] through
 // pointer methods. Pass *HashSet or *KeyedHashSet operands, as returned by their

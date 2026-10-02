@@ -44,6 +44,23 @@ func TestConcreteZeroValues(t *testing.T) {
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
+func TestSourceFromSlice(t *testing.T) {
+	values := []int{1, 2}
+	var source *set.SliceSource[int] = set.SourceFromSlice(values)
+	values[1] = 3
+
+	assert.Equal(t, 2, source.Length())
+	assert.Equal(t, []int{1, 3}, slices.Collect(source.All()))
+}
+
+func TestConcreteZeroValue_SymmetricDifferenceWith(t *testing.T) {
+	var values set.HashSet[int]
+	other := set.HashSetOf[int]().From([]int{1})
+
+	assert.Equal(t, 1, values.SymmetricDifferenceWith(other))
+	assert.True(t, values.Contains(1))
+}
+
 func TestAsReadonly(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		assert.Nil(t, set.AsReadonly[int](nil))

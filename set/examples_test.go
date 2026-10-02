@@ -70,6 +70,16 @@ func ExampleHashFactory_Union() {
 	// [1 2 3]
 }
 
+func ExampleSourceFromSlice() {
+	factory := set.HashSetOf[int]()
+	result := factory.Union(set.SourceFromSlice([]int{1, 2, 2}))
+
+	fmt.Println(slices.Sorted(result.All()))
+
+	// Output:
+	// [1 2]
+}
+
 func ExampleHashSet_IntersectWith() {
 	values := set.HashSetOf[int]().From([]int{1, 2, 3, 4})
 	allowed := set.HashSetOf[int]().From([]int{2, 4, 6})
