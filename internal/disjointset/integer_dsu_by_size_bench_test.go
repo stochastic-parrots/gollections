@@ -2,19 +2,47 @@ package disjointset
 
 import "testing"
 
-func BenchmarkFlatDisjointSetUnionBySize_Find(b *testing.B) {
-	const size = 4096
-	dsu := NewFlatDisjointSetUnionBySize(0, size-1)
-	for idx := 1; idx < size; idx++ {
-		dsu.Union(0, idx)
+func BenchmarkFlatDisjointSetUnionBySize_FindCompressed(b *testing.B) {
+	dsu := NewFlatDisjointSetUnionBySize(0, findForestSize-1)
+	buildBalancedFindForest(dsu.Union)
+	for component := range findComponents {
+		_, _ = dsu.Find(component*findComponentSize + findComponentSize - 1)
 	}
+	next := 0
 	b.ReportAllocs()
 	for b.Loop() {
-		_, _ = dsu.Find(size - 1)
+		if next == findComponents {
+			next = 0
+		}
+		_, _ = dsu.Find(next*findComponentSize + findComponentSize - 1)
+		next++
 	}
 }
 
-func BenchmarkFlatDisjointSetUnionBySize_Connected(b *testing.B) {
+func BenchmarkFlatDisjointSetUnionBySize_FindPathCompression(b *testing.B) {
+	dsu := NewFlatDisjointSetUnionBySize(0, findForestSize-1)
+	buildBalancedFindForest(dsu.Union)
+	parents := append([]int(nil), dsu.parents...)
+	next := 0
+	b.ReportAllocs()
+	for b.Loop() {
+		if next == findComponents {
+			b.StopTimer()
+			// Restore only the paths compressed by the preceding lookups.
+			for base := 0; base < findForestSize; base += findComponentSize {
+				for node := base + findComponentSize - 1; node != base; node = parents[node] {
+					dsu.parents[node] = parents[node]
+				}
+			}
+			next = 0
+			b.StartTimer()
+		}
+		_, _ = dsu.Find(next*findComponentSize + findComponentSize - 1)
+		next++
+	}
+}
+
+func BenchmarkFlatDisjointSetUnionBySize_ConnectedShortPath(b *testing.B) {
 	const size = 4096
 	dsu := NewFlatDisjointSetUnionBySize(0, size-1)
 	for idx := 1; idx < size; idx++ {
@@ -26,8 +54,8 @@ func BenchmarkFlatDisjointSetUnionBySize_Connected(b *testing.B) {
 	}
 }
 
-func BenchmarkFlatDisjointSetUnionBySize_Union(b *testing.B) {
-	const size = 1024
+func BenchmarkFlatDisjointSetUnionBySize_UnionSingletons(b *testing.B) {
+	const size = 4096
 	dsu := NewFlatDisjointSetUnionBySize(0, size-1)
 	next := 0
 	b.ReportAllocs()
@@ -43,7 +71,34 @@ func BenchmarkFlatDisjointSetUnionBySize_Union(b *testing.B) {
 	}
 }
 
-func BenchmarkFlatDisjointSetUnionBySize_UnionBatch(b *testing.B) {
+func BenchmarkFlatDisjointSetUnionBySize_UnionExistingSets(b *testing.B) {
+	const size = 4096
+	dsu := NewFlatDisjointSetUnionBySize(0, size-1)
+	prepare := func() {
+		dsu.Reset()
+		for idx := 0; idx < size; idx += 4 {
+			dsu.Union(idx, idx+1)
+			dsu.Union(idx+2, idx+3)
+			dsu.Union(idx+1, idx+3)
+		}
+	}
+	prepare()
+	next := 0
+	b.ReportAllocs()
+	for b.Loop() {
+		if next == size {
+			b.StopTimer()
+			prepare()
+			next = 0
+			b.StartTimer()
+		}
+		// Both arguments are nonroot leaves in different four-value sets.
+		dsu.Union(next+3, next+7)
+		next += 8
+	}
+}
+
+func BenchmarkFlatDisjointSetUnionBySize_UnionStarBatch(b *testing.B) {
 	const size = 4096
 	dsu := NewFlatDisjointSetUnionBySize(0, size-1)
 	b.ReportAllocs()
@@ -55,7 +110,6 @@ func BenchmarkFlatDisjointSetUnionBySize_UnionBatch(b *testing.B) {
 			dsu.Union(0, idx)
 		}
 	}
-	b.ReportMetric(float64(size-1), "unions/op")
 }
 
 func BenchmarkFlatDisjointSetUnionBySize_Reset(b *testing.B) {

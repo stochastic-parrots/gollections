@@ -9,8 +9,7 @@ import (
 
 func TestNewFlatDisjointSetUnionBySize(t *testing.T) {
 	dsu := NewFlatDisjointSetUnionBySize(uint8(254), uint8(255))
-	assert.Equal(t, []int{0, 1}, dsu.parents)
-	assert.Equal(t, []uint{1, 1}, dsu.sizes)
+	assert.Equal(t, []int{-1, -1}, dsu.parents)
 	assert.Equal(t, 2, dsu.disjoints)
 }
 
@@ -23,7 +22,7 @@ func TestFlatDisjointSetUnionBySize_Find(t *testing.T) {
 	assert.Equal(t, 0, representative)
 	assert.False(t, ok)
 
-	dsu.parents[0], dsu.parents[1] = 2, 0
+	dsu.parents[0], dsu.parents[1], dsu.parents[2] = 2, 0, -3
 	representative, ok = dsu.Find(0)
 	assert.Equal(t, 1, representative)
 	assert.True(t, ok)
@@ -55,14 +54,14 @@ func TestFlatDisjointSetUnionBySize_Union(t *testing.T) {
 	assert.False(t, dsu.Union(-1, 0))
 	assert.False(t, dsu.Union(0, 5))
 	assert.True(t, dsu.Union(0, 1))
-	assert.Equal(t, uint(2), dsu.sizes[0])
+	assert.Equal(t, -2, dsu.parents[0])
 	assert.True(t, dsu.Union(2, 0))
 	assert.Equal(t, 0, dsu.parents[2])
-	assert.Equal(t, uint(3), dsu.sizes[0])
+	assert.Equal(t, -3, dsu.parents[0])
 	assert.True(t, dsu.Union(3, 4))
 	assert.True(t, dsu.Union(3, 0))
 	assert.Equal(t, 0, dsu.parents[3])
-	assert.Equal(t, uint(5), dsu.sizes[0])
+	assert.Equal(t, -5, dsu.parents[0])
 	assert.False(t, dsu.Union(4, 2))
 	assert.Equal(t, 1, dsu.Disjoints())
 }
@@ -72,6 +71,9 @@ func TestFlatDisjointSetUnionBySize_Size(t *testing.T) {
 	size, ok := dsu.Size(-1)
 	assert.Equal(t, 0, size)
 	assert.False(t, ok)
+	size, ok = dsu.Size(2)
+	assert.Equal(t, 1, size)
+	assert.True(t, ok)
 	assert.True(t, dsu.Union(0, 1))
 	size, ok = dsu.Size(1)
 	assert.Equal(t, 2, size)
@@ -126,15 +128,13 @@ func TestFlatDisjointSetUnionBySize_Enumerate(t *testing.T) {
 
 func TestFlatDisjointSetUnionBySize_Reset(t *testing.T) {
 	dsu := NewFlatDisjointSetUnionBySize(0, 3)
-	parents, sizes := dsu.parents, dsu.sizes
+	parents := dsu.parents
 	dsu.Union(0, 1)
 	dsu.Union(2, 3)
 	dsu.Union(0, 2)
 	dsu.Reset()
 	assert.Equal(t, 4, dsu.Disjoints())
-	assert.Equal(t, []int{0, 1, 2, 3}, dsu.parents)
-	assert.Equal(t, []uint{1, 1, 1, 1}, dsu.sizes)
+	assert.Equal(t, []int{-1, -1, -1, -1}, dsu.parents)
 	assert.Equal(t, &parents[0], &dsu.parents[0])
-	assert.Equal(t, &sizes[0], &dsu.sizes[0])
 	assert.True(t, dsu.Union(0, 1))
 }

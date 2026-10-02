@@ -6,8 +6,9 @@ import (
 	"github.com/stochastic-parrots/gollections/constraint"
 )
 
-// FlatDisjointSetUnionByRank stores one parent and rank per value in an
-// inclusive integer range. The parent slice index is the normalized value.
+// FlatDisjointSetUnionByRank stores an inclusive integer range in one slice.
+// Nonnegative entries are parent indexes; negative entries encode root ranks
+// as -1 minus the rank.
 // Find, Connected, Union, and Rank take O(α(N)) amortized time between resets,
 // where N is the range length and α is the inverse Ackermann function. A single
 // call can traverse O(log N) nodes.
@@ -15,19 +16,18 @@ type FlatDisjointSetUnionByRank[T constraint.Integer] struct {
 	min, max  T
 	disjoints int
 	parents   []int
-	ranks     []uint8
 }
 
 // NewFlatDisjointSetUnionByRank allocates singleton sets for the range.
 func NewFlatDisjointSetUnionByRank[T constraint.Integer](min, max T) *FlatDisjointSetUnionByRank[T] {
 	interval := flatInterval(min, max)
-	parents, ranks := make([]int, interval), make([]uint8, interval)
+	parents := make([]int, interval)
 	disjoints := interval
 
 	for idx := range interval {
-		parents[idx] = idx
+		parents[idx] = -1
 	}
-	return &FlatDisjointSetUnionByRank[T]{min, max, disjoints, parents, ranks}
+	return &FlatDisjointSetUnionByRank[T]{min, max, disjoints, parents}
 }
 
 func (dsu *FlatDisjointSetUnionByRank[T]) normalize(x T) (int, bool) {
@@ -38,20 +38,23 @@ func (dsu *FlatDisjointSetUnionByRank[T]) normalize(x T) (int, bool) {
 }
 
 func (dsu *FlatDisjointSetUnionByRank[T]) find(normalized int) int {
-	if dsu.parents[normalized] != normalized {
-		dsu.parents[normalized] = dsu.find(dsu.parents[normalized])
+	parent := dsu.parents[normalized]
+	if parent < 0 {
+		return normalized
 	}
-	return dsu.parents[normalized]
+	root := dsu.find(parent)
+	dsu.parents[normalized] = root
+	return root
 }
 
 func (dsu *FlatDisjointSetUnionByRank[T]) link(a, b int) {
-	if dsu.ranks[a] > dsu.ranks[b] {
+	if dsu.parents[a] < dsu.parents[b] {
 		dsu.parents[b] = a
-	} else if dsu.ranks[b] > dsu.ranks[a] {
+	} else if dsu.parents[b] < dsu.parents[a] {
 		dsu.parents[a] = b
 	} else {
 		dsu.parents[b] = a
-		dsu.ranks[a] += 1
+		dsu.parents[a]--
 	}
 }
 
@@ -115,7 +118,7 @@ func (dsu *FlatDisjointSetUnionByRank[T]) Rank(x T) (rank int, ok bool) {
 		return 0, false
 	}
 	root := dsu.find(normalized)
-	return int(dsu.ranks[root]), true
+	return -dsu.parents[root] - 1, true
 }
 
 // Disjoints returns the current number of sets.
@@ -155,13 +158,12 @@ func (dsu *FlatDisjointSetUnionByRank[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-// Reset restores singleton sets and reuses the allocated parent and rank slices.
+// Reset restores singleton sets and reuses the allocated parent slice.
 //
 // Complexity: O(N).
 func (dsu *FlatDisjointSetUnionByRank[T]) Reset() {
 	for idx := range dsu.parents {
-		dsu.parents[idx] = idx
-		dsu.ranks[idx] = 0
+		dsu.parents[idx] = -1
 	}
 	dsu.disjoints = len(dsu.parents)
 }

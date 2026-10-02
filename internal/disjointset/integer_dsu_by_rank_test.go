@@ -9,8 +9,7 @@ import (
 
 func TestNewFlatDisjointSetUnionByRank(t *testing.T) {
 	dsu := NewFlatDisjointSetUnionByRank(-2, 1)
-	assert.Equal(t, []int{0, 1, 2, 3}, dsu.parents)
-	assert.Equal(t, []uint8{0, 0, 0, 0}, dsu.ranks)
+	assert.Equal(t, []int{-1, -1, -1, -1}, dsu.parents)
 	assert.Equal(t, 4, dsu.disjoints)
 }
 
@@ -23,7 +22,7 @@ func TestFlatDisjointSetUnionByRank_Find(t *testing.T) {
 	assert.Equal(t, 0, representative)
 	assert.False(t, ok)
 
-	dsu.parents[0], dsu.parents[1] = 2, 0
+	dsu.parents[0], dsu.parents[1], dsu.parents[2] = 2, 0, -1
 	representative, ok = dsu.Find(0)
 	assert.Equal(t, 1, representative)
 	assert.True(t, ok)
@@ -55,14 +54,14 @@ func TestFlatDisjointSetUnionByRank_Union(t *testing.T) {
 	assert.False(t, dsu.Union(-1, 0))
 	assert.False(t, dsu.Union(0, 6))
 	assert.True(t, dsu.Union(0, 1))
-	assert.Equal(t, uint8(1), dsu.ranks[0])
+	assert.Equal(t, -2, dsu.parents[0])
 	assert.True(t, dsu.Union(2, 0))
 	assert.Equal(t, 0, dsu.parents[2])
 	assert.True(t, dsu.Union(3, 4))
 	assert.True(t, dsu.Union(3, 5))
 	assert.True(t, dsu.Union(3, 0))
 	assert.Equal(t, 3, dsu.parents[0])
-	assert.Equal(t, uint8(2), dsu.ranks[3])
+	assert.Equal(t, -3, dsu.parents[3])
 	assert.False(t, dsu.Union(0, 5))
 	assert.Equal(t, 1, dsu.Disjoints())
 }
@@ -72,6 +71,9 @@ func TestFlatDisjointSetUnionByRank_Rank(t *testing.T) {
 	rank, ok := dsu.Rank(-1)
 	assert.Equal(t, 0, rank)
 	assert.False(t, ok)
+	rank, ok = dsu.Rank(2)
+	assert.Equal(t, 0, rank)
+	assert.True(t, ok)
 	assert.True(t, dsu.Union(0, 1))
 	rank, ok = dsu.Rank(1)
 	assert.Equal(t, 1, rank)
@@ -126,15 +128,13 @@ func TestFlatDisjointSetUnionByRank_Enumerate(t *testing.T) {
 
 func TestFlatDisjointSetUnionByRank_Reset(t *testing.T) {
 	dsu := NewFlatDisjointSetUnionByRank(0, 3)
-	parents, ranks := dsu.parents, dsu.ranks
+	parents := dsu.parents
 	dsu.Union(0, 1)
 	dsu.Union(2, 3)
 	dsu.Union(0, 2)
 	dsu.Reset()
 	assert.Equal(t, 4, dsu.Disjoints())
-	assert.Equal(t, []int{0, 1, 2, 3}, dsu.parents)
-	assert.Equal(t, []uint8{0, 0, 0, 0}, dsu.ranks)
+	assert.Equal(t, []int{-1, -1, -1, -1}, dsu.parents)
 	assert.Equal(t, &parents[0], &dsu.parents[0])
-	assert.Equal(t, &ranks[0], &dsu.ranks[0])
 	assert.True(t, dsu.Union(0, 1))
 }

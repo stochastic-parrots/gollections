@@ -6,8 +6,8 @@ import (
 	"github.com/stochastic-parrots/gollections/constraint"
 )
 
-// FlatDisjointSetUnionBySize stores one parent and size per value in an
-// inclusive integer range. Sizes are authoritative only at roots.
+// FlatDisjointSetUnionBySize stores an inclusive integer range in one slice.
+// Nonnegative entries are parent indexes; negative entries are root sizes.
 // Find, Connected, Union, and Size take O(α(N)) amortized time between resets,
 // where N is the range length and α is the inverse Ackermann function. A single
 // call can traverse O(log N) nodes.
@@ -15,19 +15,18 @@ type FlatDisjointSetUnionBySize[T constraint.Integer] struct {
 	min, max  T
 	disjoints int
 	parents   []int
-	sizes     []uint
 }
 
 // NewFlatDisjointSetUnionBySize allocates singleton sets for the range.
 func NewFlatDisjointSetUnionBySize[T constraint.Integer](min, max T) *FlatDisjointSetUnionBySize[T] {
 	interval := flatInterval(min, max)
-	parents, sizes := make([]int, interval), make([]uint, interval)
+	parents := make([]int, interval)
 	disjoints := interval
 
 	for idx := range interval {
-		parents[idx], sizes[idx] = idx, 1
+		parents[idx] = -1
 	}
-	return &FlatDisjointSetUnionBySize[T]{min, max, disjoints, parents, sizes}
+	return &FlatDisjointSetUnionBySize[T]{min, max, disjoints, parents}
 }
 
 func (dsu *FlatDisjointSetUnionBySize[T]) normalize(x T) (int, bool) {
@@ -38,19 +37,22 @@ func (dsu *FlatDisjointSetUnionBySize[T]) normalize(x T) (int, bool) {
 }
 
 func (dsu *FlatDisjointSetUnionBySize[T]) find(normalized int) int {
-	if dsu.parents[normalized] != normalized {
-		dsu.parents[normalized] = dsu.find(dsu.parents[normalized])
+	parent := dsu.parents[normalized]
+	if parent < 0 {
+		return normalized
 	}
-	return dsu.parents[normalized]
+	root := dsu.find(parent)
+	dsu.parents[normalized] = root
+	return root
 }
 
 func (dsu *FlatDisjointSetUnionBySize[T]) link(a, b int) {
-	if dsu.sizes[b] > dsu.sizes[a] {
+	if dsu.parents[b] < dsu.parents[a] {
+		dsu.parents[b] += dsu.parents[a]
 		dsu.parents[a] = b
-		dsu.sizes[b] += dsu.sizes[a]
 	} else {
+		dsu.parents[a] += dsu.parents[b]
 		dsu.parents[b] = a
-		dsu.sizes[a] += dsu.sizes[b]
 	}
 }
 
@@ -114,7 +116,7 @@ func (dsu *FlatDisjointSetUnionBySize[T]) Size(x T) (size int, ok bool) {
 		return 0, false
 	}
 	root := dsu.find(normalized)
-	return int(dsu.sizes[root]), true
+	return -dsu.parents[root], true
 }
 
 // Disjoints returns the current number of sets.
@@ -154,13 +156,12 @@ func (dsu *FlatDisjointSetUnionBySize[T]) Enumerate() iter.Seq2[int, T] {
 	}
 }
 
-// Reset restores singleton sets and reuses the allocated parent and size slices.
+// Reset restores singleton sets and reuses the allocated parent slice.
 //
 // Complexity: O(N).
 func (dsu *FlatDisjointSetUnionBySize[T]) Reset() {
 	for idx := range dsu.parents {
-		dsu.parents[idx] = idx
-		dsu.sizes[idx] = 1
+		dsu.parents[idx] = -1
 	}
 	dsu.disjoints = len(dsu.parents)
 }
