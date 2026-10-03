@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"strings"
 
 	"github.com/stochastic-parrots/gollections"
 )
@@ -33,35 +32,21 @@ func Format[T any](s fmt.State, verb rune, collection gollections.Collection[T],
 		fmt.Fprintf(s, "%v{len:%d, cap:%d} ", t, collection.Len(), capacity)
 	}
 
-	writeValues(s, collection)
-}
-
-// String renders values in iteration order using the same five-element display
-// limit as Format, without type or capacity metadata.
-//
-// Complexity: O(1) collection operations.
-func String[T any](collection gollections.Collection[T]) string {
-	var output strings.Builder
-	writeValues(&output, collection)
-	return output.String()
-}
-
-func writeValues[T any](output io.Writer, collection gollections.Collection[T]) {
 	if collection.Len() == 0 {
-		_, _ = io.WriteString(output, "[]")
+		_, _ = io.WriteString(s, "[]")
 		return
 	}
 
-	_, _ = io.WriteString(output, "[")
+	_, _ = io.WriteString(s, "[")
 	for idx, val := range collection.Enumerate() {
-		if idx >= displayLimit {
-			fmt.Fprintf(output, " ...(+%d more)", collection.Len()-displayLimit)
+		if idx >= 5 {
+			fmt.Fprintf(s, " ...(+%d more)", collection.Len()-displayLimit)
 			break
 		}
 		if idx > 0 {
-			_, _ = io.WriteString(output, " ")
+			_, _ = io.WriteString(s, " ")
 		}
-		fmt.Fprint(output, val)
+		fmt.Fprint(s, val)
 	}
-	_, _ = io.WriteString(output, "]")
+	_, _ = io.WriteString(s, "]")
 }

@@ -100,12 +100,14 @@ Use a checked capability assertion when you need to call an optional method
 directly through a structural interface or pass it to a function that requires
 that capability.
 
-Readonly wrappers keep their existing formatting and JSON methods. They
-delegate to optional capabilities when present; otherwise they encode values
-as a JSON array in iteration order, using `[]` for an empty collection.
-List, deque, and sorted-list wrappers also render strings with the existing
-five-element display limit. Views remain live and do not expose mutation or
-`json.Unmarshaler`.
+Readonly wrappers keep their formatting and JSON methods by calling `fmt.Sprint`
+and `json.Marshal` on the wrapped collection. Built-in collections retain their
+five-element string display limit and JSON arrays, including `[]` when empty.
+External implementations follow the standard packages' behavior; their elements
+are not rendered automatically through collection iteration. `json.Marshal`
+validates and compacts custom JSON, escapes HTML characters, and wraps errors
+returned by `MarshalJSON` in `json.MarshalerError`. Views remain live and do not
+expose mutation or `json.Unmarshaler`.
 
 ## Construction
 

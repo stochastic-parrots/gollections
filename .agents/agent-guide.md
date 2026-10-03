@@ -59,8 +59,8 @@ Use this file to orient quickly, then rely on
 - Keep root interfaces observation-only; mutations belong in structure-specific
   packages.
 - Keep formatting and JSON as optional concrete capabilities, outside structural
-  interfaces. Readonly wrappers delegate to those capabilities when present and
-  otherwise render values through iteration.
+  interfaces. Readonly wrappers use fmt.Sprint and json.Marshal on the wrapped
+  collection, following the standard packages' behavior.
 - Alias public concrete types to implementation structs and return pointers to
   those aliases from direct package-level constructors.
 - Document whether each concrete alias has a usable zero value, and add a public

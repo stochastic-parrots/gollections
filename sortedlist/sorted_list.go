@@ -6,7 +6,6 @@ import (
 	"iter"
 
 	"github.com/stochastic-parrots/gollections"
-	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 )
 
 // Order selects the direction of a type's natural order.
@@ -133,9 +132,9 @@ type SortedList[T any] interface {
 // type assertion back to the mutable interface. It is not a snapshot and does
 // not provide synchronization.
 //
-// The wrapper implements fmt.Stringer and json.Marshaler, delegating to those
-// optional capabilities when present. Otherwise it renders values in iteration
-// order as a string with a five-element display limit or as a JSON array.
+// The wrapper implements fmt.Stringer and json.Marshaler through fmt.Sprint
+// and json.Marshal on the wrapped collection, following those packages'
+// formatting, JSON validation, and error wrapping behavior.
 func AsReadonly[T any](list SortedList[T]) *readonly[T] {
 	if list == nil {
 		return nil
@@ -187,18 +186,8 @@ func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
 func (w readonly[T]) Len() int { return w.inner.Len() }
 
-func (w readonly[T]) MarshalJSON() ([]byte, error) {
-	if marshaler, ok := w.inner.(json.Marshaler); ok {
-		return marshaler.MarshalJSON()
-	}
-	return collection.Marshal(w.inner)
-}
+func (w readonly[T]) MarshalJSON() ([]byte, error) { return json.Marshal(w.inner) }
 
-func (w readonly[T]) String() string {
-	if stringer, ok := w.inner.(fmt.Stringer); ok {
-		return stringer.String()
-	}
-	return collection.String(w.inner)
-}
+func (w readonly[T]) String() string { return fmt.Sprint(w.inner) }
 
 var _ Readonly[any] = (*readonly[any])(nil)

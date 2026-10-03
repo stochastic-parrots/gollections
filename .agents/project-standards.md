@@ -52,8 +52,8 @@ alias and constructor from the public package.
   `gollections.Collection` or `gollections.Map`.
 - Structural interfaces must not require formatting or JSON methods. Preserve
   those optional capabilities on concrete types and readonly wrappers. Wrappers
-  delegate when the wrapped value implements the capability and otherwise
-  render values through iteration; they must not expose `json.Unmarshaler`.
+  use fmt.Sprint and json.Marshal on the wrapped collection, following the
+  standard packages' behavior; they must not expose `json.Unmarshaler`.
 - Expose mutations through the domain interface where their semantics are clear,
   for example `list.List`, `sortedlist.SortedList`, `deque.Deque`,
   `heap.Heap`, `set.Set`, and `prioritymap.PriorityMap`.

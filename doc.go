@@ -41,8 +41,8 @@
 // capability assertion for direct calls to String, MarshalJSON, or UnmarshalJSON
 // through an interface. Standard fmt and encoding/json calls discover the
 // capabilities of the underlying concrete value. Readonly wrappers retain their
-// existing formatting and JSON methods and render values in iteration order
-// when the wrapped collection has no corresponding optional capability.
+// formatting and JSON methods through fmt.Sprint and json.Marshal on the wrapped
+// collection, following those packages' formatting and encoding behavior.
 //
 // # Concurrency
 //
