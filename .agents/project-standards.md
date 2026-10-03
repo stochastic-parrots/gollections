@@ -142,10 +142,12 @@ alias and constructor from the public package.
   - `K` for keys.
   - `V` for generic map values.
   - `P` for priorities.
-- When a mutation supports both single-value and batch forms, use the singular
-  verb for one value and its plural for the variadic form: `Add`/`Adds`,
-  `Remove`/`Removes`, `Append`/`Appends`, `Prepend`/`Prepends`, and
-  `Push`/`Pushes`. Use `xs ...T` for the variadic input.
+- When a mutation accepts one or many values, expose one variadic method with
+  a singular verb: `Add`, `Remove`, `Append`, `Prepend`, or `Push`. Use
+  `xs ...T` for the variadic input. Empty input is a no-op. Set mutations
+  return the number of membership changes for both single values and batches.
+  Operations with distinct contracts, such as indexed mutations and removals
+  returning a value, retain their domain-specific signatures.
 - Use `idx` for indexes, not `index`, in method signatures and tests.
 - Direct constructor names include the implementation: `NewArray`, `ArrayFrom`,
   `ArrayClone`, and `ArrayFromSeq`; `NewLinked`, `LinkedFrom`, and
@@ -258,6 +260,9 @@ alias and constructor from the public package.
   Include a separate row for each method; do not group methods or include any
   constructor in the table. Repeat the method table for every constructor,
   including `From`, `Clone`, and `FromSeq`.
+- Keep every complexity table consistently formatted: align the operation and
+  complexity columns, and realign all rows whenever a row or label changes.
+  Preserve the same table layout across constructor variants that share an API.
 - Document a constructor's total cost exactly once, as the final comment line
   immediately before its declaration: `// Complexity: <Big O cost>.` Do not
   repeat that cost in the table or descriptive text. Put ownership, ordering,
@@ -289,12 +294,11 @@ alias and constructor from the public package.
   //	All()                 O(N)
   //	Enumerate()           O(N)
   //	Get(idx)              O(N)
-  //	Find(x, cmp)          O(N)
-  //	Contains(x, cmp)      O(N)
+  //	Find(match)           O(N)
+  //	Contains(match)       O(N)
   //	Backward()            O(N)
   //	ToSlice()             O(N)
-  //	Append(x)             O(1)
-  //	Appends(xs... T)      O(len(xs))
+  //	Append(xs... T)       O(len(xs))
   //	Insert(idx, x)        O(N)
   //	Set(idx, x)           O(N)
   //	Remove(idx)           O(N)
@@ -318,12 +322,11 @@ alias and constructor from the public package.
   //	All()                 O(N)
   //	Enumerate()           O(N)
   //	Get(idx)              O(N)
-  //	Find(x, cmp)          O(N)
-  //	Contains(x, cmp)      O(N)
+  //	Find(match)           O(N)
+  //	Contains(match)       O(N)
   //	Backward()            O(N)
   //	ToSlice()             O(N)
-  //	Append(x)             O(1)
-  //	Appends(xs... T)      O(len(xs))
+  //	Append(xs... T)       O(len(xs))
   //	Insert(idx, x)        O(N)
   //	Set(idx, x)           O(N)
   //	Remove(idx)           O(N)

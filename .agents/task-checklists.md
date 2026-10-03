@@ -84,8 +84,9 @@ Use these checklists for repeatable agent workflows. They supplement
 7. Confirm that adapters only normalize APIs and preserve each real
    implementation's semantics. Do not invent behavior just to include an
    implementation in a suite.
-8. Use `b.ReportAllocs()` and verify that interfaces or variadic calls do not
-   create artificial per-operation allocations.
+8. Use `b.ReportAllocs()` and distinguish collection allocations from temporary
+   argument slices escaping through variadic interface calls. Compare concrete
+   calls separately when measuring public API overhead.
 9. Reset or rebuild setup outside the measured section unless setup is the
    operation being measured.
 10. Run each new benchmark with a short `-benchtime` before the full suite to

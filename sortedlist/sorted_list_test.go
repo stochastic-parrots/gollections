@@ -68,7 +68,7 @@ func TestArrayClone(t *testing.T) {
 
 func TestArrayFromSeq(t *testing.T) {
 	source := list.NewArray[int](0)
-	source.Appends(3, 1, 2)
+	source.Append(3, 1, 2)
 
 	list := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
 
@@ -122,7 +122,7 @@ func TestArraySortedList_GetError(t *testing.T) {
 
 func TestArraySortedList_ReplaceError(t *testing.T) {
 	list := sortedlist.NewArray(cmp.Compare[int], 0)
-	list.Adds(1, 3, 5)
+	list.Add(1, 3, 5)
 
 	err := list.Replace(1, 6)
 
@@ -153,7 +153,7 @@ func TestAsReadonly(t *testing.T) {
 
 	t.Run("View", func(t *testing.T) {
 		mutable := sortedlist.NewArray(cmp.Compare[int], 0)
-		mutable.Adds(2, 1)
+		mutable.Add(2, 1)
 
 		view := sortedlist.AsReadonly(mutable)
 
@@ -225,7 +225,7 @@ func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	assert.False(t, unmarshals)
 	assert.True(t, list.IsEmpty())
 
-	list.Adds(3, 1, 2, 2)
+	list.Add(3, 1, 2, 2)
 
 	assert.Equal(t, []int{1, 2, 2, 3}, list.ToSlice())
 	assert.Equal(t, []int{1, 2, 2, 3}, slices.Collect(list.All()))

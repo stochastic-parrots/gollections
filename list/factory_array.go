@@ -28,8 +28,7 @@ var _ List[int] = &list.ArrayList[int]{}
 //	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
-//	Append(x)             O(1) Amortized
-//	Appends(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	Insert(idx, x)        O(N)
 //	Set(idx, x)           O(1)
 //	Remove(idx)           O(N)
@@ -57,8 +56,7 @@ func NewArray[T any](capacity int) *ArrayList[T] { return list.NewArrayList[T](c
 //	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
-//	Append(x)             O(1) Amortized
-//	Appends(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	Insert(idx, x)        O(N)
 //	Set(idx, x)           O(1)
 //	Remove(idx)           O(N)
@@ -86,8 +84,7 @@ func ArrayFrom[T any](data []T) *ArrayList[T] { return list.NewArrayListFromSlic
 //	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
-//	Append(x)             O(1) Amortized
-//	Appends(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	Insert(idx, x)        O(N)
 //	Set(idx, x)           O(1)
 //	Remove(idx)           O(N)
@@ -115,8 +112,7 @@ func ArrayClone[T any](data []T) *ArrayList[T] { return list.NewArrayListCloneSl
 //	Contains(match)       O(N)
 //	Backward()            O(N)
 //	ToSlice()             O(N)
-//	Append(x)             O(1) Amortized
-//	Appends(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	Insert(idx, x)        O(N)
 //	Set(idx, x)           O(1)
 //	Remove(idx)           O(N)

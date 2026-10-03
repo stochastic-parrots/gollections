@@ -27,10 +27,8 @@
 // Mutable deques implement the [Deque] interface:
 //
 //	type Deque[T any] interface {
-//		Prepend(x T)
-//		Prepends(xs ...T)
-//		Append(x T)
-//		Appends(xs ...T)
+//		Prepend(xs ...T)
+//		Append(xs ...T)
 //		Shift() (T, bool)
 //		Pop() (T, bool)
 //		Clear()
@@ -43,9 +41,9 @@
 // The package exposes two implementations:
 //
 //   - [ArrayDeque]: A circular-array deque with good memory locality and
-//     amortized O(1) operations at both ends.
-//   - [LinkedDeque]: A doubly linked deque with stable O(1) operations at both
-//     ends and no backing-array moves.
+//     amortized O(1) single-value operations at both ends.
+//   - [LinkedDeque]: A doubly linked deque with O(1) single-value operations
+//     at both ends and no backing-array moves.
 //
 // Construct an [ArrayDeque] with [NewArray], [ArrayFrom], [ArrayClone], or
 // [ArrayFromSeq]. Construct a [LinkedDeque] with [NewLinked], [LinkedFrom], or

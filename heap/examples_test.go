@@ -13,7 +13,7 @@ func ExampleNewBinary() {
 	}
 
 	h := heap.NewBinary(byLength, 0)
-	h.Pushes("apple", "kiwi", "banana", "pear")
+	h.Push("apple", "kiwi", "banana", "pear")
 
 	for !h.IsEmpty() {
 		val, _ := h.Pop()
@@ -53,7 +53,7 @@ func ExampleBinaryClone() {
 func ExampleNewOrderedBinary_min() {
 	h := heap.NewOrderedBinary[int](heap.Min, 5)
 
-	h.Pushes(10, 50, 5, 1)
+	h.Push(10, 50, 5, 1)
 
 	for !h.IsEmpty() {
 		val, _ := h.Pop()
@@ -95,7 +95,7 @@ func ExampleBinaryClone_min() {
 func ExampleNewOrderedBinary_max() {
 	h := heap.NewOrderedBinary[float64](heap.Max, 0)
 	h.Push(1.5)
-	h.Pushes(10.2, 3.7)
+	h.Push(10.2, 3.7)
 
 	top, _ := h.Peek()
 	fmt.Printf("%.1f\n", top)

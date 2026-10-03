@@ -41,7 +41,7 @@ func BenchmarkSortedList_Contains(b *testing.B) {
 		b.Run("Case="+test.name, func(b *testing.B) {
 			for _, implementation := range getSortedListSuite(len(data)) {
 				list := implementation.Factory()
-				list.Adds(data...)
+				list.Add(data...)
 				b.Run("Library="+implementation.Name, func(b *testing.B) {
 					b.ReportAllocs()
 					for b.Loop() {
@@ -64,7 +64,7 @@ func BenchmarkSortedList_RangeQuery(b *testing.B) {
 
 	for _, implementation := range getSortedListSuite(len(data)) {
 		l := implementation.Factory()
-		l.Adds(data...)
+		l.Add(data...)
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {

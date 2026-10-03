@@ -73,8 +73,8 @@ func TestKeyedHashSet_Add(t *testing.T) {
 	set := KeyedHashSet[record, int]{keyOf: recordID}
 	first := record{ID: 1, Name: "first"}
 
-	assert.True(t, set.Add(first))
-	assert.False(t, set.Add(record{ID: 1, Name: "duplicate"}))
+	assert.Equal(t, 1, set.Add(first))
+	assert.Zero(t, set.Add(record{ID: 1, Name: "duplicate"}))
 
 	assert.Equal(t, 1, set.Len())
 	assert.Equal(t, []record{first}, slices.Collect(set.All()))
@@ -84,9 +84,9 @@ func TestKeyedHashSet_Adds(t *testing.T) {
 	first := record{ID: 1, Name: "first"}
 	set := NewKeyedHashSet(0, recordID)
 
-	assert.Equal(t, 2, set.Adds(first, record{ID: 1, Name: "duplicate"}, record{ID: 2, Name: "second"}))
-	assert.Zero(t, set.Adds())
-	assert.Zero(t, set.Adds(record{ID: 1}, record{ID: 2}))
+	assert.Equal(t, 2, set.Add(first, record{ID: 1, Name: "duplicate"}, record{ID: 2, Name: "second"}))
+	assert.Zero(t, set.Add())
+	assert.Zero(t, set.Add(record{ID: 1}, record{ID: 2}))
 
 	assert.Equal(t, 2, set.Len())
 	assert.Contains(t, slices.Collect(set.All()), first)
@@ -95,8 +95,8 @@ func TestKeyedHashSet_Adds(t *testing.T) {
 func TestKeyedHashSet_Remove(t *testing.T) {
 	set := NewKeyedHashSetFromSlice([]record{{ID: 1}, {ID: 2}}, recordID)
 
-	assert.True(t, set.Remove(record{ID: 1, Name: "query"}))
-	assert.False(t, set.Remove(record{ID: 1}))
+	assert.Equal(t, 1, set.Remove(record{ID: 1, Name: "query"}))
+	assert.Zero(t, set.Remove(record{ID: 1}))
 	assert.False(t, set.Contains(record{ID: 1}))
 	assert.Equal(t, 1, set.Len())
 }
@@ -104,9 +104,9 @@ func TestKeyedHashSet_Remove(t *testing.T) {
 func TestKeyedHashSet_Removes(t *testing.T) {
 	set := NewKeyedHashSetFromSlice([]record{{ID: 1}, {ID: 2}, {ID: 3}}, recordID)
 
-	assert.Equal(t, 2, set.Removes(record{ID: 2}, record{ID: 2}, record{ID: 4}, record{ID: 3}))
-	assert.Zero(t, set.Removes())
-	assert.Zero(t, set.Removes(record{ID: 2}, record{ID: 4}))
+	assert.Equal(t, 2, set.Remove(record{ID: 2}, record{ID: 2}, record{ID: 4}, record{ID: 3}))
+	assert.Zero(t, set.Remove())
+	assert.Zero(t, set.Remove(record{ID: 2}, record{ID: 4}))
 	assert.Equal(t, []record{{ID: 1}}, slices.Collect(set.All()))
 }
 

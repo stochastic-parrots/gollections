@@ -114,19 +114,11 @@ func (l *ArrayList[T]) Set(index int, x T) error {
 	return nil
 }
 
-// Append adds an element to the end of the list.
+// Append adds the given elements to the end of the list in input order.
+// Empty input leaves the list unchanged.
 //
-// Complexity: O(1) Amortized.
-// If the underlying capacity is exceeded, a new, larger array is allocated
-// and all elements are copied (O(N)).
-func (l *ArrayList[T]) Append(x T) {
-	l.data = append(l.data, x)
-}
-
-// Appends adds the given elements to the end of the list.
-//
-// Complexity: O(len(xs)) Amortized.
-func (l *ArrayList[T]) Appends(xs ...T) {
+// Complexity: Amortized O(len(xs)).
+func (l *ArrayList[T]) Append(xs ...T) {
 	l.data = append(l.data, xs...)
 }
 
@@ -267,7 +259,7 @@ func (l *ArrayList[T]) MarshalJSON() ([]byte, error) {
 //
 // Complexity: O(N + len(data)).
 func (l *ArrayList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Appends)
+	return collection.Unmarshal(data, l.Clear, l.Append)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

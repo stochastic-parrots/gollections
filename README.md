@@ -118,6 +118,28 @@ copy values into map storage. `FromSeq` functions consume an iterator once.
 `heap.BinaryFromSeq(hasPriority, seq)` and
 `heap.OrderedBinaryFromSeq(order, seq)` are new O(N) constructors.
 
+## Mutations
+
+`Append`, `Prepend`, `Push`, and `Add` accept zero, one, or many values through
+one variadic method. Calling them without values leaves the collection unchanged:
+
+```go
+items.Append()
+items.Append("one")
+items.Append("two", "three")
+xs := []string{"four", "five"}
+items.Append(xs...)
+```
+
+Batch calls use the same singular name as single-value calls. Custom interfaces
+and method values must use the variadic signature. Set `Add` and `Remove` return
+counts; use `> 0` when a caller needs a boolean.
+
+Variadic calls through collection interfaces can allocate a temporary argument
+slice, even for one value. Calling the concrete type directly avoids interface
+dispatch overhead. Benchmark the call form used by your workload; reusing an
+argument slice can avoid repeated temporary allocations.
+
 ## Choosing a list
 
 - `ArrayList`: use as the default indexed sequence when O(1) random access,
@@ -169,9 +191,10 @@ itself. Use `NewKeyedHashSet` with a canonical comparable key when NaN membershi
 required. When `HashSet` uses an interface type, its dynamic values must also be
 comparable, matching native Go map requirements.
 
-`Add` and `Remove` report whether one value changed membership; `Adds` and
-`Removes` report how many values in a batch changed membership. Iteration and
-JSON array order are unspecified.
+`Add(xs ...T)` and `Remove(xs ...T)` return the number of values whose membership
+changed. Both accept zero, one, or many values; empty input returns zero. Use
+`Add(x) > 0` or `Remove(x) > 0` when a boolean is needed. Iteration and JSON
+array order are unspecified.
 
 ## Choosing a disjoint set
 

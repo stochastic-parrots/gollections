@@ -9,7 +9,7 @@ import (
 
 func TestRangeQueryCount(t *testing.T) {
 	list := datastructs.NewStdSortedList(5)
-	list.Adds(1, 2, 2, 3, 5)
+	list.Add(1, 2, 2, 3, 5)
 
 	assert.Equal(t, 3, RangeQueryCount(list, 2, 5))
 }

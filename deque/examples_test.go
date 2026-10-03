@@ -10,8 +10,8 @@ import (
 
 func ExampleNewArray() {
 	queue := deque.NewArray[int](2)
-	queue.Appends(2, 3)
-	queue.Prepends(0, 1)
+	queue.Append(2, 3)
+	queue.Prepend(0, 1)
 
 	front, _ := queue.Front()
 	back, _ := queue.Back()
@@ -38,7 +38,7 @@ func ExampleNewArray() {
 
 func ExampleNewLinked() {
 	deque := deque.NewLinked[string]()
-	deque.Appends("middle", "back")
+	deque.Append("middle", "back")
 	deque.Prepend("front")
 
 	fmt.Println(slices.Collect(deque.All()))
@@ -93,7 +93,7 @@ func ExampleLinkedFromSeq() {
 
 func ExampleAsReadonly() {
 	mutable := deque.NewArray[int](0)
-	mutable.Appends(10, 20)
+	mutable.Append(10, 20)
 
 	view := deque.AsReadonly(mutable)
 	fmt.Println("Readonly view:", slices.Collect(view.All()))

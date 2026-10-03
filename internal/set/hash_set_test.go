@@ -53,8 +53,8 @@ func TestHashSet_Contains(t *testing.T) {
 func TestHashSet_Add(t *testing.T) {
 	var set HashSet[int]
 
-	assert.True(t, set.Add(1))
-	assert.False(t, set.Add(1))
+	assert.Equal(t, 1, set.Add(1))
+	assert.Zero(t, set.Add(1))
 
 	assert.Equal(t, 1, set.Len())
 	assert.True(t, set.Contains(1))
@@ -63,9 +63,9 @@ func TestHashSet_Add(t *testing.T) {
 func TestHashSet_Adds(t *testing.T) {
 	set := NewHashSet[int](0)
 
-	assert.Equal(t, 2, set.Adds(1, 2, 1))
-	assert.Zero(t, set.Adds())
-	assert.Zero(t, set.Adds(1, 2))
+	assert.Equal(t, 2, set.Add(1, 2, 1))
+	assert.Zero(t, set.Add())
+	assert.Zero(t, set.Add(1, 2))
 
 	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(set.All()))
@@ -74,8 +74,8 @@ func TestHashSet_Adds(t *testing.T) {
 func TestHashSet_Remove(t *testing.T) {
 	set := NewHashSetFromSlice([]int{1, 2})
 
-	assert.True(t, set.Remove(1))
-	assert.False(t, set.Remove(1))
+	assert.Equal(t, 1, set.Remove(1))
+	assert.Zero(t, set.Remove(1))
 	assert.False(t, set.Contains(1))
 	assert.Equal(t, 1, set.Len())
 }
@@ -83,9 +83,9 @@ func TestHashSet_Remove(t *testing.T) {
 func TestHashSet_Removes(t *testing.T) {
 	set := NewHashSetFromSlice([]int{1, 2, 3})
 
-	assert.Equal(t, 2, set.Removes(2, 2, 4, 3))
-	assert.Zero(t, set.Removes())
-	assert.Zero(t, set.Removes(2, 4))
+	assert.Equal(t, 2, set.Remove(2, 2, 4, 3))
+	assert.Zero(t, set.Remove())
+	assert.Zero(t, set.Remove(2, 4))
 	assert.Equal(t, []int{1}, slices.Collect(set.All()))
 }
 

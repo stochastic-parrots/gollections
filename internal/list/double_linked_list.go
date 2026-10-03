@@ -31,7 +31,7 @@ func NewDoubleLinkedList[T any]() *DoubleLinkedList[T] {
 // Values are copied into newly allocated nodes and data is not retained.
 func NewDoubleLinkedListFromSlice[T any](data []T) *DoubleLinkedList[T] {
 	list := NewDoubleLinkedList[T]()
-	list.Appends(data...)
+	list.Append(data...)
 	return list
 }
 
@@ -163,31 +163,25 @@ func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 	return nil
 }
 
-// Append inserts an element at the end of the list.
+// Append inserts the given elements at the logical end of the list in input order.
+// Empty input leaves the list unchanged.
 //
-// Complexity: O(1).
-func (l *DoubleLinkedList[T]) Append(x T) {
-	if l.IsEmpty() {
-		l.first = node.NewDoubleLinkedNode(x)
-		l.last = l.first
-		l.length++
-		return
-	}
-
-	if !l.reversed {
+// Complexity: O(len(xs)).
+func (l *DoubleLinkedList[T]) Append(xs ...T) {
+	for _, x := range xs {
 		new := node.NewDoubleLinkedNode(x)
-		l.last.Next = new
-		new.Previous = l.last
+		if l.IsEmpty() {
+			l.first = new
+		} else if l.reversed {
+			l.last.Previous = new
+			new.Next = l.last
+		} else {
+			l.last.Next = new
+			new.Previous = l.last
+		}
 		l.last = new
 		l.length++
-		return
 	}
-
-	new := node.NewDoubleLinkedNode(x)
-	l.last.Previous = new
-	new.Next = l.last
-	l.last = new
-	l.length++
 }
 
 // prepend is the internal implementation for adding a value to the logical start of the list.
@@ -296,15 +290,6 @@ func (l *DoubleLinkedList[T]) Remove(idx int) (T, error) {
 	current.Value = zero
 	l.length--
 	return val, nil
-}
-
-// Appends inserts the given elements at the end of the list.
-//
-// Complexity: O(len(xs)).
-func (l *DoubleLinkedList[T]) Appends(xs ...T) {
-	for _, x := range xs {
-		l.Append(x)
-	}
 }
 
 // Reverse inverts the logical order of the list in O(1) time.
@@ -436,7 +421,7 @@ func (l *DoubleLinkedList[T]) MarshalJSON() ([]byte, error) {
 //
 // Complexity: O(N + len(data)).
 func (l *DoubleLinkedList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Appends)
+	return collection.Unmarshal(data, l.Clear, l.Append)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

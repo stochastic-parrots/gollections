@@ -15,21 +15,17 @@ func NewStdSortedList(capacity int) *StdSortedList {
 	return &StdSortedList{data: make([]int, 0, capacity)}
 }
 
-// Add inserts x while preserving sorted order.
-func (l *StdSortedList) Add(x int) {
-	idx, _ := slices.BinarySearch(l.data, x)
-	l.data = append(l.data, 0)
-	copy(l.data[idx+1:], l.data[idx:])
-	l.data[idx] = x
-}
-
-// Adds inserts all values while preserving sorted order.
-func (l *StdSortedList) Adds(xs ...int) {
+// Add inserts the given values while preserving sorted order.
+func (l *StdSortedList) Add(xs ...int) {
 	switch len(xs) {
 	case 0:
 		return
 	case 1:
-		l.Add(xs[0])
+		x := xs[0]
+		idx, _ := slices.BinarySearch(l.data, x)
+		l.data = append(l.data, 0)
+		copy(l.data[idx+1:], l.data[idx:])
+		l.data[idx] = x
 	default:
 		l.data = append(l.data, xs...)
 		slices.Sort(l.data)

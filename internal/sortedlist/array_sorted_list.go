@@ -263,28 +263,23 @@ func (l *ArraySortedList[T]) Last() (T, bool) {
 	return l.data[len(l.data)-1], true
 }
 
-// Add inserts x while preserving the sorted invariant.
-//
-// Complexity: O(N).
-func (l *ArraySortedList[T]) Add(x T) {
-	idx := l.UpperBound(x)
-
-	var zero T
-	l.data = append(l.data, zero)
-	copy(l.data[idx+1:], l.data[idx:])
-	l.data[idx] = x
-}
-
-// Adds inserts zero or more values while preserving the sorted invariant.
+// Add inserts the given values while preserving the sorted invariant.
+// Empty input leaves the list unchanged.
 //
 // Complexity: O(N) for one value, or
 // O((N + len(xs)) log (N + len(xs))) for multiple values.
-func (l *ArraySortedList[T]) Adds(xs ...T) {
+func (l *ArraySortedList[T]) Add(xs ...T) {
 	switch len(xs) {
 	case 0:
 		return
 	case 1:
-		l.Add(xs[0])
+		x := xs[0]
+		idx := l.UpperBound(x)
+
+		var zero T
+		l.data = append(l.data, zero)
+		copy(l.data[idx+1:], l.data[idx:])
+		l.data[idx] = x
 		return
 	}
 

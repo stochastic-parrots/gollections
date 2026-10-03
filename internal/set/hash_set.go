@@ -19,7 +19,7 @@ func NewHashSet[T comparable](capacity int) *HashSet[T] {
 // NewHashSetFromSlice creates a hash set containing the unique values in data.
 func NewHashSetFromSlice[T comparable](data []T) *HashSet[T] {
 	set := NewHashSet[T](len(data))
-	set.Adds(data...)
+	set.Add(data...)
 	return set
 }
 
@@ -54,54 +54,35 @@ func (set *HashSet[T]) Contains(x T) bool {
 	return ok
 }
 
-// Add inserts x if it is not already present and reports whether the set
-// changed.
-//
-// Complexity: O(1) on average.
-func (set *HashSet[T]) Add(x T) bool {
-	if _, ok := set.values[x]; ok {
-		return false
-	}
-	if set.values == nil {
-		set.values = make(map[T]struct{})
-	}
-	set.values[x] = struct{}{}
-	return true
-}
-
-// Adds inserts every value in xs that is not already present and returns the
-// number of values added.
+// Add inserts every value in xs that is not already present and returns the
+// number of values added. Empty input leaves the set unchanged.
 //
 // Complexity: O(len(xs)) on average.
-func (set *HashSet[T]) Adds(xs ...T) (added int) {
+func (set *HashSet[T]) Add(xs ...T) (added int) {
 	for _, x := range xs {
-		if set.Add(x) {
-			added++
+		if _, ok := set.values[x]; ok {
+			continue
 		}
+		if set.values == nil {
+			set.values = make(map[T]struct{})
+		}
+		set.values[x] = struct{}{}
+		added++
 	}
 	return added
 }
 
-// Remove deletes x and reports whether it was present.
-//
-// Complexity: O(1) on average.
-func (set *HashSet[T]) Remove(x T) bool {
-	if _, ok := set.values[x]; !ok {
-		return false
-	}
-	delete(set.values, x)
-	return true
-}
-
-// Removes deletes every value in xs that is present and returns the number of
-// values removed.
+// Remove deletes every value in xs that is present and returns the number of
+// values removed. Empty input leaves the set unchanged.
 //
 // Complexity: O(len(xs)) on average.
-func (set *HashSet[T]) Removes(xs ...T) (removed int) {
+func (set *HashSet[T]) Remove(xs ...T) (removed int) {
 	for _, x := range xs {
-		if set.Remove(x) {
-			removed++
+		if _, ok := set.values[x]; !ok {
+			continue
 		}
+		delete(set.values, x)
+		removed++
 	}
 	return removed
 }

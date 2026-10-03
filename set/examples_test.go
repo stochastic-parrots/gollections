@@ -12,15 +12,15 @@ func ExampleNewHashSet() {
 	values := set.HashSetFrom[string]([]string{"go", "collections", "go"})
 	fmt.Println("added:", values.Add("iterators"))
 	fmt.Println("added:", values.Add("go"))
-	fmt.Println("removed:", values.Removes("collections", "missing", "collections"))
+	fmt.Println("removed:", values.Remove("collections", "missing", "collections"))
 
 	fmt.Println(slices.Sorted(values.All()))
 	fmt.Println(values.Contains("go"))
 	fmt.Println(values.Contains("maps"))
 
 	// Output:
-	// added: true
-	// added: false
+	// added: 1
+	// added: 0
 	// removed: 1
 	// [go iterators]
 	// true
@@ -35,7 +35,7 @@ func ExampleNewKeyedHashSet() {
 	}
 
 	users := set.NewKeyedHashSet(func(value user) int { return value.ID }, 0)
-	added := users.Adds(
+	added := users.Add(
 		user{ID: 2, Name: "Grace", Roles: []string{"admin"}},
 		user{ID: 1, Name: "Ada", Roles: []string{"author"}},
 		user{ID: 1, Name: "duplicate"},

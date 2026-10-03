@@ -83,6 +83,8 @@ Use this file to orient quickly, then rely on
 - Respect an explicit user choice about benchmark contracts. If the chosen
   contract introduces a known measurement artifact, document it in the response
   instead of reworking the harness in a different direction.
+- Mutations that accept one or many values use one variadic method with a
+  singular name. Empty input is a no-op; set mutations return counts.
 
 ## Verification
 

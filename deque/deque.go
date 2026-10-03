@@ -36,22 +36,16 @@ type Readonly[T any] interface {
 }
 
 // Deque defines the operations for a double-ended queue.
-//
-// It supports highly efficient O(1) insertions and removals at both ends.
 type Deque[T any] interface {
-	// Prepend adds an element to the beginning of the deque.
-	Prepend(x T)
-
-	// Prepends adds the given elements to the beginning of the deque.
+	// Prepend adds the given elements to the beginning of the deque.
 	//
 	// The relative order of the elements is preserved at the front of the deque.
-	Prepends(xs ...T)
+	// With no elements, it leaves the deque unchanged.
+	Prepend(xs ...T)
 
-	// Append adds an element to the end of the deque.
-	Append(x T)
-
-	// Appends adds the given elements to the end of the deque.
-	Appends(xs ...T)
+	// Append adds the given elements to the end of the deque in input order.
+	// With no elements, it leaves the deque unchanged.
+	Append(xs ...T)
 
 	// Shift removes and returns the element from the beginning of the deque.
 	//

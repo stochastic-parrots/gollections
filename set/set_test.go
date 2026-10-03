@@ -33,8 +33,8 @@ func TestFactoriesImplementSet(t *testing.T) {
 func TestConcreteZeroValues(t *testing.T) {
 	var values set.HashSet[int]
 
-	assert.True(t, values.Add(1))
-	assert.Equal(t, 1, values.Adds(2, 1))
+	assert.Equal(t, 1, values.Add(1))
+	assert.Equal(t, 1, values.Add(2, 1))
 
 	assert.Equal(t, 2, values.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
@@ -75,8 +75,8 @@ func TestNewKeyedHashSet(t *testing.T) {
 	values := set.NewKeyedHashSet(memberID, 2)
 	first := member{ID: 1, Name: "first", Labels: []string{"a"}}
 
-	assert.True(t, values.Add(first))
-	assert.False(t, values.Add(member{ID: 1, Name: "duplicate"}))
+	assert.Equal(t, 1, values.Add(first))
+	assert.Zero(t, values.Add(member{ID: 1, Name: "duplicate"}))
 
 	assert.Equal(t, 1, values.Len())
 	assert.Equal(t, []member{first}, slices.Collect(values.All()))
@@ -112,7 +112,7 @@ func TestEmptySliceConstructors(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			values := construct()
 			assert.True(t, values.IsEmpty())
-			assert.True(t, values.Add(1))
+			assert.Equal(t, 1, values.Add(1))
 			assert.True(t, values.Contains(1))
 		})
 	}
@@ -157,8 +157,8 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	t.Helper()
 
 	assert.True(t, values.IsEmpty())
-	assert.True(t, values.Add(1))
-	assert.Equal(t, 1, values.Adds(2, 1))
+	assert.Equal(t, 1, values.Add(1))
+	assert.Equal(t, 1, values.Add(2, 1))
 
 	assert.False(t, values.IsEmpty())
 	assert.Equal(t, 2, values.Len())
@@ -166,10 +166,10 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	assert.False(t, values.Contains(3))
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 
-	assert.True(t, values.Remove(1))
-	assert.False(t, values.Remove(1))
-	assert.Equal(t, 2, values.Adds(3, 4))
-	assert.Equal(t, 2, values.Removes(2, 2, 4, 5))
+	assert.Equal(t, 1, values.Remove(1))
+	assert.Zero(t, values.Remove(1))
+	assert.Equal(t, 2, values.Add(3, 4))
+	assert.Equal(t, 2, values.Remove(2, 2, 4, 5))
 
 	data, err := values.MarshalJSON()
 	assert.NoError(t, err)
@@ -178,6 +178,6 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	values.Clear()
 	assert.True(t, values.IsEmpty())
 
-	assert.True(t, values.Add(3))
+	assert.Equal(t, 1, values.Add(3))
 	assert.True(t, values.Contains(3))
 }

@@ -31,6 +31,10 @@
 // From and FromSeq discard duplicates while preserving the first value
 // encountered for each identity.
 //
+// Add and Remove accept zero, one, or many values and return the number of
+// membership changes. Repeated identities are counted only once, and empty
+// input returns zero without changing the set.
+//
 // # Views, Iteration, And JSON
 //
 // [Set] exposes mutation, while [Readonly] contains observation and traversal
