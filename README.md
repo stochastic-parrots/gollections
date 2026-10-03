@@ -133,12 +133,12 @@ items.Append(xs...)
 
 Batch calls use the same singular name as single-value calls. Custom interfaces
 and method values must use the variadic signature. Set `Add` and `Remove` return
-counts; use `> 0` when migrating a caller that expects a boolean.
+counts; use `> 0` when a caller needs a boolean.
 
 Variadic calls through collection interfaces can allocate a temporary argument
-slice, even for one value. The concrete types returned by factories avoid this
-interface dispatch overhead. Benchmark the call form used by your workload;
-reusing an argument slice can avoid repeated temporary allocations.
+slice, even for one value. Calling the concrete type directly avoids interface
+dispatch overhead. Benchmark the call form used by your workload; reusing an
+argument slice can avoid repeated temporary allocations.
 
 ## Choosing a list
 
@@ -193,8 +193,8 @@ comparable, matching native Go map requirements.
 
 `Add(xs ...T)` and `Remove(xs ...T)` return the number of values whose membership
 changed. Both accept zero, one, or many values; empty input returns zero. Use
-`Add(x) > 0` or `Remove(x) > 0` when a boolean is needed. Iteration and JSON array
-order are unspecified.
+`Add(x) > 0` or `Remove(x) > 0` when a boolean is needed. Iteration and JSON
+array order are unspecified.
 
 ## Choosing a disjoint set
 
