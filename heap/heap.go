@@ -1,8 +1,6 @@
 package heap
 
 import (
-	"encoding/json"
-	"fmt"
 	"iter"
 
 	"github.com/stochastic-parrots/gollections"
@@ -63,7 +61,4 @@ type Heap[T any] interface {
 	Clear()
 
 	gollections.Collection[T]
-
-	fmt.Stringer
-	json.Marshaler
 }

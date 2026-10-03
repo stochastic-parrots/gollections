@@ -137,3 +137,29 @@ func ExampleAsReadonly() {
 	// Readonly view: [10 20]
 	// Readonly view: [10 20 30]
 }
+
+func ExampleList_optionalCapabilities() {
+	var items list.List[int] = list.ArrayFrom([]int{1, 2})
+
+	if stringer, ok := items.(fmt.Stringer); ok {
+		fmt.Println(stringer.String())
+	}
+	if marshaler, ok := items.(json.Marshaler); ok {
+		data, err := marshaler.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(data))
+	}
+	if unmarshaler, ok := items.(json.Unmarshaler); ok {
+		if err := unmarshaler.UnmarshalJSON([]byte(`[3,4]`)); err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println(items.ToSlice())
+
+	// Output:
+	// [1 2]
+	// [1,2]
+	// [3 4]
+}

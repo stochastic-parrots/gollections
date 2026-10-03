@@ -43,10 +43,11 @@
 // stable set indexes. Iterators are lazy and callers must not mutate the set
 // while iteration is running.
 //
-// Sets marshal as JSON arrays in unspecified iteration order. They do not
-// implement json.Unmarshaler because a JSON array does not encode the selected
-// identity policy. Decode into []T and pass the values to the same HashSetFrom or
-// KeyedHashSetFrom constructor family.
+// HashSet and KeyedHashSet marshal as JSON arrays in unspecified iteration
+// order. The Set and Readonly interfaces do not require JSON methods.
+// The concrete types do not implement json.Unmarshaler because a JSON array
+// does not encode the selected identity policy. Decode into []T and pass the
+// values to the same HashSetFrom or KeyedHashSetFrom constructor family.
 //
 // Sets are not safe for concurrent use. Callers must synchronize access when
 // any goroutine may mutate a shared set.

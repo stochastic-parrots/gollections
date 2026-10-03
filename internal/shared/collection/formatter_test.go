@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stochastic-parrots/gollections/internal/shared/collection"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,6 +53,23 @@ func TestFormat(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := fmt.Sprintf(tt.format, tt.collection)
 			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
+
+func TestString(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		values []int
+		want   string
+	}{
+		{"Empty", nil, "[]"},
+		{"Values", []int{1, 2, 3}, "[1 2 3]"},
+		{"DisplayLimit", []int{1, 2, 3, 4, 5}, "[1 2 3 4 5]"},
+		{"Truncated", []int{1, 2, 3, 4, 5, 6}, "[1 2 3 4 5 ...(+1 more)]"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, collection.String(&FakeCollection[int]{data: test.values}))
 		})
 	}
 }

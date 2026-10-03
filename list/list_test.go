@@ -2,12 +2,44 @@ package list_test
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/list"
 	"github.com/stretchr/testify/assert"
 )
+
+// Embedding the structural interface hides the concrete value's optional methods.
+type structuralList[T any] struct {
+	list.List[T]
+}
+
+var _ list.List[int] = (*structuralList[int])(nil)
+var _ list.Readonly[int] = (*structuralList[int])(nil)
+
+var _ json.Marshaler = (*list.ArrayList[int])(nil)
+var _ fmt.Stringer = (*list.ArrayList[int])(nil)
+var _ fmt.Formatter = (*list.ArrayList[int])(nil)
+var _ json.Unmarshaler = (*list.ArrayList[int])(nil)
+
+var _ json.Marshaler = (*list.LinkedList[int])(nil)
+var _ fmt.Stringer = (*list.LinkedList[int])(nil)
+var _ fmt.Formatter = (*list.LinkedList[int])(nil)
+var _ json.Unmarshaler = (*list.LinkedList[int])(nil)
+
+type optionalList[T any] struct {
+	list.List[T]
+	data []byte
+	err  error
+}
+
+func (values optionalList[T]) MarshalJSON() ([]byte, error) {
+	return values.data, values.err
+}
+
+func (values optionalList[T]) String() string { return "custom formatting" }
 
 func TestConstructorsImplementList(t *testing.T) {
 	var _ *list.ArrayList[int] = list.NewArray[int](0)
@@ -196,6 +228,136 @@ func TestList_Contains(t *testing.T) {
 			assert.Equal(t, 1, calls)
 			assert.False(t, test.list.Contains(func(value int) bool { return value < 0 }))
 		})
+	}
+}
+
+func TestStructuralList(t *testing.T) {
+	values := &structuralList[int]{List: list.ArrayFrom([]int{1, 2})}
+	assert.NotImplements(t, (*fmt.Stringer)(nil), values)
+	assert.NotImplements(t, (*json.Marshaler)(nil), values)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), values)
+
+	view := list.AsReadonly[int](values)
+	assert.NotImplements(t, (*list.List[int])(nil), view)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), view)
+	values.Append(3)
+	assert.Equal(t, []int{1, 2, 3}, slices.Collect(view.All()))
+	data, err := json.Marshal(view)
+	assert.NoError(t, err)
+	assert.Equal(t, "[1,2,3]", string(data))
+}
+
+func TestReadonly_String(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+				want   string
+			}{
+				{"Empty", nil, "[]"},
+				{"Values", []int{1, 2, 3}, "[1 2 3]"},
+				{"DisplayLimit", []int{1, 2, 3, 4, 5}, "[1 2 3 4 5]"},
+				{"Truncated", []int{1, 2, 3, 4, 5, 6}, "[1 2 3 4 5 ...(+1 more)]"},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := list.AsReadonly[int](values)
+					assert.Equal(t, test.want, view.String())
+					assert.Equal(t, test.want, fmt.Sprint(view))
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		values := optionalList[int]{List: list.ArrayFrom([]int{1, 2})}
+		view := list.AsReadonly[int](values)
+		assert.Equal(t, "custom formatting", view.String())
+	})
+}
+
+func TestReadonly_MarshalJSON(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+			}{
+				{"Empty", nil},
+				{"Values", []int{1, 2, 3}},
+				{"BeyondDisplayLimit", []int{1, 2, 3, 4, 5, 6}},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := list.AsReadonly[int](values)
+					data, err := view.MarshalJSON()
+					assert.NoError(t, err)
+					if len(test.values) == 0 {
+						assert.Equal(t, "[]", string(data))
+					} else {
+						var decoded []int
+						assert.NoError(t, json.Unmarshal(data, &decoded))
+						assert.Equal(t, test.values, decoded)
+					}
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		want := []byte(" { \"custom\": true }\n")
+		values := optionalList[int]{List: list.ArrayFrom([]int{1, 2}), data: want}
+		view := list.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.NoError(t, err)
+		assert.Equal(t, want, data)
+	})
+
+	t.Run("CustomError", func(t *testing.T) {
+		want := errors.New("custom serialization error")
+		values := optionalList[int]{List: list.ArrayFrom([]int{1, 2}), err: want}
+		view := list.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.Nil(t, data)
+		assert.Same(t, want, err)
+	})
+
+	t.Run("ElementError", func(t *testing.T) {
+		for name, values := range map[string]list.List[chan int]{
+			"Concrete":   list.ArrayFrom([]chan int{make(chan int)}),
+			"Structural": &structuralList[chan int]{List: list.ArrayFrom([]chan int{make(chan int)})},
+		} {
+			t.Run(name, func(t *testing.T) {
+				view := list.AsReadonly[chan int](values)
+				data, err := view.MarshalJSON()
+				assert.Nil(t, data)
+				var unsupported *json.UnsupportedTypeError
+				assert.ErrorAs(t, err, &unsupported)
+			})
+		}
+	})
+}
+
+func TestReadonly_TraversalOrder(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			values := construct([]int{1, 2, 3})
+			values.Reverse()
+			view := list.AsReadonly[int](values)
+			assert.Equal(t, "[3 2 1]", view.String())
+			data, err := view.MarshalJSON()
+			assert.NoError(t, err)
+			assert.Equal(t, "[3,2,1]", string(data))
+		})
+	}
+}
+
+func readonlySources() map[string]func([]int) list.List[int] {
+	return map[string]func([]int) list.List[int]{
+		"Array":      func(values []int) list.List[int] { return list.ArrayFrom(values) },
+		"Linked":     func(values []int) list.List[int] { return list.LinkedFrom(values) },
+		"Structural": func(values []int) list.List[int] { return &structuralList[int]{List: list.ArrayFrom(values)} },
 	}
 }
 

@@ -2,12 +2,44 @@ package deque_test
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/deque"
 	"github.com/stretchr/testify/assert"
 )
+
+// Embedding the structural interface hides the concrete value's optional methods.
+type structuralDeque[T any] struct {
+	deque.Deque[T]
+}
+
+var _ deque.Deque[int] = (*structuralDeque[int])(nil)
+var _ deque.Readonly[int] = (*structuralDeque[int])(nil)
+
+var _ json.Marshaler = (*deque.ArrayDeque[int])(nil)
+var _ fmt.Stringer = (*deque.ArrayDeque[int])(nil)
+var _ fmt.Formatter = (*deque.ArrayDeque[int])(nil)
+var _ json.Unmarshaler = (*deque.ArrayDeque[int])(nil)
+
+var _ json.Marshaler = (*deque.LinkedDeque[int])(nil)
+var _ fmt.Stringer = (*deque.LinkedDeque[int])(nil)
+var _ fmt.Formatter = (*deque.LinkedDeque[int])(nil)
+var _ json.Unmarshaler = (*deque.LinkedDeque[int])(nil)
+
+type optionalDeque[T any] struct {
+	deque.Deque[T]
+	data []byte
+	err  error
+}
+
+func (values optionalDeque[T]) MarshalJSON() ([]byte, error) {
+	return values.data, values.err
+}
+
+func (values optionalDeque[T]) String() string { return "custom formatting" }
 
 func TestConstructorsImplementDeque(t *testing.T) {
 	var _ *deque.ArrayDeque[int] = deque.NewArray[int](0)
@@ -135,6 +167,138 @@ func TestAsReadonly(t *testing.T) {
 		assert.NoError(t, err)
 		assert.JSONEq(t, `[0,1,2]`, string(data))
 	})
+}
+
+func TestStructuralDeque(t *testing.T) {
+	values := &structuralDeque[int]{Deque: deque.ArrayFrom([]int{1, 2})}
+	assert.NotImplements(t, (*fmt.Stringer)(nil), values)
+	assert.NotImplements(t, (*json.Marshaler)(nil), values)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), values)
+
+	view := deque.AsReadonly[int](values)
+	assert.NotImplements(t, (*deque.Deque[int])(nil), view)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), view)
+	values.Append(3)
+	assert.Equal(t, []int{1, 2, 3}, slices.Collect(view.All()))
+	data, err := json.Marshal(view)
+	assert.NoError(t, err)
+	assert.Equal(t, "[1,2,3]", string(data))
+}
+
+func TestReadonly_String(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+				want   string
+			}{
+				{"Empty", nil, "[]"},
+				{"Values", []int{1, 2, 3}, "[1 2 3]"},
+				{"DisplayLimit", []int{1, 2, 3, 4, 5}, "[1 2 3 4 5]"},
+				{"Truncated", []int{1, 2, 3, 4, 5, 6}, "[1 2 3 4 5 ...(+1 more)]"},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := deque.AsReadonly[int](values)
+					assert.Equal(t, test.want, view.String())
+					assert.Equal(t, test.want, fmt.Sprint(view))
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		values := optionalDeque[int]{Deque: deque.ArrayFrom([]int{1, 2})}
+		view := deque.AsReadonly[int](values)
+		assert.Equal(t, "custom formatting", view.String())
+	})
+}
+
+func TestReadonly_MarshalJSON(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+			}{
+				{"Empty", nil},
+				{"Values", []int{1, 2, 3}},
+				{"BeyondDisplayLimit", []int{1, 2, 3, 4, 5, 6}},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := deque.AsReadonly[int](values)
+					data, err := view.MarshalJSON()
+					assert.NoError(t, err)
+					if len(test.values) == 0 {
+						assert.Equal(t, "[]", string(data))
+					} else {
+						var decoded []int
+						assert.NoError(t, json.Unmarshal(data, &decoded))
+						assert.Equal(t, test.values, decoded)
+					}
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		want := []byte(" { \"custom\": true }\n")
+		values := optionalDeque[int]{Deque: deque.ArrayFrom([]int{1, 2}), data: want}
+		view := deque.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.NoError(t, err)
+		assert.Equal(t, want, data)
+	})
+
+	t.Run("CustomError", func(t *testing.T) {
+		want := errors.New("custom serialization error")
+		values := optionalDeque[int]{Deque: deque.ArrayFrom([]int{1, 2}), err: want}
+		view := deque.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.Nil(t, data)
+		assert.Same(t, want, err)
+	})
+
+	t.Run("ElementError", func(t *testing.T) {
+		for name, values := range map[string]deque.Deque[chan int]{
+			"Concrete":   deque.ArrayFrom([]chan int{make(chan int)}),
+			"Structural": &structuralDeque[chan int]{Deque: deque.ArrayFrom([]chan int{make(chan int)})},
+		} {
+			t.Run(name, func(t *testing.T) {
+				view := deque.AsReadonly[chan int](values)
+				data, err := view.MarshalJSON()
+				assert.Nil(t, data)
+				var unsupported *json.UnsupportedTypeError
+				assert.ErrorAs(t, err, &unsupported)
+			})
+		}
+	})
+}
+
+func TestReadonly_TraversalOrder(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			values := construct([]int{1, 2, 3})
+			_, _ = values.Shift()
+			values.Append(4)
+			values.Prepend(0)
+			view := deque.AsReadonly[int](values)
+			assert.Equal(t, "[0 2 3 4]", view.String())
+			data, err := view.MarshalJSON()
+			assert.NoError(t, err)
+			assert.Equal(t, "[0,2,3,4]", string(data))
+		})
+	}
+}
+
+func readonlySources() map[string]func([]int) deque.Deque[int] {
+	return map[string]func([]int) deque.Deque[int]{
+		"Array":      func(values []int) deque.Deque[int] { return deque.ArrayFrom(values) },
+		"Linked":     func(values []int) deque.Deque[int] { return deque.LinkedFrom(values) },
+		"Structural": func(values []int) deque.Deque[int] { return &structuralDeque[int]{Deque: deque.ArrayFrom(values)} },
+	}
 }
 
 func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {

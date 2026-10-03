@@ -57,13 +57,52 @@ Go documentation tools.
 - Concurrency: collections are not safe for concurrent use unless explicitly
   documented otherwise. Callers must synchronize shared access when any
   goroutine may mutate the collection.
-- JSON support: most collections marshal as arrays without external construction
-  input, using the traversal order documented by each package. Lists and deques
-  also unmarshal because array order completely defines their logical state.
+- JSON support: concrete lists, deques, sorted lists, heaps, and sets marshal as
+  arrays without external construction input, using each package's traversal
+  order. Concrete lists and deques also unmarshal because array order completely
+  defines their logical state. Structural interfaces do not require JSON or
+  formatting capabilities.
   Sorted lists, heaps, and sets require slice decoding followed by the matching
   constructor so ordering, priority, and set identity remain explicit.
   Disjoint sets have no JSON representation because an array of elements does
   not encode the partition.
+
+## Formatting and JSON capabilities
+
+Collection interfaces describe structural operations. Concrete types retain
+their optional formatting and JSON methods, and standard `fmt` and
+`encoding/json` calls discover those methods on the underlying concrete value.
+
+This is a breaking change for direct optional method calls and assignments
+through structural interfaces:
+
+| Structural interface | Capability no longer required |
+| --- | --- |
+| `list.Readonly`, `deque.Readonly`, `sortedlist.Readonly`, `heap.Heap` | `fmt.Stringer`, `json.Marshaler` |
+| `set.Readonly` | `json.Marshaler` |
+| `list.List`, `deque.Deque` | `json.Unmarshaler`, plus inherited readonly capabilities |
+
+Keep the concrete type when you need its methods, or use a checked capability
+assertion before calling an optional method or passing the value to a function
+that requires that capability:
+
+```go
+var items list.List[int] = list.ArrayFrom([]int{1, 2})
+if marshaler, ok := items.(json.Marshaler); ok {
+    data, err := marshaler.MarshalJSON()
+    if err != nil {
+        return err
+    }
+    fmt.Println(string(data))
+}
+```
+
+Readonly wrappers keep their existing formatting and JSON methods. They
+delegate to optional capabilities when present; otherwise they encode values
+as a JSON array in iteration order, using `[]` for an empty collection.
+List, deque, and sorted-list wrappers also render strings with the existing
+five-element display limit. Views remain live and do not expose mutation or
+`json.Unmarshaler`.
 
 ## Construction
 

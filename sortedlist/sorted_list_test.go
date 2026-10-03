@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"slices"
 	"testing"
@@ -12,6 +13,30 @@ import (
 	"github.com/stochastic-parrots/gollections/sortedlist"
 	"github.com/stretchr/testify/assert"
 )
+
+// Embedding the structural interface hides the concrete value's optional methods.
+type structuralSortedList[T any] struct {
+	sortedlist.SortedList[T]
+}
+
+var _ sortedlist.SortedList[int] = (*structuralSortedList[int])(nil)
+var _ sortedlist.Readonly[int] = (*structuralSortedList[int])(nil)
+
+var _ json.Marshaler = (*sortedlist.ArraySortedList[int])(nil)
+var _ fmt.Stringer = (*sortedlist.ArraySortedList[int])(nil)
+var _ fmt.Formatter = (*sortedlist.ArraySortedList[int])(nil)
+
+type optionalSortedList[T any] struct {
+	sortedlist.SortedList[T]
+	data []byte
+	err  error
+}
+
+func (values optionalSortedList[T]) MarshalJSON() ([]byte, error) {
+	return values.data, values.err
+}
+
+func (values optionalSortedList[T]) String() string { return "custom formatting" }
 
 func TestFactoriesImplementSortedList(t *testing.T) {
 	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
@@ -218,6 +243,142 @@ func TestAsReadonly(t *testing.T) {
 	})
 }
 
+func TestStructuralSortedList(t *testing.T) {
+	values := &structuralSortedList[int]{SortedList: sortedlist.OrderedArrayFrom(sortedlist.Asc, []int{2, 1})}
+	assert.NotImplements(t, (*fmt.Stringer)(nil), values)
+	assert.NotImplements(t, (*json.Marshaler)(nil), values)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), values)
+
+	view := sortedlist.AsReadonly[int](values)
+	assert.NotImplements(t, (*sortedlist.SortedList[int])(nil), view)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), view)
+	values.Add(3)
+	assert.Equal(t, []int{1, 2, 3}, slices.Collect(view.All()))
+	data, err := json.Marshal(view)
+	assert.NoError(t, err)
+	assert.Equal(t, "[1,2,3]", string(data))
+}
+
+func TestReadonly_String(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+				want   string
+			}{
+				{"Empty", nil, "[]"},
+				{"Values", []int{1, 2, 3}, "[1 2 3]"},
+				{"DisplayLimit", []int{1, 2, 3, 4, 5}, "[1 2 3 4 5]"},
+				{"Truncated", []int{1, 2, 3, 4, 5, 6}, "[1 2 3 4 5 ...(+1 more)]"},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := sortedlist.AsReadonly[int](values)
+					assert.Equal(t, test.want, view.String())
+					assert.Equal(t, test.want, fmt.Sprint(view))
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		values := optionalSortedList[int]{SortedList: sortedlist.OrderedArrayFrom(sortedlist.Asc, []int{2, 1})}
+		view := sortedlist.AsReadonly[int](values)
+		assert.Equal(t, "custom formatting", view.String())
+	})
+}
+
+func TestReadonly_MarshalJSON(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+			}{
+				{"Empty", nil},
+				{"Values", []int{1, 2, 3}},
+				{"BeyondDisplayLimit", []int{1, 2, 3, 4, 5, 6}},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := sortedlist.AsReadonly[int](values)
+					data, err := view.MarshalJSON()
+					assert.NoError(t, err)
+					if len(test.values) == 0 {
+						assert.Equal(t, "[]", string(data))
+					} else {
+						var decoded []int
+						assert.NoError(t, json.Unmarshal(data, &decoded))
+						assert.Equal(t, test.values, decoded)
+					}
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		want := []byte(" { \"custom\": true }\n")
+		values := optionalSortedList[int]{SortedList: sortedlist.OrderedArrayFrom(sortedlist.Asc, []int{2, 1}), data: want}
+		view := sortedlist.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.NoError(t, err)
+		assert.Equal(t, want, data)
+	})
+
+	t.Run("CustomError", func(t *testing.T) {
+		want := errors.New("custom serialization error")
+		values := optionalSortedList[int]{SortedList: sortedlist.OrderedArrayFrom(sortedlist.Asc, []int{2, 1}), err: want}
+		view := sortedlist.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.Nil(t, data)
+		assert.Same(t, want, err)
+	})
+
+	t.Run("ElementError", func(t *testing.T) {
+		for name, values := range map[string]sortedlist.SortedList[chan int]{
+			"Concrete":   sortedlist.ArrayFrom(func(a, b chan int) int { return 0 }, []chan int{make(chan int)}),
+			"Structural": &structuralSortedList[chan int]{SortedList: sortedlist.ArrayFrom(func(a, b chan int) int { return 0 }, []chan int{make(chan int)})},
+		} {
+			t.Run(name, func(t *testing.T) {
+				view := sortedlist.AsReadonly[chan int](values)
+				data, err := view.MarshalJSON()
+				assert.Nil(t, data)
+				var unsupported *json.UnsupportedTypeError
+				assert.ErrorAs(t, err, &unsupported)
+			})
+		}
+	})
+}
+
+func TestReadonly_TraversalOrder(t *testing.T) {
+	for name, values := range map[string]sortedlist.SortedList[int]{
+		"Concrete": sortedlist.OrderedArrayFrom(sortedlist.Desc, []int{1, 2, 3}),
+		"Structural": &structuralSortedList[int]{
+			SortedList: sortedlist.OrderedArrayFrom(sortedlist.Desc, []int{1, 2, 3}),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			view := sortedlist.AsReadonly[int](values)
+			assert.Equal(t, "[3 2 1]", view.String())
+			data, err := view.MarshalJSON()
+			assert.NoError(t, err)
+			assert.Equal(t, "[3,2,1]", string(data))
+		})
+	}
+}
+
+func readonlySources() map[string]func([]int) sortedlist.SortedList[int] {
+	return map[string]func([]int) sortedlist.SortedList[int]{
+		"Array": func(values []int) sortedlist.SortedList[int] {
+			return sortedlist.OrderedArrayFrom(sortedlist.Asc, values)
+		},
+		"Structural": func(values []int) sortedlist.SortedList[int] {
+			return &structuralSortedList[int]{SortedList: sortedlist.OrderedArrayFrom(sortedlist.Asc, values)}
+		},
+	}
+}
+
 func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	t.Helper()
 
@@ -287,7 +448,7 @@ func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	data, err := json.Marshal(list)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[1,2,3]`, string(data))
-	assert.Equal(t, "[1 2 3]", list.String())
+	assert.Equal(t, "[1 2 3]", list.(fmt.Stringer).String())
 
 	list.Clear()
 	assert.True(t, list.IsEmpty())

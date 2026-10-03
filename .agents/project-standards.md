@@ -50,6 +50,10 @@ alias and constructor from the public package.
 
 - Keep root interfaces observation-only. Do not add mutating methods to
   `gollections.Collection` or `gollections.Map`.
+- Structural interfaces must not require formatting or JSON methods. Preserve
+  those optional capabilities on concrete types and readonly wrappers. Wrappers
+  delegate when the wrapped value implements the capability and otherwise
+  render values through iteration; they must not expose `json.Unmarshaler`.
 - Expose mutations through the domain interface where their semantics are clear,
   for example `list.List`, `sortedlist.SortedList`, `deque.Deque`,
   `heap.Heap`, `set.Set`, and `prioritymap.PriorityMap`.
@@ -252,9 +256,9 @@ alias and constructor from the public package.
   the same long warning in multiple files unless each public entrypoint needs
   to carry the warning independently.
 - Every public constructor must have its own `Performance Summary (Time
-  Complexity)` table directly in its Go doc comment. The table lists only
-  methods in the concrete type's public mutable and readonly interfaces,
-  including inherited root methods and implemented `String`/JSON methods.
+  Complexity)` table directly in its Go doc comment. The table lists methods
+  required by the concrete type's public mutable and readonly interfaces,
+  including inherited root methods, and its optional `String`/JSON methods.
   Include a separate row for each method; do not group methods or include any
   constructor in the table. Repeat the method table for every constructor,
   including `From`, `Clone`, and `FromSeq`.
@@ -355,11 +359,12 @@ alias and constructor from the public package.
 - Document behavioral contracts close to the API that depends on them. For
   example, radix priority maps must document their monotonicity requirement near
   the type and mutation methods.
-- Collection types may implement `json.Marshaler` without external construction
-  input. When the JSON representation is an array, document its traversal order.
-- Lists and deques implement `json.Unmarshaler` because the JSON array order
-  completely defines their logical state. Unmarshaling replaces the contents
-  only after the complete array is decoded successfully.
+- Concrete collection types may implement `json.Marshaler` without external
+  construction input. When the JSON representation is an array, document its
+  traversal order.
+- Concrete lists and deques implement `json.Unmarshaler` because the JSON array
+  order completely defines their logical state. Unmarshaling replaces the
+  contents only after the complete array is decoded successfully.
 - Sorted lists do not implement `json.Unmarshaler`. Callers decode into a slice
   and use the matching `ArrayFrom` or `OrderedArrayFrom` constructor so the
   ordering

@@ -2,12 +2,36 @@ package set_test
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/set"
 	"github.com/stretchr/testify/assert"
 )
+
+// Embedding the structural interface hides the concrete value's optional methods.
+type structuralSet[T any] struct {
+	set.Set[T]
+}
+
+var _ set.Set[int] = (*structuralSet[int])(nil)
+var _ set.Readonly[int] = (*structuralSet[int])(nil)
+
+var _ json.Marshaler = (*set.HashSet[int])(nil)
+
+var _ json.Marshaler = (*set.KeyedHashSet[int, int])(nil)
+
+type optionalSet[T any] struct {
+	set.Set[T]
+	data []byte
+	err  error
+}
+
+func (values optionalSet[T]) MarshalJSON() ([]byte, error) {
+	return values.data, values.err
+}
 
 type member struct {
 	ID     int
@@ -153,6 +177,96 @@ func TestAsReadonly(t *testing.T) {
 	})
 }
 
+func TestStructuralSet(t *testing.T) {
+	values := &structuralSet[int]{Set: set.HashSetFrom([]int{1, 2})}
+	assert.NotImplements(t, (*fmt.Stringer)(nil), values)
+	assert.NotImplements(t, (*json.Marshaler)(nil), values)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), values)
+
+	view := set.AsReadonly[int](values)
+	assert.NotImplements(t, (*set.Set[int])(nil), view)
+	assert.NotImplements(t, (*json.Unmarshaler)(nil), view)
+	values.Add(3)
+	assert.ElementsMatch(t, []int{1, 2, 3}, slices.Collect(view.All()))
+	data, err := json.Marshal(view)
+	assert.NoError(t, err)
+	var decoded []int
+	assert.NoError(t, json.Unmarshal(data, &decoded))
+	assert.ElementsMatch(t, []int{1, 2, 3}, decoded)
+}
+
+func TestReadonly_MarshalJSON(t *testing.T) {
+	for source, construct := range readonlySources() {
+		t.Run(source, func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				values []int
+			}{
+				{"Empty", nil},
+				{"Values", []int{1, 2, 3}},
+				{"BeyondDisplayLimit", []int{1, 2, 3, 4, 5, 6}},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					values := construct(slices.Clone(test.values))
+					view := set.AsReadonly[int](values)
+					data, err := view.MarshalJSON()
+					assert.NoError(t, err)
+					if len(test.values) == 0 {
+						assert.Equal(t, "[]", string(data))
+					} else {
+						var decoded []int
+						assert.NoError(t, json.Unmarshal(data, &decoded))
+						assert.ElementsMatch(t, test.values, decoded)
+					}
+				})
+			}
+		})
+	}
+
+	t.Run("Custom", func(t *testing.T) {
+		want := []byte(" { \"custom\": true }\n")
+		values := optionalSet[int]{Set: set.HashSetFrom([]int{1, 2}), data: want}
+		view := set.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.NoError(t, err)
+		assert.Equal(t, want, data)
+	})
+
+	t.Run("CustomError", func(t *testing.T) {
+		want := errors.New("custom serialization error")
+		values := optionalSet[int]{Set: set.HashSetFrom([]int{1, 2}), err: want}
+		view := set.AsReadonly[int](values)
+		data, err := view.MarshalJSON()
+		assert.Nil(t, data)
+		assert.Same(t, want, err)
+	})
+
+	t.Run("ElementError", func(t *testing.T) {
+		for name, values := range map[string]set.Set[chan int]{
+			"Concrete":   set.HashSetFrom([]chan int{make(chan int)}),
+			"Structural": &structuralSet[chan int]{Set: set.HashSetFrom([]chan int{make(chan int)})},
+		} {
+			t.Run(name, func(t *testing.T) {
+				view := set.AsReadonly[chan int](values)
+				data, err := view.MarshalJSON()
+				assert.Nil(t, data)
+				var unsupported *json.UnsupportedTypeError
+				assert.ErrorAs(t, err, &unsupported)
+			})
+		}
+	})
+}
+
+func readonlySources() map[string]func([]int) set.Set[int] {
+	return map[string]func([]int) set.Set[int]{
+		"Hash": func(values []int) set.Set[int] { return set.HashSetFrom(values) },
+		"Keyed": func(values []int) set.Set[int] {
+			return set.KeyedHashSetFrom(func(value int) int { return value }, values)
+		},
+		"Structural": func(values []int) set.Set[int] { return &structuralSet[int]{Set: set.HashSetFrom(values)} },
+	}
+}
+
 func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	t.Helper()
 
@@ -171,7 +285,7 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	assert.Equal(t, 2, values.Adds(3, 4))
 	assert.Equal(t, 2, values.Removes(2, 2, 4, 5))
 
-	data, err := values.MarshalJSON()
+	data, err := values.(json.Marshaler).MarshalJSON()
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[3]`, string(data))
 
