@@ -15,8 +15,6 @@
 //		Back() (T, bool)
 //		ToSlice() []T
 //		gollections.Collection[T]
-//		fmt.Stringer
-//		json.Marshaler
 //	}
 //
 // A readonly view observes the same underlying deque. It restricts mutation
@@ -33,7 +31,6 @@
 //		Pop() (T, bool)
 //		Clear()
 //		Readonly[T]
-//		json.Unmarshaler
 //	}
 //
 // # Implementations
@@ -57,9 +54,10 @@
 //
 // # JSON
 //
-// Deques marshal and unmarshal as arrays from front to back. Unmarshal replaces
-// the current contents only after the complete JSON array is decoded
-// successfully.
+// ArrayDeque and LinkedDeque marshal and unmarshal as arrays from front to back.
+// The Deque and Readonly interfaces do not require JSON or formatting methods.
+// Unmarshal replaces the current contents only after the complete JSON array
+// is decoded successfully.
 //
 // All traverses a deque from front to back. Enumerate uses the same order
 // and assigns consecutive indexes starting at zero.

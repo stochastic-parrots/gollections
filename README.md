@@ -57,13 +57,57 @@ Go documentation tools.
 - Concurrency: collections are not safe for concurrent use unless explicitly
   documented otherwise. Callers must synchronize shared access when any
   goroutine may mutate the collection.
-- JSON support: most collections marshal as arrays without external construction
-  input, using the traversal order documented by each package. Lists and deques
-  also unmarshal because array order completely defines their logical state.
+- JSON support: concrete lists, deques, sorted lists, heaps, and sets marshal as
+  arrays without external construction input, using each package's traversal
+  order. Concrete lists and deques also unmarshal because array order completely
+  defines their logical state. Structural interfaces do not require JSON or
+  formatting capabilities.
   Sorted lists, heaps, and sets require slice decoding followed by the matching
   constructor so ordering, priority, and set identity remain explicit.
   Disjoint sets have no JSON representation because an array of elements does
   not encode the partition.
+
+## Formatting and JSON capabilities
+
+Collection interfaces describe structural operations. Concrete types retain
+their optional formatting and JSON methods, and standard `fmt` and
+`encoding/json` calls discover those methods on the underlying concrete value.
+
+This is a breaking change for direct optional method calls and assignments
+through structural interfaces:
+
+| Structural interface | Capability no longer required |
+| --- | --- |
+| `list.Readonly`, `deque.Readonly`, `sortedlist.Readonly`, `heap.Heap` | `fmt.Stringer`, `json.Marshaler` |
+| `set.Readonly` | `json.Marshaler` |
+| `list.List`, `deque.Deque` | `json.Unmarshaler`, plus inherited readonly capabilities |
+
+Constructors return concrete types, so direct calls such as `items.String()`
+remain available. For built-in collections stored behind a structural interface,
+use standard formatting and JSON functions without type assertions:
+
+```go
+var items list.List[int] = list.ArrayFrom([]int{1, 2})
+fmt.Println(items)
+data, err := json.Marshal(items)
+if err != nil {
+    return err
+}
+fmt.Println(string(data))
+```
+
+Use a checked capability assertion when you need to call an optional method
+directly through a structural interface or pass it to a function that requires
+that capability.
+
+Readonly wrappers keep their formatting and JSON methods by calling `fmt.Sprint`
+and `json.Marshal` on the wrapped collection. Built-in collections retain their
+five-element string display limit and JSON arrays, including `[]` when empty.
+External implementations follow the standard packages' behavior; their elements
+are not rendered automatically through collection iteration. `json.Marshal`
+validates and compacts custom JSON, escapes HTML characters, and wraps errors
+returned by `MarshalJSON` in `json.MarshalerError`. Views remain live and do not
+expose mutation or `json.Unmarshaler`.
 
 ## Construction
 

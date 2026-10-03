@@ -52,8 +52,6 @@
 //		Range(from, to T) iter.Seq[T]
 //		ToSlice() []T
 //		gollections.Collection[T]
-//		fmt.Stringer
-//		json.Marshaler
 //	}
 //
 // A readonly view observes the same underlying sorted list. It restricts
@@ -88,7 +86,9 @@
 //
 // # JSON
 //
-// Sorted lists marshal as arrays in sorted order. They do not implement
-// json.Unmarshaler; decode into []T and pass the values to the same constructor family so
-// the natural or custom ordering strategy remains explicit.
+// ArraySortedList marshals as an array in sorted order. The SortedList and
+// Readonly interfaces do not require JSON or formatting methods.
+// ArraySortedList does not implement json.Unmarshaler; decode into []T and pass
+// the values to the same constructor family so the natural or custom ordering
+// strategy remains explicit.
 package sortedlist
