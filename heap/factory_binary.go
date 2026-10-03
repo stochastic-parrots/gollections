@@ -33,7 +33,8 @@ func orderedPriority[T cmp.Ordered](order Order) func(T, T) bool {
 // The predicate must remain stable for the heap's lifetime.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -43,7 +44,7 @@ func orderedPriority[T cmp.Ordered](order Order) func(T, T) bool {
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -63,7 +64,8 @@ func NewBinary[T any](hasPriority func(T, T) bool, capacity int) *BinaryHeap[T] 
 // The predicate must be non-nil and define a stable strict weak ordering.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -73,7 +75,7 @@ func NewBinary[T any](hasPriority func(T, T) bool, capacity int) *BinaryHeap[T] 
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -93,7 +95,8 @@ func BinaryFrom[T any](hasPriority func(T, T) bool, data []T) *BinaryHeap[T] {
 // and define a stable strict weak ordering.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -103,7 +106,7 @@ func BinaryFrom[T any](hasPriority func(T, T) bool, data []T) *BinaryHeap[T] {
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -122,7 +125,8 @@ func BinaryClone[T any](hasPriority func(T, T) bool, data []T) *BinaryHeap[T] {
 // The predicate must be non-nil and define a stable strict weak ordering.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -132,7 +136,7 @@ func BinaryClone[T any](hasPriority func(T, T) bool, data []T) *BinaryHeap[T] {
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -150,7 +154,8 @@ func BinaryFromSeq[T any](hasPriority func(T, T) bool, seq iter.Seq[T]) *BinaryH
 // NewOrderedBinary creates an empty heap using T's natural order in the selected direction.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -160,7 +165,7 @@ func BinaryFromSeq[T any](hasPriority func(T, T) bool, seq iter.Seq[T]) *BinaryH
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -178,7 +183,8 @@ func NewOrderedBinary[T cmp.Ordered](order Order, capacity int) *BinaryHeap[T] {
 // The caller must stop using data and every alias afterward. Use OrderedBinaryClone to preserve it.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -188,7 +194,7 @@ func NewOrderedBinary[T cmp.Ordered](order Order, capacity int) *BinaryHeap[T] {
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -205,7 +211,8 @@ func OrderedBinaryFrom[T cmp.Ordered](order Order, data []T) *BinaryHeap[T] {
 // OrderedBinaryClone heapifies an independent shallow copy of data using T's natural order.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -215,7 +222,7 @@ func OrderedBinaryFrom[T cmp.Ordered](order Order, data []T) *BinaryHeap[T] {
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)
@@ -232,7 +239,8 @@ func OrderedBinaryClone[T cmp.Ordered](order Order, data []T) *BinaryHeap[T] {
 // OrderedBinaryFromSeq consumes seq once into new storage and heapifies the collected values.
 //
 // Push uses the O(N + len(xs)) heapify path when the heap is empty or when
-// len(xs) exceeds both N and 64. It uses O(len(xs) log N) insertion otherwise.
+// len(xs) exceeds both N and 64. It uses
+// O(len(xs) log (N + len(xs))) insertion otherwise.
 //
 // Performance Summary (Time Complexity):
 //
@@ -242,7 +250,7 @@ func OrderedBinaryClone[T cmp.Ordered](order Order, data []T) *BinaryHeap[T] {
 //	Len()             O(1)
 //	All()             O(N)
 //	Enumerate()       O(N)
-//	Push(xs... T)   O(len(xs) log N) or O(N + len(xs))
+//	Push(xs... T)     O(len(xs) log (N + len(xs))) or O(N + len(xs))
 //	Pop()             O(log N)
 //	Peek()            O(1)
 //	Drain()           O(N log N)

@@ -26,8 +26,8 @@ var _ Set[int] = &set.HashSet[int]{}
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average
-//	Add(xs... T)      O(len(xs)) on average
-//	Remove(xs... T)   O(len(xs)) on average
+//	Add(xs... T)       O(len(xs)) on average
+//	Remove(xs... T)    O(len(xs)) on average
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
@@ -45,8 +45,8 @@ func NewHashSet[T comparable](capacity int) *HashSet[T] { return set.NewHashSet[
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average
-//	Add(xs... T)      O(len(xs)) on average
-//	Remove(xs... T)   O(len(xs)) on average
+//	Add(xs... T)       O(len(xs)) on average
+//	Remove(xs... T)    O(len(xs)) on average
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
@@ -64,8 +64,8 @@ func HashSetFrom[T comparable](data []T) *HashSet[T] { return set.NewHashSetFrom
 //	All()              O(N)
 //	Enumerate()        O(N)
 //	Contains(x)        O(1) on average
-//	Add(xs... T)      O(len(xs)) on average
-//	Remove(xs... T)   O(len(xs)) on average
+//	Add(xs... T)       O(len(xs)) on average
+//	Remove(xs... T)    O(len(xs)) on average
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //

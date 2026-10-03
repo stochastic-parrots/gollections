@@ -29,8 +29,8 @@ var _ Deque[int] = &deque.RingBufferDeque[int]{}
 //	Pop()                 O(1)
 //	Clear()               O(N)
 //	UnmarshalJSON(data)   O(N + len(data))
-//	Prepend(xs... T)     O(len(xs)) Amortized
-//	Append(xs... T)      O(len(xs)) Amortized
+//	Prepend(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
 //	String()              O(1)
 //
@@ -54,8 +54,8 @@ func NewArray[T any](capacity int) *ArrayDeque[T] { return deque.NewRingBufferDe
 //	Pop()                 O(1)
 //	Clear()               O(N)
 //	UnmarshalJSON(data)   O(N + len(data))
-//	Prepend(xs... T)     O(len(xs)) Amortized
-//	Append(xs... T)      O(len(xs)) Amortized
+//	Prepend(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
 //	String()              O(1)
 //
@@ -79,8 +79,8 @@ func ArrayFrom[T any](data []T) *ArrayDeque[T] { return deque.NewRingBufferDeque
 //	Pop()                 O(1)
 //	Clear()               O(N)
 //	UnmarshalJSON(data)   O(N + len(data))
-//	Prepend(xs... T)     O(len(xs)) Amortized
-//	Append(xs... T)      O(len(xs)) Amortized
+//	Prepend(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
 //	String()              O(1)
 //
@@ -104,8 +104,8 @@ func ArrayClone[T any](data []T) *ArrayDeque[T] { return deque.NewRingBufferDequ
 //	Pop()                 O(1)
 //	Clear()               O(N)
 //	UnmarshalJSON(data)   O(N + len(data))
-//	Prepend(xs... T)     O(len(xs)) Amortized
-//	Append(xs... T)      O(len(xs)) Amortized
+//	Prepend(xs... T)      O(len(xs)) Amortized
+//	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
 //	String()              O(1)
 //
