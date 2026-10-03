@@ -260,6 +260,9 @@ alias and constructor from the public package.
   Include a separate row for each method; do not group methods or include any
   constructor in the table. Repeat the method table for every constructor,
   including `From`, `Clone`, and `FromSeq`.
+- Keep every complexity table consistently formatted: align the operation and
+  complexity columns, and realign all rows whenever a row or label changes.
+  Preserve the same table layout across constructor variants that share an API.
 - Document a constructor's total cost exactly once, as the final comment line
   immediately before its declaration: `// Complexity: <Big O cost>.` Do not
   repeat that cost in the table or descriptive text. Put ownership, ordering,
