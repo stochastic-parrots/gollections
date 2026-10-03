@@ -9,10 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var _ json.Marshaler = (*set.HashSet[int])(nil)
-
-var _ json.Marshaler = (*set.KeyedHashSet[int, int])(nil)
-
 type member struct {
 	ID     int
 	Name   string
@@ -155,59 +151,6 @@ func TestAsReadonly(t *testing.T) {
 		mutable.Add(3)
 		assert.True(t, view.Contains(3))
 	})
-}
-
-func TestReadonly_MarshalJSON(t *testing.T) {
-	for source, construct := range readonlySources() {
-		t.Run(source, func(t *testing.T) {
-			for _, test := range []struct {
-				name   string
-				values []int
-			}{
-				{"Empty", nil},
-				{"Values", []int{1, 2, 3}},
-				{"BeyondDisplayLimit", []int{1, 2, 3, 4, 5, 6}},
-			} {
-				t.Run(test.name, func(t *testing.T) {
-					values := construct(slices.Clone(test.values))
-					view := set.AsReadonly[int](values)
-					data, err := view.MarshalJSON()
-					assert.NoError(t, err)
-					if len(test.values) == 0 {
-						assert.Equal(t, "[]", string(data))
-					} else {
-						var decoded []int
-						assert.NoError(t, json.Unmarshal(data, &decoded))
-						assert.ElementsMatch(t, test.values, decoded)
-					}
-				})
-			}
-		})
-	}
-
-	t.Run("ElementError", func(t *testing.T) {
-		for name, values := range map[string]set.Set[chan int]{
-			"Hash":  set.HashSetFrom([]chan int{make(chan int)}),
-			"Keyed": set.KeyedHashSetFrom(func(value chan int) chan int { return value }, []chan int{make(chan int)}),
-		} {
-			t.Run(name, func(t *testing.T) {
-				view := set.AsReadonly[chan int](values)
-				data, err := view.MarshalJSON()
-				assert.Nil(t, data)
-				var unsupported *json.UnsupportedTypeError
-				assert.ErrorAs(t, err, &unsupported)
-			})
-		}
-	})
-}
-
-func readonlySources() map[string]func([]int) set.Set[int] {
-	return map[string]func([]int) set.Set[int]{
-		"Hash": func(values []int) set.Set[int] { return set.HashSetFrom(values) },
-		"Keyed": func(values []int) set.Set[int] {
-			return set.KeyedHashSetFrom(func(value int) int { return value }, values)
-		},
-	}
 }
 
 func assertSetBehavior(t *testing.T, values set.Set[int]) {

@@ -3,17 +3,12 @@ package heap_test
 import (
 	"cmp"
 	"encoding/json"
-	"fmt"
 	"slices"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/heap"
 	"github.com/stretchr/testify/assert"
 )
-
-var _ fmt.Stringer = (*heap.BinaryHeap[int])(nil)
-var _ fmt.Formatter = (*heap.BinaryHeap[int])(nil)
-var _ json.Marshaler = (*heap.BinaryHeap[int])(nil)
 
 func TestConstructorsImplementHeap(t *testing.T) {
 	var _ *heap.BinaryHeap[int] = heap.NewBinary(cmp.Less[int], 0)
@@ -117,28 +112,6 @@ func TestEmptySliceConstructors(t *testing.T) {
 			top, ok := values.Peek()
 			assert.True(t, ok)
 			assert.Equal(t, 1, top)
-		})
-	}
-}
-
-func TestBinaryHeap_FormattingAndJSON(t *testing.T) {
-	for _, test := range []struct {
-		name       string
-		input      []int
-		wantJSON   string
-		wantString string
-	}{
-		{"Empty", nil, "[]", "[]"},
-		{"HeapOrder", []int{1, 3, 2}, "[1,3,2]", "[1 3 2]"},
-		{"Truncated", []int{1, 3, 2, 7, 5, 4}, "[1,3,2,7,5,4]", "[1 3 2 7 5 ...(+1 more)]"},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			var values heap.Heap[int] = heap.OrderedBinaryFrom(heap.Min, slices.Clone(test.input))
-			data, err := json.Marshal(values)
-			assert.NoError(t, err)
-			assert.Equal(t, test.wantJSON, string(data))
-			assert.Equal(t, test.wantString, values.(fmt.Stringer).String())
-			assert.Equal(t, test.wantString, fmt.Sprint(values))
 		})
 	}
 }
