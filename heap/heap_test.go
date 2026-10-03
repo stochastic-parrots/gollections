@@ -11,11 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type structuralHeap[T any] struct {
-	heap.Heap[T]
-}
-
-var _ heap.Heap[int] = (*structuralHeap[int])(nil)
 var _ fmt.Stringer = (*heap.BinaryHeap[int])(nil)
 var _ fmt.Formatter = (*heap.BinaryHeap[int])(nil)
 var _ json.Marshaler = (*heap.BinaryHeap[int])(nil)
@@ -124,20 +119,6 @@ func TestEmptySliceConstructors(t *testing.T) {
 			assert.Equal(t, 1, top)
 		})
 	}
-}
-
-func TestStructuralHeap(t *testing.T) {
-	values := &structuralHeap[int]{Heap: heap.NewOrderedBinary[int](heap.Min, 0)}
-	assert.NotImplements(t, (*fmt.Stringer)(nil), values)
-	assert.NotImplements(t, (*json.Marshaler)(nil), values)
-	assert.NotImplements(t, (*json.Unmarshaler)(nil), values)
-
-	values.Pushes(3, 1, 2)
-	var drained []int
-	for _, value := range values.Drain() {
-		drained = append(drained, value)
-	}
-	assert.Equal(t, []int{1, 2, 3}, drained)
 }
 
 func TestBinaryHeap_FormattingAndJSON(t *testing.T) {

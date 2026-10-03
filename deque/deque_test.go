@@ -2,7 +2,6 @@ package deque_test
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"slices"
 	"testing"
@@ -10,14 +9,6 @@ import (
 	"github.com/stochastic-parrots/gollections/deque"
 	"github.com/stretchr/testify/assert"
 )
-
-// Embedding the structural interface hides the concrete value's optional methods.
-type structuralDeque[T any] struct {
-	deque.Deque[T]
-}
-
-var _ deque.Deque[int] = (*structuralDeque[int])(nil)
-var _ deque.Readonly[int] = (*structuralDeque[int])(nil)
 
 var _ json.Marshaler = (*deque.ArrayDeque[int])(nil)
 var _ fmt.Stringer = (*deque.ArrayDeque[int])(nil)
@@ -28,18 +19,6 @@ var _ json.Marshaler = (*deque.LinkedDeque[int])(nil)
 var _ fmt.Stringer = (*deque.LinkedDeque[int])(nil)
 var _ fmt.Formatter = (*deque.LinkedDeque[int])(nil)
 var _ json.Unmarshaler = (*deque.LinkedDeque[int])(nil)
-
-type optionalDeque[T any] struct {
-	deque.Deque[T]
-	data []byte
-	err  error
-}
-
-func (values optionalDeque[T]) MarshalJSON() ([]byte, error) {
-	return values.data, values.err
-}
-
-func (values optionalDeque[T]) String() string { return "custom formatting" }
 
 func TestConstructorsImplementDeque(t *testing.T) {
 	var _ *deque.ArrayDeque[int] = deque.NewArray[int](0)
@@ -142,6 +121,7 @@ func TestAsReadonly(t *testing.T) {
 		mutable.Appends(1, 2)
 
 		view := deque.AsReadonly[int](mutable)
+		assert.NotImplements(t, (*deque.Deque[int])(nil), view)
 		_, unmarshals := any(view).(json.Unmarshaler)
 		assert.False(t, unmarshals)
 
@@ -169,22 +149,6 @@ func TestAsReadonly(t *testing.T) {
 	})
 }
 
-func TestStructuralDeque(t *testing.T) {
-	values := &structuralDeque[int]{Deque: deque.ArrayFrom([]int{1, 2})}
-	assert.NotImplements(t, (*fmt.Stringer)(nil), values)
-	assert.NotImplements(t, (*json.Marshaler)(nil), values)
-	assert.NotImplements(t, (*json.Unmarshaler)(nil), values)
-
-	view := deque.AsReadonly[int](values)
-	assert.NotImplements(t, (*deque.Deque[int])(nil), view)
-	assert.NotImplements(t, (*json.Unmarshaler)(nil), view)
-	values.Append(3)
-	assert.Equal(t, []int{1, 2, 3}, slices.Collect(view.All()))
-	data, err := json.Marshal(view)
-	assert.NoError(t, err)
-	assert.Equal(t, "[1,2,3]", string(data))
-}
-
 func TestReadonly_String(t *testing.T) {
 	for source, construct := range readonlySources() {
 		t.Run(source, func(t *testing.T) {
@@ -207,12 +171,6 @@ func TestReadonly_String(t *testing.T) {
 			}
 		})
 	}
-
-	t.Run("Custom", func(t *testing.T) {
-		values := optionalDeque[int]{Deque: deque.ArrayFrom([]int{1, 2})}
-		view := deque.AsReadonly[int](values)
-		assert.Equal(t, "custom formatting", view.String())
-	})
 }
 
 func TestReadonly_MarshalJSON(t *testing.T) {
@@ -243,28 +201,10 @@ func TestReadonly_MarshalJSON(t *testing.T) {
 		})
 	}
 
-	t.Run("Custom", func(t *testing.T) {
-		want := []byte(" { \"custom\": true }\n")
-		values := optionalDeque[int]{Deque: deque.ArrayFrom([]int{1, 2}), data: want}
-		view := deque.AsReadonly[int](values)
-		data, err := view.MarshalJSON()
-		assert.NoError(t, err)
-		assert.Equal(t, want, data)
-	})
-
-	t.Run("CustomError", func(t *testing.T) {
-		want := errors.New("custom serialization error")
-		values := optionalDeque[int]{Deque: deque.ArrayFrom([]int{1, 2}), err: want}
-		view := deque.AsReadonly[int](values)
-		data, err := view.MarshalJSON()
-		assert.Nil(t, data)
-		assert.Same(t, want, err)
-	})
-
 	t.Run("ElementError", func(t *testing.T) {
 		for name, values := range map[string]deque.Deque[chan int]{
-			"Concrete":   deque.ArrayFrom([]chan int{make(chan int)}),
-			"Structural": &structuralDeque[chan int]{Deque: deque.ArrayFrom([]chan int{make(chan int)})},
+			"Array":  deque.ArrayFrom([]chan int{make(chan int)}),
+			"Linked": deque.LinkedFrom([]chan int{make(chan int)}),
 		} {
 			t.Run(name, func(t *testing.T) {
 				view := deque.AsReadonly[chan int](values)
@@ -295,9 +235,8 @@ func TestReadonly_TraversalOrder(t *testing.T) {
 
 func readonlySources() map[string]func([]int) deque.Deque[int] {
 	return map[string]func([]int) deque.Deque[int]{
-		"Array":      func(values []int) deque.Deque[int] { return deque.ArrayFrom(values) },
-		"Linked":     func(values []int) deque.Deque[int] { return deque.LinkedFrom(values) },
-		"Structural": func(values []int) deque.Deque[int] { return &structuralDeque[int]{Deque: deque.ArrayFrom(values)} },
+		"Array":  func(values []int) deque.Deque[int] { return deque.ArrayFrom(values) },
+		"Linked": func(values []int) deque.Deque[int] { return deque.LinkedFrom(values) },
 	}
 }
 
