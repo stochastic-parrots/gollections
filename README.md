@@ -82,20 +82,23 @@ through structural interfaces:
 | `set.Readonly` | `json.Marshaler` |
 | `list.List`, `deque.Deque` | `json.Unmarshaler`, plus inherited readonly capabilities |
 
-Keep the concrete type when you need its methods, or use a checked capability
-assertion before calling an optional method or passing the value to a function
-that requires that capability:
+Constructors return concrete types, so direct calls such as `items.String()`
+remain available. For built-in collections stored behind a structural interface,
+use standard formatting and JSON functions without type assertions:
 
 ```go
 var items list.List[int] = list.ArrayFrom([]int{1, 2})
-if marshaler, ok := items.(json.Marshaler); ok {
-    data, err := marshaler.MarshalJSON()
-    if err != nil {
-        return err
-    }
-    fmt.Println(string(data))
+fmt.Println(items)
+data, err := json.Marshal(items)
+if err != nil {
+    return err
 }
+fmt.Println(string(data))
 ```
+
+Use a checked capability assertion when you need to call an optional method
+directly through a structural interface or pass it to a function that requires
+that capability.
 
 Readonly wrappers keep their existing formatting and JSON methods. They
 delegate to optional capabilities when present; otherwise they encode values

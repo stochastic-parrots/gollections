@@ -138,23 +138,17 @@ func ExampleAsReadonly() {
 	// Readonly view: [10 20 30]
 }
 
-func ExampleList_optionalCapabilities() {
+func ExampleList_formattingAndJSON() {
 	var items list.List[int] = list.ArrayFrom([]int{1, 2})
 
-	if stringer, ok := items.(fmt.Stringer); ok {
-		fmt.Println(stringer.String())
+	fmt.Println(items)
+	data, err := json.Marshal(items)
+	if err != nil {
+		panic(err)
 	}
-	if marshaler, ok := items.(json.Marshaler); ok {
-		data, err := marshaler.MarshalJSON()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(string(data))
-	}
-	if unmarshaler, ok := items.(json.Unmarshaler); ok {
-		if err := unmarshaler.UnmarshalJSON([]byte(`[3,4]`)); err != nil {
-			panic(err)
-		}
+	fmt.Println(string(data))
+	if err := json.Unmarshal([]byte(`[3,4]`), items); err != nil {
+		panic(err)
 	}
 	fmt.Println(items.ToSlice())
 
