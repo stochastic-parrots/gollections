@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"slices"
 	"testing"
@@ -287,7 +288,7 @@ func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
 	data, err := json.Marshal(list)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[1,2,3]`, string(data))
-	assert.Equal(t, "[1 2 3]", list.String())
+	assert.Equal(t, "[1 2 3]", fmt.Sprint(list))
 
 	list.Clear()
 	assert.True(t, list.IsEmpty())

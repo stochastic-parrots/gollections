@@ -30,14 +30,19 @@
 //
 // # JSON
 //
-// Collections marshal without external construction input; each package
-// documents the traversal order used by its JSON array. Lists and deques also
-// implement json.Unmarshaler because the array completely defines their logical
-// element order. Sorted lists do not implement unmarshaling so their natural or
-// custom ordering strategy remains an explicit constructor choice. Heaps do not
-// implement it because the array does not encode their comparator or min/max
-// selection. Sets likewise require an explicit equality or derived-key policy.
-// Decode those structures into a slice, then use the matching constructor.
+// Concrete lists, deques, sorted lists, heaps, and sets marshal without external
+// construction input; each package documents its JSON array's traversal order.
+// Concrete lists and deques also implement json.Unmarshaler because the array
+// completely defines their logical element order. Sorted lists, heaps, and sets
+// require explicit ordering, priority, or identity configuration; decode into a
+// slice and use the matching constructor family.
+//
+// Structural interfaces do not require formatting or JSON capabilities. Use a
+// capability assertion for direct calls to String, MarshalJSON, or UnmarshalJSON
+// through an interface. Standard fmt and encoding/json calls discover the
+// capabilities of the underlying concrete value. Readonly wrappers retain their
+// formatting and JSON methods through fmt.Sprint and json.Marshal on the wrapped
+// collection, following those packages' formatting and encoding behavior.
 //
 // # Concurrency
 //

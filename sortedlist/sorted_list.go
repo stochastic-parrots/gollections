@@ -99,8 +99,6 @@ type Readonly[T any] interface {
 	ToSlice() []T
 
 	gollections.Collection[T]
-	fmt.Stringer
-	json.Marshaler
 }
 
 // SortedList defines a list whose order is derived from a comparator or natural
@@ -128,8 +126,13 @@ type SortedList[T any] interface {
 
 // AsReadonly returns a [Readonly] view of the provided [SortedList].
 //
-// The returned view is a wrapper that prevents type assertion back to
-// the mutable interface, ensuring data safety for observers.
+// The returned view observes the same underlying collection while preventing
+// type assertion back to the mutable interface. It is not a snapshot and does
+// not provide synchronization.
+//
+// The wrapper implements fmt.Stringer and json.Marshaler through fmt.Sprint
+// and json.Marshal on the wrapped collection, following those packages'
+// formatting, JSON validation, and error wrapping behavior.
 func AsReadonly[T any](list SortedList[T]) *readonly[T] {
 	if list == nil {
 		return nil
@@ -181,8 +184,8 @@ func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
 func (w readonly[T]) Len() int { return w.inner.Len() }
 
-func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
+func (w readonly[T]) MarshalJSON() ([]byte, error) { return json.Marshal(w.inner) }
 
-func (w readonly[T]) String() string { return w.inner.String() }
+func (w readonly[T]) String() string { return fmt.Sprint(w.inner) }
 
 var _ Readonly[any] = (*readonly[any])(nil)

@@ -10,7 +10,6 @@ import (
 // Readonly defines a non-mutable view of a set.
 type Readonly[T any] interface {
 	gollections.Collection[T]
-	json.Marshaler
 
 	// Contains returns true if the set contains a value with the same identity
 	// as x according to the concrete implementation.
@@ -43,6 +42,9 @@ type Set[T any] interface {
 // The returned view observes the same underlying set while preventing type
 // assertion back to the mutable interface. It is not a snapshot and does not
 // provide synchronization.
+//
+// The wrapper implements json.Marshaler through json.Marshal on the wrapped
+// set, including the standard package's JSON validation and error wrapping.
 func AsReadonly[T any](set Set[T]) *readonly[T] {
 	if set == nil {
 		return nil
@@ -64,6 +66,6 @@ func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
 func (w readonly[T]) Len() int { return w.inner.Len() }
 
-func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
+func (w readonly[T]) MarshalJSON() ([]byte, error) { return json.Marshal(w.inner) }
 
 var _ Readonly[any] = (*readonly[any])(nil)

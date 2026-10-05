@@ -137,3 +137,23 @@ func ExampleAsReadonly() {
 	// Readonly view: [10 20]
 	// Readonly view: [10 20 30]
 }
+
+func ExampleList_formattingAndJSON() {
+	var items list.List[int] = list.ArrayFrom([]int{1, 2})
+
+	fmt.Println(items)
+	data, err := json.Marshal(items)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(data))
+	if err := json.Unmarshal([]byte(`[3,4]`), items); err != nil {
+		panic(err)
+	}
+	fmt.Println(items.ToSlice())
+
+	// Output:
+	// [1 2]
+	// [1,2]
+	// [3 4]
+}

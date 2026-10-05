@@ -26,10 +26,11 @@
 //
 // # JSON
 //
-// Heaps marshal as arrays in internal heap order, not Pop or Drain order. They
-// do not implement json.Unmarshaler because JSON cannot preserve the comparator.
-// Decode into []T and pass the values to the same constructor family used to define heap
-// priority.
+// BinaryHeap marshals as an array in internal heap order, not Pop or Drain
+// order. The Heap interface does not require JSON or formatting methods.
+// BinaryHeap does not implement json.Unmarshaler because JSON cannot preserve
+// the comparator. Decode into []T and pass the values to the same constructor
+// family used to define heap priority.
 //
 // # Complexity
 //

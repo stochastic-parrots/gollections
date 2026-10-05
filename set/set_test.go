@@ -171,7 +171,7 @@ func assertSetBehavior(t *testing.T, values set.Set[int]) {
 	assert.Equal(t, 2, values.Add(3, 4))
 	assert.Equal(t, 2, values.Remove(2, 2, 4, 5))
 
-	data, err := values.MarshalJSON()
+	data, err := json.Marshal(values)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[3]`, string(data))
 
