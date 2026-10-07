@@ -7,8 +7,8 @@ import (
 	"github.com/stochastic-parrots/gollections/prioritymap"
 )
 
-func ExampleBinaryHeap() {
-	pm := prioritymap.BinaryHeap[string](cmp.Less[int]).New(3)
+func ExampleNewBinaryHeap() {
+	pm := prioritymap.NewBinaryHeap[string](cmp.Less[int], 3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 	pm.Set("some", 1)
@@ -22,8 +22,8 @@ func ExampleBinaryHeap() {
 	// user - other: age - 2
 }
 
-func ExampleOrderedBinaryHeap_min() {
-	pm := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Min).New(3)
+func ExampleNewOrderedBinaryHeap_min() {
+	pm := prioritymap.NewOrderedBinaryHeap[string, int](prioritymap.Min, 3)
 	pm.Set("some", 3)
 	pm.Set("other", 2)
 
@@ -44,8 +44,8 @@ func ExampleOrderedBinaryHeap_min() {
 	// user - another: age - 10
 }
 
-func ExampleOrderedBinaryHeap_max() {
-	pm := prioritymap.OrderedBinaryHeap[string, int](prioritymap.Max).New(3)
+func ExampleNewOrderedBinaryHeap_max() {
+	pm := prioritymap.NewOrderedBinaryHeap[string, int](prioritymap.Max, 3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 
@@ -66,8 +66,8 @@ func ExampleOrderedBinaryHeap_max() {
 	// user - other: age - 2
 }
 
-func ExamplePairingHeap() {
-	pm := prioritymap.PairingHeap[string](cmp.Less[int]).New(3)
+func ExampleNewPairingHeap() {
+	pm := prioritymap.NewPairingHeap[string](cmp.Less[int], 3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 	pm.Set("some", 1)
@@ -81,8 +81,8 @@ func ExamplePairingHeap() {
 	// user - other: age - 2
 }
 
-func ExampleOrderedPairingHeap_min() {
-	pm := prioritymap.OrderedPairingHeap[string, int](prioritymap.Min).New(3)
+func ExampleNewOrderedPairingHeap_min() {
+	pm := prioritymap.NewOrderedPairingHeap[string, int](prioritymap.Min, 3)
 	pm.Set("some", 3)
 	pm.Set("other", 2)
 
@@ -103,8 +103,8 @@ func ExampleOrderedPairingHeap_min() {
 	// user - another: age - 10
 }
 
-func ExampleOrderedPairingHeap_max() {
-	pm := prioritymap.OrderedPairingHeap[string, int](prioritymap.Max).New(3)
+func ExampleNewOrderedPairingHeap_max() {
+	pm := prioritymap.NewOrderedPairingHeap[string, int](prioritymap.Max, 3)
 	pm.Set("some", 10)
 	pm.Set("other", 2)
 
@@ -125,8 +125,8 @@ func ExampleOrderedPairingHeap_max() {
 	// user - other: age - 2
 }
 
-func ExampleRadixHeap() {
-	pm := prioritymap.RadixHeap[string, uint64]().New(3)
+func ExampleNewRadixHeap() {
+	pm := prioritymap.NewRadixHeap[string, uint64](3)
 	pm.Set("destination", 20)
 	pm.Set("neighbor", 7)
 	pm.Set("start", 0)
@@ -142,7 +142,7 @@ func ExampleRadixHeap() {
 }
 
 func ExampleAsReadonly() {
-	pm := prioritymap.OrderedPairingHeap[string, int](prioritymap.Min).New(10)
+	pm := prioritymap.NewOrderedPairingHeap[string, int](prioritymap.Min, 10)
 	pm.Set("Critical Bug", 1)
 	pm.Set("Feature Request", 10)
 	pm.Set("Documentation Update", 5)
@@ -151,7 +151,7 @@ func ExampleAsReadonly() {
 
 	// view.Pop() => compiler(MissingFieldOrMethod)
 
-	fmt.Println(view.Length())
+	fmt.Println(view.Len())
 	fmt.Println(view.IsEmpty())
 
 	priority, _ := view.Get("Feature Request")

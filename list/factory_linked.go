@@ -6,50 +6,94 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/list"
 )
 
-// LinkedList is a doubly linked [List]. Its zero value is ready for use.
+// LinkedList is a doubly linked list. Its zero value is ready for use.
 type LinkedList[T any] = list.DoubleLinkedList[T]
 
-var _ List[any] = &list.DoubleLinkedList[any]{}
+var _ List[int] = &list.DoubleLinkedList[int]{}
 
-// LinkedFactory constructs doubly linked lists.
-//
-// Linked lists provide O(1) reversal and boundary insertion or removal, while
-// indexed operations require O(N) traversal.
+// NewLinked creates an empty doubly linked list. Choose it for O(1)
+// reversal and boundary insertion or removal; indexed operations traverse O(N) nodes.
 //
 // Performance Summary (Time Complexity):
 //
-//	Operation           Time Complexity
-//	-----------------   ---------------
-//	New()               O(1)
-//	From/FromSeq        O(N)
-//	Append(x)           O(1)
-//	Appends(xs...T)     O(len(xs))
-//	Insert/Remove       O(N)
-//	Get/Set             O(N)
-//	Find/Contains       O(N)
-//	Reverse             O(1)
-//	Clear               O(N)
-type LinkedFactory[T any] struct{}
-
-// Linked returns a factory for doubly linked lists.
-func Linked[T any]() LinkedFactory[T] {
-	return LinkedFactory[T]{}
-}
-
-// New creates an empty doubly linked list.
-func (LinkedFactory[T]) New() *LinkedList[T] {
-	return list.NewDoubleLinkedList[T]()
-}
-
-// From creates a linked list containing data.
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs))
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(N)
+//	Remove(idx)           O(N)
+//	Reverse()             O(1)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
 //
-// Values are copied into newly allocated nodes; the source slice is not
-// modified or retained.
-func (LinkedFactory[T]) From(data []T) *LinkedList[T] {
-	return list.NewDoubleLinkedListFromSlice(data)
-}
+// Complexity: O(1).
+func NewLinked[T any]() *LinkedList[T] { return list.NewDoubleLinkedList[T]() }
 
-// FromSeq creates a linked list containing values from seq.
-func (LinkedFactory[T]) FromSeq(seq iter.Seq[T]) *LinkedList[T] {
+// LinkedFrom copies values from data into new nodes without retaining the source slice.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs))
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(N)
+//	Remove(idx)           O(N)
+//	Reverse()             O(1)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
+//
+// Complexity: O(len(data)).
+func LinkedFrom[T any](data []T) *LinkedList[T] { return list.NewDoubleLinkedListFromSlice(data) }
+
+// LinkedFromSeq consumes seq once into new storage in iteration order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(N)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs))
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(N)
+//	Remove(idx)           O(N)
+//	Reverse()             O(1)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
+//
+// Complexity: O(N), where N is the number of values yielded by seq.
+func LinkedFromSeq[T any](seq iter.Seq[T]) *LinkedList[T] {
 	return list.NewDoubleLinkedListFromSeq(seq)
 }

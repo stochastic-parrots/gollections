@@ -5,7 +5,6 @@ import "container/heap"
 type stdLibIntHeap []int
 
 func (h stdLibIntHeap) Len() int           { return len(h) }
-func (h stdLibIntHeap) Length() int        { return len(h) }
 func (h stdLibIntHeap) Less(i, j int) bool { return h[i] < h[j] }
 func (h stdLibIntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 func (h *stdLibIntHeap) Push(x any)        { *h = append(*h, x.(int)) }
@@ -22,19 +21,14 @@ type StdLibHeap struct {
 	stdheap *stdLibIntHeap
 }
 
-// Push inserts a value into the standard-library heap baseline.
-func (w *StdLibHeap) Push(x int) {
-	heap.Push(w.stdheap, x)
-}
-
-// Pushes inserts the given values into the standard-library heap baseline.
-func (w *StdLibHeap) Pushes(xs ...int) {
+// Push inserts the given values into the standard-library heap baseline.
+func (w *StdLibHeap) Push(xs ...int) {
 	k := len(xs)
 	switch k {
 	case 0:
 		return
 	case 1:
-		w.Push(xs[0])
+		heap.Push(w.stdheap, xs[0])
 		return
 	}
 
@@ -46,7 +40,7 @@ func (w *StdLibHeap) Pushes(xs ...int) {
 	}
 
 	for _, x := range xs {
-		w.Push(x)
+		heap.Push(w.stdheap, x)
 	}
 }
 
@@ -80,8 +74,8 @@ func (w *StdLibHeap) Replace(v int) (int, bool) {
 	return root, true
 }
 
-// Length returns the number of values in the heap baseline.
-func (w *StdLibHeap) Length() int {
+// Len returns the number of values in the heap baseline.
+func (w *StdLibHeap) Len() int {
 	return len(*w.stdheap)
 }
 

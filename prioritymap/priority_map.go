@@ -132,6 +132,6 @@ func (w readonly[K, P]) All() iter.Seq2[K, P] { return w.inner.All() }
 
 func (w readonly[K, P]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[K, P]) Length() int { return w.inner.Length() }
+func (w readonly[K, P]) Len() int { return w.inner.Len() }
 
 var _ Readonly[string, int] = (*readonly[string, int])(nil)

@@ -34,7 +34,7 @@ func TestNewKeyedHashSetFromSlice(t *testing.T) {
 
 	set := NewKeyedHashSetFromSlice([]record{first, duplicate, second}, recordID)
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []record{first, second}, slices.Collect(set.All()))
 }
 
@@ -45,7 +45,7 @@ func TestNewKeyedHashSetFromSeq(t *testing.T) {
 
 	set := NewKeyedHashSetFromSeq(slices.Values([]record{first, duplicate, second}), recordID)
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.ElementsMatch(t, []record{first, second}, slices.Collect(set.All()))
 }
 
@@ -64,7 +64,7 @@ func TestNewKeyedHashSetFromMap_Nil(t *testing.T) {
 	set := NewKeyedHashSetFromMap(nil, recordID)
 
 	assert.NotNil(t, set.values)
-	assert.True(t, set.Add(record{ID: 1}))
+	assert.Equal(t, 1, set.Add(record{ID: 1}))
 }
 
 func TestNewKeyedHashSetCloneMap(t *testing.T) {
@@ -85,10 +85,10 @@ func TestNewKeyedHashSetCloneMap_Nil(t *testing.T) {
 	assert.NotNil(t, set.values)
 }
 
-func TestKeyedHashSet_Length(t *testing.T) {
+func TestKeyedHashSet_Len(t *testing.T) {
 	set := NewKeyedHashSetFromSlice([]record{{ID: 1}, {ID: 2}}, recordID)
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 }
 
 func TestKeyedHashSet_IsEmpty(t *testing.T) {
@@ -107,13 +107,13 @@ func TestKeyedHashSet_Contains(t *testing.T) {
 }
 
 func TestKeyedHashSet_Add(t *testing.T) {
-	set := KeyedHashSet[int, record]{keyOf: recordID}
+	set := KeyedHashSet[record, int]{keyOf: recordID}
 	first := record{ID: 1, Name: "first"}
 
-	assert.True(t, set.Add(first))
-	assert.False(t, set.Add(record{ID: 1, Name: "duplicate"}))
+	assert.Equal(t, 1, set.Add(first))
+	assert.Zero(t, set.Add(record{ID: 1, Name: "duplicate"}))
 
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 	assert.Equal(t, []record{first}, slices.Collect(set.All()))
 }
 
@@ -121,29 +121,29 @@ func TestKeyedHashSet_Adds(t *testing.T) {
 	first := record{ID: 1, Name: "first"}
 	set := NewKeyedHashSet(0, recordID)
 
-	assert.Equal(t, 2, set.Adds(first, record{ID: 1, Name: "duplicate"}, record{ID: 2, Name: "second"}))
-	assert.Zero(t, set.Adds())
-	assert.Zero(t, set.Adds(record{ID: 1}, record{ID: 2}))
+	assert.Equal(t, 2, set.Add(first, record{ID: 1, Name: "duplicate"}, record{ID: 2, Name: "second"}))
+	assert.Zero(t, set.Add())
+	assert.Zero(t, set.Add(record{ID: 1}, record{ID: 2}))
 
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.Contains(t, slices.Collect(set.All()), first)
 }
 
 func TestKeyedHashSet_Remove(t *testing.T) {
 	set := NewKeyedHashSetFromSlice([]record{{ID: 1}, {ID: 2}}, recordID)
 
-	assert.True(t, set.Remove(record{ID: 1, Name: "query"}))
-	assert.False(t, set.Remove(record{ID: 1}))
+	assert.Equal(t, 1, set.Remove(record{ID: 1, Name: "query"}))
+	assert.Zero(t, set.Remove(record{ID: 1}))
 	assert.False(t, set.Contains(record{ID: 1}))
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 }
 
 func TestKeyedHashSet_Removes(t *testing.T) {
 	set := NewKeyedHashSetFromSlice([]record{{ID: 1}, {ID: 2}, {ID: 3}}, recordID)
 
-	assert.Equal(t, 2, set.Removes(record{ID: 2}, record{ID: 2}, record{ID: 4}, record{ID: 3}))
-	assert.Zero(t, set.Removes())
-	assert.Zero(t, set.Removes(record{ID: 2}, record{ID: 4}))
+	assert.Equal(t, 2, set.Remove(record{ID: 2}, record{ID: 2}, record{ID: 4}, record{ID: 3}))
+	assert.Zero(t, set.Remove())
+	assert.Zero(t, set.Remove(record{ID: 2}, record{ID: 4}))
 	assert.Equal(t, []record{{ID: 1}}, slices.Collect(set.All()))
 }
 
@@ -261,7 +261,7 @@ func TestKeyedHashSet_MarshalJSON(t *testing.T) {
 
 type keyedSource[T any] []T
 
-func (values keyedSource[T]) Length() int {
+func (values keyedSource[T]) Len() int {
 	return len(values)
 }
 
@@ -269,7 +269,7 @@ func (values keyedSource[T]) All() iter.Seq[T] {
 	return slices.Values(values)
 }
 
-func recordNameLength(value record) int {
+func recordNameLen(value record) int {
 	return len(value.Name)
 }
 
@@ -278,7 +278,7 @@ func TestCollectKeyedKeys(t *testing.T) {
 		{ID: 1, Name: "a"},
 		{ID: 1, Name: "bb"},
 		{ID: 2, Name: "ccc"},
-	}, recordNameLength)
+	}, recordNameLen)
 
 	assert.Equal(t, map[int]struct{}{
 		1: {},
@@ -305,7 +305,7 @@ func TestCollectKeyedMembership(t *testing.T) {
 		{ID: 1, Name: "a"},
 		{ID: 1, Name: "bb"},
 		{ID: 2, Name: "ccc"},
-	}, recordNameLength)
+	}, recordNameLen)
 
 	assert.Equal(t, map[int]bool{
 		1: false,
@@ -515,7 +515,7 @@ func TestKeyedHashSet_Clone(t *testing.T) {
 	clone := original.Clone()
 
 	assert.ElementsMatch(t, slices.Collect(original.All()), slices.Collect(clone.All()))
-	assert.True(t, clone.Add(record{ID: 3, Name: "three"}))
+	assert.Equal(t, 1, clone.Add(record{ID: 3, Name: "three"}))
 	assert.False(t, original.Contains(record{ID: 3}))
 	assert.Equal(t, 3, clone.keyOf(record{ID: 3}))
 }
@@ -539,7 +539,7 @@ func TestKeyedHashSet_Union(t *testing.T) {
 	}, slices.Collect(result.All()))
 	assert.ElementsMatch(t, slices.Collect(original.All()), slices.Collect(original.Union().All()))
 	assert.ElementsMatch(t, slices.Collect(original.All()), slices.Collect(self.All()))
-	assert.True(t, self.Add(record{ID: 3}))
+	assert.Equal(t, 1, self.Add(record{ID: 3}))
 	assert.False(t, original.Contains(record{ID: 3}))
 }
 
@@ -632,26 +632,26 @@ func TestKeyedHashSet_SymmetricDifference(t *testing.T) {
 	}, slices.Collect(original.SymmetricDifference(
 		keyedSource[record]{{ID: 2}, {ID: 2}},
 	).All()))
-	byNameLength := func(value record) int {
+	byNameLen := func(value record) int {
 		return len(value.Name)
 	}
 	assert.Equal(t, 1, original.SymmetricDifference(
 		NewKeyedHashSetFromSlice([]record{
 			{ID: 1, Name: "a"},
 			{ID: 1, Name: "bb"},
-		}, byNameLength),
-	).Length())
+		}, byNameLen),
+	).Len())
 }
 
 func TestKeyedHashSet_RelationsReapplyReceiverIdentity(t *testing.T) {
 	byID := NewKeyedHashSetFromSlice([]record{{ID: 1}}, recordID)
-	byNameLength := func(value record) int {
+	byNameLen := func(value record) int {
 		return len(value.Name)
 	}
 	sameIDs := NewKeyedHashSetFromSlice([]record{
 		{ID: 1, Name: "a"},
 		{ID: 1, Name: "bb"},
-	}, byNameLength)
+	}, byNameLen)
 
 	assert.True(t, byID.Equal(sameIDs))
 	assert.True(t, byID.IsSubset(sameIDs))
@@ -663,7 +663,7 @@ func TestKeyedHashSet_RelationsReapplyReceiverIdentity(t *testing.T) {
 	withExtra := NewKeyedHashSetFromSlice([]record{
 		{ID: 1, Name: "a"},
 		{ID: 2, Name: "bb"},
-	}, byNameLength)
+	}, byNameLen)
 	assert.False(t, byID.Equal(withExtra))
 	assert.True(t, byID.IsProperSubset(withExtra))
 	assert.False(t, byID.IsSuperset(withExtra))
@@ -679,7 +679,7 @@ func TestKeyedHashSet_RelationsReapplyReceiverIdentity(t *testing.T) {
 	)))
 	assert.True(t, byID.IsDisjoint(NewKeyedHashSetFromSlice(
 		[]record{{ID: 2, Name: "a"}},
-		byNameLength,
+		byNameLen,
 	)))
 }
 
@@ -779,7 +779,7 @@ func TestKeyedHashSet_IntersectWith(t *testing.T) {
 	assert.Equal(t, 1, set.IntersectWith(keyedSource[record]{}))
 	assert.True(t, set.IsEmpty())
 
-	set.Adds(record{ID: 1}, record{ID: 2})
+	set.Add(record{ID: 1}, record{ID: 2})
 	assert.Equal(t, 2, set.IntersectWith(
 		keyedSource[record]{{ID: 1}},
 		keyedSource[record]{{ID: 2}},
@@ -801,11 +801,11 @@ func TestKeyedHashSet_DifferenceWith(t *testing.T) {
 	assert.True(t, set.IsEmpty())
 	assert.Zero(t, set.DifferenceWith(keyedSource[record]{{ID: 1}}))
 
-	set.Adds(record{ID: 1}, record{ID: 2})
+	set.Add(record{ID: 1}, record{ID: 2})
 	assert.Equal(t, 2, set.DifferenceWith(keyedSource[record]{{ID: 1}, {ID: 2}}))
 	assert.True(t, set.IsEmpty())
 
-	set.Adds(record{ID: 1}, record{ID: 2})
+	set.Add(record{ID: 1}, record{ID: 2})
 	assert.Equal(t, 1, set.DifferenceWith(NewKeyedHashSetFromSlice(
 		[]record{{ID: 2}},
 		recordID,
@@ -819,7 +819,7 @@ func TestKeyedHashSet_DifferenceWith(t *testing.T) {
 }
 
 func TestKeyedHashSet_SymmetricDifferenceWith(t *testing.T) {
-	set := KeyedHashSet[int, record]{keyOf: recordID}
+	set := KeyedHashSet[record, int]{keyOf: recordID}
 
 	assert.Equal(t, 1, set.SymmetricDifferenceWith(
 		NewKeyedHashSetFromSlice([]record{{ID: 4}}, recordID),
@@ -858,7 +858,7 @@ func TestKeyedHashSet_SymmetricDifferenceWith(t *testing.T) {
 		keyedSource[record]{{ID: 2}},
 		keyedSource[record]{{ID: 3}},
 	))
-	assert.Equal(t, 2, set.Length())
+	assert.Equal(t, 2, set.Len())
 	assert.True(t, set.Contains(record{ID: 1}))
 	assert.True(t, set.Contains(record{ID: 3}))
 
@@ -874,7 +874,7 @@ func TestKeyedHashSet_SymmetricDifferenceWith(t *testing.T) {
 		keyedSource[record]{{ID: 2}},
 		other,
 	))
-	assert.Equal(t, 1, set.Length())
+	assert.Equal(t, 1, set.Len())
 	assert.True(t, set.Contains(record{ID: 1}))
 
 	set.Clear()
@@ -900,7 +900,7 @@ func TestKeyedHashSet_SymmetricDifferenceWithRepresentativeMatchesPure(t *testin
 }
 
 func TestKeyedHashSet_SymmetricDifferenceWithSingleGenericSource(t *testing.T) {
-	set := KeyedHashSet[int, record]{keyOf: recordID}
+	set := KeyedHashSet[record, int]{keyOf: recordID}
 	source := keyedSource[record]{{ID: 1, Name: "first"}, {ID: 1, Name: "duplicate"}, {ID: 2}}
 
 	assert.Equal(t, 2, set.SymmetricDifferenceWith(source))
@@ -911,7 +911,7 @@ func TestKeyedHashSet_SymmetricDifferenceWithSingleGenericSource(t *testing.T) {
 }
 
 func TestKeyedHashSet_SymmetricDifferenceWithAllocatesForZeroValueReceiver(t *testing.T) {
-	set := KeyedHashSet[int, record]{keyOf: recordID}
+	set := KeyedHashSet[record, int]{keyOf: recordID}
 	assert.Nil(t, set.values)
 
 	assert.Equal(t, 2, set.SymmetricDifferenceWith(
@@ -921,7 +921,7 @@ func TestKeyedHashSet_SymmetricDifferenceWithAllocatesForZeroValueReceiver(t *te
 	assert.NotNil(t, set.values)
 	assert.ElementsMatch(t, []record{{ID: 1}, {ID: 2}}, slices.Collect(set.All()))
 
-	set = KeyedHashSet[int, record]{keyOf: recordID}
+	set = KeyedHashSet[record, int]{keyOf: recordID}
 	assert.Zero(t, set.SymmetricDifferenceWith(
 		keyedSource[record]{{ID: 1}},
 		keyedSource[record]{{ID: 1}},

@@ -13,8 +13,8 @@ func BenchmarkArraySortedList_Adds(b *testing.B) {
 
 	b.ReportAllocs()
 	for b.Loop() {
-		list.Adds(data...)
-		_ = list.Length()
+		list.Add(data...)
+		_ = list.Len()
 
 		b.StopTimer()
 		list.Clear()
@@ -25,7 +25,7 @@ func BenchmarkArraySortedList_Adds(b *testing.B) {
 func BenchmarkArraySortedList_Add(b *testing.B) {
 	data := descendingInts(arraySortedListBenchmarkSize)
 	list := NewArraySortedList(len(data)+1, cmp.Compare[int])
-	list.Adds(data...)
+	list.Add(data...)
 	value := arraySortedListBenchmarkSize / 2
 
 	b.ReportAllocs()

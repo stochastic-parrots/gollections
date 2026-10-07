@@ -12,7 +12,7 @@ import (
 func TestNewBinaryHeap(t *testing.T) {
 	heap := NewBinaryHeap(10, ordering.Min[int]())
 
-	assert.Equal(t, 0, heap.Length())
+	assert.Equal(t, 0, heap.Len())
 	assert.True(t, heap.IsEmpty())
 	assert.Empty(t, heap.data)
 }
@@ -27,10 +27,13 @@ func TestNewBinaryHeapFromSlice(t *testing.T) {
 	})
 
 	t.Run("Many", func(t *testing.T) {
-		data := []int{10, 5, 8, 2, 7}
+		data := make([]int, 5, 8)
+		copy(data, []int{10, 5, 8, 2, 7})
 		heap := NewBinaryHeapFromSlice(data, ordering.Min[int]())
 
-		assert.Equal(t, 5, heap.Length())
+		assert.Equal(t, 5, heap.Len())
+		assert.Equal(t, 8, cap(heap.data))
+		assert.Same(t, &data[0], &heap.data[0])
 
 		val, ok := heap.Peek()
 		assert.True(t, ok)
@@ -44,7 +47,7 @@ func TestNewBinaryHeapCloneSlice(t *testing.T) {
 
 	heap.Pop()
 	assert.Equal(t, 3, len(src))
-	assert.Equal(t, 2, heap.Length())
+	assert.Equal(t, 2, heap.Len())
 }
 
 func TestBinaryHeap_Push(t *testing.T) {
@@ -54,39 +57,39 @@ func TestBinaryHeap_Push(t *testing.T) {
 	heap.Push(5)
 	val, _ := heap.Peek()
 	assert.Equal(t, 5, val)
-	assert.Equal(t, 2, heap.Length())
+	assert.Equal(t, 2, heap.Len())
 }
 
 func TestBinaryHeap_Pushes(t *testing.T) {
 	t.Run("Nothing", func(t *testing.T) {
 		heap := NewBinaryHeap(0, ordering.Min[int]())
 
-		heap.Pushes()
+		heap.Push()
 
 		_, ok := heap.Peek()
 		assert.False(t, ok)
-		assert.Zero(t, heap.Length())
+		assert.Zero(t, heap.Len())
 	})
 
 	t.Run("Single", func(t *testing.T) {
 		heap := NewBinaryHeap(0, ordering.Min[int]())
 
-		heap.Pushes(10)
+		heap.Push(10)
 
 		val, _ := heap.Peek()
 		assert.Equal(t, 10, val)
-		assert.Equal(t, 1, heap.Length())
+		assert.Equal(t, 1, heap.Len())
 	})
 
 	t.Run("Many", func(t *testing.T) {
 		heap := NewBinaryHeap(0, ordering.Min[int]())
 		heap.Push(10)
 
-		heap.Pushes(2, 20, 1)
+		heap.Push(2, 20, 1)
 
 		val, _ := heap.Peek()
 		assert.Equal(t, 1, val)
-		assert.Equal(t, 4, heap.Length())
+		assert.Equal(t, 4, heap.Len())
 	})
 
 	t.Run("LargeBatch", func(t *testing.T) {
@@ -97,12 +100,12 @@ func TestBinaryHeap_Pushes(t *testing.T) {
 			values[i] = 100 - i
 		}
 
-		heap.Pushes(values...)
+		heap.Push(values...)
 
 		value, ok := heap.Peek()
 		assert.True(t, ok)
 		assert.Equal(t, 0, value)
-		assert.Equal(t, 101, heap.Length())
+		assert.Equal(t, 101, heap.Len())
 	})
 }
 
@@ -128,17 +131,17 @@ func TestBinaryHeap_Replace(t *testing.T) {
 		heap.Replace(2)
 		val, _ = heap.Peek()
 		assert.Equal(t, 2, val)
-		assert.Equal(t, 2, heap.Length())
+		assert.Equal(t, 2, heap.Len())
 
 		heap.Replace(8)
 		val, _ = heap.Peek()
 		assert.Equal(t, 8, val)
-		assert.Equal(t, 2, heap.Length())
+		assert.Equal(t, 2, heap.Len())
 
 		heap.Replace(15)
 		val, _ = heap.Peek()
 		assert.Equal(t, 10, val)
-		assert.Equal(t, 2, heap.Length())
+		assert.Equal(t, 2, heap.Len())
 	})
 }
 
@@ -194,7 +197,7 @@ func TestBinaryHeapDrain(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 2, heap.Length())
+		assert.Equal(t, 2, heap.Len())
 		value, ok := heap.Pop()
 		assert.True(t, ok)
 		assert.Equal(t, 2, value)
@@ -243,7 +246,7 @@ func TestBinaryHeapEnumerate(t *testing.T) {
 func TestBinaryHeapClear(t *testing.T) {
 	a, b := 1, 2
 	heap := NewBinaryHeap(4, func(a, b *int) bool { return *a < *b })
-	heap.Pushes(&b, &a)
+	heap.Push(&b, &a)
 	backing := &heap.data[:cap(heap.data)][0]
 
 	heap.Clear()
@@ -254,7 +257,7 @@ func TestBinaryHeapClear(t *testing.T) {
 	assert.Nil(t, heap.data[:cap(heap.data)][0])
 	assert.Nil(t, heap.data[:cap(heap.data)][1])
 
-	heap.Pushes(&b, &a)
+	heap.Push(&b, &a)
 	top, ok := heap.Peek()
 	assert.True(t, ok)
 	assert.Same(t, &a, top)
@@ -275,7 +278,7 @@ func TestBinaryHeap_MarshalJSON(t *testing.T) {
 func TestBinaryHeapString(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
 		heap := NewBinaryHeap(3, ordering.Min[int]())
-		heap.Pushes(30, 10, 20)
+		heap.Push(30, 10, 20)
 		got := heap.String()
 		want := "[10 30 20]"
 		assert.Equal(t, want, got)
@@ -283,7 +286,7 @@ func TestBinaryHeapString(t *testing.T) {
 
 	t.Run("String Many Elements", func(t *testing.T) {
 		heap := NewBinaryHeap(10, ordering.Min[int]())
-		heap.Pushes(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := heap.String()
 		want := "[-99 -10 -1 0 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
@@ -293,7 +296,7 @@ func TestBinaryHeapString(t *testing.T) {
 func TestBinaryHeapFormat(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
 		heap := NewBinaryHeap(3, ordering.Min[int]())
-		heap.Pushes(30, 10, 20)
+		heap.Push(30, 10, 20)
 		got := fmt.Sprintf("%v", heap)
 		want := "[10 30 20]"
 		assert.Equal(t, want, got)
@@ -301,7 +304,7 @@ func TestBinaryHeapFormat(t *testing.T) {
 
 	t.Run("Verbose", func(t *testing.T) {
 		heap := NewBinaryHeap(12, ordering.Min[int]())
-		heap.Pushes(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", heap)
 		want := "*heap.BinaryHeap[int]{size:10, cap:12}"
 		assert.Equal(t, want, got)
@@ -309,7 +312,7 @@ func TestBinaryHeapFormat(t *testing.T) {
 
 	t.Run("Verbose + String", func(t *testing.T) {
 		heap := NewBinaryHeap(12, ordering.Min[int]())
-		heap.Pushes(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		heap.Push(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", heap)
 		want := "*heap.BinaryHeap[int]{len:10, cap:12} [-99 -10 -1 0 1 ...(+5 more)]"
 		assert.Equal(t, want, got)

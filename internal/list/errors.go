@@ -2,58 +2,84 @@ package list
 
 import "fmt"
 
-// IndexOutOfBoundError represents an error where the provided index is outside
-// the valid range [0, limit].
-//
-// This struct implements the 'error' interface and should be used by list methods
-// (like Get or Set) to return context-rich errors.
-type IndexOutOfBoundError struct {
-	// index is the invalid index that the user attempted to access.
-	index int
+// Operation identifies a list operation that uses an index.
+type Operation uint8
 
-	// limit is the maximum valid index allowed in the collection (Length - 1).
-	limit int
+const (
+	// OperationGet identifies an indexed read.
+	OperationGet Operation = iota + 1
+	// OperationSet identifies an indexed update.
+	OperationSet
+	// OperationInsert identifies an indexed insertion.
+	OperationInsert
+	// OperationRemove identifies an indexed removal.
+	OperationRemove
+	// OperationReplace identifies an indexed replacement in a sorted list.
+	OperationReplace
+)
+
+// IndexOutOfBoundsError reports an index outside the valid range [0, limit].
+// Limit includes the end position for insertion errors.
+type IndexOutOfBoundsError struct {
+	index     int
+	limit     int
+	operation Operation
 }
 
-// NewIndexOutOfBoundError creates a new IndexOutOfBoundError.
-//
-// This function should be used internally by the library to generate an
-// out-of-bounds error with contextual information.
-//
-// Parameters:
-//
-//	index  The invalid index that was requested.
-//	limit  The largest valid index allowed in the collection (Length - 1).
-func NewIndexOutOfBoundError(index, limit int) *IndexOutOfBoundError {
-	return &IndexOutOfBoundError{index, limit}
+// NewIndexOutOfBoundsError reports an invalid index for an operation.
+// limit is the largest valid index; for insertion, it is the collection length.
+func NewIndexOutOfBoundsError(operation Operation, index, limit int) *IndexOutOfBoundsError {
+	return &IndexOutOfBoundsError{index: index, limit: limit, operation: operation}
 }
 
-// Error implements the 'error' interface and formats the error message,
-// including the invalid index and the maximum allowed limit.
-func (e *IndexOutOfBoundError) Error() string {
-	return fmt.Sprintf("index %d is out of bounds; maximum valid index is %d", e.index, e.limit)
+// Error reports the invalid index and the collection length or empty state.
+func (e *IndexOutOfBoundsError) Error() string {
+	operation := ""
+	switch e.operation {
+	case OperationGet:
+		operation = "cannot get "
+	case OperationSet:
+		operation = "cannot set "
+	case OperationInsert:
+		operation = "cannot insert at "
+	case OperationRemove:
+		operation = "cannot remove "
+	case OperationReplace:
+		operation = "cannot replace "
+	}
+	if e.limit == -1 {
+		if operation == "" {
+			return fmt.Sprintf("index %d out of range because list is empty", e.index)
+		}
+		return fmt.Sprintf("%sindex %d because list is empty", operation, e.index)
+	}
+	length := e.limit + 1
+	if e.operation == OperationInsert {
+		length = e.limit
+	}
+	return fmt.Sprintf("%sindex %d out of range for length %d", operation, e.index, length)
 }
 
-// Is reports whether the target is an IndexOutOfBoundError.
-func (e *IndexOutOfBoundError) Is(target error) bool {
-	_, ok := target.(*IndexOutOfBoundError)
+// Is reports whether the target is an IndexOutOfBoundsError.
+func (e *IndexOutOfBoundsError) Is(target error) bool {
+	_, ok := target.(*IndexOutOfBoundsError)
 	return ok
 }
 
 // Index returns the invalid index that was requested.
-func (e *IndexOutOfBoundError) Index() int {
+func (e *IndexOutOfBoundsError) Index() int {
 	return e.index
 }
 
-// Limit returns the largest valid index allowed in the collection.
-func (e *IndexOutOfBoundError) Limit() int {
+// Limit returns the largest valid index, including the end position for insertion.
+func (e *IndexOutOfBoundsError) Limit() int {
 	return e.limit
 }
 
-// ErrIndexOutOfBound is the "sentinel" error used for type checking.
+// ErrIndexOutOfBounds is the "sentinel" error used for type checking.
 //
-// API consumers should use errors.Is(err, list.ErrIndexOutOfBound)
-// to check if the returned error is an IndexOutOfBoundError.
+// API consumers should use errors.Is(err, list.ErrIndexOutOfBounds)
+// to check if the returned error is an IndexOutOfBoundsError.
 //
 // To extract the index and limit values, use errors.As and the Index/Limit methods.
-var ErrIndexOutOfBound = &IndexOutOfBoundError{}
+var ErrIndexOutOfBounds = &IndexOutOfBoundsError{limit: -1}

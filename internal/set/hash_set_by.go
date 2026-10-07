@@ -10,15 +10,15 @@ import (
 // KeyedHashSet stores arbitrary values indexed by a comparable key derived
 // from each value. The first value inserted for a key remains its
 // representative.
-type KeyedHashSet[K comparable, T any] struct {
+type KeyedHashSet[T any, K comparable] struct {
 	values map[K]T
 	keyOf  func(T) K
 }
 
 // NewKeyedHashSet creates an empty keyed hash set with the requested initial
 // capacity and identity function.
-func NewKeyedHashSet[K comparable, T any](capacity int, keyOf func(T) K) *KeyedHashSet[K, T] {
-	return &KeyedHashSet[K, T]{
+func NewKeyedHashSet[T any, K comparable](capacity int, keyOf func(T) K) *KeyedHashSet[T, K] {
+	return &KeyedHashSet[T, K]{
 		values: make(map[K]T, capacity),
 		keyOf:  keyOf,
 	}
@@ -26,15 +26,15 @@ func NewKeyedHashSet[K comparable, T any](capacity int, keyOf func(T) K) *KeyedH
 
 // NewKeyedHashSetFromSlice creates a keyed hash set containing values from
 // data. The first value for each derived key is preserved.
-func NewKeyedHashSetFromSlice[K comparable, T any](data []T, keyOf func(T) K) *KeyedHashSet[K, T] {
+func NewKeyedHashSetFromSlice[T any, K comparable](data []T, keyOf func(T) K) *KeyedHashSet[T, K] {
 	set := NewKeyedHashSet(len(data), keyOf)
-	set.Adds(data...)
+	set.Add(data...)
 	return set
 }
 
 // NewKeyedHashSetFromSeq collects values yielded by seq into a keyed hash set.
 // The first value for each derived key is preserved.
-func NewKeyedHashSetFromSeq[K comparable, T any](seq iter.Seq[T], keyOf func(T) K) *KeyedHashSet[K, T] {
+func NewKeyedHashSetFromSeq[T any, K comparable](seq iter.Seq[T], keyOf func(T) K) *KeyedHashSet[T, K] {
 	set := NewKeyedHashSet(0, keyOf)
 	for value := range seq {
 		set.Add(value)
@@ -43,15 +43,15 @@ func NewKeyedHashSetFromSeq[K comparable, T any](seq iter.Seq[T], keyOf func(T) 
 }
 
 // NewKeyedHashSetFromMap uses values as the set's backing map without copying.
-func NewKeyedHashSetFromMap[K comparable, T any](values map[K]T, keyOf func(T) K) *KeyedHashSet[K, T] {
+func NewKeyedHashSetFromMap[T any, K comparable](values map[K]T, keyOf func(T) K) *KeyedHashSet[T, K] {
 	if values == nil {
 		values = make(map[K]T)
 	}
-	return &KeyedHashSet[K, T]{values: values, keyOf: keyOf}
+	return &KeyedHashSet[T, K]{values: values, keyOf: keyOf}
 }
 
 // NewKeyedHashSetCloneMap copies values into the set's backing map.
-func NewKeyedHashSetCloneMap[K comparable, T any](values map[K]T, keyOf func(T) K) *KeyedHashSet[K, T] {
+func NewKeyedHashSetCloneMap[T any, K comparable](values map[K]T, keyOf func(T) K) *KeyedHashSet[T, K] {
 	return NewKeyedHashSetFromMap(maps.Clone(values), keyOf)
 }
 
@@ -60,36 +60,36 @@ func NewKeyedHashSetCloneMap[K comparable, T any](values map[K]T, keyOf func(T) 
 func NewKeyedHashSetIntersection[T any, K comparable](
 	keyOf func(T) K,
 	sources ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(sources) == 0 {
 		return NewKeyedHashSet(0, keyOf)
 	}
 	for _, source := range sources {
-		if source.Length() == 0 {
+		if source.Len() == 0 {
 			return NewKeyedHashSet(0, keyOf)
 		}
 	}
 	if len(sources) == 1 {
-		result := NewKeyedHashSet(sources[0].Length(), keyOf)
+		result := NewKeyedHashSet(sources[0].Len(), keyOf)
 		result.unionWithSource(sources[0])
 		return result
 	}
 
 	filterIdx := 1
 	for idx := 2; idx < len(sources); idx++ {
-		if sources[idx].Length() < sources[filterIdx].Length() {
+		if sources[idx].Len() < sources[filterIdx].Len() {
 			filterIdx = idx
 		}
 	}
 
-	var result *KeyedHashSet[K, T]
-	if sources[0].Length() <= sources[filterIdx].Length() {
-		result = NewKeyedHashSet(sources[0].Length(), keyOf)
+	var result *KeyedHashSet[T, K]
+	if sources[0].Len() <= sources[filterIdx].Len() {
+		result = NewKeyedHashSet(sources[0].Len(), keyOf)
 		result.unionWithSource(sources[0])
 		result.intersectWith(sources[filterIdx])
 	} else {
 		keys := collectKeyedKeys(sources[filterIdx], keyOf)
-		result = NewKeyedHashSet(min(sources[0].Length(), len(keys)), keyOf)
+		result = NewKeyedHashSet(min(sources[0].Len(), len(keys)), keyOf)
 		for value := range sources[0].All() {
 			key := keyOf(value)
 			_, exists := keys[key]
@@ -119,15 +119,15 @@ func NewKeyedHashSetIntersection[T any, K comparable](
 func NewKeyedHashSetDifference[T any, K comparable](
 	keyOf func(T) K,
 	sources ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(sources) == 0 {
 		return NewKeyedHashSet(0, keyOf)
 	}
 
-	result := NewKeyedHashSet(sources[0].Length(), keyOf)
+	result := NewKeyedHashSet(sources[0].Len(), keyOf)
 	result.unionWithSource(sources[0])
 	for _, source := range sources[1:] {
-		if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+		if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 			for _, value := range sourceSet.values {
 				delete(result.values, keyOf(value))
 			}
@@ -149,90 +149,71 @@ func NewKeyedHashSetDifference[T any, K comparable](
 func NewKeyedHashSetSymmetricDifference[T any, K comparable](
 	keyOf func(T) K,
 	sources ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(sources) == 0 {
 		return NewKeyedHashSet(0, keyOf)
 	}
 
-	result := NewKeyedHashSet(sources[0].Length(), keyOf)
+	result := NewKeyedHashSet(sources[0].Len(), keyOf)
 	result.unionWithSource(sources[0])
 	toggleKeyedSources(result, sources[1:])
 	return result
 }
 
-// Length returns the number of distinct keys in the set.
+// Len returns the number of distinct keys in the set.
 //
 // Complexity: O(1).
-func (set *KeyedHashSet[K, T]) Length() int {
+func (set *KeyedHashSet[T, K]) Len() int {
 	return len(set.values)
 }
 
 // IsEmpty returns true if the set contains no values.
 //
 // Complexity: O(1).
-func (set *KeyedHashSet[K, T]) IsEmpty() bool {
+func (set *KeyedHashSet[T, K]) IsEmpty() bool {
 	return len(set.values) == 0
 }
 
 // Contains returns true if the key derived from x belongs to the set.
 //
-// Complexity: Expected O(1) plus the cost of the identity function.
-func (set *KeyedHashSet[K, T]) Contains(x T) bool {
+// Complexity: O(1) on average plus the cost of the identity function.
+func (set *KeyedHashSet[T, K]) Contains(x T) bool {
 	_, ok := set.values[set.keyOf(x)]
 	return ok
 }
 
-// Add inserts x unless its derived key is already present, reports whether the
-// set changed, and preserves existing representatives.
+// Add inserts every value in xs whose derived key is not already present and
+// returns the number of values added. Existing representatives are preserved.
+// Empty input leaves the set unchanged.
 //
-// Complexity: Expected O(1) plus the cost of the identity function.
-func (set *KeyedHashSet[K, T]) Add(x T) bool {
-	key := set.keyOf(x)
-	if _, ok := set.values[key]; ok {
-		return false
-	}
-	if set.values == nil {
-		set.values = make(map[K]T)
-	}
-	set.values[key] = x
-	return true
-}
-
-// Adds inserts every value in xs whose derived key is not already present and
-// returns the number of values added.
-//
-// Complexity: Expected O(len(xs)) plus the identity-function calls.
-func (set *KeyedHashSet[K, T]) Adds(xs ...T) (added int) {
+// Complexity: O(len(xs)) on average plus the identity-function calls.
+func (set *KeyedHashSet[T, K]) Add(xs ...T) (added int) {
 	for _, x := range xs {
-		if set.Add(x) {
-			added++
+		key := set.keyOf(x)
+		if _, ok := set.values[key]; ok {
+			continue
 		}
+		if set.values == nil {
+			set.values = make(map[K]T)
+		}
+		set.values[key] = x
+		added++
 	}
 	return added
 }
 
-// Remove deletes the value with the same derived key as x and reports whether
-// it was present.
+// Remove deletes every value in xs whose derived key is present and returns
+// the number of values removed. Empty input leaves the set unchanged.
 //
-// Complexity: Expected O(1) plus the cost of the identity function.
-func (set *KeyedHashSet[K, T]) Remove(x T) bool {
-	key := set.keyOf(x)
-	if _, ok := set.values[key]; !ok {
-		return false
-	}
-	delete(set.values, key)
-	return true
-}
-
-// Removes deletes every value in xs whose derived key is present and returns
-// the number of values removed.
-//
-// Complexity: Expected O(len(xs)) plus the identity-function calls.
-func (set *KeyedHashSet[K, T]) Removes(xs ...T) (removed int) {
+// Complexity: O(len(xs)) on average plus the identity-function calls.
+func (set *KeyedHashSet[T, K]) Remove(xs ...T) (removed int) {
 	for _, x := range xs {
-		if set.Remove(x) {
-			removed++
+		key := set.keyOf(x)
+		if _, ok := set.values[key]; !ok {
+			continue
 		}
+		delete(set.values, key)
+		removed++
 	}
 	return removed
 }
@@ -241,7 +222,7 @@ func (set *KeyedHashSet[K, T]) Removes(xs ...T) (removed int) {
 // representative values and preserving its identity function.
 //
 // Complexity: O(N).
-func (set *KeyedHashSet[K, T]) Clone() *KeyedHashSet[K, T] {
+func (set *KeyedHashSet[T, K]) Clone() *KeyedHashSet[T, K] {
 	clone := NewKeyedHashSet(len(set.values), set.keyOf)
 	maps.Copy(clone.values, set.values)
 	return clone
@@ -250,12 +231,12 @@ func (set *KeyedHashSet[K, T]) Clone() *KeyedHashSet[K, T] {
 // Union returns a new set containing identities present in the receiver or any
 // other operand. The receiver's identity function applies to every operand.
 //
-// Complexity: Expected O(N + sum of operand lengths), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) Union(
+// Complexity: O(N + sum of operand lengths) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) Union(
 	others ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(others) == 1 {
-		if otherSet, ok := others[0].(*KeyedHashSet[K, T]); ok && otherSet == set {
+		if otherSet, ok := others[0].(*KeyedHashSet[T, K]); ok && otherSet == set {
 			return set.Clone()
 		}
 	}
@@ -265,7 +246,7 @@ func (set *KeyedHashSet[K, T]) Union(
 	capacity := len(set.values)
 	largestSource := 0
 	for _, other := range others {
-		largestSource = max(largestSource, other.Length())
+		largestSource = max(largestSource, other.Len())
 	}
 	result := NewKeyedHashSet(capacity+largestSource, set.keyOf)
 	maps.Copy(result.values, set.values)
@@ -276,16 +257,16 @@ func (set *KeyedHashSet[K, T]) Union(
 // Intersection returns a new set containing identities present in the receiver
 // and every other operand. Receiver representatives are preserved.
 //
-// Complexity: Expected O(N * len(others) + sum of operand lengths), plus keyOf
+// Complexity: O(N * len(others) + sum of operand lengths) on average, plus keyOf
 // calls.
-func (set *KeyedHashSet[K, T]) Intersection(
+func (set *KeyedHashSet[T, K]) Intersection(
 	others ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(others) == 0 {
 		return set.Clone()
 	}
 	if len(others) == 1 {
-		if otherSet, ok := others[0].(*KeyedHashSet[K, T]); ok && otherSet == set {
+		if otherSet, ok := others[0].(*KeyedHashSet[T, K]); ok && otherSet == set {
 			return set.Clone()
 		}
 	}
@@ -293,7 +274,7 @@ func (set *KeyedHashSet[K, T]) Intersection(
 		return NewKeyedHashSet(0, set.keyOf)
 	}
 	for _, other := range others {
-		if other.Length() == 0 {
+		if other.Len() == 0 {
 			return NewKeyedHashSet(0, set.keyOf)
 		}
 	}
@@ -328,20 +309,20 @@ func (set *KeyedHashSet[K, T]) Intersection(
 // Difference returns a new set containing receiver identities absent from
 // every other operand. Receiver representatives are preserved.
 //
-// Complexity: Expected O(N + sum of operand lengths), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) Difference(
+// Complexity: O(N + sum of operand lengths) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) Difference(
 	others ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(others) == 0 {
 		return set.Clone()
 	}
 
 	excluded := make(map[K]struct{})
 	for _, other := range others {
-		if otherSet, ok := other.(*KeyedHashSet[K, T]); ok && otherSet == set {
+		if otherSet, ok := other.(*KeyedHashSet[T, K]); ok && otherSet == set {
 			return NewKeyedHashSet(0, set.keyOf)
 		}
-		if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+		if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 			for _, value := range otherSet.values {
 				key := set.keyOf(value)
 				if _, exists := set.values[key]; exists {
@@ -374,12 +355,12 @@ func (set *KeyedHashSet[K, T]) Difference(
 // number of the receiver and other operands. A surviving identity uses the
 // representative from the last operand that toggles it into the result.
 //
-// Complexity: Expected O(N + sum of operand lengths), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) SymmetricDifference(
+// Complexity: O(N + sum of operand lengths) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) SymmetricDifference(
 	others ...Source[T],
-) *KeyedHashSet[K, T] {
+) *KeyedHashSet[T, K] {
 	if len(others) == 1 {
-		if otherSet, ok := others[0].(*KeyedHashSet[K, T]); ok && otherSet == set {
+		if otherSet, ok := others[0].(*KeyedHashSet[T, K]); ok && otherSet == set {
 			return NewKeyedHashSet(0, set.keyOf)
 		}
 	}
@@ -390,16 +371,16 @@ func (set *KeyedHashSet[K, T]) SymmetricDifference(
 
 // Equal returns true if the receiver and other contain the same derived keys.
 //
-// Complexity: Expected O(N + other.Length()), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) Equal(other Source[T]) bool {
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok && otherSet == set {
+// Complexity: O(N + other.Len()) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) Equal(other Source[T]) bool {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok && otherSet == set {
 		return true
 	}
-	if len(set.values) > other.Length() {
+	if len(set.values) > other.Len() {
 		return false
 	}
-	matched := make(map[K]struct{}, min(len(set.values), other.Length()))
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+	matched := make(map[K]struct{}, min(len(set.values), other.Len()))
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 		for _, value := range otherSet.values {
 			key := set.keyOf(value)
 			if _, exists := set.values[key]; !exists {
@@ -421,16 +402,16 @@ func (set *KeyedHashSet[K, T]) Equal(other Source[T]) bool {
 
 // IsSubset returns true if every receiver key is present in other.
 //
-// Complexity: Expected O(N + other.Length()), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) IsSubset(other Source[T]) bool {
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok && otherSet == set {
+// Complexity: O(N + other.Len()) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) IsSubset(other Source[T]) bool {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok && otherSet == set {
 		return true
 	}
-	if len(set.values) > other.Length() {
+	if len(set.values) > other.Len() {
 		return false
 	}
-	matched := make(map[K]struct{}, min(len(set.values), other.Length()))
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+	matched := make(map[K]struct{}, min(len(set.values), other.Len()))
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 		for _, value := range otherSet.values {
 			key := set.keyOf(value)
 			if _, exists := set.values[key]; exists {
@@ -457,16 +438,16 @@ func (set *KeyedHashSet[K, T]) IsSubset(other Source[T]) bool {
 // IsProperSubset returns true if the receiver is a subset of other and the two
 // operands are not equal.
 //
-// Complexity: Expected O(N + other.Length()), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) IsProperSubset(
+// Complexity: O(N + other.Len()) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) IsProperSubset(
 	other Source[T],
 ) bool {
-	if len(set.values) >= other.Length() {
+	if len(set.values) >= other.Len() {
 		return false
 	}
-	matched := make(map[K]struct{}, min(len(set.values), other.Length()))
+	matched := make(map[K]struct{}, min(len(set.values), other.Len()))
 	hasExtra := false
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 		for _, value := range otherSet.values {
 			key := set.keyOf(value)
 			if _, exists := set.values[key]; exists {
@@ -497,9 +478,9 @@ func (set *KeyedHashSet[K, T]) IsProperSubset(
 // IsSuperset returns true if every identity in other is present in the
 // receiver.
 //
-// Complexity: Expected O(other.Length()), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) IsSuperset(other Source[T]) bool {
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+// Complexity: O(other.Len()) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) IsSuperset(other Source[T]) bool {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 		if otherSet == set {
 			return true
 		}
@@ -521,15 +502,15 @@ func (set *KeyedHashSet[K, T]) IsSuperset(other Source[T]) bool {
 // IsProperSuperset returns true if the receiver is a superset of other and the
 // two operands are not equal.
 //
-// Complexity: Expected O(N + other.Length()), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) IsProperSuperset(
+// Complexity: O(N + other.Len()) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) IsProperSuperset(
 	other Source[T],
 ) bool {
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok && otherSet == set {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok && otherSet == set {
 		return false
 	}
-	matched := make(map[K]struct{}, min(len(set.values), other.Length()))
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+	matched := make(map[K]struct{}, min(len(set.values), other.Len()))
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 		for _, value := range otherSet.values {
 			key := set.keyOf(value)
 			if _, exists := set.values[key]; !exists {
@@ -557,11 +538,11 @@ func (set *KeyedHashSet[K, T]) IsProperSuperset(
 
 // IsDisjoint returns true if the receiver and other share no derived key.
 //
-// Complexity: Expected O(other.Length()), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) IsDisjoint(
+// Complexity: O(other.Len()) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) IsDisjoint(
 	other Source[T],
 ) bool {
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 		if otherSet == set {
 			return len(set.values) == 0
 		}
@@ -582,23 +563,23 @@ func (set *KeyedHashSet[K, T]) IsDisjoint(
 
 // UnionWith adds identities from every operand and returns how many were added.
 //
-// Complexity: Expected O(sum of operand lengths), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) UnionWith(
+// Complexity: O(sum of operand lengths) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) UnionWith(
 	others ...Source[T],
 ) (added int) {
 	for _, other := range others {
-		if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+		if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 			if otherSet == set {
 				continue
 			}
 			for _, value := range otherSet.values {
-				if set.Add(value) {
+				if set.Add(value) > 0 {
 					added++
 				}
 			}
 		} else {
 			for value := range other.All() {
-				if set.Add(value) {
+				if set.Add(value) > 0 {
 					added++
 				}
 			}
@@ -610,9 +591,9 @@ func (set *KeyedHashSet[K, T]) UnionWith(
 // IntersectWith removes receiver identities absent from any operand and
 // returns how many were removed.
 //
-// Complexity: Expected O(N * len(others) + sum of operand lengths), plus keyOf
+// Complexity: O(N * len(others) + sum of operand lengths) on average, plus keyOf
 // calls.
-func (set *KeyedHashSet[K, T]) IntersectWith(
+func (set *KeyedHashSet[T, K]) IntersectWith(
 	others ...Source[T],
 ) (removed int) {
 	if len(set.values) == 0 || len(others) == 0 {
@@ -620,7 +601,7 @@ func (set *KeyedHashSet[K, T]) IntersectWith(
 	}
 
 	first := smallestSource(others)
-	if others[first].Length() == 0 {
+	if others[first].Len() == 0 {
 		removed := len(set.values)
 		clear(set.values)
 		return removed
@@ -640,15 +621,15 @@ func (set *KeyedHashSet[K, T]) IntersectWith(
 // DifferenceWith removes identities present in any operand and returns how
 // many were removed.
 //
-// Complexity: Expected O(sum of operand lengths), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) DifferenceWith(
+// Complexity: O(sum of operand lengths) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) DifferenceWith(
 	others ...Source[T],
 ) (removed int) {
 	if len(set.values) == 0 {
 		return 0
 	}
 	for _, other := range others {
-		if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+		if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 			if otherSet == set {
 				removed += len(set.values)
 				clear(set.values)
@@ -684,15 +665,15 @@ func (set *KeyedHashSet[K, T]) DifferenceWith(
 // toggled into the receiver uses the representative from the last operand that
 // makes it present.
 //
-// Complexity: Expected O(sum of operand lengths), plus keyOf calls.
-func (set *KeyedHashSet[K, T]) SymmetricDifferenceWith(
+// Complexity: O(sum of operand lengths) on average, plus keyOf calls.
+func (set *KeyedHashSet[T, K]) SymmetricDifferenceWith(
 	others ...Source[T],
 ) int {
 	if len(others) == 0 {
 		return 0
 	}
 	if len(others) == 1 {
-		if otherSet, ok := others[0].(*KeyedHashSet[K, T]); ok {
+		if otherSet, ok := others[0].(*KeyedHashSet[T, K]); ok {
 			if otherSet == set {
 				changed := len(set.values)
 				clear(set.values)
@@ -741,7 +722,7 @@ func (set *KeyedHashSet[K, T]) SymmetricDifferenceWith(
 	var seen map[K]struct{}
 	for _, other := range others {
 		if seen == nil {
-			seen = make(map[K]struct{}, other.Length())
+			seen = make(map[K]struct{}, other.Len())
 		} else {
 			clear(seen)
 		}
@@ -767,7 +748,7 @@ func (set *KeyedHashSet[K, T]) SymmetricDifferenceWith(
 			states[key] = state
 		}
 
-		if otherSet, ok := other.(*KeyedHashSet[K, T]); ok {
+		if otherSet, ok := other.(*KeyedHashSet[T, K]); ok {
 			for _, value := range otherSet.values {
 				toggle(value)
 			}
@@ -802,10 +783,10 @@ func (set *KeyedHashSet[K, T]) SymmetricDifferenceWith(
 	return changed
 }
 
-func (set *KeyedHashSet[K, T]) intersectWith(
+func (set *KeyedHashSet[T, K]) intersectWith(
 	other Source[T],
 ) (removed int) {
-	if otherSet, ok := other.(*KeyedHashSet[K, T]); ok && otherSet == set {
+	if otherSet, ok := other.(*KeyedHashSet[T, K]); ok && otherSet == set {
 		return 0
 	}
 
@@ -819,9 +800,9 @@ func (set *KeyedHashSet[K, T]) intersectWith(
 	return removed
 }
 
-func (set *KeyedHashSet[K, T]) unionWithSource(source Source[T]) (added int) {
+func (set *KeyedHashSet[T, K]) unionWithSource(source Source[T]) (added int) {
 	for value := range source.All() {
-		if set.Add(value) {
+		if set.Add(value) > 0 {
 			added++
 		}
 	}
@@ -829,17 +810,17 @@ func (set *KeyedHashSet[K, T]) unionWithSource(source Source[T]) (added int) {
 }
 
 func toggleKeyedSources[T any, K comparable, S Source[T]](
-	set *KeyedHashSet[K, T],
+	set *KeyedHashSet[T, K],
 	others []S,
 ) {
 	var seen map[K]struct{}
 	for _, other := range others {
 		if seen == nil {
-			seen = make(map[K]struct{}, other.Length())
+			seen = make(map[K]struct{}, other.Len())
 		} else {
 			clear(seen)
 		}
-		if otherSet, ok := any(other).(*KeyedHashSet[K, T]); ok {
+		if otherSet, ok := any(other).(*KeyedHashSet[T, K]); ok {
 			for _, value := range otherSet.values {
 				key := set.keyOf(value)
 				if _, duplicate := seen[key]; duplicate {
@@ -873,7 +854,7 @@ func toggleKeyedSources[T any, K comparable, S Source[T]](
 // order.
 //
 // Complexity: O(N) for a full traversal, O(1) per step.
-func (set *KeyedHashSet[K, T]) All() iter.Seq[T] {
+func (set *KeyedHashSet[T, K]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range set.values {
 			if !yield(value) {
@@ -887,7 +868,7 @@ func (set *KeyedHashSet[K, T]) All() iter.Seq[T] {
 // values in unspecified order.
 //
 // Complexity: O(N) for a full traversal, O(1) per step.
-func (set *KeyedHashSet[K, T]) Enumerate() iter.Seq2[int, T] {
+func (set *KeyedHashSet[T, K]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		idx := 0
 		for _, value := range set.values {
@@ -902,8 +883,8 @@ func (set *KeyedHashSet[K, T]) Enumerate() iter.Seq2[int, T] {
 // Clear removes all values while preserving the identity function and keeping
 // the set initialized for reuse.
 //
-// Complexity: O(allocated map storage).
-func (set *KeyedHashSet[K, T]) Clear() {
+// Complexity: O(N).
+func (set *KeyedHashSet[T, K]) Clear() {
 	clear(set.values)
 }
 
@@ -911,7 +892,7 @@ func (set *KeyedHashSet[K, T]) Clear() {
 // iteration order.
 //
 // Complexity: O(N).
-func (set *KeyedHashSet[K, T]) MarshalJSON() ([]byte, error) {
+func (set *KeyedHashSet[T, K]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(set)
 }
 
@@ -919,7 +900,7 @@ func collectKeyedIdentities[T any, K comparable](
 	source Source[T],
 	keyOf func(T) K,
 ) map[K]T {
-	identities := make(map[K]T, source.Length())
+	identities := make(map[K]T, source.Len())
 	for value := range source.All() {
 		key := keyOf(value)
 		if _, exists := identities[key]; !exists {
@@ -933,8 +914,8 @@ func collectKeyedKeys[T any, K comparable](
 	source Source[T],
 	keyOf func(T) K,
 ) map[K]struct{} {
-	keys := make(map[K]struct{}, source.Length())
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	keys := make(map[K]struct{}, source.Len())
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		for _, value := range sourceSet.values {
 			keys[keyOf(value)] = struct{}{}
 		}
@@ -951,8 +932,8 @@ func collectKeyedMatches[T any, K comparable, V any](
 	keyOf func(T) K,
 	membership map[K]V,
 ) map[K]struct{} {
-	matches := make(map[K]struct{}, min(source.Length(), len(membership)))
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	matches := make(map[K]struct{}, min(source.Len(), len(membership)))
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		for _, value := range sourceSet.values {
 			key := keyOf(value)
 			if _, exists := membership[key]; exists {
@@ -976,14 +957,14 @@ func CollectKeyedKeys[T any, K comparable](
 	source Source[T],
 	keyOf func(T) K,
 ) map[K]struct{} {
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		keys := make(map[K]struct{}, len(sourceSet.values))
 		for _, value := range sourceSet.values {
 			keys[keyOf(value)] = struct{}{}
 		}
 		return keys
 	}
-	keys := make(map[K]struct{}, source.Length())
+	keys := make(map[K]struct{}, source.Len())
 	for value := range source.All() {
 		keys[keyOf(value)] = struct{}{}
 	}
@@ -996,14 +977,14 @@ func CollectKeyedMembership[T any, K comparable](
 	source Source[T],
 	keyOf func(T) K,
 ) map[K]bool {
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		membership := make(map[K]bool, len(sourceSet.values))
 		for _, value := range sourceSet.values {
 			membership[keyOf(value)] = false
 		}
 		return membership
 	}
-	membership := make(map[K]bool, source.Length())
+	membership := make(map[K]bool, source.Len())
 	for value := range source.All() {
 		membership[keyOf(value)] = false
 	}
@@ -1017,7 +998,7 @@ func MatchKeyedMembership[T any, K comparable](
 	source Source[T],
 	keyOf func(T) K,
 ) (matched int, contained bool) {
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		for _, value := range sourceSet.values {
 			key := keyOf(value)
 			seen, exists := membership[key]
@@ -1056,7 +1037,7 @@ func MatchKeyedSubset[T any, K comparable](
 		return true
 	}
 	matched := 0
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		for _, value := range sourceSet.values {
 			key := keyOf(value)
 			seen, exists := membership[key]
@@ -1091,7 +1072,7 @@ func MatchKeyedContainedMembership[T any, K comparable](
 	source Source[T],
 	keyOf func(T) K,
 ) (matched int, hasExtra bool) {
-	if sourceSet, ok := source.(*KeyedHashSet[K, T]); ok {
+	if sourceSet, ok := source.(*KeyedHashSet[T, K]); ok {
 		for _, value := range sourceSet.values {
 			key := keyOf(value)
 			seen, exists := membership[key]

@@ -13,8 +13,8 @@ type Collection[T any] interface {
 	// IsEmpty returns true if the collection is empty.
 	IsEmpty() bool
 
-	// Length returns the number of elements in the collection.
-	Length() int
+	// Len returns the number of elements in the collection.
+	Len() int
 
 	// All returns an iterator for the collection.
 	//

@@ -3,8 +3,8 @@
 // # Implementations
 //
 // [HashSet] stores comparable values directly as Go map keys. Choose it when Go
-// equality defines value identity. Its zero value is ready for use. Use
-// [NewHashSet] to choose an initial capacity or [HashSetFrom] to populate it.
+// equality defines value identity. Its zero value is ready for use. Select it
+// with [NewHashSet].
 //
 // [KeyedHashSet] stores arbitrary values and derives a comparable identity key
 // through a caller-provided function. Choose it for values that are not
@@ -18,21 +18,24 @@
 //
 // Hash identity must also be reflexive. Go floating-point NaN values are not
 // equal to themselves, so they cannot be found after insertion into HashSet and
-// must not be returned directly as KeyedHashSet keys. Use NewKeyedHashSet with
-// a canonical comparable representation when NaN values need set membership.
+// must not be returned directly as KeyedHashSet keys. Use NewKeyedHashSet with a
+// canonical comparable representation when NaN values need set membership.
 // When HashSet uses an interface type, every dynamic value supplied as a key
 // must be comparable, matching the requirements of a native Go map.
 //
 // # Construction
 //
-// NewHashSet creates an empty HashSet, while HashSetFrom and HashSetFromSeq
-// build one from a slice or iterator. NewKeyedHashSet creates an empty
-// KeyedHashSet, while KeyedHashSetFrom and KeyedHashSetFromSeq build one from a
-// slice or iterator. KeyedHashSetFromMap shares a map as its backing storage;
-// KeyedHashSetCloneMap copies it. For both map constructors, callers are
-// responsible for ensuring each map key matches the identity of its value.
-// Slice and iterator constructors discard duplicates while preserving the
-// first value encountered for each identity.
+// [NewHashSet] and [NewKeyedHashSet] create empty sets. [HashSetFrom] and
+// [KeyedHashSetFrom] copy values into map storage without retaining the source
+// slice. [HashSetFromSeq] and [KeyedHashSetFromSeq] consume iterators once.
+// From and FromSeq discard duplicates while preserving the first value
+// encountered for each identity. [KeyedHashSetFromMap] shares its input map;
+// [KeyedHashSetCloneMap] copies it. Both require every map key to match the
+// identity of its value.
+//
+// Add and Remove accept zero, one, or many values and return the number of
+// membership changes. Repeated identities are counted only once, and empty
+// input returns zero without changing the set.
 //
 // # Set Algebra
 //
@@ -97,10 +100,11 @@
 // stable set indexes. Iterators are lazy and callers must not mutate the set
 // while iteration is running.
 //
-// Sets marshal as JSON arrays in unspecified iteration order. They do not
-// implement json.Unmarshaler because a JSON array does not encode the selected
-// identity policy. Decode into []T and pass the values to HashSetFrom or
-// KeyedHashSetFrom with the same identity function.
+// HashSet and KeyedHashSet marshal as JSON arrays in unspecified iteration
+// order. The Set and Readonly interfaces do not require JSON methods.
+// The concrete types do not implement json.Unmarshaler because a JSON array
+// does not encode the selected identity policy. Decode into []T and pass the
+// values to the same HashSetFrom or KeyedHashSetFrom constructor family.
 //
 // Sets are not safe for concurrent use. Callers must synchronize access when
 // any goroutine may mutate a shared set.

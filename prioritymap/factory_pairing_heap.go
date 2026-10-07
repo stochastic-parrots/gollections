@@ -7,58 +7,89 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
 )
 
-// PairingHeapPriorityMap is an indexed, pointer-based pairing heap. Its zero
-// value is invalid; construct one with [PairingHeap] or [OrderedPairingHeap].
+// PairingHeapPriorityMap is an indexed, pointer-based pairing heap. Its zero value is invalid;
+// use NewPairingHeap or NewOrderedPairingHeap.
 type PairingHeapPriorityMap[K comparable, P any] = prioritymap.PairingPriorityMap[K, P]
 
 var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}
 
-// PairingHeapFactory constructs pairing-heap priority maps with a fixed ordering.
+// NewPairingHeap creates an indexed pairing-heap priority map with a stable
+// strict-weak-order predicate. Choose it when priority improvements are frequent.
+// It panics for a nil predicate. The freelist retains at most capacity nodes;
+// zero capacity disables freelist retention.
+// An improvement performs a lookup, at most one cut, and one heap link, so its
+// immediate heap work is O(1). Pop later consolidates children in two passes.
+// The amortized rows account for this deferred work across mixed operations,
+// using a conservative O(log N) bound for Improve.
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which may differ from the constructor's capacity argument.
+// Preallocation or growth followed by removals can leave C much larger than N.
+// The O(C) iterator rows describe full traversal: iteration examines index
+// slots, including empty ones. Clear scans the index and visits N heap nodes.
 //
-// Pairing priority maps provide O(1) lookup and Peek. Priority improvements are
-// O(1) amortized, while Pop, removal, and arbitrary updates are O(log N)
-// amortized.
-// The comparator must be non-nil, define a strict weak ordering, and remain
-// stable for the lifetime of every map created by the factory.
+// Performance Summary (Time Complexity):
 //
-// The zero value is invalid. Create a factory with [PairingHeap] or
-// [OrderedPairingHeap].
+//	Operation                Time Complexity
+//	----------------------   ---------------
+//	Get(key)                 O(1)
+//	Contains(key)            O(1)
+//	Keys()                   O(C)
+//	Values()                 O(C)
+//	All()                    O(C)
+//	IsEmpty()                O(1)
+//	Len()                    O(1)
+//	Peek()                   O(1)
+//	Set(key, priority)       O(log N) Amortized
+//	Update(key, priority)    O(log N) Amortized
+//	Improve(key, priority)   O(log N) Amortized
+//	Remove(key)              O(log N) Amortized
+//	Pop()                    O(log N) Amortized
+//	Drain()                  O(N log N) Amortized
+//	Clear()                  O(C)
 //
-// Performance Summary (Amortized Time Complexity):
-//
-//	Operation           Time Complexity
-//	-----------------   ---------------
-//	New(capacity)       O(capacity)
-//	Improve             O(1) when priority improves
-//	Update              O(log N)
-//	Get/Peek            O(1)
-//	Remove/Pop          O(log N)
-//	Drain               O(N log N)
-//	Clear               O(N)
-type PairingHeapFactory[K comparable, P any] struct {
-	hasPriority func(P, P) bool
-}
-
-// PairingHeap returns a pairing-heap priority-map factory using hasPriority for ordering.
-// It panics if hasPriority is nil.
-func PairingHeap[K comparable, P any](hasPriority func(P, P) bool) PairingHeapFactory[K, P] {
+// Complexity: O(capacity).
+func NewPairingHeap[K comparable, P any](hasPriority func(P, P) bool, capacity int) *PairingHeapPriorityMap[K, P] {
 	if hasPriority == nil {
 		panic("prioritymap: nil priority comparator")
 	}
-	return PairingHeapFactory[K, P]{hasPriority: hasPriority}
+	return prioritymap.NewPairingPriorityMapWithCapacity[K](capacity, hasPriority)
 }
 
-// OrderedPairingHeap returns a pairing-heap factory using the natural order of P.
-func OrderedPairingHeap[K comparable, P cmp.Ordered](order Order) PairingHeapFactory[K, P] {
+// NewOrderedPairingHeap creates an empty priority map using P's natural order.
+// An improvement performs a lookup, at most one cut, and one heap link, so its
+// immediate heap work is O(1). Pop later consolidates children in two passes.
+// The amortized rows account for this deferred work across mixed operations,
+// using a conservative O(log N) bound for Improve.
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which may differ from the constructor's capacity argument.
+// Preallocation or growth followed by removals can leave C much larger than N.
+// The O(C) iterator rows describe full traversal: iteration examines index
+// slots, including empty ones. Clear scans the index and visits N heap nodes.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation                Time Complexity
+//	----------------------   ---------------
+//	Get(key)                 O(1)
+//	Contains(key)            O(1)
+//	Keys()                   O(C)
+//	Values()                 O(C)
+//	All()                    O(C)
+//	IsEmpty()                O(1)
+//	Len()                    O(1)
+//	Peek()                   O(1)
+//	Set(key, priority)       O(log N) Amortized
+//	Update(key, priority)    O(log N) Amortized
+//	Improve(key, priority)   O(log N) Amortized
+//	Remove(key)              O(log N) Amortized
+//	Pop()                    O(log N) Amortized
+//	Drain()                  O(N log N) Amortized
+//	Clear()                  O(C)
+//
+// Complexity: O(capacity).
+func NewOrderedPairingHeap[K comparable, P cmp.Ordered](order Order, capacity int) *PairingHeapPriorityMap[K, P] {
 	if order == Max {
-		return PairingHeap[K](ordering.Max[P]())
+		return NewPairingHeap[K](ordering.Max[P](), capacity)
 	}
-	return PairingHeap[K](ordering.Min[P]())
-}
-
-// New creates an empty pairing priority map with the requested initial capacity.
-// The freelist retains at most capacity nodes for reuse. A zero capacity
-// disables freelist retention.
-func (factory PairingHeapFactory[K, P]) New(capacity int) *PairingHeapPriorityMap[K, P] {
-	return prioritymap.NewPairingPriorityMapWithCapacity[K](capacity, factory.hasPriority)
+	return NewPairingHeap[K](ordering.Min[P](), capacity)
 }

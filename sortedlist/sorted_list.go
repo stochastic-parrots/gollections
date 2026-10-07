@@ -26,17 +26,17 @@ const (
 type Readonly[T any] interface {
 	// Get returns the element at the specified sorted index.
 	//
-	// Returns an error if the index is out of bounds [0, Length).
+	// Returns an error if the index is out of bounds [0, Len).
 	Get(idx int) (x T, err error)
 
 	// LowerBound returns the first index whose value does not sort before x.
 	//
-	// It returns Length when every value sorts before x.
+	// It returns Len when every value sorts before x.
 	LowerBound(x T) int
 
 	// UpperBound returns the first index whose value sorts after x.
 	//
-	// It returns Length when no value sorts after x.
+	// It returns Len when no value sorts after x.
 	UpperBound(x T) int
 
 	// EqualRange returns the half-open index range containing values equivalent to x.
@@ -99,8 +99,6 @@ type Readonly[T any] interface {
 	ToSlice() []T
 
 	gollections.Collection[T]
-	fmt.Stringer
-	json.Marshaler
 }
 
 // SortedList defines a list whose order is derived from a comparator or natural
@@ -108,11 +106,9 @@ type Readonly[T any] interface {
 type SortedList[T any] interface {
 	Readonly[T]
 
-	// Add inserts x while preserving the sorted invariant.
-	Add(x T)
-
-	// Adds inserts zero or more values while preserving the sorted invariant.
-	Adds(xs ...T)
+	// Add inserts the given values while preserving the sorted invariant.
+	// With no values, it leaves the list unchanged.
+	Add(xs ...T)
 
 	// Replace changes the value at idx while preserving the sorted invariant.
 	//
@@ -130,8 +126,13 @@ type SortedList[T any] interface {
 
 // AsReadonly returns a [Readonly] view of the provided [SortedList].
 //
-// The returned view is a wrapper that prevents type assertion back to
-// the mutable interface, ensuring data safety for observers.
+// The returned view observes the same underlying collection while preventing
+// type assertion back to the mutable interface. It is not a snapshot and does
+// not provide synchronization.
+//
+// The wrapper implements fmt.Stringer and json.Marshaler through fmt.Sprint
+// and json.Marshal on the wrapped collection, following those packages'
+// formatting, JSON validation, and error wrapping behavior.
 func AsReadonly[T any](list SortedList[T]) *readonly[T] {
 	if list == nil {
 		return nil
@@ -181,10 +182,10 @@ func (w readonly[T]) Enumerate() iter.Seq2[int, T] { return w.inner.Enumerate() 
 
 func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[T]) Length() int { return w.inner.Length() }
+func (w readonly[T]) Len() int { return w.inner.Len() }
 
-func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
+func (w readonly[T]) MarshalJSON() ([]byte, error) { return json.Marshal(w.inner) }
 
-func (w readonly[T]) String() string { return w.inner.String() }
+func (w readonly[T]) String() string { return fmt.Sprint(w.inner) }
 
 var _ Readonly[any] = (*readonly[any])(nil)

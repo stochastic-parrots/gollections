@@ -2,7 +2,7 @@ package set
 
 import "testing"
 
-func BenchmarkHashSet_Adds(b *testing.B) {
+func BenchmarkHashSet_AddBatch(b *testing.B) {
 	const size = 10_000
 	values := make([]int, size)
 	for idx := range values {
@@ -14,7 +14,7 @@ func BenchmarkHashSet_Adds(b *testing.B) {
 		b.StopTimer()
 		set := NewHashSet[int](size)
 		b.StartTimer()
-		set.Adds(values...)
+		set.Add(values...)
 	}
 }
 
@@ -50,7 +50,7 @@ func BenchmarkHashSet_Remove(b *testing.B) {
 	}
 }
 
-func BenchmarkHashSet_Removes(b *testing.B) {
+func BenchmarkHashSet_RemoveBatch(b *testing.B) {
 	const size = 10_000
 	values := make([]int, size)
 	for idx := range values {
@@ -62,7 +62,7 @@ func BenchmarkHashSet_Removes(b *testing.B) {
 		b.StopTimer()
 		set := NewHashSetFromSlice(values)
 		b.StartTimer()
-		set.Removes(values...)
+		set.Remove(values...)
 	}
 }
 
@@ -116,7 +116,7 @@ func BenchmarkHashSet_UnionWithPreallocated(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		b.StopTimer()
-		set := NewHashSet[int](left.Length() + right.Length())
+		set := NewHashSet[int](left.Len() + right.Len())
 		set.UnionWith(left)
 		b.StartTimer()
 		set.UnionWith(right)

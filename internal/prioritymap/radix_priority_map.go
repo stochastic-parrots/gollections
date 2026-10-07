@@ -417,10 +417,10 @@ func (pm *RadixPriorityMap[K, P]) IsEmpty() bool {
 	return len(pm.entries) == 0
 }
 
-// Length returns the current number of elements in the heap.
+// Len returns the current number of elements in the heap.
 //
 // Complexity: O(1).
-func (pm *RadixPriorityMap[K, P]) Length() int {
+func (pm *RadixPriorityMap[K, P]) Len() int {
 	return len(pm.entries)
 }
 

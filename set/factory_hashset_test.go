@@ -1,10 +1,12 @@
 package set_test
 
 import (
+	"encoding/json"
 	"iter"
 	"slices"
 	"testing"
 
+	"github.com/stochastic-parrots/gollections/list"
 	"github.com/stochastic-parrots/gollections/set"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +17,7 @@ func (values hashValueSource[T]) All() iter.Seq[T] {
 	return slices.Values(values)
 }
 
-func (values hashValueSource[T]) Length() int {
+func (values hashValueSource[T]) Len() int {
 	return len(values)
 }
 
@@ -23,47 +25,18 @@ func TestNewHashSet(t *testing.T) {
 	assertSetBehavior(t, set.NewHashSet[int](2))
 }
 
-func TestHashSet_From(t *testing.T) {
+func TestHashSetFrom(t *testing.T) {
 	data := []int{1, 2, 1}
-	values := set.HashSetFrom(data)
+	values := set.HashSetFrom[int](data)
 	data[0] = 3
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
-func TestHashSet_FromSeq(t *testing.T) {
-	values := set.HashSetFromSeq(slices.Values([]int{1, 2, 1}))
+func TestHashSetFromSeq(t *testing.T) {
+	values := set.HashSetFromSeq[int](slices.Values([]int{1, 2, 1}))
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-}
-
-func assertSetBehavior(t *testing.T, values set.Set[int]) {
-	t.Helper()
-
-	assert.True(t, values.IsEmpty())
-	assert.True(t, values.Add(1))
-	assert.Equal(t, 1, values.Adds(2, 1))
-
-	assert.False(t, values.IsEmpty())
-	assert.Equal(t, 2, values.Length())
-	assert.True(t, values.Contains(1))
-	assert.False(t, values.Contains(3))
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-
-	assert.True(t, values.Remove(1))
-	assert.False(t, values.Remove(1))
-	assert.Equal(t, 2, values.Adds(3, 4))
-	assert.Equal(t, 2, values.Removes(2, 2, 4, 5))
-
-	data, err := values.MarshalJSON()
-	assert.NoError(t, err)
-	assert.JSONEq(t, `[3]`, string(data))
-
-	values.Clear()
-	assert.True(t, values.IsEmpty())
-
-	assert.True(t, values.Add(3))
-	assert.True(t, values.Contains(3))
 }
 
 func TestHashSet_Union(t *testing.T) {
@@ -72,6 +45,24 @@ func TestHashSet_Union(t *testing.T) {
 
 	assert.ElementsMatch(t, []int{1, 2, 3}, slices.Collect(result.All()))
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(left.All()))
+}
+
+func TestHashSet_UnionCollectionSource(t *testing.T) {
+	values := list.ArrayFrom([]int{2, 3, 3})
+	for name, source := range map[string]set.Source[int]{
+		"Collection": values,
+		"Readonly":   list.AsReadonly[int](values),
+	} {
+		t.Run(name, func(t *testing.T) {
+			left := set.HashSetFrom([]int{1, 2})
+			result := left.Union(source)
+
+			assert.Equal(t, 3, source.Len())
+			assert.ElementsMatch(t, []int{1, 2, 3}, slices.Collect(result.All()))
+			assert.ElementsMatch(t, []int{1, 2}, slices.Collect(left.All()))
+			assert.Equal(t, []int{2, 3, 3}, slices.Collect(values.All()))
+		})
+	}
 }
 
 func TestHashSet_Intersection(t *testing.T) {
@@ -141,4 +132,33 @@ func TestRelations_IsProperSuperset(t *testing.T) {
 func TestRelations_IsDisjoint(t *testing.T) {
 	assert.True(t, set.IsDisjoint(readonlyHashSet(1), readonlyHashSet(2, 3)))
 	assert.False(t, set.IsDisjoint(readonlyHashSet(1, 2), readonlyHashSet(2)))
+}
+
+func assertSetBehavior(t *testing.T, values set.Set[int]) {
+	t.Helper()
+
+	assert.True(t, values.IsEmpty())
+	assert.Equal(t, 1, values.Add(1))
+	assert.Equal(t, 1, values.Add(2, 1))
+
+	assert.False(t, values.IsEmpty())
+	assert.Equal(t, 2, values.Len())
+	assert.True(t, values.Contains(1))
+	assert.False(t, values.Contains(3))
+	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
+
+	assert.Equal(t, 1, values.Remove(1))
+	assert.Zero(t, values.Remove(1))
+	assert.Equal(t, 2, values.Add(3, 4))
+	assert.Equal(t, 2, values.Remove(2, 2, 4, 5))
+
+	data, err := json.Marshal(values)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `[3]`, string(data))
+
+	values.Clear()
+	assert.True(t, values.IsEmpty())
+
+	assert.Equal(t, 1, values.Add(3))
+	assert.True(t, values.Contains(3))
 }

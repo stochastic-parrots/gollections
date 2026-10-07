@@ -10,10 +10,9 @@ import (
 	"github.com/stochastic-parrots/gollections/sortedlist"
 )
 
-func ExampleArray() {
-	factory := sortedlist.Array(cmp.Compare[int])
-	items := factory.New(0)
-	items.Adds(3, 1, 2, 2)
+func ExampleNewArray() {
+	items := sortedlist.NewArray(cmp.Compare[int], 0)
+	items.Add(3, 1, 2, 2)
 
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
@@ -27,7 +26,7 @@ func ExampleArray() {
 
 	var values []int
 	_ = json.Unmarshal([]byte(`[9,7,8]`), &values)
-	items = factory.From(values)
+	items = sortedlist.ArrayFrom(cmp.Compare[int], values)
 	fmt.Println("Decoded:", slices.Collect(items.All()))
 
 	// Output:
@@ -38,9 +37,9 @@ func ExampleArray() {
 	// Decoded: [7 8 9]
 }
 
-func ExampleOrderedArray() {
-	ascending := sortedlist.OrderedArray[int](sortedlist.Asc).Clone([]int{3, 1, 2, 2})
-	descending := sortedlist.OrderedArray[int](sortedlist.Desc).Clone([]int{3, 1, 2, 2})
+func ExampleNewOrderedArray() {
+	ascending := sortedlist.OrderedArrayClone[int](sortedlist.Asc, []int{3, 1, 2, 2})
+	descending := sortedlist.OrderedArrayClone[int](sortedlist.Desc, []int{3, 1, 2, 2})
 
 	fmt.Println(slices.Collect(ascending.All()))
 	fmt.Println(slices.Collect(descending.All()))
@@ -51,8 +50,8 @@ func ExampleOrderedArray() {
 }
 
 func ExampleArraySortedList_bounds() {
-	list := sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
-	list.Adds(1, 2, 2, 2, 3)
+	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	list.Add(1, 2, 2, 2, 3)
 
 	start, end := list.EqualRange(2)
 
@@ -69,8 +68,8 @@ func ExampleArraySortedList_bounds() {
 }
 
 func ExampleArraySortedList_navigate() {
-	list := sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
-	list.Adds(10, 20, 30)
+	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	list.Add(10, 20, 30)
 
 	ceiling, ceilingIdx, _ := list.Ceiling(25)
 	floor, floorIdx, _ := list.Floor(25)
@@ -90,8 +89,8 @@ func ExampleArraySortedList_navigate() {
 }
 
 func ExampleArraySortedList_Range() {
-	list := sortedlist.OrderedArray[int](sortedlist.Asc).New(0)
-	list.Adds(1, 2, 2, 3, 4)
+	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	list.Add(1, 2, 2, 3, 4)
 
 	fmt.Println(slices.Collect(list.Range(2, 4)))
 
@@ -99,9 +98,9 @@ func ExampleArraySortedList_Range() {
 	// [2 2 3]
 }
 
-func ExampleArrayFactory_From() {
+func ExampleArrayFrom() {
 	data := []int{3, 1, 2}
-	list := sortedlist.Array(cmp.Compare[int]).From(data)
+	list := sortedlist.ArrayFrom(cmp.Compare[int], data)
 
 	fmt.Println(slices.Collect(list.All()))
 	fmt.Println(data)
@@ -111,9 +110,9 @@ func ExampleArrayFactory_From() {
 	// [1 2 3]
 }
 
-func ExampleArrayFactory_Clone() {
+func ExampleArrayClone() {
 	data := []int{3, 1, 2}
-	list := sortedlist.Array(cmp.Compare[int]).Clone(data)
+	list := sortedlist.ArrayClone(cmp.Compare[int], data)
 
 	fmt.Println(slices.Collect(list.All()))
 	fmt.Println(data)
@@ -123,11 +122,11 @@ func ExampleArrayFactory_Clone() {
 	// [3 1 2]
 }
 
-func ExampleArrayFactory_FromSeq() {
-	source := list.Array[int]().New(0)
-	source.Appends(3, 1, 2)
+func ExampleArrayFromSeq() {
+	source := list.NewArray[int](0)
+	source.Append(3, 1, 2)
 
-	list := sortedlist.Array(cmp.Compare[int]).FromSeq(source.All())
+	list := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
 
 	fmt.Println(slices.Collect(list.All()))
 	fmt.Println(source.ToSlice())
@@ -138,8 +137,8 @@ func ExampleArrayFactory_FromSeq() {
 }
 
 func ExampleAsReadonly() {
-	mutable := sortedlist.Array(cmp.Compare[int]).New(0)
-	mutable.Adds(2, 1)
+	mutable := sortedlist.NewArray(cmp.Compare[int], 0)
+	mutable.Add(2, 1)
 
 	view := sortedlist.AsReadonly(mutable)
 	fmt.Println("Readonly view:", slices.Collect(view.All()))

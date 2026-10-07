@@ -15,16 +15,16 @@ import (
 type Readonly[T any] interface {
 	// Get returns the element at the specified index.
 	//
-	// Returns an error if the index is out of bounds [0, Length).
+	// Returns an error if the index is out of bounds [0, Len).
 	Get(idx int) (x T, err error)
 
-	// Find locates the index of an element using a linear search.
-	// It returns the index and true if found; otherwise, -1 and false.
-	Find(x T, cmp func(a, b T) int) (idx int, ok bool)
+	// Find returns the index of the first value for which match returns true,
+	// searching in list order.
+	// It returns -1 and false when no value matches.
+	Find(match func(T) bool) (idx int, ok bool)
 
-	// Contains returns true if the element exists in the list according
-	// to the provided comparator. This is typically an O(N) operation.
-	Contains(x T, cmp func(a, b T) int) bool
+	// Contains reports whether match returns true for any value in list order.
+	Contains(match func(T) bool) bool
 
 	// Backward returns an iterator that traverses the list in reverse order.
 	//
@@ -43,8 +43,6 @@ type Readonly[T any] interface {
 	ToSlice() []T
 
 	gollections.Collection[T]
-	fmt.Stringer
-	json.Marshaler
 }
 
 // List defines the operations for a collection where the order is determined
@@ -52,11 +50,9 @@ type Readonly[T any] interface {
 type List[T any] interface {
 	Readonly[T]
 
-	// Append adds an element to the end of the list.
-	Append(x T)
-
-	// Appends adds the given elements to the end of the list.
-	Appends(xs ...T)
+	// Append adds the given elements to the end of the list in input order.
+	// With no elements, it leaves the list unchanged.
+	Append(xs ...T)
 
 	// Insert places an element at a specific index, shifting subsequent
 	// elements to the right.
@@ -75,14 +71,17 @@ type List[T any] interface {
 	// Implementation configuration is preserved; storage retention depends on
 	// the concrete list strategy.
 	Clear()
-
-	json.Unmarshaler
 }
 
 // AsReadonly returns a [Readonly] view of the provided [List].
 //
-// The returned view is a wrapper that prevents type assertion back to
-// the mutable interface, ensuring data safety for observers.
+// The returned view observes the same underlying collection while preventing
+// type assertion back to the mutable interface. It is not a snapshot and does
+// not provide synchronization.
+//
+// The wrapper implements fmt.Stringer and json.Marshaler through fmt.Sprint
+// and json.Marshal on the wrapped collection, following those packages'
+// formatting, JSON validation, and error wrapping behavior.
 func AsReadonly[T any](list List[T]) *readonly[T] {
 	if list == nil {
 		return nil
@@ -96,9 +95,9 @@ type readonly[T any] struct {
 
 func (w readonly[T]) Get(idx int) (x T, err error) { return w.inner.Get(idx) }
 
-func (w readonly[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) { return w.inner.Find(x, cmp) }
+func (w readonly[T]) Find(match func(T) bool) (idx int, ok bool) { return w.inner.Find(match) }
 
-func (w readonly[T]) Contains(x T, cmp func(a, b T) int) bool { return w.inner.Contains(x, cmp) }
+func (w readonly[T]) Contains(match func(T) bool) bool { return w.inner.Contains(match) }
 
 func (w readonly[T]) Backward() iter.Seq[T] { return w.inner.Backward() }
 
@@ -110,10 +109,10 @@ func (w readonly[T]) ToSlice() []T { return w.inner.ToSlice() }
 
 func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[T]) Length() int { return w.inner.Length() }
+func (w readonly[T]) Len() int { return w.inner.Len() }
 
-func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
+func (w readonly[T]) MarshalJSON() ([]byte, error) { return json.Marshal(w.inner) }
 
-func (w readonly[T]) String() string { return w.inner.String() }
+func (w readonly[T]) String() string { return fmt.Sprint(w.inner) }
 
 var _ Readonly[any] = (*readonly[any])(nil)

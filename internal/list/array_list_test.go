@@ -1,7 +1,6 @@
 package list
 
 import (
-	"cmp"
 	"fmt"
 	"slices"
 	"testing"
@@ -51,9 +50,9 @@ func TestArrayList_IsEmpty(t *testing.T) {
 	assert.True(t, list.IsEmpty())
 }
 
-func TestArrayList_Length(t *testing.T) {
+func TestArrayList_Len(t *testing.T) {
 	list := NewArrayList[int](100)
-	list.Appends(10, 1, 9, 100)
+	list.Append(10, 1, 9, 100)
 
 	assert.False(t, list.IsEmpty())
 	assert.Equal(t, 4, len(list.data))
@@ -63,7 +62,7 @@ func TestArrayList_Get(t *testing.T) {
 	t.Run("ValidIndex", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 
 		for i := range 4 {
 			x, err := list.Get(i)
@@ -75,7 +74,7 @@ func TestArrayList_Get(t *testing.T) {
 	t.Run("Reversed", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 		list.Reverse()
 
 		inversedIndex := 3
@@ -89,14 +88,14 @@ func TestArrayList_Get(t *testing.T) {
 
 	t.Run("InvalidIndex", func(t *testing.T) {
 		list := NewArrayList[int](4)
-		list.Appends(10, 1, 9, 100)
+		list.Append(10, 1, 9, 100)
 
 		for _, i := range []int{-1, 4, 5} {
 			_, err := list.Get(i)
-			target := NewIndexOutOfBoundError(i, len(list.data))
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot get index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, len(list.data))
-			assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
+			assert.EqualError(t, err, fmt.Sprintf(template, i, len(list.data)))
 		}
 	})
 }
@@ -105,10 +104,10 @@ func TestArrayList_Find(t *testing.T) {
 	t.Run("ElementExists", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 
 		for idx, value := range values {
-			fidx, exists := list.Find(value, cmp.Compare[int])
+			fidx, exists := list.Find(func(x int) bool { return x == value })
 			assert.Equal(t, idx, fidx)
 			assert.True(t, exists)
 		}
@@ -116,8 +115,8 @@ func TestArrayList_Find(t *testing.T) {
 
 	t.Run("NonExistent", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(1, 2, 3)
-		idx, exists := list.Find(4, cmp.Compare[int])
+		list.Append(1, 2, 3)
+		idx, exists := list.Find(func(x int) bool { return x == 4 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -125,7 +124,7 @@ func TestArrayList_Find(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		list := NewArrayList[int](0)
-		idx, exists := list.Find(2, cmp.Compare[int])
+		idx, exists := list.Find(func(x int) bool { return x == 2 })
 
 		assert.Equal(t, -1, idx)
 		assert.False(t, exists)
@@ -136,24 +135,24 @@ func TestArrayList_Contains(t *testing.T) {
 	t.Run("ElementExists", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 
 		for _, value := range values {
-			assert.True(t, list.Contains(value, cmp.Compare[int]))
+			assert.True(t, list.Contains(func(x int) bool { return x == value }))
 		}
 	})
 
 	t.Run("NonExistent", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(1, 2, 3)
+		list.Append(1, 2, 3)
 
-		assert.False(t, list.Contains(4, cmp.Compare[int]))
+		assert.False(t, list.Contains(func(x int) bool { return x == 4 }))
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		list := NewArrayList[int](0)
 
-		assert.False(t, list.Contains(4, cmp.Compare[int]))
+		assert.False(t, list.Contains(func(x int) bool { return x == 4 }))
 	})
 }
 
@@ -161,7 +160,7 @@ func TestArrayList_Set(t *testing.T) {
 	t.Run("ValidIndex", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 
 		for i := range 4 {
 			err := list.Set(i, values[i]+1)
@@ -174,7 +173,7 @@ func TestArrayList_Set(t *testing.T) {
 	t.Run("Reversed", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 		list.Reverse()
 
 		inversedIndex := 3
@@ -189,14 +188,14 @@ func TestArrayList_Set(t *testing.T) {
 	t.Run("OutOfBounds", func(t *testing.T) {
 		list := NewArrayList[int](4)
 		values := []int{10, 1, 9, 100}
-		list.Appends(values...)
+		list.Append(values...)
 
 		for _, i := range []int{-1, 4, 5} {
 			err := list.Set(i, 0)
-			target := NewIndexOutOfBoundError(i, len(list.data))
-			template := "index %d is out of bounds; maximum valid index is %d"
+			var target *IndexOutOfBoundsError
+			template := "cannot set index %d out of range for length %d"
 			assert.ErrorAsf(t, err, &target, template, i, len(list.data))
-			assert.EqualErrorf(t, err, err.Error(), template, i, len(list.data))
+			assert.EqualError(t, err, fmt.Sprintf(template, i, len(list.data)))
 		}
 
 		for i := range len(list.data) {
@@ -216,7 +215,7 @@ func TestArrayList_Insert(t *testing.T) {
 
 	t.Run("AtBeginning", func(t *testing.T) {
 		list := NewArrayList[int](2)
-		list.Appends(1, 2)
+		list.Append(1, 2)
 		err := list.Insert(0, 0)
 		assert.NoError(t, err)
 		assert.Equal(t, []int{0, 1, 2}, list.ToSlice())
@@ -224,7 +223,7 @@ func TestArrayList_Insert(t *testing.T) {
 
 	t.Run("InMiddle", func(t *testing.T) {
 		list := NewArrayList[int](2)
-		list.Appends(1, 3)
+		list.Append(1, 3)
 		err := list.Insert(1, 2)
 		assert.NoError(t, err)
 		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
@@ -232,7 +231,7 @@ func TestArrayList_Insert(t *testing.T) {
 
 	t.Run("AtBeginning_Reversed", func(t *testing.T) {
 		l := NewArrayList[int](2)
-		l.Appends(1, 2)
+		l.Append(1, 2)
 		l.Reverse()
 
 		err := l.Insert(0, 3)
@@ -242,7 +241,7 @@ func TestArrayList_Insert(t *testing.T) {
 
 	t.Run("InMiddle_Reversed", func(t *testing.T) {
 		l := NewArrayList[int](2)
-		l.Appends(1, 3)
+		l.Append(1, 3)
 		l.Reverse()
 
 		err := l.Insert(1, 2)
@@ -252,7 +251,7 @@ func TestArrayList_Insert(t *testing.T) {
 
 	t.Run("AtEnd", func(t *testing.T) {
 		list := NewArrayList[int](2)
-		list.Appends(1, 2)
+		list.Append(1, 2)
 		err := list.Insert(2, 3)
 		assert.NoError(t, err)
 		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
@@ -262,7 +261,7 @@ func TestArrayList_Insert(t *testing.T) {
 		list := NewArrayList[int](1)
 		list.Append(1)
 		err := list.Insert(5, 10)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot insert at index 5 out of range for length 1")
 		assert.Equal(t, []int{1}, list.ToSlice())
 	})
 }
@@ -279,7 +278,7 @@ func TestArrayList_Remove(t *testing.T) {
 
 	t.Run("First", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(1, 2, 3)
+		list.Append(1, 2, 3)
 		val, err := list.Remove(0)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, val)
@@ -288,7 +287,7 @@ func TestArrayList_Remove(t *testing.T) {
 
 	t.Run("Last", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(1, 2, 3)
+		list.Append(1, 2, 3)
 		val, err := list.Remove(2)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, val)
@@ -297,7 +296,7 @@ func TestArrayList_Remove(t *testing.T) {
 
 	t.Run("Middle", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(1, 2, 3)
+		list.Append(1, 2, 3)
 		val, err := list.Remove(1)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, val)
@@ -306,7 +305,7 @@ func TestArrayList_Remove(t *testing.T) {
 
 	t.Run("First_Reversed", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3)
+		l.Append(1, 2, 3)
 		l.Reverse()
 
 		val, err := l.Remove(0)
@@ -317,7 +316,7 @@ func TestArrayList_Remove(t *testing.T) {
 
 	t.Run("Last_Reversed", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3)
+		l.Append(1, 2, 3)
 		l.Reverse()
 
 		val, err := l.Remove(2)
@@ -328,7 +327,7 @@ func TestArrayList_Remove(t *testing.T) {
 
 	t.Run("Middle_Reversed", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(1, 2, 3)
+		list.Append(1, 2, 3)
 		list.Reverse()
 
 		val, err := list.Remove(1)
@@ -341,7 +340,7 @@ func TestArrayList_Remove(t *testing.T) {
 		list := NewArrayList[int](0)
 		list.Append(1)
 		_, err := list.Remove(1)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "cannot remove index 1 out of range for length 1")
 	})
 }
 
@@ -355,7 +354,7 @@ func TestArrayList_Append(t *testing.T) {
 
 func TestArrayList_Appends(t *testing.T) {
 	list := NewArrayList[int](0)
-	list.Appends(1, 2, 3)
+	list.Append(1, 2, 3)
 
 	assert.False(t, list.IsEmpty())
 	assert.Equal(t, []int{1, 2, 3}, list.data)
@@ -364,7 +363,7 @@ func TestArrayList_Appends(t *testing.T) {
 func TestArrayList_Reverse(t *testing.T) {
 	list := NewArrayList[int](3)
 	items := []int{1, 2, 3}
-	list.Appends(items...)
+	list.Append(items...)
 	list.Reverse()
 
 	assert.Equal(t, 3, len(list.data))
@@ -375,7 +374,7 @@ func TestArrayList_Reverse(t *testing.T) {
 func TestArrayList_String(t *testing.T) {
 	t.Run("InLimit", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(30, 10, 20)
+		list.Append(30, 10, 20)
 		got := list.String()
 		want := "[30 10 20]"
 		assert.Equal(t, want, got)
@@ -383,7 +382,7 @@ func TestArrayList_String(t *testing.T) {
 
 	t.Run("ExceedsLimit", func(t *testing.T) {
 		list := NewArrayList[int](10)
-		list.Appends(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := list.String()
 		want := "[30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
@@ -393,7 +392,7 @@ func TestArrayList_String(t *testing.T) {
 func TestArrayList_Format(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		list := NewArrayList[int](3)
-		list.Appends(30, 10, 20)
+		list.Append(30, 10, 20)
 		got := fmt.Sprintf("%v", list)
 		want := "[30 10 20]"
 		assert.Equal(t, want, got)
@@ -401,7 +400,7 @@ func TestArrayList_Format(t *testing.T) {
 
 	t.Run("Verbose", func(t *testing.T) {
 		list := NewArrayList[int](12)
-		list.Appends(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%#v", list)
 		want := "*list.ArrayList[int]{size:10, cap:12}"
 		assert.Equal(t, want, got)
@@ -409,7 +408,7 @@ func TestArrayList_Format(t *testing.T) {
 
 	t.Run("GoSyntax", func(t *testing.T) {
 		list := NewArrayList[int](12)
-		list.Appends(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
+		list.Append(30, 10, 20, 40, 1, 0, -1, -10, 0, -99)
 		got := fmt.Sprintf("%+v", list)
 		want := "*list.ArrayList[int]{len:10, cap:12} [30 10 20 40 1 ...(+5 more)]"
 		assert.Equal(t, want, got)
@@ -420,7 +419,7 @@ func TestArrayList_All(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 
 		idx := 0
 		for value := range list.All() {
@@ -432,7 +431,7 @@ func TestArrayList_All(t *testing.T) {
 	t.Run("PartialIteration", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 
 		idx := 0
 		for value := range list.All() {
@@ -444,13 +443,13 @@ func TestArrayList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -464,7 +463,7 @@ func TestArrayList_All(t *testing.T) {
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -478,7 +477,7 @@ func TestArrayList_All(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, idx)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -489,7 +488,7 @@ func TestArrayList_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -498,19 +497,19 @@ func TestArrayList_Enumerate(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 
 		for idx, value := range list.Enumerate() {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 
 		count := 0
 		for idx, value := range list.Enumerate() {
@@ -522,13 +521,13 @@ func TestArrayList_Enumerate(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, count)
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -536,13 +535,13 @@ func TestArrayList_Enumerate(t *testing.T) {
 			assert.Equal(t, items[idx], value)
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 	})
 
 	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		list.Appends(items...)
+		list.Append(items...)
 		list.Reverse()
 		slices.Reverse(items)
 
@@ -555,7 +554,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 3, list.Length())
+		assert.Equal(t, 3, list.Len())
 		assert.Equal(t, 2, count)
 	})
 
@@ -567,7 +566,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 0, list.Length())
+		assert.Equal(t, 0, list.Len())
 		assert.Equal(t, 0, count)
 	})
 }
@@ -576,7 +575,7 @@ func TestArrayList_Backward(t *testing.T) {
 	t.Run("FullIteration", func(t *testing.T) {
 		l := NewArrayList[int](3)
 		items := []int{1, 2, 3}
-		l.Appends(items...)
+		l.Append(items...)
 
 		var got []int
 		for v := range l.Backward() {
@@ -588,7 +587,7 @@ func TestArrayList_Backward(t *testing.T) {
 
 	t.Run("PartialIteration", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3, 4)
+		l.Append(1, 2, 3, 4)
 
 		count := 0
 		for v := range l.Backward() {
@@ -603,7 +602,7 @@ func TestArrayList_Backward(t *testing.T) {
 
 	t.Run("FullIteration_Reversed", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3)
+		l.Append(1, 2, 3)
 		l.Reverse()
 
 		var got []int
@@ -616,7 +615,7 @@ func TestArrayList_Backward(t *testing.T) {
 
 	t.Run("PartialIteration_Reversed", func(t *testing.T) {
 		l := NewArrayList[int](4)
-		l.Appends(1, 2, 3, 4)
+		l.Append(1, 2, 3, 4)
 		l.Reverse()
 
 		count := 0
@@ -644,7 +643,7 @@ func TestArrayList_Backward(t *testing.T) {
 func TestArrayList_MarshalJSON(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(10, 20, 30)
+		l.Append(10, 20, 30)
 
 		got, err := l.MarshalJSON()
 		assert.NoError(t, err)
@@ -653,7 +652,7 @@ func TestArrayList_MarshalJSON(t *testing.T) {
 
 	t.Run("Reversed", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3)
+		l.Append(1, 2, 3)
 		l.Reverse()
 
 		got, err := l.MarshalJSON()
@@ -677,14 +676,14 @@ func TestArrayList_UnmarshalJSON(t *testing.T) {
 
 		err := l.UnmarshalJSON(data)
 		assert.NoError(t, err)
-		assert.Equal(t, 3, l.Length())
+		assert.Equal(t, 3, l.Len())
 		assert.Equal(t, []int{4, 5, 6}, l.ToSlice())
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		data := []byte("[]")
 		l := NewArrayList[int](0)
-		l.Appends(1, 2)
+		l.Append(1, 2)
 
 		err := l.UnmarshalJSON(data)
 		assert.NoError(t, err)
@@ -702,13 +701,13 @@ func TestArrayList_UnmarshalJSON(t *testing.T) {
 func TestArrayList_ToSlice(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3)
+		l.Append(1, 2, 3)
 		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	})
 
 	t.Run("Reversed", func(t *testing.T) {
 		l := NewArrayList[int](3)
-		l.Appends(1, 2, 3)
+		l.Append(1, 2, 3)
 		l.Reverse()
 
 		assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
@@ -723,7 +722,7 @@ func TestArrayList_ToSlice(t *testing.T) {
 func TestArrayList_Clear(t *testing.T) {
 	a, b := 1, 2
 	l := NewArrayList[*int](4)
-	l.Appends(&a, &b)
+	l.Append(&a, &b)
 	backing := &l.data[:cap(l.data)][0]
 
 	l.Clear()

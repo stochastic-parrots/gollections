@@ -27,17 +27,25 @@
 // preserve capacity, bounded freelists retain at most their configured limit,
 // and linked structures without a freelist may release their nodes. Clear does
 // not guarantee that storage is shrunk or memory is returned to the Go runtime.
+// Fixed-range disjoint sets use Reset to restore singleton sets while retaining
+// all values in their range.
 //
 // # JSON
 //
-// Collections marshal without external construction input; each package
-// documents the traversal order used by its JSON array. Lists and deques also
-// implement json.Unmarshaler because the array completely defines their logical
-// element order. Sorted lists do not implement unmarshaling so their natural or
-// custom ordering strategy remains an explicit factory choice. Heaps do not
-// implement it because the array does not encode their comparator or min/max
-// selection. Sets likewise require an explicit equality or derived-key policy.
-// Decode those structures into a slice, then use the matching factory.
+// Concrete lists, deques, sorted lists, heaps, and sets marshal without external
+// construction input; each package documents its JSON array's traversal order.
+// Concrete lists and deques also implement json.Unmarshaler because the array
+// completely defines their logical element order. Sorted lists, heaps, and sets
+// require explicit ordering, priority, or identity configuration; decode into a
+// slice and use the matching constructor family. Disjoint sets have no JSON
+// representation because an array of range values does not encode the partition.
+//
+// Structural interfaces do not require formatting or JSON capabilities. Use a
+// capability assertion for direct calls to String, MarshalJSON, or UnmarshalJSON
+// through an interface. Standard fmt and encoding/json calls discover the
+// capabilities of the underlying concrete value. Readonly wrappers retain their
+// formatting and JSON methods through fmt.Sprint and json.Marshal on the wrapped
+// collection, following those packages' formatting and encoding behavior.
 //
 // # Concurrency
 //
@@ -45,7 +53,8 @@
 // not safe for concurrent use. Callers must synchronize access when at least one
 // goroutine may mutate a shared collection. Readonly interfaces and views limit
 // the operations available through an API; they do not provide synchronization
-// or a snapshot of the underlying collection.
+// or a snapshot of the underlying collection. Disjoint-set queries such as Find
+// and Connected may compress paths and require synchronization on shared access.
 //
 // # Subpackages
 //
@@ -70,6 +79,9 @@
 //   - [github.com/stochastic-parrots/gollections/set]:
 //     Unique comparable values or arbitrary values identified by derived keys.
 //
+//   - [github.com/stochastic-parrots/gollections/disjointset]:
+//     Union-find over fixed integer ranges, using union by rank or size.
+//
 // # Design Principles
 //
 //   - Type Safety: Full generic support ensures compile-time type checking.
@@ -84,6 +96,6 @@
 // # Documentation Characteristics
 //
 // Each data structure includes detailed performance documentation in its subpackage.
-// Refer to the factory types (for example, [list.ArrayFactory]) for time
-// complexity tables covering all operations.
+// Refer to the package constructors (for example, [list.NewArray]) for
+// construction and ownership contracts.
 package gollections

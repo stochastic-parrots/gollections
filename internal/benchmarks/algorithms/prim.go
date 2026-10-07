@@ -22,7 +22,7 @@ func Prim[T constraint.Number](graph models.Graph[T], pm datastructs.PriorityMap
 	weights[0] = 0
 	pm.Set(0, 0)
 
-	for pm.Length() != 0 {
+	for pm.Len() != 0 {
 		u, w, _ := pm.Pop()
 
 		if visited[u] {

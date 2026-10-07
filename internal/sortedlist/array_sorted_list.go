@@ -47,10 +47,10 @@ func NewArraySortedListFromSeq[T any](seq iter.Seq[T], compare func(a, b T) int)
 	return NewArraySortedListFromSlice(slices.Collect(seq), compare)
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (l *ArraySortedList[T]) Length() int {
+func (l *ArraySortedList[T]) Len() int {
 	return len(l.data)
 }
 
@@ -67,7 +67,7 @@ func (l *ArraySortedList[T]) IsEmpty() bool {
 func (l *ArraySortedList[T]) Get(idx int) (T, error) {
 	if idx < 0 || idx >= len(l.data) {
 		var zero T
-		return zero, list.NewIndexOutOfBoundError(idx, len(l.data)-1)
+		return zero, list.NewIndexOutOfBoundsError(list.OperationGet, idx, len(l.data)-1)
 	}
 
 	return l.data[idx], nil
@@ -75,7 +75,7 @@ func (l *ArraySortedList[T]) Get(idx int) (T, error) {
 
 // LowerBound returns the first index whose value does not sort before x.
 //
-// It returns Length when every value sorts before x.
+// It returns Len when every value sorts before x.
 //
 // Complexity: O(log N).
 func (l *ArraySortedList[T]) LowerBound(x T) int {
@@ -97,7 +97,7 @@ func (l *ArraySortedList[T]) LowerBound(x T) int {
 
 // UpperBound returns the first index whose value sorts after x.
 //
-// It returns Length when no value sorts after x.
+// It returns Len when no value sorts after x.
 //
 // Complexity: O(log N).
 func (l *ArraySortedList[T]) UpperBound(x T) int {
@@ -263,28 +263,23 @@ func (l *ArraySortedList[T]) Last() (T, bool) {
 	return l.data[len(l.data)-1], true
 }
 
-// Add inserts x while preserving the sorted invariant.
-//
-// Complexity: O(N).
-func (l *ArraySortedList[T]) Add(x T) {
-	idx := l.UpperBound(x)
-
-	var zero T
-	l.data = append(l.data, zero)
-	copy(l.data[idx+1:], l.data[idx:])
-	l.data[idx] = x
-}
-
-// Adds inserts zero or more values while preserving the sorted invariant.
+// Add inserts the given values while preserving the sorted invariant.
+// Empty input leaves the list unchanged.
 //
 // Complexity: O(N) for one value, or
 // O((N + len(xs)) log (N + len(xs))) for multiple values.
-func (l *ArraySortedList[T]) Adds(xs ...T) {
+func (l *ArraySortedList[T]) Add(xs ...T) {
 	switch len(xs) {
 	case 0:
 		return
 	case 1:
-		l.Add(xs[0])
+		x := xs[0]
+		idx := l.UpperBound(x)
+
+		var zero T
+		l.data = append(l.data, zero)
+		copy(l.data[idx+1:], l.data[idx:])
+		l.data[idx] = x
 		return
 	}
 
@@ -300,7 +295,7 @@ func (l *ArraySortedList[T]) Adds(xs ...T) {
 // Complexity: O(1).
 func (l *ArraySortedList[T]) Replace(idx int, x T) error {
 	if idx < 0 || idx >= len(l.data) {
-		return list.NewIndexOutOfBoundError(idx, len(l.data)-1)
+		return list.NewIndexOutOfBoundsError(list.OperationReplace, idx, len(l.data)-1)
 	}
 	if idx > 0 && l.compare(l.data[idx-1], x) > 0 {
 		return ErrOrderViolation

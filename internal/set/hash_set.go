@@ -20,7 +20,7 @@ func NewHashSet[T comparable](capacity int) *HashSet[T] {
 // NewHashSetFromSlice creates a hash set containing the unique values in data.
 func NewHashSetFromSlice[T comparable](data []T) *HashSet[T] {
 	set := NewHashSet[T](len(data))
-	set.Adds(data...)
+	set.Add(data...)
 	return set
 }
 
@@ -42,7 +42,7 @@ func NewHashSetIntersection[T comparable](
 		return NewHashSet[T](0)
 	}
 	for _, source := range sources {
-		if source.Length() == 0 {
+		if source.Len() == 0 {
 			return NewHashSet[T](0)
 		}
 	}
@@ -78,7 +78,7 @@ func NewHashSetIntersection[T comparable](
 	if sourceSet, ok := sources[first].(*HashSet[T]); ok {
 		result = sourceSet.Clone()
 	} else {
-		result = NewHashSet[T](sources[first].Length())
+		result = NewHashSet[T](sources[first].Len())
 		result.unionWithSource(sources[first])
 	}
 	for idx, source := range sources {
@@ -105,7 +105,7 @@ func NewHashSetDifference[T comparable](
 	if sourceSet, ok := sources[0].(*HashSet[T]); ok {
 		result = sourceSet.Clone()
 	} else {
-		result = NewHashSet[T](sources[0].Length())
+		result = NewHashSet[T](sources[0].Len())
 		result.unionWithSource(sources[0])
 	}
 	for _, source := range sources[1:] {
@@ -146,17 +146,17 @@ func NewHashSetSymmetricDifference[T comparable](
 	if sourceSet, ok := sources[0].(*HashSet[T]); ok {
 		result = sourceSet.Clone()
 	} else {
-		result = NewHashSet[T](sources[0].Length())
+		result = NewHashSet[T](sources[0].Len())
 		result.unionWithSource(sources[0])
 	}
 	toggleHashSources(result, sources[1:])
 	return result
 }
 
-// Length returns the number of values in the set.
+// Len returns the number of values in the set.
 //
 // Complexity: O(1).
-func (set *HashSet[T]) Length() int {
+func (set *HashSet[T]) Len() int {
 	return len(set.values)
 }
 
@@ -169,60 +169,41 @@ func (set *HashSet[T]) IsEmpty() bool {
 
 // Contains returns true if x belongs to the set.
 //
-// Complexity: Expected O(1).
+// Complexity: O(1) on average.
 func (set *HashSet[T]) Contains(x T) bool {
 	_, ok := set.values[x]
 	return ok
 }
 
-// Add inserts x if it is not already present and reports whether the set
-// changed.
+// Add inserts every value in xs that is not already present and returns the
+// number of values added. Empty input leaves the set unchanged.
 //
-// Complexity: Expected O(1).
-func (set *HashSet[T]) Add(x T) bool {
-	if _, ok := set.values[x]; ok {
-		return false
-	}
-	if set.values == nil {
-		set.values = make(map[T]struct{})
-	}
-	set.values[x] = struct{}{}
-	return true
-}
-
-// Adds inserts every value in xs that is not already present and returns the
-// number of values added.
-//
-// Complexity: Expected O(len(xs)).
-func (set *HashSet[T]) Adds(xs ...T) (added int) {
+// Complexity: O(len(xs)) on average.
+func (set *HashSet[T]) Add(xs ...T) (added int) {
 	for _, x := range xs {
-		if set.Add(x) {
-			added++
+		if _, ok := set.values[x]; ok {
+			continue
 		}
+		if set.values == nil {
+			set.values = make(map[T]struct{})
+		}
+		set.values[x] = struct{}{}
+		added++
 	}
 	return added
 }
 
-// Remove deletes x and reports whether it was present.
+// Remove deletes every value in xs that is present and returns the number of
+// values removed. Empty input leaves the set unchanged.
 //
-// Complexity: Expected O(1).
-func (set *HashSet[T]) Remove(x T) bool {
-	if _, ok := set.values[x]; !ok {
-		return false
-	}
-	delete(set.values, x)
-	return true
-}
-
-// Removes deletes every value in xs that is present and returns the number of
-// values removed.
-//
-// Complexity: Expected O(len(xs)).
-func (set *HashSet[T]) Removes(xs ...T) (removed int) {
+// Complexity: O(len(xs)) on average.
+func (set *HashSet[T]) Remove(xs ...T) (removed int) {
 	for _, x := range xs {
-		if set.Remove(x) {
-			removed++
+		if _, ok := set.values[x]; !ok {
+			continue
 		}
+		delete(set.values, x)
+		removed++
 	}
 	return removed
 }
@@ -239,7 +220,7 @@ func (set *HashSet[T]) Clone() *HashSet[T] {
 // Union returns a new set containing values present in the receiver or any
 // other operand. The receiver is not modified.
 //
-// Complexity: Expected O(N + sum of operand lengths).
+// Complexity: O(N + sum of operand lengths) on average.
 func (set *HashSet[T]) Union(others ...Source[T]) *HashSet[T] {
 	if len(others) == 1 {
 		if otherSet, ok := others[0].(*HashSet[T]); ok && otherSet == set {
@@ -252,7 +233,7 @@ func (set *HashSet[T]) Union(others ...Source[T]) *HashSet[T] {
 	capacity := len(set.values)
 	largestSource := 0
 	for _, other := range others {
-		largestSource = max(largestSource, other.Length())
+		largestSource = max(largestSource, other.Len())
 	}
 	result := NewHashSet[T](capacity + largestSource)
 	maps.Copy(result.values, set.values)
@@ -263,7 +244,7 @@ func (set *HashSet[T]) Union(others ...Source[T]) *HashSet[T] {
 // Intersection returns a new set containing values present in the receiver and
 // every other operand. The receiver is not modified.
 //
-// Complexity: Expected O(N * len(others) + sum of operand lengths).
+// Complexity: O(N * len(others) + sum of operand lengths) on average.
 func (set *HashSet[T]) Intersection(others ...Source[T]) *HashSet[T] {
 	if len(others) == 0 {
 		return set.Clone()
@@ -277,7 +258,7 @@ func (set *HashSet[T]) Intersection(others ...Source[T]) *HashSet[T] {
 		return NewHashSet[T](0)
 	}
 	for _, other := range others {
-		if other.Length() == 0 {
+		if other.Len() == 0 {
 			return NewHashSet[T](0)
 		}
 	}
@@ -352,7 +333,7 @@ func (set *HashSet[T]) Intersection(others ...Source[T]) *HashSet[T] {
 // Difference returns a new set containing receiver values absent from every
 // other operand. The receiver is not modified.
 //
-// Complexity: Expected O(N * len(others) + sum of operand lengths).
+// Complexity: O(N * len(others) + sum of operand lengths) on average.
 func (set *HashSet[T]) Difference(others ...Source[T]) *HashSet[T] {
 	if len(others) == 0 {
 		return set.Clone()
@@ -443,7 +424,7 @@ func (set *HashSet[T]) Difference(others ...Source[T]) *HashSet[T] {
 // SymmetricDifference returns a new set containing values present in an odd
 // number of the receiver and other operands. The receiver is not modified.
 //
-// Complexity: Expected O(N + sum of operand lengths).
+// Complexity: O(N + sum of operand lengths) on average.
 func (set *HashSet[T]) SymmetricDifference(
 	others ...Source[T],
 ) *HashSet[T] {
@@ -459,9 +440,9 @@ func (set *HashSet[T]) SymmetricDifference(
 
 // Equal returns true if the receiver and other contain the same values.
 //
-// Complexity: Expected O(N + other.Length()).
+// Complexity: O(N + other.Len()) on average.
 func (set *HashSet[T]) Equal(other Source[T]) bool {
-	if len(set.values) > other.Length() {
+	if len(set.values) > other.Len() {
 		return false
 	}
 	if otherSet, ok := other.(*HashSet[T]); ok {
@@ -471,7 +452,7 @@ func (set *HashSet[T]) Equal(other Source[T]) bool {
 		return len(set.values) == len(otherSet.values) &&
 			containsAll(set.values, otherSet.values)
 	}
-	matched := make(map[T]struct{}, min(len(set.values), other.Length()))
+	matched := make(map[T]struct{}, min(len(set.values), other.Len()))
 	for value := range other.All() {
 		if _, exists := set.values[value]; !exists {
 			return false
@@ -483,9 +464,9 @@ func (set *HashSet[T]) Equal(other Source[T]) bool {
 
 // IsSubset returns true if every receiver value is present in other.
 //
-// Complexity: Expected O(N + other.Length()).
+// Complexity: O(N + other.Len()) on average.
 func (set *HashSet[T]) IsSubset(other Source[T]) bool {
-	if len(set.values) > other.Length() {
+	if len(set.values) > other.Len() {
 		return false
 	}
 	if otherSet, ok := other.(*HashSet[T]); ok {
@@ -495,7 +476,7 @@ func (set *HashSet[T]) IsSubset(other Source[T]) bool {
 		return len(set.values) <= len(otherSet.values) &&
 			containsAll(set.values, otherSet.values)
 	}
-	matched := make(map[T]struct{}, min(len(set.values), other.Length()))
+	matched := make(map[T]struct{}, min(len(set.values), other.Len()))
 	for value := range other.All() {
 		if _, exists := set.values[value]; exists {
 			matched[value] = struct{}{}
@@ -510,16 +491,16 @@ func (set *HashSet[T]) IsSubset(other Source[T]) bool {
 // IsProperSubset returns true if the receiver is a subset of other and the two
 // operands are not equal.
 //
-// Complexity: Expected O(N + other.Length()).
+// Complexity: O(N + other.Len()) on average.
 func (set *HashSet[T]) IsProperSubset(other Source[T]) bool {
-	if len(set.values) >= other.Length() {
+	if len(set.values) >= other.Len() {
 		return false
 	}
 	if otherSet, ok := other.(*HashSet[T]); ok {
 		return len(set.values) < len(otherSet.values) &&
 			containsAll(set.values, otherSet.values)
 	}
-	matched := make(map[T]struct{}, min(len(set.values), other.Length()))
+	matched := make(map[T]struct{}, min(len(set.values), other.Len()))
 	hasExtra := false
 	for value := range other.All() {
 		if _, exists := set.values[value]; exists {
@@ -537,7 +518,7 @@ func (set *HashSet[T]) IsProperSubset(other Source[T]) bool {
 // IsSuperset returns true if every identity in other is present in the
 // receiver.
 //
-// Complexity: Expected O(other.Length()).
+// Complexity: O(other.Len()) on average.
 func (set *HashSet[T]) IsSuperset(other Source[T]) bool {
 	if otherSet, ok := other.(*HashSet[T]); ok {
 		if otherSet == set {
@@ -557,13 +538,13 @@ func (set *HashSet[T]) IsSuperset(other Source[T]) bool {
 // IsProperSuperset returns true if the receiver is a superset of other and the
 // two operands are not equal.
 //
-// Complexity: Expected O(N + other.Length()).
+// Complexity: O(N + other.Len()) on average.
 func (set *HashSet[T]) IsProperSuperset(other Source[T]) bool {
 	if otherSet, ok := other.(*HashSet[T]); ok {
 		return len(set.values) > len(otherSet.values) &&
 			containsAll(otherSet.values, set.values)
 	}
-	matched := make(map[T]struct{}, min(len(set.values), other.Length()))
+	matched := make(map[T]struct{}, min(len(set.values), other.Len()))
 	for value := range other.All() {
 		if _, exists := set.values[value]; !exists {
 			return false
@@ -578,7 +559,7 @@ func (set *HashSet[T]) IsProperSuperset(other Source[T]) bool {
 
 // IsDisjoint returns true if the receiver and other share no value.
 //
-// Complexity: Expected O(other.Length()).
+// Complexity: O(other.Len()) on average.
 func (set *HashSet[T]) IsDisjoint(other Source[T]) bool {
 	if otherSet, ok := other.(*HashSet[T]); ok {
 		if otherSet == set {
@@ -605,7 +586,7 @@ func (set *HashSet[T]) IsDisjoint(other Source[T]) bool {
 
 // UnionWith adds identities from every operand and returns how many were added.
 //
-// Complexity: Expected O(sum of operand lengths).
+// Complexity: O(sum of operand lengths) on average.
 func (set *HashSet[T]) UnionWith(others ...Source[T]) (added int) {
 	for _, other := range others {
 		if otherSet, ok := other.(*HashSet[T]); ok {
@@ -621,14 +602,14 @@ func (set *HashSet[T]) UnionWith(others ...Source[T]) (added int) {
 				continue
 			}
 			for value := range otherSet.values {
-				if set.Add(value) {
+				if set.Add(value) > 0 {
 					added++
 				}
 			}
 			continue
 		}
 		for value := range other.All() {
-			if set.Add(value) {
+			if set.Add(value) > 0 {
 				added++
 			}
 		}
@@ -639,7 +620,7 @@ func (set *HashSet[T]) UnionWith(others ...Source[T]) (added int) {
 // IntersectWith removes receiver identities absent from any operand and
 // returns how many were removed.
 //
-// Complexity: Expected O(N * len(others) + sum of operand lengths).
+// Complexity: O(N * len(others) + sum of operand lengths) on average.
 func (set *HashSet[T]) IntersectWith(
 	others ...Source[T],
 ) (removed int) {
@@ -648,7 +629,7 @@ func (set *HashSet[T]) IntersectWith(
 	}
 
 	first := smallestSource(others)
-	if others[first].Length() == 0 {
+	if others[first].Len() == 0 {
 		removed := len(set.values)
 		clear(set.values)
 		return removed
@@ -668,7 +649,7 @@ func (set *HashSet[T]) IntersectWith(
 // DifferenceWith removes identities present in any operand and returns how
 // many were removed.
 //
-// Complexity: Expected O(sum of operand lengths).
+// Complexity: O(sum of operand lengths) on average.
 func (set *HashSet[T]) DifferenceWith(
 	others ...Source[T],
 ) (removed int) {
@@ -709,7 +690,7 @@ func (set *HashSet[T]) DifferenceWith(
 // SymmetricDifferenceWith toggles identities present in an odd number of
 // operands and returns how many receiver memberships changed.
 //
-// Complexity: Expected O(sum of operand lengths).
+// Complexity: O(sum of operand lengths) on average.
 func (set *HashSet[T]) SymmetricDifferenceWith(
 	others ...Source[T],
 ) int {
@@ -751,7 +732,7 @@ func (set *HashSet[T]) SymmetricDifferenceWith(
 			continue
 		}
 		if seen == nil {
-			seen = make(map[T]struct{}, other.Length())
+			seen = make(map[T]struct{}, other.Len())
 		} else {
 			clear(seen)
 		}
@@ -807,7 +788,7 @@ func (set *HashSet[T]) intersectWith(other Source[T]) (removed int) {
 
 func (set *HashSet[T]) unionWithSource(source Source[T]) (added int) {
 	for value := range source.All() {
-		if set.Add(value) {
+		if set.Add(value) > 0 {
 			added++
 		}
 	}
@@ -832,7 +813,7 @@ func toggleHashSources[T comparable, S Source[T]](
 		}
 
 		if seen == nil {
-			seen = make(map[T]struct{}, other.Length())
+			seen = make(map[T]struct{}, other.Len())
 		} else {
 			clear(seen)
 		}
@@ -881,7 +862,7 @@ func (set *HashSet[T]) Enumerate() iter.Seq2[int, T] {
 
 // Clear removes all values while keeping the set initialized for reuse.
 //
-// Complexity: O(allocated map storage).
+// Complexity: O(N).
 func (set *HashSet[T]) Clear() {
 	clear(set.values)
 }
@@ -901,7 +882,7 @@ func collectHashIdentities[T comparable](
 		maps.Copy(identities, set.values)
 		return identities
 	}
-	identities := make(map[T]struct{}, source.Length())
+	identities := make(map[T]struct{}, source.Len())
 	for value := range source.All() {
 		if _, ok := identities[value]; !ok {
 			identities[value] = struct{}{}
@@ -914,7 +895,7 @@ func collectHashMatches[T comparable](
 	source Source[T],
 	membership map[T]struct{},
 ) map[T]struct{} {
-	matches := make(map[T]struct{}, min(source.Length(), len(membership)))
+	matches := make(map[T]struct{}, min(source.Len(), len(membership)))
 	for value := range source.All() {
 		if _, exists := membership[value]; exists {
 			matches[value] = struct{}{}
@@ -926,7 +907,7 @@ func collectHashMatches[T comparable](
 func smallestSource[T any, S Source[T]](sources []S) int {
 	smallest := 0
 	for idx := 1; idx < len(sources); idx++ {
-		if sources[idx].Length() < sources[smallest].Length() {
+		if sources[idx].Len() < sources[smallest].Len() {
 			smallest = idx
 		}
 	}
@@ -962,7 +943,7 @@ func CollectHashKeys[T comparable](source Source[T]) map[T]struct{} {
 		maps.Copy(keys, sourceSet.values)
 		return keys
 	}
-	keys := make(map[T]struct{}, source.Length())
+	keys := make(map[T]struct{}, source.Len())
 	for value := range source.All() {
 		keys[value] = struct{}{}
 	}
@@ -979,7 +960,7 @@ func CollectHashMembership[T comparable](source Source[T]) map[T]bool {
 		}
 		return membership
 	}
-	membership := make(map[T]bool, source.Length())
+	membership := make(map[T]bool, source.Len())
 	for value := range source.All() {
 		membership[value] = false
 	}

@@ -11,7 +11,7 @@ const displayLimit = 5
 
 type formattedCollection[T any] interface {
 	Enumerate() iter.Seq2[int, T]
-	Length() int
+	Len() int
 }
 
 // Format provides a standardized way to render a collection into a string.
@@ -28,15 +28,15 @@ func Format[T any](s fmt.State, verb rune, collection formattedCollection[T], ca
 	t := reflect.TypeOf(collection)
 
 	if verb == 'v' && s.Flag('#') {
-		fmt.Fprintf(s, "%v{size:%d, cap:%d}", t, collection.Length(), capacity)
+		fmt.Fprintf(s, "%v{size:%d, cap:%d}", t, collection.Len(), capacity)
 		return
 	}
 
 	if s.Flag('+') {
-		fmt.Fprintf(s, "%v{len:%d, cap:%d} ", t, collection.Length(), capacity)
+		fmt.Fprintf(s, "%v{len:%d, cap:%d} ", t, collection.Len(), capacity)
 	}
 
-	if collection.Length() == 0 {
+	if collection.Len() == 0 {
 		_, _ = io.WriteString(s, "[]")
 		return
 	}
@@ -44,7 +44,7 @@ func Format[T any](s fmt.State, verb rune, collection formattedCollection[T], ca
 	_, _ = io.WriteString(s, "[")
 	for idx, val := range collection.Enumerate() {
 		if idx >= 5 {
-			fmt.Fprintf(s, " ...(+%d more)", collection.Length()-displayLimit)
+			fmt.Fprintf(s, " ...(+%d more)", collection.Len()-displayLimit)
 			break
 		}
 		if idx > 0 {

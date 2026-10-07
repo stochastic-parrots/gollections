@@ -14,25 +14,27 @@
 // reversal and boundary insertion or removal matter more than indexed access.
 // Indexed operations require O(N) traversal.
 //
-// Select an implementation with [Array] or [Linked]. Each selector returns a
-// reusable concrete factory whose construction methods return pointers to the
-// corresponding concrete list type.
+// Choose an implementation through [NewArray], [ArrayFrom], [ArrayClone],
+// [ArrayFromSeq], [NewLinked], [LinkedFrom], or [LinkedFromSeq]. Each
+// constructor returns a pointer to the corresponding concrete list type.
 // The zero values of [ArrayList] and [LinkedList] are ready for use.
 //
 // # Construction And Ownership
 //
-// Array factories provide New, From, Clone, and FromSeq. [ArrayFactory.From]
-// takes ownership of the provided slice and may reuse its backing array during
-// later mutations. [ArrayFactory.Clone] preserves the source by making a shallow
-// copy. FromSeq collects an iterator into new storage.
+// [ArrayFrom] takes ownership of the provided slice and may reuse its backing
+// array during later mutations. The caller must stop using the source and all
+// aliases afterward. [ArrayClone] makes an independent shallow copy of its
+// storage. [ArrayFromSeq] collects an iterator into new storage once.
 //
-// Linked factories provide New, From, and FromSeq. Linked construction always
-// copies values into newly allocated nodes and never retains a source slice.
+// [LinkedFrom] copies values into newly allocated nodes and never retains a
+// source slice. [LinkedFromSeq] consumes an iterator once into new nodes.
 //
 // # JSON
 //
-// Lists marshal and unmarshal as arrays in index order. Unmarshal replaces the
-// current contents only after the complete JSON array is decoded successfully.
+// ArrayList and LinkedList marshal and unmarshal as arrays in index order.
+// The List and Readonly interfaces do not require JSON or formatting methods.
+// Unmarshal replaces the current contents only after the complete JSON array
+// is decoded successfully.
 //
 // # Views And Iteration
 //
@@ -44,6 +46,8 @@
 // All traverses the current logical list order from first to last, including
 // after Reverse. Enumerate uses the same order and assigns consecutive indexes
 // starting at zero. Backward traverses that logical order in reverse.
+// Find returns the index of the first value matching a predicate;
+// Contains reports whether any value matches. Both search in logical order.
 //
 // A readonly view observes the same underlying list; it is not a snapshot and
 // does not make concurrent mutation safe.

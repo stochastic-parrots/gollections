@@ -9,76 +9,95 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFactoriesImplementDeque(t *testing.T) {
-	var _ *deque.ArrayDeque[int] = deque.Array[int]().New(0)
-	var _ *deque.ArrayDeque[int] = deque.Array[int]().From([]int{1})
-	var _ *deque.ArrayDeque[int] = deque.Array[int]().Clone([]int{1})
-	var _ *deque.ArrayDeque[int] = deque.Array[int]().FromSeq(slices.Values([]int{1}))
-	var _ *deque.LinkedDeque[int] = deque.Linked[int]().New()
-	var _ *deque.LinkedDeque[int] = deque.Linked[int]().From([]int{1})
-	var _ *deque.LinkedDeque[int] = deque.Linked[int]().FromSeq(slices.Values([]int{1}))
-	var _ deque.Deque[int] = deque.Array[int]().New(0)
-	var _ deque.Deque[int] = deque.Linked[int]().New()
+func TestConstructorsImplementDeque(t *testing.T) {
+	var _ *deque.ArrayDeque[int] = deque.NewArray[int](0)
+	var _ *deque.ArrayDeque[int] = deque.ArrayFrom[int]([]int{1})
+	var _ *deque.ArrayDeque[int] = deque.ArrayClone[int]([]int{1})
+	var _ *deque.ArrayDeque[int] = deque.ArrayFromSeq[int](slices.Values([]int{1}))
+	var _ *deque.LinkedDeque[int] = deque.NewLinked[int]()
+	var _ *deque.LinkedDeque[int] = deque.LinkedFrom[int]([]int{1})
+	var _ *deque.LinkedDeque[int] = deque.LinkedFromSeq[int](slices.Values([]int{1}))
+	var _ deque.Deque[int] = deque.NewArray[int](0)
+	var _ deque.Deque[int] = deque.NewLinked[int]()
 }
 
 func TestConcreteZeroValues(t *testing.T) {
 	var array deque.ArrayDeque[int]
-	array.Appends(1, 2)
+	array.Append(1, 2)
 	array.Prepend(0)
 	assert.Equal(t, []int{0, 1, 2}, array.ToSlice())
 	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &array))
 	assert.Equal(t, []int{3, 4}, array.ToSlice())
 
 	var linked deque.LinkedDeque[int]
-	linked.Appends(1, 2)
+	linked.Append(1, 2)
 	linked.Prepend(0)
 	assert.Equal(t, []int{0, 1, 2}, linked.ToSlice())
 	assert.NoError(t, json.Unmarshal([]byte(`[3,4]`), &linked))
 	assert.Equal(t, []int{3, 4}, linked.ToSlice())
 }
 
-func TestArrayFactory_From(t *testing.T) {
+func TestArrayFrom(t *testing.T) {
 	data := []int{1, 2}
-	deque := deque.Array[int]().From(data)
-
-	_, _ = deque.Shift()
-	assert.Equal(t, []int{0, 2}, data)
-}
-
-func TestArrayFactory_Clone(t *testing.T) {
-	data := []int{1, 2}
-	deque := deque.Array[int]().Clone(data)
-
-	_, _ = deque.Shift()
-	assert.Equal(t, []int{1, 2}, data)
-}
-
-func TestArrayFactory_FromSeq(t *testing.T) {
-	deque := deque.Array[int]().FromSeq(slices.Values([]int{1, 2}))
+	deque := deque.ArrayFrom[int](data)
 
 	assert.Equal(t, []int{1, 2}, deque.ToSlice())
 }
 
-func TestLinkedFactory_From(t *testing.T) {
+func TestArrayClone(t *testing.T) {
 	data := []int{1, 2}
-	deque := deque.Linked[int]().From(data)
+	deque := deque.ArrayClone[int](data)
+
+	_, _ = deque.Shift()
+	assert.Equal(t, []int{1, 2}, data)
+	data[1] = 20
+	assert.Equal(t, []int{2}, deque.ToSlice())
+}
+
+func TestArrayFromSeq(t *testing.T) {
+	deque := deque.ArrayFromSeq[int](slices.Values([]int{1, 2}))
+
+	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+}
+
+func TestLinkedFrom(t *testing.T) {
+	data := []int{1, 2}
+	deque := deque.LinkedFrom[int](data)
 	data[0] = 10
 
 	assert.Equal(t, []int{1, 2}, deque.ToSlice())
 }
 
-func TestLinkedFactory_FromSeq(t *testing.T) {
-	deque := deque.Linked[int]().FromSeq(slices.Values([]int{1, 2}))
+func TestLinkedFromSeq(t *testing.T) {
+	deque := deque.LinkedFromSeq[int](slices.Values([]int{1, 2}))
 
 	assert.Equal(t, []int{1, 2}, deque.ToSlice())
 }
 
-func TestArrayFactory_New(t *testing.T) {
-	assertDequeBehavior(t, deque.Array[int]().New(1))
+func TestNewArray(t *testing.T) {
+	assertDequeBehavior(t, deque.NewArray[int](1))
 }
 
-func TestLinkedFactory_New(t *testing.T) {
-	assertDequeBehavior(t, deque.Linked[int]().New())
+func TestNewLinked(t *testing.T) {
+	assertDequeBehavior(t, deque.NewLinked[int]())
+}
+
+func TestEmptySliceConstructors(t *testing.T) {
+	for name, construct := range map[string]func() deque.Deque[int]{
+		"ArrayFromNil":    func() deque.Deque[int] { return deque.ArrayFrom([]int(nil)) },
+		"ArrayFromEmpty":  func() deque.Deque[int] { return deque.ArrayFrom(make([]int, 0, 4)) },
+		"ArrayCloneNil":   func() deque.Deque[int] { return deque.ArrayClone([]int(nil)) },
+		"ArrayCloneEmpty": func() deque.Deque[int] { return deque.ArrayClone(make([]int, 0, 4)) },
+		"LinkedFromNil":   func() deque.Deque[int] { return deque.LinkedFrom([]int(nil)) },
+		"LinkedFromEmpty": func() deque.Deque[int] { return deque.LinkedFrom(make([]int, 0, 4)) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			values := construct()
+			assert.True(t, values.IsEmpty())
+			values.Append(1)
+			assert.Equal(t, []int{1}, values.ToSlice())
+		})
+	}
 }
 
 func TestAsReadonly(t *testing.T) {
@@ -87,8 +106,8 @@ func TestAsReadonly(t *testing.T) {
 	})
 
 	t.Run("View", func(t *testing.T) {
-		mutable := deque.Array[int]().New(0)
-		mutable.Appends(1, 2)
+		mutable := deque.NewArray[int](0)
+		mutable.Append(1, 2)
 
 		view := deque.AsReadonly[int](mutable)
 		_, unmarshals := any(view).(json.Unmarshaler)
@@ -96,7 +115,7 @@ func TestAsReadonly(t *testing.T) {
 
 		assert.Equal(t, []int{1, 2}, slices.Collect(view.All()))
 		assert.Equal(t, []int{0, 1}, collectIndexes(view.Enumerate()))
-		assert.Equal(t, 2, view.Length())
+		assert.Equal(t, 2, view.Len())
 		assert.False(t, view.IsEmpty())
 
 		front, ok := view.Front()
@@ -123,8 +142,8 @@ func assertDequeBehavior(t *testing.T, d deque.Deque[int]) {
 
 	assert.True(t, d.IsEmpty())
 
-	d.Appends(2, 3)
-	d.Prepends(0, 1)
+	d.Append(2, 3)
+	d.Prepend(0, 1)
 
 	assert.Equal(t, []int{0, 1, 2, 3}, d.ToSlice())
 	assert.Equal(t, []int{0, 1, 2, 3}, slices.Collect(d.All()))

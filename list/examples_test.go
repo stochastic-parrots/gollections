@@ -1,7 +1,6 @@
 package list_test
 
 import (
-	"cmp"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -9,9 +8,9 @@ import (
 	"github.com/stochastic-parrots/gollections/list"
 )
 
-func ExampleArray() {
-	items := list.Array[int]().New(5)
-	items.Appends(10, 20, 30)
+func ExampleNewArray() {
+	items := list.NewArray[int](5)
+	items.Append(10, 20, 30)
 
 	val, _ := items.Get(1)
 	fmt.Printf("Get(1): %d\n", val)
@@ -21,9 +20,9 @@ func ExampleArray() {
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
 
-	fmt.Println(items.Contains(50, cmp.Compare[int]))
+	fmt.Println(items.Contains(func(x int) bool { return x == 50 }))
 	items.Append(50)
-	fmt.Println(items.Contains(50, cmp.Compare[int]))
+	fmt.Println(items.Contains(func(x int) bool { return x == 50 }))
 
 	items.Reverse()
 	fmt.Println(slices.Collect(items.All()))
@@ -53,15 +52,15 @@ func ExampleArray() {
 	// Unmarshal: [1 2 3]
 }
 
-func ExampleLinked() {
-	items := list.Linked[string]().New()
-	items.Appends("Go", "is", "fast")
+func ExampleNewLinked() {
+	items := list.NewLinked[string]()
+	items.Append("Go", "is", "fast")
 
 	fmt.Println(slices.Collect(items.All()))
 	fmt.Println(slices.Collect(items.Backward()))
 
-	fmt.Println(items.Contains("Go", cmp.Compare[string]))
-	fmt.Println(items.Contains("Java", cmp.Compare[string]))
+	fmt.Println(items.Contains(func(x string) bool { return x == "Go" }))
+	fmt.Println(items.Contains(func(x string) bool { return x == "Java" }))
 
 	_ = items.Insert(0, "Java and")
 	_, _ = items.Remove(2)
@@ -85,9 +84,9 @@ func ExampleLinked() {
 	// Unmarshal: [hello world]
 }
 
-func ExampleArrayFactory_From() {
+func ExampleArrayFrom() {
 	values := []int{10, 20, 30}
-	list := list.Array[int]().From(values)
+	list := list.ArrayFrom[int](values)
 
 	list.Append(40)
 	fmt.Println(list.ToSlice())
@@ -96,9 +95,9 @@ func ExampleArrayFactory_From() {
 	// [10 20 30 40]
 }
 
-func ExampleArrayFactory_Clone() {
+func ExampleArrayClone() {
 	values := []int{10, 20, 30}
-	list := list.Array[int]().Clone(values)
+	list := list.ArrayClone[int](values)
 	_ = list.Set(0, 100)
 
 	fmt.Println(list.ToSlice())
@@ -109,8 +108,8 @@ func ExampleArrayFactory_Clone() {
 	// [10 20 30]
 }
 
-func ExampleLinkedFactory_FromSeq() {
-	list := list.Linked[int]().FromSeq(slices.Values([]int{10, 20, 30}))
+func ExampleLinkedFromSeq() {
+	list := list.LinkedFromSeq[int](slices.Values([]int{10, 20, 30}))
 
 	fmt.Println(list.ToSlice())
 
@@ -119,8 +118,8 @@ func ExampleLinkedFactory_FromSeq() {
 }
 
 func ExampleAsReadonly() {
-	mutable := list.Array[int]().New(0)
-	mutable.Appends(10, 20)
+	mutable := list.NewArray[int](0)
+	mutable.Append(10, 20)
 
 	data := list.AsReadonly(mutable)
 
@@ -137,4 +136,24 @@ func ExampleAsReadonly() {
 	// Output:
 	// Readonly view: [10 20]
 	// Readonly view: [10 20 30]
+}
+
+func ExampleList_formattingAndJSON() {
+	var items list.List[int] = list.ArrayFrom([]int{1, 2})
+
+	fmt.Println(items)
+	data, err := json.Marshal(items)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(data))
+	if err := json.Unmarshal([]byte(`[3,4]`), items); err != nil {
+		panic(err)
+	}
+	fmt.Println(items.ToSlice())
+
+	// Output:
+	// [1 2]
+	// [1,2]
+	// [3 4]
 }

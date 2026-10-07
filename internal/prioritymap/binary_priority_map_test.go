@@ -10,7 +10,7 @@ import (
 func TestNewBinaryPriorityMap(t *testing.T) {
 	pm := NewBinaryPriorityMap[string](10, ordering.Min[int]())
 
-	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, 0, pm.Len())
 	assert.True(t, pm.IsEmpty())
 	assert.Empty(t, pm.data)
 	assert.Empty(t, pm.indexes)
@@ -22,7 +22,7 @@ func TestBinaryPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("B", 5)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		key, val, _ := pm.Peek()
 		assert.Equal(t, "B", key)
 		assert.Equal(t, 5, val)
@@ -33,7 +33,7 @@ func TestBinaryPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("A", 2) // Update priority to be higher
 
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 		_, priority, _ := pm.Peek()
 		assert.Equal(t, 2, priority)
 	})
@@ -79,7 +79,7 @@ func TestBinaryPriorityMap_Improve(t *testing.T) {
 		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 
 		assert.True(t, pm.Improve("A", 10))
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 
 		val, ok := pm.Get("A")
 		assert.True(t, ok)
@@ -145,7 +145,7 @@ func TestBinaryPriorityMap_Remove(t *testing.T) {
 	pm.Set("C", 30)
 
 	assert.True(t, pm.Remove("B"))
-	assert.Equal(t, 2, pm.Length())
+	assert.Equal(t, 2, pm.Len())
 	_, exists := pm.Get("B")
 	assert.False(t, exists)
 
@@ -235,13 +235,13 @@ func TestBinaryPriorityMap_IsEmpty(t *testing.T) {
 	assert.True(t, pm.IsEmpty())
 }
 
-func TestBinaryPriorityMap_Length(t *testing.T) {
+func TestBinaryPriorityMap_Len(t *testing.T) {
 	pm := NewBinaryPriorityMap[int](0, ordering.Min[int]())
-	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, 0, pm.Len())
 
 	pm.Set(1, 10)
 	pm.Set(2, 20)
-	assert.Equal(t, 2, pm.Length())
+	assert.Equal(t, 2, pm.Len())
 }
 
 func TestBinaryPriorityMap_Keys(t *testing.T) {
@@ -256,7 +256,7 @@ func TestBinaryPriorityMap_Keys(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -275,7 +275,7 @@ func TestBinaryPriorityMap_Keys(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -304,7 +304,7 @@ func TestBinaryPriorityMap_Values(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -323,7 +323,7 @@ func TestBinaryPriorityMap_Values(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -352,7 +352,7 @@ func TestBinaryPriorityMap_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -371,7 +371,7 @@ func TestBinaryPriorityMap_All(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -420,7 +420,7 @@ func TestBinaryPriorityMap_Drain(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		assert.False(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
 		assert.True(t, pm.Contains("c"))
@@ -458,11 +458,11 @@ func TestBinaryPriorityMap_Clear(t *testing.T) {
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 
 		pm.Clear()
 
-		assert.Equal(t, 0, pm.Length())
+		assert.Equal(t, 0, pm.Len())
 		assert.True(t, pm.IsEmpty())
 		assert.False(t, pm.Contains("a"))
 		assert.False(t, pm.Contains("b"))
@@ -491,7 +491,7 @@ func TestBinaryPriorityMap_Clear(t *testing.T) {
 		pm.Set("new", 5)
 		pm.Set("newer", 1)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		key, priority, ok := pm.Peek()
 		assert.True(t, ok)
 		assert.Equal(t, "newer", key)

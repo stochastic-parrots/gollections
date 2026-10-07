@@ -7,78 +7,337 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/sortedlist"
 )
 
-// ArraySortedList is a slice-backed [SortedList] with comparator-defined order.
-// Its zero value is invalid; construct one with [Array] or [OrderedArray].
+// ArraySortedList is a slice-backed SortedList. Its zero value is invalid;
+// use NewArray or NewOrderedArray.
 type ArraySortedList[T any] = sortedlist.ArraySortedList[T]
 
-var _ SortedList[any] = &sortedlist.ArraySortedList[any]{}
+var _ SortedList[int] = &sortedlist.ArraySortedList[int]{}
 
-// ArrayFactory constructs slice-backed sorted lists with a fixed comparator.
-//
-// The comparator follows the same contract as cmp.Compare. Array sorted lists
-// provide O(log N) lookup, O(1) indexed access, and O(N) single-value insertion
-// or removal because values may need to be shifted.
-// The comparator must be non-nil, define a transitive ordering and equivalence
-// relation, and remain stable for the lifetime of every list from the factory.
-//
-// The zero value is invalid. Create a factory with [Array] or [OrderedArray].
-//
-// Performance Summary (Time Complexity):
-//
-//	Operation           Time Complexity
-//	-----------------   ---------------
-//	New(capacity)       O(capacity)
-//	From/Clone/FromSeq  O(N log N)
-//	Add(x)/Remove(x)    O(N)
-//	Adds(xs...T)        O((N + len(xs)) log (N + len(xs)))
-//	Lookup/Bounds       O(log N)
-//	Range               O(log N + yielded values)
-//	Get                 O(1)
-//	Clear               O(N)
-type ArrayFactory[T any] struct {
-	compare func(a, b T) int
-}
-
-// Array returns an array sorted-list factory using compare for every operation.
-// It panics if compare is nil.
-func Array[T any](compare func(a, b T) int) ArrayFactory[T] {
+func checkCompare[T any](compare func(T, T) int) {
 	if compare == nil {
 		panic("sortedlist: nil comparator")
 	}
-	return ArrayFactory[T]{compare: compare}
 }
 
-// OrderedArray returns an array sorted-list factory using the natural order of
-// T in the selected direction.
-func OrderedArray[T cmp.Ordered](order Order) ArrayFactory[T] {
+func orderedCompare[T cmp.Ordered](order Order) func(T, T) int {
 	if order == Desc {
-		return Array(func(a, b T) int { return cmp.Compare(b, a) })
+		return func(a, b T) int { return cmp.Compare(b, a) }
 	}
-	return Array(cmp.Compare[T])
+	return cmp.Compare[T]
 }
 
-// New creates an empty array sorted list with the requested initial capacity.
-func (factory ArrayFactory[T]) New(capacity int) *ArraySortedList[T] {
-	return sortedlist.NewArraySortedList(capacity, factory.compare)
-}
-
-// From creates an array sorted list using data as its backing storage.
+// NewArray creates an empty sorted list using a stable cmp.Compare-compatible
+// comparator. Choose it for O(log N) lookup and O(1) indexed access when
+// single-value insertion or removal at O(N) cost is acceptable.
+// The comparator must remain stable for the lifetime of the list.
 //
-// WARNING: From sorts data in place and transfers ownership of its backing
-// storage. The caller must not use data or aliases of its backing array after
-// this call. Use [ArrayFactory.Clone] to preserve the source slice.
-func (factory ArrayFactory[T]) From(data []T) *ArraySortedList[T] {
-	return sortedlist.NewArraySortedListFromSlice(data, factory.compare)
-}
-
-// Clone creates an array sorted list from a sorted copy of data.
+// Performance Summary (Time Complexity):
 //
-// Clone does not modify or retain the provided slice.
-func (factory ArrayFactory[T]) Clone(data []T) *ArraySortedList[T] {
-	return sortedlist.NewArraySortedListCloneSlice(data, factory.compare)
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(capacity).
+func NewArray[T any](compare func(T, T) int, capacity int) *ArraySortedList[T] {
+	checkCompare(compare)
+	return sortedlist.NewArraySortedList(capacity, compare)
 }
 
-// FromSeq collects seq into new storage and creates an array sorted list.
-func (factory ArrayFactory[T]) FromSeq(seq iter.Seq[T]) *ArraySortedList[T] {
-	return sortedlist.NewArraySortedListFromSeq(seq, factory.compare)
+// ArrayFrom sorts data in place and transfers ownership of its backing array.
+// The caller must stop using data and every alias afterward. Use ArrayClone to preserve it.
+// The comparator must be non-nil and provide a stable cmp.Compare-compatible order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(len(data) log len(data)).
+func ArrayFrom[T any](compare func(T, T) int, data []T) *ArraySortedList[T] {
+	checkCompare(compare)
+	return sortedlist.NewArraySortedListFromSlice(data, compare)
+}
+
+// ArrayClone sorts an independent shallow copy of data and does not modify or retain its backing array.
+// The comparator must be non-nil and provide a stable cmp.Compare-compatible order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(len(data) log len(data)).
+func ArrayClone[T any](compare func(T, T) int, data []T) *ArraySortedList[T] {
+	checkCompare(compare)
+	return sortedlist.NewArraySortedListCloneSlice(data, compare)
+}
+
+// ArrayFromSeq consumes seq once, then sorts new storage using compare.
+// The comparator must be non-nil and provide a stable cmp.Compare-compatible order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(N log N), where N is the number of values yielded by seq.
+func ArrayFromSeq[T any](compare func(T, T) int, seq iter.Seq[T]) *ArraySortedList[T] {
+	checkCompare(compare)
+	return sortedlist.NewArraySortedListFromSeq(seq, compare)
+}
+
+// NewOrderedArray creates an empty sorted list using T's natural order in the selected direction.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(capacity).
+func NewOrderedArray[T cmp.Ordered](order Order, capacity int) *ArraySortedList[T] {
+	return NewArray(orderedCompare[T](order), capacity)
+}
+
+// OrderedArrayFrom sorts data in place using T's natural order and transfers its backing array.
+// The caller must stop using data and every alias afterward. Use OrderedArrayClone to preserve it.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(len(data) log len(data)).
+func OrderedArrayFrom[T cmp.Ordered](order Order, data []T) *ArraySortedList[T] {
+	return ArrayFrom(orderedCompare[T](order), data)
+}
+
+// OrderedArrayClone sorts an independent shallow copy of data using T's natural order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(len(data) log len(data)).
+func OrderedArrayClone[T cmp.Ordered](order Order, data []T) *ArraySortedList[T] {
+	return ArrayClone(orderedCompare[T](order), data)
+}
+
+// OrderedArrayFromSeq consumes seq once, then sorts the values using T's natural order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation         Time Complexity
+//	---------------   ---------------
+//	IsEmpty()         O(1)
+//	Len()             O(1)
+//	All()             O(N)
+//	Enumerate()       O(N)
+//	Get(idx)          O(1)
+//	LowerBound(x)     O(log N)
+//	UpperBound(x)     O(log N)
+//	EqualRange(x)     O(log N)
+//	Count(x)          O(log N)
+//	Find(x)           O(log N)
+//	Ceiling(x)        O(log N)
+//	Floor(x)          O(log N)
+//	Higher(x)         O(log N)
+//	Lower(x)          O(log N)
+//	Contains(x)       O(log N)
+//	First()           O(1)
+//	Last()            O(1)
+//	Backward()        O(N)
+//	Range(from, to)   O(log N + yielded values)
+//	ToSlice()         O(N)
+//	Add(xs... T)      O((N + len(xs)) log (N + len(xs)))
+//	Remove(x)         O(N)
+//	Replace(idx, x)   O(1)
+//	Clear()           O(N)
+//	MarshalJSON()     O(N)
+//	String()          O(1)
+//
+// Complexity: O(N log N), where N is the number of values yielded by seq.
+func OrderedArrayFromSeq[T cmp.Ordered](order Order, seq iter.Seq[T]) *ArraySortedList[T] {
+	return ArrayFromSeq(orderedCompare[T](order), seq)
 }

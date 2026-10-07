@@ -8,19 +8,19 @@ import (
 	"github.com/stochastic-parrots/gollections/set"
 )
 
-func ExampleHashSetFrom() {
-	values := set.HashSetFrom([]string{"go", "collections", "go"})
+func ExampleNewHashSet() {
+	values := set.HashSetFrom[string]([]string{"go", "collections", "go"})
 	fmt.Println("added:", values.Add("iterators"))
 	fmt.Println("added:", values.Add("go"))
-	fmt.Println("removed:", values.Removes("collections", "missing", "collections"))
+	fmt.Println("removed:", values.Remove("collections", "missing", "collections"))
 
 	fmt.Println(slices.Sorted(values.All()))
 	fmt.Println(values.Contains("go"))
 	fmt.Println(values.Contains("maps"))
 
 	// Output:
-	// added: true
-	// added: false
+	// added: 1
+	// added: 0
 	// removed: 1
 	// [go iterators]
 	// true
@@ -34,8 +34,8 @@ func ExampleNewKeyedHashSet() {
 		Roles []string
 	}
 
-	users := set.NewKeyedHashSet(0, func(value user) int { return value.ID })
-	added := users.Adds(
+	users := set.NewKeyedHashSet(func(value user) int { return value.ID }, 0)
+	added := users.Add(
 		user{ID: 2, Name: "Grace", Roles: []string{"admin"}},
 		user{ID: 1, Name: "Ada", Roles: []string{"author"}},
 		user{ID: 1, Name: "duplicate"},
@@ -62,8 +62,8 @@ func ExampleEqualBy() {
 	}
 
 	byName := func(value user) string { return value.Name }
-	left := set.KeyedHashSetFrom([]user{{ID: 1, Name: "Ada"}}, byName)
-	right := set.KeyedHashSetFrom([]user{{ID: 1, Name: "Ada Lovelace"}}, byName)
+	left := set.KeyedHashSetFrom(byName, []user{{ID: 1, Name: "Ada"}})
+	right := set.KeyedHashSetFrom(byName, []user{{ID: 1, Name: "Ada Lovelace"}})
 
 	fmt.Println(set.EqualBy(func(value user) int { return value.ID }, left, right))
 
@@ -109,7 +109,7 @@ func ExampleHashSet_IntersectWith() {
 }
 
 func ExampleAsReadonly() {
-	mutable := set.HashSetFrom([]int{1, 2})
+	mutable := set.HashSetFrom[int]([]int{1, 2})
 	view := set.AsReadonly[int](mutable)
 
 	fmt.Println(slices.Sorted(view.All()))

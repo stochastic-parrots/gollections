@@ -5,7 +5,7 @@
 // operations such as Insert, Set, or Reverse. Replace is allowed only when the
 // new value preserves sorted order. The list order is derived from the
 // comparator selected at construction time and is preserved after every
-// mutation. [OrderedArray] supplies that comparator for a cmp.Ordered type in
+// mutation. [NewOrderedArray] supplies that comparator for a cmp.Ordered type in
 // ascending or descending order.
 //
 // A sorted list is a good fit when data is built once or updated occasionally
@@ -15,16 +15,14 @@
 // a heap, priority map, or a future tree/skip-list implementation depending on
 // the access pattern.
 //
-// Use [OrderedArray] when T satisfies cmp.Ordered and ascending or descending
-// natural order is enough. Use [Array] when values need a custom comparator.
-// Both selectors return [ArrayFactory] and use the same implementation. The
-// comparator must define the same ordering for construction, lookup,
-// replacement, and removal. The relative order of values considered equivalent
-// by the comparator is unspecified; include a tie-breaker when that order
-// matters.
+// Use [NewOrderedArray], [OrderedArrayFrom], [OrderedArrayClone], or
+// [OrderedArrayFromSeq] when T satisfies cmp.Ordered and natural order is enough.
+// Use [NewArray], [ArrayFrom], [ArrayClone], or [ArrayFromSeq] for a custom
+// comparator. The comparator must remain stable and define the same ordering
+// for construction, lookup, replacement, and removal. The relative order of
+// equivalent values is unspecified; include a tie-breaker if it matters.
 //
-// [ArraySortedList] requires a comparator and must be constructed through
-// [Array] or [OrderedArray]; its zero value is invalid.
+// [ArraySortedList] requires a comparator; its zero value is invalid.
 //
 // Bounds and range operations use list order. [Readonly.Range] is half-open:
 // it yields values in [from, to), including values equivalent to from and
@@ -54,8 +52,6 @@
 //		Range(from, to T) iter.Seq[T]
 //		ToSlice() []T
 //		gollections.Collection[T]
-//		fmt.Stringer
-//		json.Marshaler
 //	}
 //
 // A readonly view observes the same underlying sorted list. It restricts
@@ -67,8 +63,7 @@
 // Mutable sorted lists implement the [SortedList] interface:
 //
 //	type SortedList[T any] interface {
-//		Add(x T)
-//		Adds(xs ...T)
+//		Add(xs ...T)
 //		Replace(idx int, x T) error
 //		Remove(x T) bool
 //		Clear()
@@ -82,16 +77,18 @@
 //   - [ArraySortedList]: A comparator-backed sorted list with O(log N) lookup
 //     and O(N) single-element insertion/removal.
 //
-// Factories build sorted lists from empty capacity, slices, cloned slices, or
-// iterators. [ArrayFactory.From] sorts and retains the provided slice,
-// transferring ownership of its backing array. The caller must not use the
-// slice or its aliases afterward. Clone preserves the source. FromSeq makes it
-// possible to sort any collection in this module that exposes All(). Every
-// factory method returns an [ArraySortedList].
+// Direct constructors build sorted lists from empty capacity, slices, cloned
+// slices, or iterators. [ArrayFrom] and [OrderedArrayFrom] sort the supplied
+// slice in place and transfer ownership of its backing array. The caller must
+// stop using the slice and every alias afterward. Clone constructors preserve
+// the source through an independent shallow copy. FromSeq constructors consume
+// their iterators once. Every constructor returns an [ArraySortedList].
 //
 // # JSON
 //
-// Sorted lists marshal as arrays in sorted order. They do not implement
-// json.Unmarshaler; decode into []T and pass the values to the same factory so
-// the natural or custom ordering strategy remains explicit.
+// ArraySortedList marshals as an array in sorted order. The SortedList and
+// Readonly interfaces do not require JSON or formatting methods.
+// ArraySortedList does not implement json.Unmarshaler; decode into []T and pass
+// the values to the same constructor family so the natural or custom ordering
+// strategy remains explicit.
 package sortedlist

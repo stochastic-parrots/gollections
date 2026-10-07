@@ -9,8 +9,8 @@ import (
 // Equal reports whether first and every additional set contain the same
 // values.
 //
-// Complexity: Expected O(Q*N + M), where Q is the number of additional sets,
-// N is first.Length(), and M is the sum of their lengths.
+// Complexity: O(Q*N + M) on average, where Q is the number of additional sets,
+// N is first.Len(), and M is the sum of their lengths.
 func Equal[T comparable](first Readonly[T], others ...Readonly[T]) bool {
 	for _, other := range others {
 		if !equal(first, other) {
@@ -21,7 +21,7 @@ func Equal[T comparable](first Readonly[T], others ...Readonly[T]) bool {
 }
 
 func equal[T comparable](left, right Readonly[T]) bool {
-	if left.Length() != right.Length() {
+	if left.Len() != right.Len() {
 		return false
 	}
 	if leftSet, ok := left.(*HashSet[T]); ok {
@@ -37,10 +37,10 @@ func equal[T comparable](left, right Readonly[T]) bool {
 
 // IsSubset reports whether every value in subset is present in superset.
 //
-// Complexity: Expected O(N + M), where N = subset.Length() and M =
-// superset.Length().
+// Complexity: O(N + M) on average, where N = subset.Len() and M =
+// superset.Len().
 func IsSubset[T comparable](subset, superset Readonly[T]) bool {
-	if subset.Length() > superset.Length() {
+	if subset.Len() > superset.Len() {
 		return false
 	}
 	if subsetSet, ok := subset.(*HashSet[T]); ok {
@@ -63,10 +63,10 @@ func IsSubset[T comparable](subset, superset Readonly[T]) bool {
 // IsProperSubset reports whether subset is contained in superset and the two
 // sources are not equal.
 //
-// Complexity: Expected O(N + M), where N = subset.Length() and M =
-// superset.Length().
+// Complexity: O(N + M) on average, where N = subset.Len() and M =
+// superset.Len().
 func IsProperSubset[T comparable](subset, superset Readonly[T]) bool {
-	if subset.Length() >= superset.Length() {
+	if subset.Len() >= superset.Len() {
 		return false
 	}
 	if subsetSet, ok := subset.(*HashSet[T]); ok {
@@ -79,10 +79,10 @@ func IsProperSubset[T comparable](subset, superset Readonly[T]) bool {
 
 // IsSuperset reports whether every value in subset is present in superset.
 //
-// Complexity: Expected O(N + M), where N = subset.Length() and M =
-// superset.Length().
+// Complexity: O(N + M) on average, where N = subset.Len() and M =
+// superset.Len().
 func IsSuperset[T comparable](superset, subset Readonly[T]) bool {
-	if subset.Length() > superset.Length() {
+	if subset.Len() > superset.Len() {
 		return false
 	}
 	if supersetSet, ok := superset.(*HashSet[T]); ok {
@@ -97,10 +97,10 @@ func IsSuperset[T comparable](superset, subset Readonly[T]) bool {
 // IsProperSuperset reports whether superset contains subset and the two
 // sources are not equal.
 //
-// Complexity: Expected O(N + M), where N = superset.Length() and M =
-// subset.Length().
+// Complexity: O(N + M) on average, where N = superset.Len() and M =
+// subset.Len().
 func IsProperSuperset[T comparable](superset, subset Readonly[T]) bool {
-	if subset.Length() >= superset.Length() {
+	if subset.Len() >= superset.Len() {
 		return false
 	}
 	if supersetSet, ok := superset.(*HashSet[T]); ok {
@@ -114,7 +114,7 @@ func IsProperSuperset[T comparable](superset, subset Readonly[T]) bool {
 // IsDisjoint reports whether first and every additional set are pairwise
 // disjoint.
 //
-// Complexity: Expected O(M), where M is the sum of all operand lengths.
+// Complexity: O(M) on average, where M is the sum of all operand lengths.
 func IsDisjoint[T comparable](first Readonly[T], others ...Readonly[T]) bool {
 	values := set.CollectHashKeys(first)
 	for _, other := range others {
@@ -139,8 +139,8 @@ func addHashValues[T comparable](known map[T]struct{}, source Readonly[T]) bool 
 // EqualBy reports whether first and every additional set contain the same
 // identities derived by keyOf. It panics if keyOf is nil.
 //
-// Complexity: Expected O(Q*N + M), where Q is the number of additional sets,
-// N is first.Length(), and M is the sum of their lengths.
+// Complexity: O(Q*N + M) on average, where Q is the number of additional sets,
+// N is first.Len(), and M is the sum of their lengths.
 func EqualBy[T any, K comparable](
 	keyOf func(T) K,
 	first Readonly[T],
@@ -156,7 +156,7 @@ func EqualBy[T any, K comparable](
 }
 
 func equalBy[T any, K comparable](left, right Readonly[T], keyOf func(T) K) bool {
-	if left.Length() > right.Length() {
+	if left.Len() > right.Len() {
 		left, right = right, left
 	}
 	membership := set.CollectKeyedMembership(left, keyOf)
@@ -167,11 +167,11 @@ func equalBy[T any, K comparable](left, right Readonly[T], keyOf func(T) K) bool
 // IsSubsetBy reports whether every identity derived from subset is present in
 // superset. It panics if keyOf is nil.
 //
-// Complexity: Expected O(N + M), where N = subset.Length() and M =
-// superset.Length().
+// Complexity: O(N + M) on average, where N = subset.Len() and M =
+// superset.Len().
 func IsSubsetBy[T any, K comparable](subset, superset Readonly[T], keyOf func(T) K) bool {
 	requireKeyOf(keyOf)
-	if subset.Length() <= superset.Length() {
+	if subset.Len() <= superset.Len() {
 		return set.MatchKeyedSubset(set.CollectKeyedMembership(subset, keyOf), superset, keyOf)
 	}
 	keys := set.CollectKeyedKeys(superset, keyOf)
@@ -186,11 +186,11 @@ func IsSubsetBy[T any, K comparable](subset, superset Readonly[T], keyOf func(T)
 // IsProperSubsetBy reports whether subset is contained in superset and their
 // derived identities are not equal. It panics if keyOf is nil.
 //
-// Complexity: Expected O(N + M), where N = subset.Length() and M =
-// superset.Length().
+// Complexity: O(N + M) on average, where N = subset.Len() and M =
+// superset.Len().
 func IsProperSubsetBy[T any, K comparable](subset, superset Readonly[T], keyOf func(T) K) bool {
 	requireKeyOf(keyOf)
-	if subset.Length() <= superset.Length() {
+	if subset.Len() <= superset.Len() {
 		membership := set.CollectKeyedMembership(subset, keyOf)
 		matched, hasExtra := set.MatchKeyedContainedMembership(membership, superset, keyOf)
 		return matched == len(membership) && hasExtra
@@ -203,8 +203,8 @@ func IsProperSubsetBy[T any, K comparable](subset, superset Readonly[T], keyOf f
 // IsSupersetBy reports whether every identity derived from subset is present
 // in superset. It panics if keyOf is nil.
 //
-// Complexity: Expected O(N + M), where N = superset.Length() and M =
-// subset.Length().
+// Complexity: O(N + M) on average, where N = superset.Len() and M =
+// subset.Len().
 func IsSupersetBy[T any, K comparable](superset, subset Readonly[T], keyOf func(T) K) bool {
 	return IsSubsetBy(subset, superset, keyOf)
 }
@@ -212,8 +212,8 @@ func IsSupersetBy[T any, K comparable](superset, subset Readonly[T], keyOf func(
 // IsProperSupersetBy reports whether superset contains subset and their
 // derived identities are not equal. It panics if keyOf is nil.
 //
-// Complexity: Expected O(N + M), where N = superset.Length() and M =
-// subset.Length().
+// Complexity: O(N + M) on average, where N = superset.Len() and M =
+// subset.Len().
 func IsProperSupersetBy[T any, K comparable](superset, subset Readonly[T], keyOf func(T) K) bool {
 	return IsProperSubsetBy(subset, superset, keyOf)
 }
@@ -221,7 +221,7 @@ func IsProperSupersetBy[T any, K comparable](superset, subset Readonly[T], keyOf
 // IsDisjointBy reports whether first and every additional set are pairwise
 // disjoint under identities derived by keyOf. It panics if keyOf is nil.
 //
-// Complexity: Expected O(M), where M is the sum of all operand lengths.
+// Complexity: O(M) on average, where M is the sum of all operand lengths.
 func IsDisjointBy[T any, K comparable](
 	keyOf func(T) K,
 	first Readonly[T],

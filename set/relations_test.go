@@ -11,42 +11,42 @@ func TestRelationsBy(t *testing.T) {
 	byName := func(value member) string { return value.Name }
 	byID := func(value member) int { return value.ID }
 
-	left := set.KeyedHashSetFrom([]member{
+	left := set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "left one"},
 		{ID: 1, Name: "left duplicate by ID"},
-	}, byName)
-	right := set.KeyedHashSetFrom([]member{
+	})
+	right := set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "right one"},
 		{ID: 2, Name: "right two"},
-	}, byName)
-	equal := set.KeyedHashSetFrom([]member{
+	})
+	equal := set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "other one"},
 		{ID: 1, Name: "other duplicate by ID"},
-	}, byName)
+	})
 
 	assert.True(t, set.EqualBy(byID, left, equal))
-	assert.True(t, set.EqualBy(byID, left, equal, set.KeyedHashSetFrom([]member{
+	assert.True(t, set.EqualBy(byID, left, equal, set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "third one"},
 		{ID: 1, Name: "third duplicate"},
-	}, byName)))
+	})))
 	assert.False(t, set.EqualBy(byID, left, equal, right))
 	assert.True(t, set.IsSubsetBy(left, right, byID))
 	assert.True(t, set.IsProperSubsetBy(left, right, byID))
 	assert.True(t, set.IsSupersetBy(right, left, byID))
 	assert.True(t, set.IsProperSupersetBy(right, left, byID))
 	assert.False(t, set.IsDisjointBy(byID, left, right))
-	assert.True(t, set.IsDisjointBy(byID, left, set.KeyedHashSetFrom([]member{
+	assert.True(t, set.IsDisjointBy(byID, left, set.KeyedHashSetFrom(byName, []member{
 		{ID: 3, Name: "unrelated"},
-	}, byName)))
+	})))
 	assert.False(t, set.IsDisjointBy(
 		byID,
-		set.KeyedHashSetFrom([]member{{ID: 1, Name: "first"}}, byName),
-		set.KeyedHashSetFrom([]member{{ID: 2, Name: "second"}}, byName),
-		set.KeyedHashSetFrom([]member{{ID: 2, Name: "overlap with second"}}, byName),
+		set.KeyedHashSetFrom(byName, []member{{ID: 1, Name: "first"}}),
+		set.KeyedHashSetFrom(byName, []member{{ID: 2, Name: "second"}}),
+		set.KeyedHashSetFrom(byName, []member{{ID: 2, Name: "overlap with second"}}),
 	))
-	assert.False(t, set.IsSubsetBy(set.KeyedHashSetFrom([]member{
+	assert.False(t, set.IsSubsetBy(set.KeyedHashSetFrom(byName, []member{
 		{ID: 3, Name: "missing"},
-	}, byName), right, byID))
+	}), right, byID))
 }
 
 func TestRelationsBy_ReadonlyOperands(t *testing.T) {
@@ -56,12 +56,12 @@ func TestRelationsBy_ReadonlyOperands(t *testing.T) {
 		return set.AsReadonly[member](values)
 	}
 
-	subset := set.KeyedHashSetFrom([]member{{ID: 1, Name: "a"}}, byName)
-	superset := set.KeyedHashSetFrom([]member{
+	subset := set.KeyedHashSetFrom(byName, []member{{ID: 1, Name: "a"}})
+	superset := set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "b"},
 		{ID: 2, Name: "c"},
-	}, byName)
-	assert.True(t, set.EqualBy(byID, asReadonly(subset), asReadonly(set.KeyedHashSetFrom([]member{{ID: 1, Name: "different"}}, byName))))
+	})
+	assert.True(t, set.EqualBy(byID, asReadonly(subset), asReadonly(set.KeyedHashSetFrom(byName, []member{{ID: 1, Name: "different"}}))))
 	assert.True(t, set.IsSubsetBy(asReadonly(subset), asReadonly(superset), byID))
 	assert.True(t, set.IsProperSubsetBy(asReadonly(subset), asReadonly(superset), byID))
 	assert.True(t, set.IsSupersetBy(asReadonly(superset), asReadonly(subset), byID))
@@ -69,35 +69,35 @@ func TestRelationsBy_ReadonlyOperands(t *testing.T) {
 	assert.True(t, set.IsDisjointBy(
 		byID,
 		asReadonly(subset),
-		asReadonly(set.KeyedHashSetFrom([]member{{ID: 3, Name: "unrelated"}}, byName)),
+		asReadonly(set.KeyedHashSetFrom(byName, []member{{ID: 3, Name: "unrelated"}})),
 	))
 
-	longSubset := set.KeyedHashSetFrom([]member{
+	longSubset := set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "one"},
 		{ID: 1, Name: "one duplicate identity"},
 		{ID: 2, Name: "two"},
 		{ID: 2, Name: "two duplicate identity"},
-	}, byName)
-	shortSuperset := set.KeyedHashSetFrom([]member{
+	})
+	shortSuperset := set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "other one"},
 		{ID: 2, Name: "other two"},
 		{ID: 3, Name: "three"},
-	}, byName)
+	})
 	assert.True(t, set.IsSubsetBy(asReadonly(longSubset), asReadonly(shortSuperset), byID))
 	assert.True(t, set.IsProperSubsetBy(asReadonly(longSubset), asReadonly(shortSuperset), byID))
 	assert.True(t, set.EqualBy(
 		byID,
 		asReadonly(longSubset),
-		asReadonly(set.KeyedHashSetFrom([]member{
+		asReadonly(set.KeyedHashSetFrom(byName, []member{
 			{ID: 1, Name: "same first ID"},
 			{ID: 2, Name: "same second ID"},
-		}, byName)),
+		})),
 	))
 	assert.False(t, set.IsProperSubsetBy(asReadonly(longSubset), asReadonly(superset), byID))
 	assert.False(t, set.IsSubsetBy(asReadonly(shortSuperset), asReadonly(longSubset), byID))
-	assert.False(t, set.IsSubsetBy(asReadonly(longSubset), asReadonly(set.KeyedHashSetFrom([]member{
+	assert.False(t, set.IsSubsetBy(asReadonly(longSubset), asReadonly(set.KeyedHashSetFrom(byName, []member{
 		{ID: 1, Name: "one"},
-	}, byName)), byID))
+	})), byID))
 }
 
 func TestRelations_ReadonlyOperands(t *testing.T) {

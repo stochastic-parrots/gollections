@@ -6,104 +6,89 @@ import (
 	"github.com/stochastic-parrots/gollections/internal/set"
 )
 
-// KeyedHashSet is a map-backed [Set] for arbitrary values whose identity is a
-// derived comparable key. Derived keys must have reflexive equality;
-// floating-point NaN is therefore not a valid key without canonicalization.
-//
-// Its zero value is invalid. The identity function must remain stable while
-// values belong to the set. A KeyedHashSet value must not be copied after first
-// use; share its pointer instead.
-type KeyedHashSet[K comparable, T any] = set.KeyedHashSet[K, T]
+// KeyedHashSet is a map-backed Set using a derived comparable key. Its zero value
+// is invalid; use NewKeyedHashSet. Derived keys must have reflexive equality.
+// A KeyedHashSet value must not be copied after first use; share its pointer instead.
+type KeyedHashSet[T any, K comparable] = set.KeyedHashSet[T, K]
 
 var (
-	_ Set[any]                              = &set.KeyedHashSet[int, any]{}
-	_ Algebra[any, *KeyedHashSet[int, any]] = &set.KeyedHashSet[int, any]{}
-	_ InPlaceAlgebra[any]                   = &set.KeyedHashSet[int, any]{}
+	_ Set[any]                              = &set.KeyedHashSet[any, int]{}
+	_ Algebra[any, *KeyedHashSet[any, int]] = &set.KeyedHashSet[any, int]{}
+	_ InPlaceAlgebra[any]                   = &set.KeyedHashSet[any, int]{}
 )
 
-// NewKeyedHashSet creates an empty keyed hash set with the requested initial
-// capacity. keyOf must be non-nil and remain stable while values belong to the
-// set. It panics if keyOf is nil.
+func checkKeyOf[T any, K comparable](keyOf func(T) K) {
+	if keyOf == nil {
+		panic("set: nil identity function")
+	}
+}
+
+// NewKeyedHashSet creates an empty keyed set. keyOf must be non-nil and stable
+// for every stored value's lifetime in the set.
 //
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()              O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
-//	Contains(x)        O(1) on average
-//	Add(x)             O(1) on average
-//	Adds(xs... T)      O(len(xs)) on average
-//	Remove(x)          O(1) on average
-//	Removes(xs... T)   O(len(xs)) on average
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
 // Complexity: O(capacity).
-func NewKeyedHashSet[K comparable, T any](capacity int, keyOf func(T) K) *KeyedHashSet[K, T] {
-	if keyOf == nil {
-		panic("set: nil identity function")
-	}
+func NewKeyedHashSet[T any, K comparable](keyOf func(T) K, capacity int) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
 	return set.NewKeyedHashSet(capacity, keyOf)
 }
 
-// KeyedHashSetFrom copies data into a new keyed hash set without retaining the
-// source slice. The first value encountered for each derived key is preserved.
-// keyOf must be non-nil and remain stable while values belong to the set. It
-// panics if keyOf is nil.
+// KeyedHashSetFrom copies values from data into map storage without retaining the slice.
+// The first value for each derived key is preserved. keyOf must be non-nil and stable.
 //
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()              O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
-//	Contains(x)        O(1) on average
-//	Add(x)             O(1) on average
-//	Adds(xs... T)      O(len(xs)) on average
-//	Remove(x)          O(1) on average
-//	Removes(xs... T)   O(len(xs)) on average
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
-// Complexity: O(len(data)) on average.
-func KeyedHashSetFrom[K comparable, T any](data []T, keyOf func(T) K) *KeyedHashSet[K, T] {
-	if keyOf == nil {
-		panic("set: nil identity function")
-	}
+// Complexity: O(len(data)) on average plus len(data) keyOf calls.
+func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
 	return set.NewKeyedHashSetFromSlice(data, keyOf)
 }
 
-// KeyedHashSetFromSeq collects values yielded by seq into a new keyed hash set.
-// The first value yielded for each derived key is preserved. keyOf must be
-// non-nil and remain stable while values belong to the set. It panics if keyOf
-// is nil.
+// KeyedHashSetFromSeq consumes seq once into map storage without guaranteeing iteration order. The first value for each
+// derived key is preserved. keyOf must be non-nil and stable.
 //
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
-//	Length()           O(1)
+//	Len()              O(1)
 //	All()              O(N)
 //	Enumerate()        O(N)
-//	Contains(x)        O(1) on average
-//	Add(x)             O(1) on average
-//	Adds(xs... T)      O(len(xs)) on average
-//	Remove(x)          O(1) on average
-//	Removes(xs... T)   O(len(xs)) on average
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
 //	Clear()            O(N)
 //	MarshalJSON()      O(N)
 //
-// Complexity: O(N) on average, where N is the number of values yielded by seq.
-func KeyedHashSetFromSeq[K comparable, T any](seq iter.Seq[T], keyOf func(T) K) *KeyedHashSet[K, T] {
-	if keyOf == nil {
-		panic("set: nil identity function")
-	}
+// Complexity: O(N) on average plus N keyOf calls, where N is the number of values yielded by seq.
+func KeyedHashSetFromSeq[T any, K comparable](keyOf func(T) K, seq iter.Seq[T]) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
 	return set.NewKeyedHashSetFromSeq(seq, keyOf)
 }
 
@@ -113,11 +98,23 @@ func KeyedHashSetFromSeq[K comparable, T any](seq iter.Seq[T], keyOf func(T) K) 
 // keyOf must be non-nil and remain stable while values belong to the set. It
 // panics if keyOf is nil.
 //
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Len()              O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
 // Complexity: O(1).
-func KeyedHashSetFromMap[K comparable, T any](values map[K]T, keyOf func(T) K) *KeyedHashSet[K, T] {
-	if keyOf == nil {
-		panic("set: nil identity function")
-	}
+func KeyedHashSetFromMap[T any, K comparable](keyOf func(T) K, values map[K]T) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
 	return set.NewKeyedHashSetFromMap(values, keyOf)
 }
 
@@ -126,10 +123,22 @@ func KeyedHashSetFromMap[K comparable, T any](values map[K]T, keyOf func(T) K) *
 // not retain the input map. keyOf must be non-nil and remain stable while
 // values belong to the set. It panics if keyOf is nil.
 //
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Len()              O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
 // Complexity: O(len(values)).
-func KeyedHashSetCloneMap[K comparable, T any](values map[K]T, keyOf func(T) K) *KeyedHashSet[K, T] {
-	if keyOf == nil {
-		panic("set: nil identity function")
-	}
+func KeyedHashSetCloneMap[T any, K comparable](keyOf func(T) K, values map[K]T) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
 	return set.NewKeyedHashSetCloneMap(values, keyOf)
 }

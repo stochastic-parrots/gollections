@@ -36,7 +36,7 @@ func (f *FakeCollection[T]) All() iter.Seq[T] {
 	}
 }
 
-func (f *FakeCollection[T]) Length() int {
+func (f *FakeCollection[T]) Len() int {
 	return len(f.data)
 }
 

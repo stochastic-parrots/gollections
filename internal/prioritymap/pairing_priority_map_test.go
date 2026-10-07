@@ -10,7 +10,7 @@ import (
 func TestNewPairingPriorityMap(t *testing.T) {
 	pm := NewPairingPriorityMap[string](ordering.Min[int]())
 
-	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, 0, pm.Len())
 	assert.True(t, pm.IsEmpty())
 	assert.Nil(t, pm.root)
 	assert.Nil(t, pm.freelist)
@@ -27,7 +27,7 @@ func TestNewPairingPriorityMapWithCapacity(t *testing.T) {
 	assert.NotNil(t, pm)
 	assert.Nil(t, pm.root)
 	assert.NotNil(t, pm.indexes)
-	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, 0, pm.Len())
 	assert.Equal(t, capacity, pm.freeLen)
 	assert.Equal(t, capacity, pm.freeCapacity)
 
@@ -81,7 +81,7 @@ func TestPairingPriorityMap_Cut(t *testing.T) {
 
 		assert.Nil(t, nodeC.previous)
 		assert.Nil(t, nodeC.next)
-		assert.Equal(t, 4, pm.Length())
+		assert.Equal(t, 4, pm.Len())
 	})
 }
 
@@ -96,7 +96,7 @@ func TestPairingPriorityMap_Combine(t *testing.T) {
 		pm.Set(5, 50)
 
 		pm.Pop() // Dispach combine with 4 children (even)
-		assert.Equal(t, 4, pm.Length())
+		assert.Equal(t, 4, pm.Len())
 	})
 
 	t.Run("OddChildren", func(t *testing.T) {
@@ -108,7 +108,7 @@ func TestPairingPriorityMap_Combine(t *testing.T) {
 		pm.Set(4, 40)
 
 		pm.Pop() // Dispach combine with 3 children (odd)
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 	})
 
 	t.Run("NilOrSingle", func(t *testing.T) {
@@ -128,7 +128,7 @@ func TestPairingPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("B", 5)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		key, val, _ := pm.Peek()
 		assert.Equal(t, "B", key)
 		assert.Equal(t, 5, val)
@@ -139,7 +139,7 @@ func TestPairingPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("A", 2)
 
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 		_, p, _ := pm.Peek()
 		assert.Equal(t, 2, p)
 	})
@@ -150,7 +150,7 @@ func TestPairingPriorityMap_Set(t *testing.T) {
 		pm.Set("B", 11)
 		pm.Set("B", 2)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		_, p, _ := pm.Peek()
 		assert.Equal(t, 2, p)
 	})
@@ -160,7 +160,7 @@ func TestPairingPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("A", 2)
 
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 		_, p, _ := pm.Peek()
 		assert.Equal(t, 2, p)
 	})
@@ -193,7 +193,7 @@ func TestPairingPriorityMap_Set(t *testing.T) {
 
 		assert.NotNil(t, nodeA.child)
 		pm.Set("A", 100)
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		valA, _ := pm.Get("A")
 		assert.Equal(t, 100, valA)
 	})
@@ -239,7 +239,7 @@ func TestPairingPriorityMap_Improve(t *testing.T) {
 		pm := NewPairingPriorityMap[string](ordering.Min[int]())
 
 		assert.True(t, pm.Improve("A", 10))
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 
 		val, ok := pm.Get("A")
 		assert.True(t, ok)
@@ -305,11 +305,11 @@ func TestPairingPriorityMap_Remove(t *testing.T) {
 	pm.Set("C", 30)
 
 	assert.True(t, pm.Remove("B"))
-	assert.Equal(t, 2, pm.Length())
+	assert.Equal(t, 2, pm.Len())
 	assert.True(t, pm.Remove("A"))
-	assert.Equal(t, 1, pm.Length())
+	assert.Equal(t, 1, pm.Len())
 	assert.False(t, pm.Remove("non-existent"))
-	assert.Equal(t, 1, pm.Length())
+	assert.Equal(t, 1, pm.Len())
 }
 
 func TestPairingPriorityMap_Pop(t *testing.T) {
@@ -361,10 +361,10 @@ func TestPairingPriorityMap_IsEmpty(t *testing.T) {
 	assert.False(t, pm.IsEmpty())
 }
 
-func TestPairingPriorityMap_Length(t *testing.T) {
+func TestPairingPriorityMap_Len(t *testing.T) {
 	pm := NewPairingPriorityMap[int](ordering.Min[int]())
 	pm.Set(1, 10)
-	assert.Equal(t, 1, pm.Length())
+	assert.Equal(t, 1, pm.Len())
 }
 
 func TestPairingPriorityMap_Keys(t *testing.T) {
@@ -379,7 +379,7 @@ func TestPairingPriorityMap_Keys(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -398,7 +398,7 @@ func TestPairingPriorityMap_Keys(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -427,7 +427,7 @@ func TestPairingPriorityMap_Values(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -446,7 +446,7 @@ func TestPairingPriorityMap_Values(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -475,7 +475,7 @@ func TestPairingPriorityMap_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -494,7 +494,7 @@ func TestPairingPriorityMap_All(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -504,7 +504,7 @@ func TestPairingPriorityMap_All(t *testing.T) {
 	t.Run("EmptyMap", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](ordering.Min[int]())
 		count := 0
-		for range pm.Values() {
+		for range pm.All() {
 			count++
 		}
 		assert.Equal(t, 0, count)
@@ -543,7 +543,7 @@ func TestPairingPriorityMap_Drain(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		assert.False(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
 		assert.True(t, pm.Contains("c"))
@@ -572,7 +572,7 @@ func TestPairingPriorityMap_Integrity(t *testing.T) {
 		}
 	}
 
-	for value := range pm.Length() {
+	for value := range pm.Len() {
 		key, priority, ok := pm.Pop()
 
 		assert.Equal(t, value+1, key)
@@ -587,7 +587,7 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 
 		pm.Clear()
 
-		assert.Equal(t, 0, pm.Length())
+		assert.Equal(t, 0, pm.Len())
 		assert.True(t, pm.IsEmpty())
 		assert.Nil(t, pm.root)
 	})
@@ -597,11 +597,11 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 
 		pm.Clear()
 
-		assert.Equal(t, 0, pm.Length())
+		assert.Equal(t, 0, pm.Len())
 		assert.True(t, pm.IsEmpty())
 		assert.False(t, pm.Contains("a"))
 		assert.False(t, pm.Contains("b"))
@@ -635,7 +635,7 @@ func TestPairingPriorityMap_Clear(t *testing.T) {
 		pm.Set("new", 5)
 		pm.Set("newer", 1)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		key, priority, ok := pm.Peek()
 		assert.True(t, ok)
 		assert.Equal(t, "newer", key)

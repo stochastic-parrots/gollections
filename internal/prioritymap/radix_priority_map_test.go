@@ -10,7 +10,7 @@ import (
 func TestNewRadixPriorityMap(t *testing.T) {
 	pm := NewRadixPriorityMap[string, uint64](10)
 
-	assert.Equal(t, 0, pm.Length())
+	assert.Equal(t, 0, pm.Len())
 	assert.True(t, pm.IsEmpty())
 	assert.Empty(t, pm.entries)
 	assert.Zero(t, pm.last)
@@ -28,7 +28,7 @@ func TestRadixPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("B", 5)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		key, val, _ := pm.Peek()
 		assert.Equal(t, "B", key)
 		assert.Equal(t, uint64(5), val)
@@ -39,7 +39,7 @@ func TestRadixPriorityMap_Set(t *testing.T) {
 		pm.Set("A", 10)
 		pm.Set("A", 2)
 
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 		_, priority, _ := pm.Peek()
 		assert.Equal(t, uint64(2), priority)
 	})
@@ -81,7 +81,7 @@ func TestRadixPriorityMap_Improve(t *testing.T) {
 		pm := NewRadixPriorityMap[string, uint64](0)
 
 		assert.True(t, pm.Improve("A", 10))
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 
 		val, ok := pm.Get("A")
 		assert.True(t, ok)
@@ -148,14 +148,14 @@ func TestRadixPriorityMap_Remove(t *testing.T) {
 		pm.Set("C", 30)
 
 		assert.True(t, pm.Remove("B"))
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		assert.False(t, pm.Contains("B"))
 		assert.Equal(t, 1, countRadixFree(pm))
 
 		assert.True(t, pm.Remove("A"))
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 		assert.False(t, pm.Remove("non-existent"))
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 	})
 
 	t.Run("HeadWithNext", func(t *testing.T) {
@@ -164,7 +164,7 @@ func TestRadixPriorityMap_Remove(t *testing.T) {
 		pm.Set("head", 12)
 
 		assert.True(t, pm.Remove("head"))
-		assert.Equal(t, 1, pm.Length())
+		assert.Equal(t, 1, pm.Len())
 		assert.True(t, pm.Contains("tail"))
 		assert.False(t, pm.Contains("head"))
 	})
@@ -261,11 +261,11 @@ func TestRadixPriorityMap_IsEmpty(t *testing.T) {
 	assert.False(t, pm.IsEmpty())
 }
 
-func TestRadixPriorityMap_Length(t *testing.T) {
+func TestRadixPriorityMap_Len(t *testing.T) {
 	pm := NewRadixPriorityMap[int, uint64](0)
 	pm.Set(1, 10)
 
-	assert.Equal(t, 1, pm.Length())
+	assert.Equal(t, 1, pm.Len())
 }
 
 func TestRadixPriorityMap_LastPriority(t *testing.T) {
@@ -298,7 +298,7 @@ func TestRadixPriorityMap_Keys(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -317,7 +317,7 @@ func TestRadixPriorityMap_Keys(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -346,7 +346,7 @@ func TestRadixPriorityMap_Values(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -365,7 +365,7 @@ func TestRadixPriorityMap_Values(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -394,7 +394,7 @@ func TestRadixPriorityMap_All(t *testing.T) {
 			count++
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 3, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -413,7 +413,7 @@ func TestRadixPriorityMap_All(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 		assert.Equal(t, 1, count)
 		assert.True(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
@@ -461,7 +461,7 @@ func TestRadixPriorityMap_Drain(t *testing.T) {
 			break
 		}
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		assert.False(t, pm.Contains("a"))
 		assert.True(t, pm.Contains("b"))
 		assert.True(t, pm.Contains("c"))
@@ -483,7 +483,7 @@ func TestRadixPriorityMap_Integrity(t *testing.T) {
 		pm.Set(i, uint64(i))
 	}
 
-	for value := range pm.Length() {
+	for value := range pm.Len() {
 		key, priority, ok := pm.Pop()
 
 		assert.Equal(t, value+1, key)
@@ -513,11 +513,11 @@ func TestRadixPriorityMap_Clear(t *testing.T) {
 		pm.Set("a", 10)
 		pm.Set("b", 20)
 		pm.Set("c", 30)
-		assert.Equal(t, 3, pm.Length())
+		assert.Equal(t, 3, pm.Len())
 
 		pm.Clear()
 
-		assert.Equal(t, 0, pm.Length())
+		assert.Equal(t, 0, pm.Len())
 		assert.True(t, pm.IsEmpty())
 		assert.False(t, pm.Contains("a"))
 		assert.False(t, pm.Contains("b"))
@@ -572,7 +572,7 @@ func TestRadixPriorityMap_Clear(t *testing.T) {
 		pm.Set("new", 5)
 		pm.Set("newer", 1)
 
-		assert.Equal(t, 2, pm.Length())
+		assert.Equal(t, 2, pm.Len())
 		key, priority, ok := pm.Peek()
 		assert.True(t, ok)
 		assert.Equal(t, "newer", key)

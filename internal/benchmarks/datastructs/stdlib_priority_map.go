@@ -80,8 +80,8 @@ func (m *StdPriorityMap[K, V]) Pop() (K, V, bool) {
 	return item.key, item.priority, true
 }
 
-// Length returns the number of entries in the baseline map.
-func (m *StdPriorityMap[K, V]) Length() int {
+// Len returns the number of entries in the baseline map.
+func (m *StdPriorityMap[K, V]) Len() int {
 	return len(m.heap.data)
 }
 

@@ -117,10 +117,10 @@ func (rb *RingBufferDeque[T]) IsEmpty() bool {
 	return rb.count == 0
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (rb *RingBufferDeque[T]) Length() int {
+func (rb *RingBufferDeque[T]) Len() int {
 	return rb.count
 }
 
@@ -206,48 +206,34 @@ func (rb *RingBufferDeque[T]) Clear() {
 	rb.write = 0
 }
 
-// Append adds an element to the end of the deque.
-//
-// Complexity: Amortized O(1).
-func (rb *RingBufferDeque[T]) Append(x T) {
-	if rb.count == len(rb.data) {
-		rb.grow()
-	}
-
-	rb.data[rb.write] = x
-	rb.write = rb.next(rb.write)
-	rb.count++
-}
-
-// Appends adds the given elements to the end of the deque.
+// Append adds the given elements to the end of the deque in input order.
+// Empty input leaves the deque unchanged.
 //
 // Complexity: Amortized O(len(xs)).
-func (rb *RingBufferDeque[T]) Appends(xs ...T) {
+func (rb *RingBufferDeque[T]) Append(xs ...T) {
 	for _, x := range xs {
-		rb.Append(x)
+		if rb.count == len(rb.data) {
+			rb.grow()
+		}
+		rb.data[rb.write] = x
+		rb.write = rb.next(rb.write)
+		rb.count++
 	}
 }
 
-// Prepend adds an element to the beginning of the deque.
-//
-// Complexity: Amortized O(1).
-func (rb *RingBufferDeque[T]) Prepend(x T) {
-	if rb.count == len(rb.data) {
-		rb.grow()
-	}
-
-	rb.read = rb.prev(rb.read)
-	rb.data[rb.read] = x
-	rb.count++
-}
-
-// Prepends adds the given elements to the beginning of the deque.
+// Prepend adds the given elements to the beginning of the deque.
 // The relative order of the provided elements is preserved at the front.
+// Empty input leaves the deque unchanged.
 //
 // Complexity: Amortized O(len(xs)).
-func (rb *RingBufferDeque[T]) Prepends(xs ...T) {
+func (rb *RingBufferDeque[T]) Prepend(xs ...T) {
 	for _, x := range slices.Backward(xs) {
-		rb.Prepend(x)
+		if rb.count == len(rb.data) {
+			rb.grow()
+		}
+		rb.read = rb.prev(rb.read)
+		rb.data[rb.read] = x
+		rb.count++
 	}
 }
 
@@ -303,5 +289,5 @@ func (rb *RingBufferDeque[T]) Pop() (T, bool) {
 //
 // Complexity: O(N + len(data)).
 func (rb *RingBufferDeque[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, rb.Clear, rb.Appends)
+	return collection.Unmarshal(data, rb.Clear, rb.Append)
 }

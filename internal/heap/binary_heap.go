@@ -171,25 +171,19 @@ func (heap *BinaryHeap[T]) Peek() (T, bool) {
 	return heap.data[0], true
 }
 
-// Push inserts an element into the heap.
+// Push inserts the given elements into the heap. Empty input leaves it unchanged.
 //
-// Complexity: O(log N).
-func (heap *BinaryHeap[T]) Push(x T) {
-	heap.data = append(heap.data, x)
-	heap.fixup(len(heap.data) - 1)
-}
-
-// Pushes inserts the given elements into the heap.
-//
-// Complexity: O(N + len(xs)) when the heap is empty or len(xs) exceeds both N
-// and 64; O(len(xs) log N) otherwise.
-func (heap *BinaryHeap[T]) Pushes(xs ...T) {
+// Complexity: O(log N) for one value; O(N + len(xs)) for multiple values when
+// the heap is empty or len(xs) exceeds both N and 64;
+// O(len(xs) log (N + len(xs))) otherwise.
+func (heap *BinaryHeap[T]) Push(xs ...T) {
 	k := len(xs)
 	switch k {
 	case 0:
 		return
 	case 1:
-		heap.Push(xs[0])
+		heap.data = append(heap.data, xs[0])
+		heap.fixup(len(heap.data) - 1)
 		return
 	}
 
@@ -201,7 +195,8 @@ func (heap *BinaryHeap[T]) Pushes(xs ...T) {
 	}
 
 	for _, x := range xs {
-		heap.Push(x)
+		heap.data = append(heap.data, x)
+		heap.fixup(len(heap.data) - 1)
 	}
 }
 
@@ -212,10 +207,10 @@ func (heap *BinaryHeap[T]) IsEmpty() bool {
 	return len(heap.data) == 0
 }
 
-// Length returns the current number of elements in the heap.
+// Len returns the current number of elements in the heap.
 //
 // Complexity: O(1).
-func (heap *BinaryHeap[T]) Length() int {
+func (heap *BinaryHeap[T]) Len() int {
 	return len(heap.data)
 }
 

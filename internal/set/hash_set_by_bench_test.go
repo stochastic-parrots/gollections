@@ -11,7 +11,7 @@ func benchmarkRecordID(value benchmarkRecord) int {
 	return value.ID
 }
 
-func BenchmarkKeyedHashSet_Adds(b *testing.B) {
+func BenchmarkKeyedHashSet_AddBatch(b *testing.B) {
 	const size = 10_000
 	values := make([]benchmarkRecord, size)
 	for idx := range values {
@@ -23,7 +23,7 @@ func BenchmarkKeyedHashSet_Adds(b *testing.B) {
 		b.StopTimer()
 		set := NewKeyedHashSet(size, benchmarkRecordID)
 		b.StartTimer()
-		set.Adds(values...)
+		set.Add(values...)
 	}
 }
 
@@ -59,7 +59,7 @@ func BenchmarkKeyedHashSet_Remove(b *testing.B) {
 	}
 }
 
-func BenchmarkKeyedHashSet_Removes(b *testing.B) {
+func BenchmarkKeyedHashSet_RemoveBatch(b *testing.B) {
 	const size = 10_000
 	values := make([]benchmarkRecord, size)
 	for idx := range values {
@@ -71,7 +71,7 @@ func BenchmarkKeyedHashSet_Removes(b *testing.B) {
 		b.StopTimer()
 		set := NewKeyedHashSetFromSlice(values, benchmarkRecordID)
 		b.StartTimer()
-		set.Removes(values...)
+		set.Remove(values...)
 	}
 }
 
@@ -126,7 +126,7 @@ func BenchmarkKeyedHashSet_UnionWithPreallocated(b *testing.B) {
 	for b.Loop() {
 		b.StopTimer()
 		set := NewKeyedHashSet(
-			left.Length()+right.Length(),
+			left.Len()+right.Len(),
 			benchmarkRecordID,
 		)
 		set.UnionWith(left)
@@ -298,8 +298,8 @@ func BenchmarkKeyedHashSet_IsDisjoint(b *testing.B) {
 }
 
 func benchmarkKeyedHashSets() (
-	*KeyedHashSet[int, benchmarkRecord],
-	*KeyedHashSet[int, benchmarkRecord],
+	*KeyedHashSet[benchmarkRecord, int],
+	*KeyedHashSet[benchmarkRecord, int],
 ) {
 	const size = 10_000
 	leftValues := make([]benchmarkRecord, size)
@@ -313,8 +313,8 @@ func benchmarkKeyedHashSets() (
 }
 
 func benchmarkKeyedHashSubset() (
-	*KeyedHashSet[int, benchmarkRecord],
-	*KeyedHashSet[int, benchmarkRecord],
+	*KeyedHashSet[benchmarkRecord, int],
+	*KeyedHashSet[benchmarkRecord, int],
 ) {
 	const size = 10_000
 	subsetValues := make([]benchmarkRecord, size)

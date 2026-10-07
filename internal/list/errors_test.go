@@ -7,12 +7,41 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewIndexOutOfBoundError(t *testing.T) {
-	err := NewIndexOutOfBoundError(-1, 3)
-	message := "index -1 is out of bounds; maximum valid index is 3"
-	template := "index %d is out of bounds; maximum valid index is %d"
-	assert.EqualErrorf(t, err, message, template, -1, 3)
-	assert.True(t, errors.Is(err, ErrIndexOutOfBound))
-	assert.Equal(t, -1, err.Index())
-	assert.Equal(t, 3, err.Limit())
+func TestNewIndexOutOfBoundsError(t *testing.T) {
+	tests := []struct {
+		name      string
+		operation Operation
+		index     int
+		limit     int
+		message   string
+	}{
+		{"GetEmpty", OperationGet, 0, -1, "cannot get index 0 because list is empty"},
+		{"SetEmpty", OperationSet, 0, -1, "cannot set index 0 because list is empty"},
+		{"RemoveEmpty", OperationRemove, 0, -1, "cannot remove index 0 because list is empty"},
+		{"ReplaceEmpty", OperationReplace, 0, -1, "cannot replace index 0 because list is empty"},
+		{"Set", OperationSet, -1, 3, "cannot set index -1 out of range for length 4"},
+		{"Insert", OperationInsert, 1, 0, "cannot insert at index 1 out of range for length 0"},
+		{"Remove", OperationRemove, 4, 3, "cannot remove index 4 out of range for length 4"},
+		{"Replace", OperationReplace, 4, 3, "cannot replace index 4 out of range for length 4"},
+		{"Unspecified", 0, -1, 3, "index -1 out of range for length 4"},
+		{"Unknown", Operation(255), -1, 3, "index -1 out of range for length 4"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := NewIndexOutOfBoundsError(tt.operation, tt.index, tt.limit)
+			assert.EqualError(t, err, tt.message)
+			assert.True(t, errors.Is(err, ErrIndexOutOfBounds))
+			var target *IndexOutOfBoundsError
+			assert.True(t, errors.As(err, &target))
+			assert.Same(t, err, target)
+			assert.Equal(t, tt.index, err.Index())
+			assert.Equal(t, tt.limit, err.Limit())
+		})
+	}
+}
+
+func TestErrIndexOutOfBounds(t *testing.T) {
+	assert.EqualError(t, ErrIndexOutOfBounds, "index 0 out of range because list is empty")
+	assert.Equal(t, -1, ErrIndexOutOfBounds.Limit())
 }

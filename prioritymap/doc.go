@@ -9,23 +9,27 @@
 // # Implementations
 //
 // [BinaryHeapPriorityMap] provides predictable O(log N) insertion, update,
-// removal, and Pop, with O(1) key lookup and Peek. Select it with [BinaryHeap]
-// or [OrderedBinaryHeap].
+// removal, and Pop, with O(1) key lookup and Peek. Select it with [NewBinaryHeap]
+// or [NewOrderedBinaryHeap].
 //
-// [PairingHeapPriorityMap] provides O(1) amortized priority improvements and is
-// intended for workloads with frequent decrease-key or increase-key operations.
-// Other priority mutations and removals are O(log N) amortized. Select it with
-// [PairingHeap] or [OrderedPairingHeap].
+// [PairingHeapPriorityMap] cuts and links a node in O(1) immediate heap work
+// when its priority improves. It defers child consolidation to Pop, removal, or
+// a worsening update; one such call may visit O(N) children. Amortized bounds
+// account for that deferred work across mixed operation sequences. With Pop at
+// O(log N) amortized, this two-pass pairing heap cannot also guarantee O(1)
+// amortized improvement. Set, Update, Improve, Remove, and Pop have conservative
+// O(log N) amortized bounds. Select it with [NewPairingHeap] or
+// [NewOrderedPairingHeap].
 //
 // [RadixHeapPriorityMap] is a monotone min-priority map for non-negative integer
 // priorities. It provides O(1) Set, Update, Improve, Get, and Remove, with O(W)
-// amortized Pop for a W-bit priority. Select it with [RadixHeap].
+// amortized Pop for a W-bit priority. Select it with [NewRadixHeap].
 //
 // # Ordering
 //
-// Binary and pairing heap factories accept either a custom priority comparator
+// Binary and pairing heap constructors accept either a custom priority comparator
 // or the natural order of a cmp.Ordered priority type. Pass [Min] to an ordered
-// factory when smaller values have higher priority, or [Max] when larger values
+// constructor when smaller values have higher priority, or [Max] when larger values
 // have higher priority.
 //
 // The radix heap is always min-priority and monotone. Its lower bound starts at
@@ -48,8 +52,13 @@
 // Keys, Values, and All do not guarantee priority order. Separate Keys and
 // Values iterations are not positionally related. Use All to retain key-priority
 // association and Drain for destructive priority-ordered traversal.
+// For a pairing heap, full map iteration and Clear depend on the key index's
+// allocated slots (C), which can exceed the number of current entries
+// (N = Len()) after preallocation or removals.
 //
 // Priority maps require initialized indexes and, except for radix heaps, a
 // priority comparator. Their concrete zero values are invalid and must be
-// constructed through the corresponding factory selector.
+// constructed through the corresponding direct constructor.
+// Ordered constructors may need explicit key and priority type arguments,
+// such as NewOrderedBinaryHeap[string, int](Min, 32).
 package prioritymap

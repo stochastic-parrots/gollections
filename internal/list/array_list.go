@@ -40,10 +40,10 @@ func NewArrayListFromSeq[T any](seq iter.Seq[T]) *ArrayList[T] {
 	return NewArrayListFromSlice(slices.Collect(seq))
 }
 
-// Length returns the current number of elements in the list.
+// Len returns the current number of elements in the list.
 //
 // Complexity: O(1).
-func (l *ArrayList[T]) Length() int {
+func (l *ArrayList[T]) Len() int {
 	return len(l.data)
 }
 
@@ -61,22 +61,22 @@ func (l *ArrayList[T]) IsEmpty() bool {
 func (l *ArrayList[T]) Get(index int) (T, error) {
 	if index < 0 || index >= len(l.data) {
 		var zero T
-		return zero, NewIndexOutOfBoundError(index, len(l.data)-1)
+		return zero, NewIndexOutOfBoundsError(OperationGet, index, len(l.data)-1)
 	}
 
 	return l.data[index], nil
 }
 
-// Find locates the index of an element using a linear search.
+// Find returns the index of the first value for which match returns true.
 //
 // Complexity: O(N).
-func (l *ArrayList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
+func (l *ArrayList[T]) Find(match func(T) bool) (idx int, ok bool) {
 	if l.IsEmpty() {
 		return -1, false
 	}
 
-	for idx, value := range l.Enumerate() {
-		if cmp(x, value) == 0 {
+	for idx := range l.data {
+		if match(l.data[idx]) {
 			return idx, true
 		}
 	}
@@ -84,16 +84,16 @@ func (l *ArrayList[T]) Find(x T, cmp func(a, b T) int) (idx int, ok bool) {
 	return -1, false
 }
 
-// Contains returns true if the element exists in the list according to cmp.
+// Contains reports whether match returns true for any value in list order.
 //
 // Complexity: O(N).
-func (l *ArrayList[T]) Contains(x T, cmp func(a, b T) int) bool {
+func (l *ArrayList[T]) Contains(match func(T) bool) bool {
 	if l.IsEmpty() {
 		return false
 	}
 
-	for value := range l.All() {
-		if cmp(x, value) == 0 {
+	for idx := range len(l.data) {
+		if match(l.data[idx]) {
 			return true
 		}
 	}
@@ -107,26 +107,18 @@ func (l *ArrayList[T]) Contains(x T, cmp func(a, b T) int) bool {
 // Returns an IndexOutOfBounds error if the index is out of range.
 func (l *ArrayList[T]) Set(index int, x T) error {
 	if index < 0 || index >= len(l.data) {
-		return NewIndexOutOfBoundError(index, len(l.data)-1)
+		return NewIndexOutOfBoundsError(OperationSet, index, len(l.data)-1)
 	}
 
 	l.data[index] = x
 	return nil
 }
 
-// Append adds an element to the end of the list.
-//
-// Complexity: Amortized O(1).
-// If the underlying capacity is exceeded, a new, larger array is allocated
-// and all elements are copied (O(N)).
-func (l *ArrayList[T]) Append(x T) {
-	l.data = append(l.data, x)
-}
-
-// Appends adds the given elements to the end of the list.
+// Append adds the given elements to the end of the list in input order.
+// Empty input leaves the list unchanged.
 //
 // Complexity: Amortized O(len(xs)).
-func (l *ArrayList[T]) Appends(xs ...T) {
+func (l *ArrayList[T]) Append(xs ...T) {
 	l.data = append(l.data, xs...)
 }
 
@@ -137,7 +129,7 @@ func (l *ArrayList[T]) Appends(xs ...T) {
 func (l *ArrayList[T]) Insert(index int, x T) error {
 	size := len(l.data)
 	if index < 0 || index > size {
-		return NewIndexOutOfBoundError(index, size)
+		return NewIndexOutOfBoundsError(OperationInsert, index, size)
 	}
 
 	if index == size {
@@ -161,7 +153,7 @@ func (l *ArrayList[T]) Remove(index int) (T, error) {
 	size := len(l.data)
 	if index < 0 || index >= size {
 		var zero T
-		return zero, NewIndexOutOfBoundError(index, size-1)
+		return zero, NewIndexOutOfBoundsError(OperationRemove, index, size-1)
 	}
 
 	val := l.data[index]
@@ -203,7 +195,7 @@ func (l *ArrayList[T]) All() iter.Seq[T] {
 // Complexity: O(N) for a full traversal, O(1) per step.
 func (l *ArrayList[T]) Backward() iter.Seq[T] {
 	return func(yield func(T) bool) {
-		for idx := l.Length() - 1; idx >= 0; idx-- {
+		for idx := l.Len() - 1; idx >= 0; idx-- {
 			if !yield(l.data[idx]) {
 				return
 			}
@@ -267,7 +259,7 @@ func (l *ArrayList[T]) MarshalJSON() ([]byte, error) {
 //
 // Complexity: O(N + len(data)).
 func (l *ArrayList[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, l.Clear, l.Appends)
+	return collection.Unmarshal(data, l.Clear, l.Append)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting

@@ -1,3 +1,6 @@
+> Target this pull request at `develop`. The `develop` to `main` release
+> promotion is opened automatically by GitHub Actions.
+
 ## Summary
 
 - What changed?

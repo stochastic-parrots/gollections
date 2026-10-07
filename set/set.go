@@ -22,7 +22,7 @@ type Source[T any] = set.Source[T]
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	All()              O(N)
-//	Length()           O(1)
+//	Len()              O(1)
 //
 // Complexity: O(1).
 func SourceFromSlice[T any](values []T) *SliceSource[T] {
@@ -40,8 +40,8 @@ func (source *SliceSource[T]) All() iter.Seq[T] {
 	return slices.Values(source.values)
 }
 
-// Length returns the number of values in the wrapped slice.
-func (source *SliceSource[T]) Length() int {
+// Len returns the number of values in the wrapped slice.
+func (source *SliceSource[T]) Len() int {
 	return len(source.values)
 }
 
@@ -50,7 +50,6 @@ var _ Source[any] = (*SliceSource[any])(nil)
 // Readonly defines a non-mutable view of a set.
 type Readonly[T any] interface {
 	gollections.Collection[T]
-	json.Marshaler
 
 	// Contains returns true if the set contains a value with the same identity
 	// as x according to the concrete implementation.
@@ -62,22 +61,16 @@ type Readonly[T any] interface {
 type Set[T any] interface {
 	Readonly[T]
 
-	// Add inserts x if the set does not already contain a value with the same
-	// identity. Existing values are preserved. It returns true if x was added.
-	Add(x T) (added bool)
-
-	// Adds inserts every value in xs that does not already exist in the set.
+	// Add inserts every value in xs that does not already exist in the set.
+	// Existing values are preserved.
 	// When multiple values have the same identity, the first one is preserved.
-	// It returns the number of values added.
-	Adds(xs ...T) (added int)
+	// It returns the number of values added, or zero when xs is empty.
+	Add(xs ...T) (added int)
 
-	// Remove deletes the value with the same identity as x.
-	// It returns true if a value was removed.
-	Remove(x T) bool
-
-	// Removes deletes every value in xs whose identity belongs to the set.
-	// It returns the number of values removed.
-	Removes(xs ...T) (removed int)
+	// Remove deletes every value in xs whose identity belongs to the set.
+	// It returns the number of values removed, or zero when xs is empty.
+	// Repeated identities and absent values do not increase the count.
+	Remove(xs ...T) (removed int)
 
 	// Clear removes all values and leaves the set ready for reuse with the same
 	// identity policy.
@@ -162,6 +155,9 @@ type InPlaceAlgebra[T any] interface {
 // The returned view observes the same underlying set while preventing type
 // assertion back to the mutable interface. It is not a snapshot and does not
 // provide synchronization.
+//
+// The wrapper implements json.Marshaler through json.Marshal on the wrapped
+// set, including the standard package's JSON validation and error wrapping.
 func AsReadonly[T any](set Set[T]) *readonly[T] {
 	if set == nil {
 		return nil
@@ -181,8 +177,8 @@ func (w readonly[T]) Enumerate() iter.Seq2[int, T] { return w.inner.Enumerate() 
 
 func (w readonly[T]) IsEmpty() bool { return w.inner.IsEmpty() }
 
-func (w readonly[T]) Length() int { return w.inner.Length() }
+func (w readonly[T]) Len() int { return w.inner.Len() }
 
-func (w readonly[T]) MarshalJSON() ([]byte, error) { return w.inner.MarshalJSON() }
+func (w readonly[T]) MarshalJSON() ([]byte, error) { return json.Marshal(w.inner) }
 
 var _ Readonly[any] = (*readonly[any])(nil)

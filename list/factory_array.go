@@ -9,54 +9,118 @@ import (
 // ArrayList is a slice-backed [List]. Its zero value is ready for use.
 type ArrayList[T any] = list.ArrayList[T]
 
-var _ List[any] = &list.ArrayList[any]{}
+var _ List[int] = &list.ArrayList[int]{}
 
-// ArrayFactory constructs slice-backed lists.
-//
-// Array lists provide O(1) indexed access and writes, amortized O(1) append,
-// and O(N) insertion or removal at an arbitrary position.
+// NewArray creates an empty slice-backed list. Choose it for O(1) indexed
+// access and writes, amortized O(1) append, and memory-local traversal.
+// Insertion or removal at an arbitrary position is O(N).
 //
 // Performance Summary (Time Complexity):
 //
-//	Operation           Time Complexity
-//	-----------------   ---------------
-//	New(capacity)       O(capacity)
-//	From(data)          O(1)
-//	Clone/FromSeq       O(N)
-//	Append(x)           O(1) amortized
-//	Appends(xs...T)     O(len(xs)) amortized
-//	Insert/Remove       O(N)
-//	Get/Set             O(1)
-//	Find/Contains       O(N)
-//	Reverse/Clear       O(N)
-type ArrayFactory[T any] struct{}
-
-// Array returns a factory for slice-backed lists.
-func Array[T any]() ArrayFactory[T] {
-	return ArrayFactory[T]{}
-}
-
-// New creates an empty array list with space preallocated for capacity values.
-func (ArrayFactory[T]) New(capacity int) *ArrayList[T] {
-	return list.NewArrayList[T](capacity)
-}
-
-// From creates an array list using data as its backing storage.
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(1)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs)) Amortized
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(1)
+//	Remove(idx)           O(N)
+//	Reverse()             O(N)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
 //
-// The caller transfers ownership of data to the returned list and must not use
-// the slice afterward. Use [ArrayFactory.Clone] to preserve the source slice.
-func (ArrayFactory[T]) From(data []T) *ArrayList[T] {
-	return list.NewArrayListFromSlice(data)
-}
+// Complexity: O(capacity).
+func NewArray[T any](capacity int) *ArrayList[T] { return list.NewArrayList[T](capacity) }
 
-// Clone creates an array list from a shallow copy of data.
+// ArrayFrom transfers ownership of data and its backing array; the caller must stop using the slice and every alias afterward. Use [ArrayClone] to preserve the source.
 //
-// Clone does not modify or retain the provided slice.
-func (ArrayFactory[T]) Clone(data []T) *ArrayList[T] {
-	return list.NewArrayListCloneSlice(data)
-}
+// Performance Summary (Time Complexity):
+//
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(1)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs)) Amortized
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(1)
+//	Remove(idx)           O(N)
+//	Reverse()             O(N)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
+//
+// Complexity: O(1).
+func ArrayFrom[T any](data []T) *ArrayList[T] { return list.NewArrayListFromSlice(data) }
 
-// FromSeq collects seq into a new array list.
-func (ArrayFactory[T]) FromSeq(seq iter.Seq[T]) *ArrayList[T] {
-	return list.NewArrayListFromSeq(seq)
-}
+// ArrayClone makes an independent shallow copy of data without modifying or retaining its backing array.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(1)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs)) Amortized
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(1)
+//	Remove(idx)           O(N)
+//	Reverse()             O(N)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
+//
+// Complexity: O(len(data)).
+func ArrayClone[T any](data []T) *ArrayList[T] { return list.NewArrayListCloneSlice(data) }
+
+// ArrayFromSeq consumes seq once into new storage in iteration order.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation             Time Complexity
+//	-------------------   ---------------
+//	IsEmpty()             O(1)
+//	Len()                 O(1)
+//	All()                 O(N)
+//	Enumerate()           O(N)
+//	Get(idx)              O(1)
+//	Find(match)           O(N)
+//	Contains(match)       O(N)
+//	Backward()            O(N)
+//	ToSlice()             O(N)
+//	Append(xs... T)       O(len(xs)) Amortized
+//	Insert(idx, x)        O(N)
+//	Set(idx, x)           O(1)
+//	Remove(idx)           O(N)
+//	Reverse()             O(N)
+//	Clear()               O(N)
+//	UnmarshalJSON(data)   O(N + len(data))
+//	MarshalJSON()         O(N)
+//	String()              O(1)
+//
+// Complexity: O(N), where N is the number of values yielded by seq.
+func ArrayFromSeq[T any](seq iter.Seq[T]) *ArrayList[T] { return list.NewArrayListFromSeq(seq) }

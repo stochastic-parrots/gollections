@@ -13,7 +13,7 @@ func BenchmarkBinaryHeap_Push(b *testing.B) {
 	value := capacity
 	b.ReportAllocs()
 	for b.Loop() {
-		if h.Length() == capacity {
+		if h.Len() == capacity {
 			b.StopTimer()
 			h.Clear()
 			value = capacity
@@ -24,7 +24,7 @@ func BenchmarkBinaryHeap_Push(b *testing.B) {
 	}
 }
 
-func BenchmarkBinaryHeap_Pushes(b *testing.B) {
+func BenchmarkBinaryHeap_PushBatch(b *testing.B) {
 	const n = 10_000
 
 	initialData := make([]int, n)
@@ -49,9 +49,9 @@ func BenchmarkBinaryHeap_Pushes(b *testing.B) {
 			for b.Loop() {
 				b.StopTimer()
 				h := NewBinaryHeap(n+k, ordering.Min[int]())
-				h.Pushes(initialData...)
+				h.Push(initialData...)
 				b.StartTimer()
-				h.Pushes(newItems...)
+				h.Push(newItems...)
 			}
 		})
 	}

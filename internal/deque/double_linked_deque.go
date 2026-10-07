@@ -30,7 +30,7 @@ func NewDoubleLinkedDeque[T any]() *DoubleLinkedDeque[T] {
 // Values are copied into newly allocated nodes and data is not retained.
 func NewDoubleLinkedDequeFromSlice[T any](data []T) *DoubleLinkedDeque[T] {
 	deque := NewDoubleLinkedDeque[T]()
-	deque.Appends(data...)
+	deque.Append(data...)
 	return deque
 }
 
@@ -43,10 +43,10 @@ func NewDoubleLinkedDequeFromSeq[T any](seq iter.Seq[T]) *DoubleLinkedDeque[T] {
 	return deque
 }
 
-// Length returns the current number of elements in the deque.
+// Len returns the current number of elements in the deque.
 //
 // Complexity: O(1).
-func (d *DoubleLinkedDeque[T]) Length() int {
+func (d *DoubleLinkedDeque[T]) Len() int {
 	return d.length
 }
 
@@ -57,56 +57,39 @@ func (d *DoubleLinkedDeque[T]) IsEmpty() bool {
 	return d.length == 0
 }
 
-// Append inserts an element at the end of the deque.
-//
-// Complexity: O(1).
-func (d *DoubleLinkedDeque[T]) Append(x T) {
-	new := node.NewDoubleLinkedNode(x)
-	if d.IsEmpty() {
-		d.first = new
-		d.last = d.first
-		d.length++
-		return
-	}
-
-	new.Previous = d.last
-	d.last.Next = new
-	d.last = new
-	d.length++
-}
-
-// Prepend inserts an element at the start of the deque.
-//
-// Complexity: O(1).
-func (d *DoubleLinkedDeque[T]) Prepend(x T) {
-	if d.IsEmpty() {
-		d.Append(x)
-		return
-	}
-
-	new := node.NewDoubleLinkedNode(x)
-	new.Next = d.first
-	d.first.Previous = new
-	d.first = new
-	d.length++
-}
-
-// Prepends inserts the given elements at the start of the deque.
-// The relative order of the provided elements is preserved at the front.
+// Append inserts the given elements at the end of the deque in input order.
+// Empty input leaves the deque unchanged.
 //
 // Complexity: O(len(xs)).
-func (d *DoubleLinkedDeque[T]) Prepends(xs ...T) {
-	for _, x := range slices.Backward(xs) {
-		d.Prepend(x)
-	}
-}
-
-// Appends inserts the given elements at the end of the deque.
-//
-// Complexity: O(len(xs)).
-func (d *DoubleLinkedDeque[T]) Appends(xs ...T) {
+func (d *DoubleLinkedDeque[T]) Append(xs ...T) {
 	for _, x := range xs {
-		d.Append(x)
+		new := node.NewDoubleLinkedNode(x)
+		if d.IsEmpty() {
+			d.first = new
+		} else {
+			new.Previous = d.last
+			d.last.Next = new
+		}
+		d.last = new
+		d.length++
+	}
+}
+
+// Prepend inserts the given elements at the start of the deque in input order.
+// Empty input leaves the deque unchanged.
+//
+// Complexity: O(len(xs)).
+func (d *DoubleLinkedDeque[T]) Prepend(xs ...T) {
+	for _, x := range slices.Backward(xs) {
+		new := node.NewDoubleLinkedNode(x)
+		if d.IsEmpty() {
+			d.last = new
+		} else {
+			new.Next = d.first
+			d.first.Previous = new
+		}
+		d.first = new
+		d.length++
 	}
 }
 
@@ -261,7 +244,7 @@ func (d *DoubleLinkedDeque[T]) MarshalJSON() ([]byte, error) {
 //
 // Complexity: O(N + len(data)).
 func (d *DoubleLinkedDeque[T]) UnmarshalJSON(data []byte) error {
-	return collection.Unmarshal(data, d.Clear, d.Appends)
+	return collection.Unmarshal(data, d.Clear, d.Append)
 }
 
 // Format implements the fmt.Formatter interface, allowing custom formatting
@@ -269,7 +252,7 @@ func (d *DoubleLinkedDeque[T]) UnmarshalJSON(data []byte) error {
 //
 // Complexity: O(1) as it respects a fixed display limit.
 func (d *DoubleLinkedDeque[T]) Format(s fmt.State, verb rune) {
-	collection.Format(s, verb, d, d.Length())
+	collection.Format(s, verb, d, d.Len())
 }
 
 // String returns a string representation of the deque.
