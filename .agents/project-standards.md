@@ -527,10 +527,14 @@ alias and constructor from the public package.
   breaking change.
 - Imports are grouped as standard library first, then blank line, then project
   imports.
-- Packages under `internal/...` may import the standard library and external
-  modules, but every import from this module must also remain under
-  `internal/...`. The `depguard` configuration in `.golangci.yml` enforces this
-  boundary.
+- Production Go files in every package, including the benchmark harness, may
+  import only the standard library and packages from this module. Third-party
+  testing libraries are allowed only in `*_test.go` files; the current allowlist
+  contains `github.com/stretchr/testify/`. Update the test allowlist in
+  `.golangci.yml` when approving another testing library.
+- Packages under `internal/...`, including their tests, may import packages from
+  this module only under `internal/...`. The `depguard` configuration in
+  `.golangci.yml` enforces both boundaries locally and in CI.
 - Do not use explicit import aliases. Prefer the imported package's declared
   name, even for the root `gollections` package and internal implementation
   packages.

@@ -15,12 +15,30 @@ linters:
 linters-settings:
   depguard:
     rules:
+      production:
+        list-mode: strict
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - github.com/stochastic-parrots/gollections$
+          - github.com/stochastic-parrots/gollections/
+      tests:
+        list-mode: strict
+        files:
+          - $test
+        allow:
+          - $gostd
+          - github.com/stochastic-parrots/gollections$
+          - github.com/stochastic-parrots/gollections/
+          - github.com/stretchr/testify/
       internal:
         list-mode: lax
         files:
           - "**/internal/**/*.go"
         allow:
-          - github.com/stochastic-parrots/gollections/internal
+          - github.com/stochastic-parrots/gollections/internal/
         deny:
           - pkg: github.com/stochastic-parrots/gollections
             desc: packages under internal may only import internal packages from this module

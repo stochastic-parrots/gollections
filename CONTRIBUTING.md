@@ -67,6 +67,20 @@ to approve their workflow runs in GitHub before the checks start.
 For CLI merges, use `gh pr merge --squash` when the target is `develop` and
 `gh pr merge --merge` when the target is `main`.
 
+## Dependencies
+
+Production Go files in every package may import only the standard library and
+packages from this module. This also applies to the benchmark harness.
+Third-party testing libraries are allowed only in `*_test.go` files; the
+current allowlist contains `github.com/stretchr/testify/`. Approve any additional
+testing library by updating the test allowlist in `.golangci.yml`.
+
+Packages under `internal/...`, including their tests, may import other packages
+from this module only under `internal/...`.
+
+The `depguard` rules in `.golangci.yml` enforce both boundaries through
+`make lint` locally and the **Lint** check in CI.
+
 ## Testing
 
 For most code changes, run:
