@@ -27,6 +27,8 @@
 // preserve capacity, bounded freelists retain at most their configured limit,
 // and linked structures without a freelist may release their nodes. Clear does
 // not guarantee that storage is shrunk or memory is returned to the Go runtime.
+// Fixed-range disjoint sets use Reset to restore singleton sets while retaining
+// all values in their range.
 //
 // # JSON
 //
@@ -35,7 +37,8 @@
 // Concrete lists and deques also implement json.Unmarshaler because the array
 // completely defines their logical element order. Sorted lists, heaps, and sets
 // require explicit ordering, priority, or identity configuration; decode into a
-// slice and use the matching constructor family.
+// slice and use the matching constructor family. Disjoint sets have no JSON
+// representation because an array of range values does not encode the partition.
 //
 // Structural interfaces do not require formatting or JSON capabilities. Use a
 // capability assertion for direct calls to String, MarshalJSON, or UnmarshalJSON
@@ -50,7 +53,8 @@
 // not safe for concurrent use. Callers must synchronize access when at least one
 // goroutine may mutate a shared collection. Readonly interfaces and views limit
 // the operations available through an API; they do not provide synchronization
-// or a snapshot of the underlying collection.
+// or a snapshot of the underlying collection. Disjoint-set queries such as Find
+// and Connected may compress paths and require synchronization on shared access.
 //
 // # Subpackages
 //
@@ -74,6 +78,9 @@
 //
 //   - [github.com/stochastic-parrots/gollections/set]:
 //     Unique comparable values or arbitrary values identified by derived keys.
+//
+//   - [github.com/stochastic-parrots/gollections/disjointset]:
+//     Union-find over fixed integer ranges, using union by rank or size.
 //
 // # Design Principles
 //
