@@ -574,6 +574,11 @@ alias and constructor from the public package.
 
 ## Commits And Tags
 
+- Always use [.github/pull_request_template.md](../.github/pull_request_template.md)
+  when creating or editing a pull request description. Preserve every section
+  in its original order, fill in the final scope and verification results, and
+  explain items that do not apply. Mark checkboxes only when supported by the
+  changes or completed verification.
 - Commit messages follow Conventional Commits with concise scopes:
   - `feat(priority map): add radix heap priority map`
   - `test(priority map): cover radix heap priority map`

@@ -101,6 +101,10 @@ Use these checklists for repeatable agent workflows. They supplement
    `feature/hashset` or `refactor/direct-constructors`.
 5. Open change pull requests against `develop`; only the automated release
    promotion from `develop` targets `main`.
-6. Use a Conventional Commit style PR title with a concise scope, such as
+6. When creating or editing a PR description, always use
+   [.github/pull_request_template.md](../.github/pull_request_template.md).
+   Preserve every section in its original order, fill in the final scope and
+   verification, and explain items that do not apply.
+7. Use a Conventional Commit style PR title with a concise scope, such as
    `feat(priority map): add radix heap priority map`.
-7. Use a Conventional Commit message with a concise scope for each commit.
+8. Use a Conventional Commit message with a concise scope for each commit.
