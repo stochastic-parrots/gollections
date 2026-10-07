@@ -10,6 +10,10 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: promote-develop
+  cancel-in-progress: false
+
 jobs:
   release-pull-request:
     name: Open or update release pull request
@@ -38,12 +42,12 @@ jobs:
             gh pr edit "$pull_request" \
               --repo "$GITHUB_REPOSITORY" \
               --title 'chore(release): promote develop to main' \
-              --body 'Automated release promotion. Review the changes and CI checks before merging.'
+              --body 'Automated release promotion. Review the changes and CI checks, then merge with a merge commit.'
           else
             gh pr create \
               --repo "$GITHUB_REPOSITORY" \
               --base main \
               --head develop \
               --title 'chore(release): promote develop to main' \
-              --body 'Automated release promotion. Review the changes and CI checks before merging.'
+              --body 'Automated release promotion. Review the changes and CI checks, then merge with a merge commit.'
           fi

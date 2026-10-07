@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
 
 permissions:
@@ -20,7 +19,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Require develop as the target
+      - name: Validate pull request branches
         env:
           PR_BASE: ${{ github.base_ref }}
           PR_HEAD: ${{ github.head_ref }}
@@ -31,11 +30,11 @@ jobs:
             exit 0
           fi
 
-          if [[ "$PR_BASE" == "main" && "$PR_HEAD" == "develop" && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" ]]; then
+          if [[ "$PR_BASE" == "main" && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" && ( "$PR_HEAD" == "develop" || "$PR_HEAD" == release/* ) ]]; then
             exit 0
           fi
 
-          echo "Pull requests must target develop. Only the develop branch may target main."
+          echo "Pull requests must target develop. Only develop or release/* branches from this repository may target main."
           exit 1
 
   build:
@@ -44,9 +43,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version:
-          - 1.24.x
-          - stable
+        include:
+          - go-version: 1.24.x
+            coverage: true
+          - go-version: stable
+            coverage: false
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -55,13 +56,27 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
           cache-dependency-path: go.sum
-      - name: Build
-        run: go build ./...
       - name: Test
+        if: ${{ !matrix.coverage }}
         run: go test -race ./...
+      - name: Test and collect library coverage
+        if: ${{ matrix.coverage }}
+        run: |
+          go test -race -covermode=atomic -coverprofile=coverage-all.out ./...
+          awk 'NR == 1 || $1 !~ /\/internal\/benchmarks\//' coverage-all.out > coverage.out
+          go tool cover -func=coverage.out
+      - name: Save library coverage
+        if: ${{ matrix.coverage }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: library-coverage
+          path: coverage.out
+          if-no-files-found: error
+          retention-days: 7
 
   coverage:
     name: Coverage
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -69,15 +84,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
+      - name: Download library coverage
+        uses: actions/download-artifact@v8
         with:
-          go-version: 1.24.x
-          cache-dependency-path: go.sum
-      - name: Collect library coverage
-        run: go list ./... | grep -v '/internal/benchmarks' | xargs go test -race -covermode=atomic -coverprofile=coverage.out
-      - name: Report library coverage
-        run: go tool cover -func=coverage.out
+          name: library-coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
