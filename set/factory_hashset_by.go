@@ -8,9 +8,14 @@ import (
 
 // KeyedHashSet is a map-backed Set using a derived comparable key. Its zero value
 // is invalid; use NewKeyedHashSet. Derived keys must have reflexive equality.
+// A KeyedHashSet value must not be copied after first use; share its pointer instead.
 type KeyedHashSet[T any, K comparable] = set.KeyedHashSet[T, K]
 
-var _ Set[any] = &set.KeyedHashSet[any, int]{}
+var (
+	_ Set[any]                              = &set.KeyedHashSet[any, int]{}
+	_ Algebra[any, *KeyedHashSet[any, int]] = &set.KeyedHashSet[any, int]{}
+	_ InPlaceAlgebra[any]                   = &set.KeyedHashSet[any, int]{}
+)
 
 func checkKeyOf[T any, K comparable](keyOf func(T) K) {
 	if keyOf == nil {
@@ -85,4 +90,55 @@ func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHash
 func KeyedHashSetFromSeq[T any, K comparable](keyOf func(T) K, seq iter.Seq[T]) *KeyedHashSet[T, K] {
 	checkKeyOf(keyOf)
 	return set.NewKeyedHashSetFromSeq(seq, keyOf)
+}
+
+// KeyedHashSetFromMap uses values as the set's backing map without copying.
+// The caller must ensure that every map key equals keyOf(value). The set and
+// caller share the map, so mutations through either are visible to both.
+// keyOf must be non-nil and remain stable while values belong to the set. It
+// panics if keyOf is nil.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Len()              O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(1).
+func KeyedHashSetFromMap[T any, K comparable](keyOf func(T) K, values map[K]T) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
+	return set.NewKeyedHashSetFromMap(values, keyOf)
+}
+
+// KeyedHashSetCloneMap creates a keyed hash set with a copy of values.
+// The caller must ensure that every map key equals keyOf(value). The set does
+// not retain the input map. keyOf must be non-nil and remain stable while
+// values belong to the set. It panics if keyOf is nil.
+//
+// Performance Summary (Time Complexity):
+//
+//	Operation          Time Complexity
+//	----------------   ---------------
+//	IsEmpty()          O(1)
+//	Len()              O(1)
+//	All()              O(N)
+//	Enumerate()        O(N)
+//	Contains(x)        O(1) on average + keyOf
+//	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
+//	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
+//	Clear()            O(N)
+//	MarshalJSON()      O(N)
+//
+// Complexity: O(len(values)).
+func KeyedHashSetCloneMap[T any, K comparable](keyOf func(T) K, values map[K]T) *KeyedHashSet[T, K] {
+	checkKeyOf(keyOf)
+	return set.NewKeyedHashSetCloneMap(values, keyOf)
 }

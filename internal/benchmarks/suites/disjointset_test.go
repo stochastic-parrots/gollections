@@ -3,10 +3,10 @@ package suites
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/disjointset"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/algorithms"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
+	"github.com/stochastic-parrots/gollections/internal/disjointset"
 )
 
 func getDisjointSetSuite(nodes int) datastructs.Implementations[datastructs.DisjointSet] {
@@ -14,13 +14,13 @@ func getDisjointSetSuite(nodes int) datastructs.Implementations[datastructs.Disj
 		{
 			Name: "Gollections_IntsRangeByRank",
 			Factory: func() datastructs.DisjointSet {
-				return disjointset.NewIntsRangeByRank(0, nodes-1)
+				return disjointset.NewFlatDisjointSetUnionByRank(0, nodes-1)
 			},
 		},
 		{
 			Name: "Gollections_IntsRangeBySize",
 			Factory: func() datastructs.DisjointSet {
-				return disjointset.NewIntsRangeBySize(0, nodes-1)
+				return disjointset.NewFlatDisjointSetUnionBySize(0, nodes-1)
 			},
 		},
 	}

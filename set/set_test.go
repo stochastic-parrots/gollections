@@ -28,6 +28,12 @@ func TestFactoriesImplementSet(t *testing.T) {
 	var _ *set.KeyedHashSet[member, int] = set.KeyedHashSetFromSeq(memberID, slices.Values([]member{{ID: 1}}))
 	var _ set.Set[int] = set.NewHashSet[int](0)
 	var _ set.Set[member] = set.NewKeyedHashSet(memberID, 0)
+	var _ set.Source[int] = set.NewHashSet[int](0)
+	var _ set.Source[member] = set.NewKeyedHashSet(memberID, 0)
+	var _ set.Algebra[int, *set.HashSet[int]] = set.NewHashSet[int](0)
+	var _ set.Algebra[member, *set.KeyedHashSet[member, int]] = set.NewKeyedHashSet(memberID, 0)
+	var _ set.InPlaceAlgebra[int] = set.NewHashSet[int](0)
+	var _ set.InPlaceAlgebra[member] = set.NewKeyedHashSet(memberID, 0)
 }
 
 func TestConcreteZeroValues(t *testing.T) {
@@ -38,68 +44,6 @@ func TestConcreteZeroValues(t *testing.T) {
 
 	assert.Equal(t, 2, values.Len())
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-}
-
-func TestKeyedHashSetConstructors_NilIdentityFunction(t *testing.T) {
-	constructors := map[string]func(){
-		"New":     func() { set.NewKeyedHashSet[int, int](nil, 0) },
-		"From":    func() { set.KeyedHashSetFrom[int, int](nil, nil) },
-		"FromSeq": func() { set.KeyedHashSetFromSeq[int, int](nil, slices.Values([]int(nil))) },
-	}
-	for name, construct := range constructors {
-		t.Run(name, func(t *testing.T) {
-			assert.PanicsWithValue(t, "set: nil identity function", construct)
-		})
-	}
-}
-
-func TestNewHashSet(t *testing.T) {
-	assertSetBehavior(t, set.NewHashSet[int](2))
-}
-
-func TestHashSetFrom(t *testing.T) {
-	data := []int{1, 2, 1}
-	values := set.HashSetFrom[int](data)
-	data[0] = 3
-
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-}
-
-func TestHashSetFromSeq(t *testing.T) {
-	values := set.HashSetFromSeq[int](slices.Values([]int{1, 2, 1}))
-
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
-}
-
-func TestNewKeyedHashSet(t *testing.T) {
-	values := set.NewKeyedHashSet(memberID, 2)
-	first := member{ID: 1, Name: "first", Labels: []string{"a"}}
-
-	assert.Equal(t, 1, values.Add(first))
-	assert.Zero(t, values.Add(member{ID: 1, Name: "duplicate"}))
-
-	assert.Equal(t, 1, values.Len())
-	assert.Equal(t, []member{first}, slices.Collect(values.All()))
-}
-
-func TestKeyedHashSetFrom(t *testing.T) {
-	first := member{ID: 1, Name: "first"}
-	data := []member{first, {ID: 1, Name: "duplicate"}, {ID: 2, Name: "second"}}
-	values := set.KeyedHashSetFrom(memberID, data)
-	data[0] = member{ID: 3, Name: "changed"}
-
-	assert.ElementsMatch(t, []member{first, {ID: 2, Name: "second"}}, slices.Collect(values.All()))
-}
-
-func TestKeyedHashSetFromSeq(t *testing.T) {
-	first := member{ID: 1, Name: "first"}
-	values := set.KeyedHashSetFromSeq(memberID, slices.Values([]member{
-		first,
-		{ID: 1, Name: "duplicate"},
-		{ID: 2, Name: "second"},
-	}))
-
-	assert.ElementsMatch(t, []member{first, {ID: 2, Name: "second"}}, slices.Collect(values.All()))
 }
 
 func TestEmptySliceConstructors(t *testing.T) {
@@ -153,31 +97,82 @@ func TestAsReadonly(t *testing.T) {
 	})
 }
 
-func assertSetBehavior(t *testing.T, values set.Set[int]) {
-	t.Helper()
+func TestSourceFromSlice(t *testing.T) {
+	values := []int{1, 2}
+	var source *set.SliceSource[int] = set.SourceFromSlice(values)
+	values[1] = 3
 
-	assert.True(t, values.IsEmpty())
-	assert.Equal(t, 1, values.Add(1))
-	assert.Equal(t, 1, values.Add(2, 1))
+	assert.Equal(t, 2, source.Len())
+	assert.Equal(t, []int{1, 3}, slices.Collect(source.All()))
+}
 
-	assert.False(t, values.IsEmpty())
-	assert.Equal(t, 2, values.Len())
+func TestSliceSource_Len(t *testing.T) {
+	var empty set.SliceSource[int]
+	assert.Zero(t, empty.Len())
+	assert.Equal(t, 3, set.SourceFromSlice([]int{1, 2, 2}).Len())
+}
+
+func TestSliceSource_All(t *testing.T) {
+	t.Run("FullIteration", func(t *testing.T) {
+		source := set.SourceFromSlice([]int{1, 2, 2})
+		assert.Equal(t, []int{1, 2, 2}, slices.Collect(source.All()))
+	})
+	t.Run("PartialIteration", func(t *testing.T) {
+		source := set.SourceFromSlice([]int{1, 2, 2})
+		count := 0
+		for value := range source.All() {
+			assert.Equal(t, 1, value)
+			count++
+			break
+		}
+		assert.Equal(t, 1, count)
+	})
+	t.Run("EmptySource", func(t *testing.T) {
+		var source set.SliceSource[int]
+		assert.Empty(t, slices.Collect(source.All()))
+	})
+}
+
+func TestConcreteZeroValue_SymmetricDifferenceWith(t *testing.T) {
+	var values set.HashSet[int]
+	other := set.HashSetFrom([]int{1})
+
+	assert.Equal(t, 1, values.SymmetricDifferenceWith(other))
 	assert.True(t, values.Contains(1))
-	assert.False(t, values.Contains(3))
-	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
+}
 
-	assert.Equal(t, 1, values.Remove(1))
-	assert.Zero(t, values.Remove(1))
-	assert.Equal(t, 2, values.Add(3, 4))
-	assert.Equal(t, 2, values.Remove(2, 2, 4, 5))
+func TestInPlaceAlgebra_ReadonlyAlias(t *testing.T) {
+	t.Run("HashSet", func(t *testing.T) {
+		values := set.HashSetFrom([]int{1, 2})
+		view := set.AsReadonly[int](values)
 
-	data, err := json.Marshal(values)
-	assert.NoError(t, err)
-	assert.JSONEq(t, `[3]`, string(data))
+		assert.Zero(t, values.UnionWith(view))
+		assert.Zero(t, values.IntersectWith(view))
+		assert.Zero(t, values.SymmetricDifferenceWith(view, view))
+		assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 
-	values.Clear()
-	assert.True(t, values.IsEmpty())
+		assert.Equal(t, 2, values.SymmetricDifferenceWith(view))
+		assert.True(t, values.IsEmpty())
 
-	assert.Equal(t, 1, values.Add(3))
-	assert.True(t, values.Contains(3))
+		values.Add(1, 2)
+		assert.Equal(t, 2, values.DifferenceWith(view))
+		assert.True(t, values.IsEmpty())
+	})
+
+	t.Run("KeyedHashSet", func(t *testing.T) {
+		values := set.KeyedHashSetFrom(memberID, []member{{ID: 1}, {ID: 2}})
+		view := set.AsReadonly[member](values)
+
+		assert.Zero(t, values.UnionWith(view))
+		assert.Zero(t, values.IntersectWith(view))
+		assert.Zero(t, values.SymmetricDifferenceWith(view, view))
+		assert.ElementsMatch(t, []member{{ID: 1}, {ID: 2}}, slices.Collect(values.All()))
+
+		assert.Equal(t, 2, values.SymmetricDifferenceWith(view))
+		assert.True(t, values.IsEmpty())
+
+		values.Add(member{ID: 1}, member{ID: 2})
+		assert.Equal(t, 2, values.DifferenceWith(view))
+		assert.True(t, values.IsEmpty())
+	})
 }

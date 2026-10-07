@@ -29,11 +29,64 @@
 // [KeyedHashSetFrom] copy values into map storage without retaining the source
 // slice. [HashSetFromSeq] and [KeyedHashSetFromSeq] consume iterators once.
 // From and FromSeq discard duplicates while preserving the first value
-// encountered for each identity.
+// encountered for each identity. [KeyedHashSetFromMap] shares its input map;
+// [KeyedHashSetCloneMap] copies it. Both require every map key to match the
+// identity of its value.
 //
 // Add and Remove accept zero, one, or many values and return the number of
 // membership changes. Repeated identities are counted only once, and empty
 // input returns zero without changing the set.
+//
+// # Set Algebra
+//
+// HashSet and KeyedHashSet implement [Algebra]. Clone, Union, Intersection,
+// Difference, and SymmetricDifference return independent sets without modifying
+// their receivers. Calling a receiver operation without additional operands
+// returns a clone. Set algebra accepts arbitrary [Source] values, which require
+// only sized iteration and need not implement the full
+// [gollections.Collection] contract.
+// [SourceFromSlice] returns a [SliceSource] that wraps a slice as an operand
+// without copying it.
+//
+// Concrete sets in this package satisfy [gollections.Collection] through
+// pointer methods. Pass *HashSet or *KeyedHashSet operands, as returned by their
+// constructors; the corresponding struct values do not implement the operand
+// interface, and initialized set structs must not be copied. Concrete pointer
+// operands also let the implementations traverse map storage directly instead
+// of allocating iterator adapters. Operations that normalize derived
+// identities may still allocate a compact membership map because the receiver's
+// key function must be reapplied.
+//
+// Every source is interpreted under the receiver's identity policy. Duplicate
+// identities within an arbitrary collection are therefore treated as one
+// membership. For
+// KeyedHashSet, Union preserves the first representative encountered;
+// Intersection and Difference preserve representatives from the receiver.
+// SymmetricDifference uses
+// the representative from the last source that toggles an identity into the
+// result. When that source has unspecified iteration order and multiple values
+// collapse to the same selected identity, the chosen representative is
+// unspecified.
+//
+// [InPlaceAlgebra] provides UnionWith, IntersectWith, DifferenceWith, and
+// SymmetricDifferenceWith when reusing an existing set is preferable to
+// allocating an independent result. These methods are destructive, are safe
+// when an operand aliases the receiver, and return the number of receiver
+// memberships changed. With no operands they leave the receiver unchanged. If
+// the expected final size of a union is known, creating an empty receiver with
+// [NewHashSet] or [NewKeyedHashSet] and that capacity before calling UnionWith
+// avoids map growth.
+//
+// Equal, IsSubset, IsProperSubset, IsSuperset, IsProperSuperset, and IsDisjoint
+// are package functions over [Readonly] sets that use direct Go equality.
+// Their EqualBy, IsSubsetBy, IsProperSubsetBy, IsSupersetBy,
+// IsProperSupersetBy, and IsDisjointBy counterparts accept an identity
+// function and apply it to all operands. Equality functions compare each
+// operand with the first; disjointness functions require every pair to be
+// disjoint. KeyedHashSet also exposes relations as methods that use the
+// receiver's identity function. Receiver relations are directional when
+// comparing sets constructed with different identity policies. The By
+// functions require a non-nil keyOf that returns reflexive comparable keys.
 //
 // # Views, Iteration, And JSON
 //

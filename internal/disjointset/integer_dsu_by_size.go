@@ -3,7 +3,7 @@ package disjointset
 import (
 	"iter"
 
-	"github.com/stochastic-parrots/gollections/constraint"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 // FlatDisjointSetUnionBySize stores an inclusive integer range in one slice.

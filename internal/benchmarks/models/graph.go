@@ -3,7 +3,7 @@ package models
 import (
 	"math/rand/v2"
 
-	"github.com/stochastic-parrots/gollections/constraint"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 // Edge represents a weighted directed edge in benchmark graph inputs.

@@ -55,6 +55,59 @@ func ExampleNewKeyedHashSet() {
 	// 2 Grace [admin]
 }
 
+func ExampleEqualBy() {
+	type user struct {
+		ID   int
+		Name string
+	}
+
+	byName := func(value user) string { return value.Name }
+	left := set.KeyedHashSetFrom(byName, []user{{ID: 1, Name: "Ada"}})
+	right := set.KeyedHashSetFrom(byName, []user{{ID: 1, Name: "Ada Lovelace"}})
+
+	fmt.Println(set.EqualBy(func(value user) int { return value.ID }, left, right))
+
+	// Output:
+	// true
+}
+
+func ExampleHashSet_Union() {
+	left := set.HashSetFrom([]int{1, 2, 3})
+	right := set.HashSetFrom([]int{3, 4})
+
+	union := left.Union(right)
+
+	fmt.Println(slices.Sorted(union.All()))
+	fmt.Println(slices.Sorted(left.All()))
+
+	// Output:
+	// [1 2 3 4]
+	// [1 2 3]
+}
+
+func ExampleSourceFromSlice() {
+	result := set.NewHashSet[int](0).Union(set.SourceFromSlice([]int{1, 2, 2}))
+
+	fmt.Println(slices.Sorted(result.All()))
+
+	// Output:
+	// [1 2]
+}
+
+func ExampleHashSet_IntersectWith() {
+	values := set.HashSetFrom([]int{1, 2, 3, 4})
+	allowed := set.HashSetFrom([]int{2, 4, 6})
+
+	removed := values.IntersectWith(allowed)
+
+	fmt.Println("removed:", removed)
+	fmt.Println(slices.Sorted(values.All()))
+
+	// Output:
+	// removed: 2
+	// [2 4]
+}
+
 func ExampleAsReadonly() {
 	mutable := set.HashSetFrom[int]([]int{1, 2})
 	view := set.AsReadonly[int](mutable)

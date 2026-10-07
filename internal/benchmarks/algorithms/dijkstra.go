@@ -1,9 +1,9 @@
 package algorithms
 
 import (
-	"github.com/stochastic-parrots/gollections/constraint"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 // Dijkstra computes shortest-path distances using the provided priority map.

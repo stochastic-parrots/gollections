@@ -3,8 +3,8 @@ package algorithms
 import (
 	"testing"
 
-	"github.com/stochastic-parrots/gollections/disjointset"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
+	"github.com/stochastic-parrots/gollections/internal/disjointset"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,7 +52,7 @@ func TestKruskal(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			set := disjointset.NewIntsRangeBySize(0, test.graph.Nodes-1)
+			set := disjointset.NewFlatDisjointSetUnionBySize(0, test.graph.Nodes-1)
 
 			assert.Equal(t, test.wantWeight, Kruskal(test.graph, set))
 			assert.Equal(t, test.wantDisjointSets, set.Disjoints())
@@ -100,7 +100,7 @@ func TestConnectedComponents(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			set := disjointset.NewIntsRangeBySize(0, test.graph.Nodes-1)
+			set := disjointset.NewFlatDisjointSetUnionBySize(0, test.graph.Nodes-1)
 
 			assert.Equal(t, test.wantComponents, ConnectedComponents(test.graph, set))
 		})

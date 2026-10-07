@@ -9,10 +9,15 @@ import (
 // HashSet is a map-backed [Set] using Go equality for value identity. Values
 // must have reflexive equality; in particular, floating-point NaN values cannot
 // be found after insertion. When T is an interface, every dynamic key must
-// also be comparable. Its zero value is ready for use.
+// also be comparable. Its zero value is ready for use. A HashSet value must
+// not be copied after first use; share its pointer instead.
 type HashSet[T comparable] = set.HashSet[T]
 
-var _ Set[int] = &set.HashSet[int]{}
+var (
+	_ Set[int]                    = &set.HashSet[int]{}
+	_ Algebra[int, *HashSet[int]] = &set.HashSet[int]{}
+	_ InPlaceAlgebra[int]         = &set.HashSet[int]{}
+)
 
 // NewHashSet creates an empty hash set. Choose it when Go equality defines
 // value identity; use [NewKeyedHashSet] when identity needs a derived key.

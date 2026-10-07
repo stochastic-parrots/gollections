@@ -240,6 +240,20 @@ changed. Both accept zero, one, or many values; empty input returns zero. Use
 `Add(x) > 0` or `Remove(x) > 0` when a boolean is needed. Iteration and JSON
 array order are unspecified.
 
+Both implementations provide pure set algebra (`Clone`, `Union`,
+`Intersection`, `Difference`, and `SymmetricDifference`) as receiver methods.
+The package-level `Equal`, `IsSubset`, `IsProperSubset`, `IsSuperset`,
+`IsProperSuperset`, and `IsDisjoint` functions compare `Readonly` sets using Go
+equality. Their `...By` counterparts take a shared identity function for both
+operands. `Equal` compares each operand with the first, while `IsDisjoint`
+requires every pair of operands to be disjoint. `KeyedHashSet` methods use the
+receiver's identity function.
+Destructive `UnionWith`, `IntersectWith`,
+`DifferenceWith`, and `SymmetricDifferenceWith` operations reuse the receiver
+and report how many memberships changed, which avoids allocating a second full
+set when mutation is appropriate. Keep and pass the set pointers returned by
+the constructors; initialized set structs must not be copied.
+
 ## Choosing a disjoint set
 
 Use `disjointset` when every integer in an inclusive range is known up front

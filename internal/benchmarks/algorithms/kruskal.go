@@ -4,9 +4,9 @@ import (
 	"cmp"
 	"slices"
 
-	"github.com/stochastic-parrots/gollections/constraint"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/datastructs"
 	"github.com/stochastic-parrots/gollections/internal/benchmarks/models"
+	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
 )
 
 // Kruskal returns the weight of a minimum spanning forest and mutates set.

@@ -111,6 +111,14 @@ alias and constructor from the public package.
   without using a constructor. Types with invalid zero values must keep the
   constructor requirement explicit in both alias and package documentation.
 
+- Set algebra accepts `set.Source[T]` operands, requiring only sized iteration,
+  and interprets them under the receiver's identity policy. Keep pure
+  result-producing operations in `set.Algebra` and destructive receiver-reusing
+  operations in `set.InPlaceAlgebra`; destructive methods report the number of
+  receiver memberships changed and must support an operand that aliases the
+  receiver. Pass concrete set operands as pointers and do not copy initialized
+  map-backed set structs.
+
 ## Naming
 
 - Public package names are short, singular, and domain-specific: `list`,
@@ -519,6 +527,10 @@ alias and constructor from the public package.
   breaking change.
 - Imports are grouped as standard library first, then blank line, then project
   imports.
+- Packages under `internal/...` may import the standard library and external
+  modules, but every import from this module must also remain under
+  `internal/...`. The `depguard` configuration in `.golangci.yml` enforces this
+  boundary.
 - Do not use explicit import aliases. Prefer the imported package's declared
   name, even for the root `gollections` package and internal implementation
   packages.

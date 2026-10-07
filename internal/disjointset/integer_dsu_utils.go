@@ -1,6 +1,6 @@
 package disjointset
 
-import "github.com/stochastic-parrots/gollections/constraint"
+import "github.com/stochastic-parrots/gollections/internal/shared/constraint"
 
 func flatInterval[T constraint.Integer](min, max T) int {
 	if min > max {
