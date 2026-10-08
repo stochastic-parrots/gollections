@@ -1,49 +1,76 @@
+version: "2"
+
 linters:
   enable:
     - asciicheck
     - copyloopvar
     - depguard
     - errorlint
-    - gofmt
-    - goimports
     - importas
     - misspell
     - nilerr
     - nolintlint
     - unconvert
 
-linters-settings:
-  depguard:
-    rules:
-      production:
-        list-mode: strict
-        files:
-          - $all
-          - "!$test"
-        allow:
-          - $gostd
-          - github.com/stochastic-parrots/gollections$
-          - github.com/stochastic-parrots/gollections/
-      tests:
-        list-mode: strict
-        files:
-          - $test
-        allow:
-          - $gostd
-          - github.com/stochastic-parrots/gollections$
-          - github.com/stochastic-parrots/gollections/
-          - github.com/stretchr/testify/
-      internal:
-        list-mode: lax
-        files:
-          - "**/internal/**/*.go"
-        allow:
-          - github.com/stochastic-parrots/gollections/internal/
-        deny:
-          - pkg: github.com/stochastic-parrots/gollections
-            desc: packages under internal may only import internal packages from this module
-  importas:
-    no-unaliased: false
-    no-extra-aliases: true
-    # Keep this list empty: explicit import aliases are not allowed.
-    alias: []
+  settings:
+    depguard:
+      rules:
+        production:
+          list-mode: strict
+          files:
+            - $all
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/stochastic-parrots/gollections$
+            - github.com/stochastic-parrots/gollections/
+        tests:
+          list-mode: strict
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com/stochastic-parrots/gollections$
+            - github.com/stochastic-parrots/gollections/
+            - github.com/stretchr/testify/
+        internal:
+          list-mode: lax
+          files:
+            - "**/internal/**/*.go"
+          allow:
+            - github.com/stochastic-parrots/gollections/internal/
+          deny:
+            - pkg: github.com/stochastic-parrots/gollections
+              desc: packages under internal may only import internal packages from this module
+    importas:
+      no-unaliased: false
+      no-extra-aliases: true
+      # Keep this list empty: explicit import aliases are not allowed.
+      alias: []
+    staticcheck:
+      # Preserve the staticcheck and gosimple checks enabled before the v2 migration.
+      checks:
+        - SA*
+        - S*
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -113,7 +113,9 @@ go test -race ./...
 ```
 
 Use `make lint` when changing public APIs, docs, or broad implementation
-behavior.
+behavior. It uses the golangci-lint version pinned in `.golangci-lint-version`,
+installs that version when needed, and runs gopls hint diagnostics. CI and the
+pre-commit lint hook use the same pinned linter version.
 
 ## Pull Requests
 

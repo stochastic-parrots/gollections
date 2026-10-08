@@ -11,8 +11,8 @@ repos:
     hooks:
       - id: go-lint
         name: lint golang files
-        entry: golangci-lint
-        args: ["run", "./..."]
+        entry: make
+        args: ["lint/golangci"]
         language: system
         types: [go]
         pass_filenames: false

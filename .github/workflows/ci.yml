@@ -86,9 +86,9 @@ jobs:
           go-version: 1.24.x
           cache-dependency-path: go.sum
       - name: Lint all packages and enforce import rules
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9.3.0
         with:
-          version: v1.64.8
+          version-file: .golangci-lint-version
           args: --timeout=5m ./...
 
   coverage:
@@ -96,15 +96,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       id-token: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
       - name: Download library coverage
-        uses: actions/download-artifact@v8
-        with:
-          name: library-coverage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name library-coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
