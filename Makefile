@@ -1,8 +1,9 @@
 GOPATH := $(shell go env GOPATH)
 GO_BIN_DIR := $(GOPATH)/bin
 
-GO_LINT := $(GO_BIN_DIR)/golangci-lint
-GO_LINT_URI=github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+GO_LINT ?= $(GO_BIN_DIR)/golangci-lint
+GO_LINT_VERSION := $(shell cat .golangci-lint-version)
+GO_LINT_URI := github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GO_LINT_VERSION)
 
 BENCH_COUNT ?= 10
 BENCH_PKG := ./internal/benchmarks/suites/...
@@ -20,9 +21,15 @@ build:
 
 .PHONY: lint
 lint:
-	$(if $(GO_LINT), ,go install $(GO_LINT_URI))
-	golangci-lint run -v ./...
+	$(MAKE) lint/golangci
 	$(MAKE) lint/gopls
+
+.PHONY: lint/golangci
+lint/golangci:
+	@if ! "$(GO_LINT)" version 2>/dev/null | grep -Fq "version $(patsubst v%,%,$(GO_LINT_VERSION)) "; then \
+		go install $(GO_LINT_URI); \
+	fi
+	$(GO_LINT) run -v ./...
 
 .PHONY: lint/gopls
 lint/gopls:
