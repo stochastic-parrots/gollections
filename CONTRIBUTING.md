@@ -113,9 +113,11 @@ go test -race ./...
 ```
 
 Use `make lint` when changing public APIs, docs, or broad implementation
-behavior. It uses the golangci-lint version pinned in `.golangci-lint-version`,
-installs that version when needed, and runs gopls hint diagnostics. CI and the
-pre-commit lint hook use the same pinned linter version.
+behavior. It installs the latest golangci-lint v2 release before each run and
+runs gopls hint diagnostics. CI and the pre-commit lint hook also follow the
+latest linter release. Local lint needs network access to check for updates;
+a new release may introduce diagnostics that need configuration or source
+changes. CI uses Go 1.24 for lint and tests both Go 1.24 and stable Go.
 
 ## Pull Requests
 
