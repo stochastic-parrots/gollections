@@ -587,4 +587,14 @@ alias and constructor from the public package.
   - `fix(priority map): clear stale priority state`
 - Keep commits reviewable and grouped by intent: feature, tests, docs,
   benchmarks, and cleanup should be separate when practical.
-- Tags are annotated and currently follow `v0.0.N-alpha`.
+- Open release PRs manually from `develop` or a same-repository `release/*`
+  branch to `main`, with the title `release: vMAJOR.MINOR.PATCH[-prerelease]`.
+  Merge releases using merge commits.
+- After a release merges, `.github/workflows/release.yml` creates an annotated
+  version tag at the PR's merge commit and a GitHub Release using the PR's
+  `Summary` section. Prerelease versions use **Pre-release**; stable versions
+  use **Latest**. Retries never overwrite a different commit's tag or an
+  existing published release's notes.
+- Release versions must match the module path: major versions 2 and above
+  require the corresponding `/vN` suffix, including prereleases. The current
+  unsuffixed module supports major versions 0 and 1.

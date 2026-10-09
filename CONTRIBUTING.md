@@ -46,26 +46,57 @@ and data-structure invariants.
   This keeps each feature or fix in a single commit.
 - Pull requests to `main` must come from `develop` or a `release/*` branch in
   this repository and use merge commits to preserve the release history.
-  GitHub Actions opens or updates the `develop` promotion after pushes to
-  `develop`; open `release/*` promotions manually.
+  Open release pull requests manually with the title
+  `release: vMAJOR.MINOR.PATCH[-prerelease]`, for example `release: v1.0.0-beta.2`.
 - Keep `develop` current with `main` after release promotions. Start a new
   change branch from `develop`.
 - Use a Conventional Commit style PR title with a concise scope, for example
   `feat(set): add set algebra operations` or
   `refactor(api)!: replace collection factories with direct constructors`.
-- A CI check rejects pull requests with any other base/head combination.
+- The **Pull request target** check validates the branches, release title, and
+  compatibility between the version and the module path in `go.mod`.
 
-The release promotion workflow needs GitHub Actions' **Allow GitHub Actions to
-create and approve pull requests** repository setting. It grants the workflow
-only `contents: read` and `pull-requests: write`.
-
-CI runs for pull requests and pushes to `main`. A push to `develop` updates the
-release pull request without starting a second CI run for the same change.
-Pull requests opened by the workflow's `GITHUB_TOKEN` may require a maintainer
-to approve their workflow runs in GitHub before the checks start.
+CI runs for pull requests and pushes to `main`. Editing a PR title or base also
+reruns CI so release validation uses the current metadata. The workflows do not
+create pull requests or change their titles and descriptions.
 
 For CLI merges, use `gh pr merge --squash` when the target is `develop` and
 `gh pr merge --merge` when the target is `main`.
+
+## Release Tags
+
+After a release PR merges into `main`, **Publish release** creates an annotated
+tag using the version in its title and publishes a GitHub Release. The tag
+points to that PR's merge commit, even if `main` has advanced before the
+workflow starts. This publishes a Go module version; review the version and
+release contents before merging.
+
+Use canonical versions such as `v1.0.0-beta.2` or `v1.0.0`, without build
+metadata. Go requires a `/vN` module path suffix for major versions 2 and above,
+including prereleases. The current module path has no suffix, so releases use
+major version 0 or 1. A v2 release requires migrating the module path and imports
+to `/v2` first.
+
+The workflow runs the automation from `main`, validates the merged PR and the
+module at its merge commit, and uses `GITHUB_TOKEN` with `contents: write` to
+push the tag. It does not need permission to create or approve pull requests.
+An existing tag at the same commit makes a retry a no-op; an existing tag at a
+different commit fails without overwriting it. If a run fails, rerun it or
+dispatch **Publish release** from `main` with the already-merged PR number.
+Release notes use the PR's `Summary` section and link back to the PR. Versions
+with a prerelease suffix are marked **Pre-release**, without **Latest**; stable
+versions are marked **Latest**. GitHub does not allow prereleases to be marked
+as latest. Retries preserve an existing published release's notes and settings.
+The tag push and release publication use `GITHUB_TOKEN` and do not trigger
+additional workflows.
+
+The automation uses Bash, Git, `jq`, and GitHub CLI, already available on the
+GitHub-hosted Ubuntu runner. Test validation and tagging locally with temporary
+Git repositories:
+
+```bash
+bash .github/scripts/test-release.sh
+```
 
 ## Dependencies
 
@@ -118,6 +149,11 @@ runs gopls hint diagnostics. CI and the pre-commit lint hook also follow the
 latest linter release. Local lint needs network access to check for updates;
 a new release may introduce diagnostics that need configuration or source
 changes. CI uses Go 1.24 for lint and tests both Go 1.24 and stable Go.
+CI enforces at least 95% statement coverage across library packages, excluding
+`internal/benchmarks`. Codecov checks 100% coverage of changed lines. Branch
+rules require both Go test jobs, lint, coverage upload, PR validation, and the
+Codecov patch check; `main` also requires the managed Code Quality analysis.
+The pre-commit test hook and `make test` keep the race detector enabled.
 
 ## Pull Requests
 
