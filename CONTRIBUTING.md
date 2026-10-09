@@ -27,9 +27,9 @@ and data-structure invariants.
 
 ## Development Workflow
 
-1. Create a focused branch for the change, named with its kind and a short
-   description, such as `feature/hashset`, `fix/comparator-contracts`,
-   `refactor/direct-constructors`, or `docs/complexity-guidance`.
+1. Create a focused branch using the prefixes described in
+   [Branch And Pull Request Flow](#branch-and-pull-request-flow), followed by a
+   short description.
 2. Keep the diff scoped to one bug, feature, documentation update, test gap, or
    benchmark gap.
 3. Follow the existing package layout: public APIs live in focused packages,
@@ -42,27 +42,42 @@ and data-structure invariants.
 
 ## Branch And Pull Request Flow
 
+Use these prefixes for change branches targeting `develop`, including branches
+from forks:
+
+| Prefix | Purpose | Example |
+| --- | --- | --- |
+| `feature/` | New capabilities | `feature/hashset` |
+| `bugfix/` | Bug fixes | `bugfix/comparator-contracts` |
+| `refactor/` | Internal changes that preserve behavior | `refactor/direct-constructors` |
+| `docs/` | Documentation changes | `docs/complexity-guidance` |
+
+The [branch-naming ruleset](.github/rulesets/branch-naming.json) blocks creation
+of other branch names in this repository, allowing `main`, `develop`, and
+`release/*` as well. The required **Pull request target** check validates the
+source and target combination, including contributions from forks.
+
 - Open all change pull requests against `develop` and merge them using squash.
-  This keeps each feature or fix in a single commit.
-- Pull requests to `main` must come from `develop` or a `release/*` branch in
-  this repository and use merge commits to preserve the release history.
-  GitHub Actions opens or updates the `develop` promotion after pushes to
-  `develop`; open `release/*` promotions manually.
-- Keep `develop` current with `main` after release promotions. Start a new
-  change branch from `develop`.
+  This keeps each change in a single commit.
+- When a batch of changes is ready, create a `release/<version>` branch from
+  the current `develop` and manually open its promotion pull request against
+  `main`. Later changes to `develop` are not automatically included in that
+  release.
+- Pull requests to `main` must come from a `release/*` branch in this repository
+  and use merge commits to preserve the release history. Direct `develop` to
+  `main` pull requests are rejected.
+- Backport any release fixes to `develop` through `bugfix/*` pull requests.
+  Start new change branches from `develop`.
 - Use a Conventional Commit style PR title with a concise scope, for example
   `feat(set): add set algebra operations` or
   `refactor(api)!: replace collection factories with direct constructors`.
 - A CI check rejects pull requests with any other base/head combination.
+  Pull request edits, including changes to the target branch, rerun CI so this
+  check evaluates the current branch combination.
 
-The release promotion workflow needs GitHub Actions' **Allow GitHub Actions to
-create and approve pull requests** repository setting. It grants the workflow
-only `contents: read` and `pull-requests: write`.
-
-CI runs for pull requests and pushes to `main`. A push to `develop` updates the
-release pull request without starting a second CI run for the same change.
-Pull requests opened by the workflow's `GITHUB_TOKEN` may require a maintainer
-to approve their workflow runs in GitHub before the checks start.
+CI runs for pull requests and pushes to `main`. A push to `develop` does not
+start a duplicate CI run or create a release pull request. Maintainers choose
+when to create each release branch and its pull request.
 
 For CLI merges, use `gh pr merge --squash` when the target is `develop` and
 `gh pr merge --merge` when the target is `main`.

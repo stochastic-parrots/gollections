@@ -1,5 +1,5 @@
-> Target this pull request at `develop`. The `develop` to `main` release
-> promotion is opened automatically by GitHub Actions.
+> Target change pull requests at `develop`. Manually opened release promotions
+> to `main` must come from a `release/*` branch in this repository.
 
 ## Summary
 

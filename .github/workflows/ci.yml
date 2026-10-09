@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
@@ -26,15 +27,15 @@ jobs:
           PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          if [[ "$PR_BASE" == "develop" ]]; then
+          if [[ "$PR_BASE" == "develop" && "$PR_HEAD" =~ ^(feature|bugfix|refactor|docs)/ ]]; then
             exit 0
           fi
 
-          if [[ "$PR_BASE" == "main" && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" && ( "$PR_HEAD" == "develop" || "$PR_HEAD" == release/* ) ]]; then
+          if [[ "$PR_BASE" == "main" && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" && "$PR_HEAD" == release/* ]]; then
             exit 0
           fi
 
-          echo "Pull requests must target develop. Only develop or release/* branches from this repository may target main."
+          echo "Pull requests to develop must come from feature/*, bugfix/*, refactor/*, or docs/* branches. Only release/* branches from this repository may target main."
           exit 1
 
   build:

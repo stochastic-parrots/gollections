@@ -97,10 +97,11 @@ Use these checklists for repeatable agent workflows. They supplement
 1. Review `git status --short`.
 2. Inspect the final diff.
 3. Run the appropriate verification.
-4. Create a focused branch named `<kind>/<short-description>`, such as
-   `feature/hashset` or `refactor/direct-constructors`.
-5. Open change pull requests against `develop`; only the automated release
-   promotion from `develop` targets `main`.
+4. Create a focused branch using `feature/`, `bugfix/`, `refactor/`, or `docs/`
+   followed by a short description, such as `feature/hashset` or
+   `refactor/direct-constructors`.
+5. Open change pull requests against `develop`; only promotions from `release/*`
+   branches in this repository target `main`.
 6. When creating or editing a PR description, always use
    [.github/pull_request_template.md](../.github/pull_request_template.md).
    Preserve every section in its original order, fill in the final scope and

@@ -574,6 +574,9 @@ alias and constructor from the public package.
 
 ## Commits And Tags
 
+- Branches for pull requests targeting `develop` must start with `feature/`,
+  `bugfix/`, `refactor/`, or `docs/`, including branches from forks. Pull requests
+  targeting `main` must come from a `release/*` branch in this repository.
 - Always use [.github/pull_request_template.md](../.github/pull_request_template.md)
   when creating or editing a pull request description. Preserve every section
   in its original order, fill in the final scope and verification results, and
