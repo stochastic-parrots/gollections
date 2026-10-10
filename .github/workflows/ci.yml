@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -26,15 +27,13 @@ jobs:
           PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          if [[ "$PR_BASE" == "develop" ]]; then
+          if [[ "$PR_BASE" == develop ]]; then
             exit 0
           fi
-
-          if [[ "$PR_BASE" == "main" && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" && ( "$PR_HEAD" == "develop" || "$PR_HEAD" == release/* ) ]]; then
+          if [[ "$PR_BASE" == main && "$PR_HEAD_REPOSITORY" == "$REPOSITORY" && ( "$PR_HEAD" == develop || "$PR_HEAD" == release/* ) ]]; then
             exit 0
           fi
-
-          echo "Pull requests must target develop. Only develop or release/* branches from this repository may target main."
+          echo "Change PRs must target develop. Only develop or release/* from this repository may target main."
           exit 1
 
   build:
@@ -65,6 +64,12 @@ jobs:
           go test -race -covermode=atomic -coverprofile=coverage-all.out ./...
           awk 'NR == 1 || $1 !~ /\/internal\/benchmarks\//' coverage-all.out > coverage.out
           go tool cover -func=coverage.out
+          awk 'NR > 1 { total += $2; if ($3 > 0) covered += $2 }
+            END {
+              if (total == 0) { print "No library coverage statements found"; exit 1 }
+              printf "Library coverage: %.2f%% (required: 95%%)\n", 100 * covered / total
+              if (100 * covered < 95 * total) exit 1
+            }' coverage.out
       - name: Save library coverage
         if: ${{ matrix.coverage }}
         uses: actions/upload-artifact@v7
