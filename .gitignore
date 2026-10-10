@@ -28,5 +28,22 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+.fleet/
+.zed/
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.vs/
+*.suo
+*.user
+nbproject/private/
+
+# Editor swap and backup files
+*.swp
+*.swo
+*~
