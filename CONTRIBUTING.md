@@ -68,12 +68,14 @@ CI also validates branch metadata inline without checking out PR code. This
 keeps the existing required check available while the trusted policy workflow
 is first introduced. The additional trusted status becomes active once that
 workflow reaches the default branch (`main`); future policy changes apply only
-after they reach that branch. CI tests the proposed release script and version
-separately so policy changes can be reviewed before publication.
+after they reach that branch. CI tests the proposed release script separately
+so policy changes can be reviewed before publication.
 
-CI runs for pull requests and pushes to `main`. Editing a PR title or base also
-reruns CI so release validation uses the current metadata. The workflows do not
-create pull requests or change their titles and descriptions.
+CI runs when a pull request is opened, reopened, or receives new commits, and
+on pushes to `main`. Editing a PR title, base, or description runs only the
+policy workflow, which validates the current metadata without rerunning Go
+tests, lint, or coverage. The workflows do not create pull requests or change
+their titles and descriptions.
 
 For CLI merges, use `gh pr merge --squash` when the target is `develop` and
 `gh pr merge --merge` when the target is `main`.
