@@ -273,6 +273,8 @@ func (l *ArrayList[T]) Format(s fmt.State, verb rune) {
 // String returns a string representation of the list.
 //
 // Complexity: O(1) as it respects a fixed display limit.
+//
+//goland:noinspection GoPrintFunctions
 func (l *ArrayList[T]) String() string {
 	return fmt.Sprint(l)
 }

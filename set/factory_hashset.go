@@ -22,57 +22,66 @@ var (
 // NewHashSet creates an empty hash set. Choose it when Go equality defines
 // value identity; use [NewKeyedHashSet] when identity needs a derived key.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average
 //	Add(xs... T)       O(len(xs)) on average
 //	Remove(xs... T)    O(len(xs)) on average
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(capacity).
 func NewHashSet[T comparable](capacity int) *HashSet[T] { return set.NewHashSet[T](capacity) }
 
 // HashSetFrom copies values from data into new map storage without retaining the source slice.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average
 //	Add(xs... T)       O(len(xs)) on average
 //	Remove(xs... T)    O(len(xs)) on average
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(len(data)) on average.
 func HashSetFrom[T comparable](data []T) *HashSet[T] { return set.NewHashSetFromSlice(data) }
 
 // HashSetFromSeq consumes seq once, inserts unique values into map storage, and does not guarantee iteration order.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average
 //	Add(xs... T)       O(len(xs)) on average
 //	Remove(xs... T)    O(len(xs)) on average
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(N) on average, where N is the number of values yielded by seq.
 func HashSetFromSeq[T comparable](seq iter.Seq[T]) *HashSet[T] { return set.NewHashSetFromSeq(seq) }

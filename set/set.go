@@ -158,11 +158,11 @@ type InPlaceAlgebra[T any] interface {
 //
 // The wrapper implements json.Marshaler through json.Marshal on the wrapped
 // set, including the standard package's JSON validation and error wrapping.
-func AsReadonly[T any](set Set[T]) *readonly[T] {
-	if set == nil {
+func AsReadonly[T any](s Set[T]) *readonly[T] {
+	if s == nil {
 		return nil
 	}
-	return &readonly[T]{inner: set}
+	return &readonly[T]{inner: s}
 }
 
 type readonly[T any] struct {

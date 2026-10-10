@@ -5,7 +5,7 @@ Use this file to orient quickly, then rely on
 
 ## Repository Snapshot
 
-- `gollections` is a Go 1.24 generic collections library.
+- `gollections` is a Go 1.24 generic collections' library.
 - Root package interfaces are read-only contracts: `Collection[T]` and
   `Map[K, V]`.
 - Public mutable APIs live in focused packages such as `list`, `sortedlist`,
@@ -103,5 +103,5 @@ Use this file to orient quickly, then rely on
 
 Ask the user before making an irreversible public API change, changing
 documented semantics, removing behavior, or choosing between two incompatible
-design directions. Otherwise make the smallest conservative change that matches
+design directions. Otherwise, make the smallest conservative change that matches
 the existing codebase.

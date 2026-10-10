@@ -61,6 +61,8 @@ func (e *IndexOutOfBoundsError) Error() string {
 }
 
 // Is reports whether the target is an IndexOutOfBoundsError.
+//
+//goland:noinspection GoTypeAssertionOnErrors
 func (e *IndexOutOfBoundsError) Is(target error) bool {
 	_, ok := target.(*IndexOutOfBoundsError)
 	return ok

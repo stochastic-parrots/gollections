@@ -11,7 +11,7 @@ import (
 )
 
 func TestConstructorsImplementHeap(t *testing.T) {
-	var _ *heap.BinaryHeap[int] = heap.NewBinary(cmp.Less[int], 0)
+	assert.IsType(t, (*heap.BinaryHeap[int])(nil), heap.NewBinary(cmp.Less[int], 0))
 	var _ heap.Heap[int] = heap.NewBinary(cmp.Less[int], 0)
 	var _ heap.Heap[int] = heap.NewOrderedBinary[int](heap.Min, 0)
 	var _ heap.Heap[int] = heap.NewOrderedBinary[int](heap.Max, 0)
@@ -23,7 +23,7 @@ func TestBinaryConstructors_NilComparator(t *testing.T) {
 		"New":     func() { heap.NewBinary[int](nil, 0) },
 		"From":    func() { heap.BinaryFrom[int](nil, nil) },
 		"Clone":   func() { heap.BinaryClone[int](nil, nil) },
-		"FromSeq": func() { heap.BinaryFromSeq[int](nil, slices.Values([]int(nil))) },
+		"FromSeq": func() { heap.BinaryFromSeq(nil, slices.Values([]int(nil))) },
 	}
 	for name, construct := range constructors {
 		t.Run(name, func(t *testing.T) {
@@ -91,10 +91,10 @@ func TestBinaryFromSeq(t *testing.T) {
 }
 
 func TestOrderedBinaryFromSeq(t *testing.T) {
-	min := heap.OrderedBinaryFromSeq(heap.Min, slices.Values([]int{3, 1, 2}))
-	max := heap.OrderedBinaryFromSeq(heap.Max, slices.Values([]int{3, 1, 2}))
-	assert.Equal(t, []int{1, 2, 3}, drain(min))
-	assert.Equal(t, []int{3, 2, 1}, drain(max))
+	minHeap := heap.OrderedBinaryFromSeq(heap.Min, slices.Values([]int{3, 1, 2}))
+	maxHeap := heap.OrderedBinaryFromSeq(heap.Max, slices.Values([]int{3, 1, 2}))
+	assert.Equal(t, []int{1, 2, 3}, drain(minHeap))
+	assert.Equal(t, []int{3, 2, 1}, drain(maxHeap))
 	assert.True(t, heap.OrderedBinaryFromSeq(heap.Min, slices.Values([]int(nil))).IsEmpty())
 }
 

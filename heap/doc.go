@@ -35,9 +35,10 @@
 // # Complexity
 //
 // Peek is O(1). Pop and Replace are O(log N). From, Clone, and FromSeq build a
-// heap in O(N). Push of one value is O(log N). Push of multiple values is
+// heap in O(N). Push of one value is O(log N) amortized. Push of multiple values is
 // O(N + len(xs)) when the heap is empty or len(xs) exceeds both N and 64;
-// otherwise it is O(len(xs) log (N + len(xs))). Drain is O(N log N) when
+// otherwise it is O(len(xs) log (N + len(xs))) amortized. Growing the backing
+// slice adds O(N + len(xs)) work to an individual Push. Drain is O(N log N) when
 // fully consumed.
 //
 // All and Enumerate expose the internal heap representation and do not guarantee

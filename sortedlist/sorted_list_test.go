@@ -15,17 +15,17 @@ import (
 )
 
 func TestFactoriesImplementSortedList(t *testing.T) {
-	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewArray(cmp.Compare[int], 0)
-	var _ *sortedlist.ArraySortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	assert.IsType(t, (*sortedlist.ArraySortedList[int])(nil), sortedlist.NewOrderedArray[int](sortedlist.Asc, 0))
+	assert.IsType(t, (*sortedlist.ArraySortedList[int])(nil), sortedlist.NewArray(cmp.Compare[int], 0))
+	assert.IsType(t, (*sortedlist.ArraySortedList[int])(nil), sortedlist.NewOrderedArray[int](sortedlist.Asc, 0))
 	var _ sortedlist.SortedList[int] = sortedlist.NewArray(cmp.Compare[int], 0)
 	var _ sortedlist.SortedList[int] = sortedlist.ArrayFrom(cmp.Compare[int], []int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.ArrayClone(cmp.Compare[int], []int{1})
 	var _ sortedlist.SortedList[int] = sortedlist.ArrayFromSeq(cmp.Compare[int], slices.Values([]int{1}))
 	var _ sortedlist.SortedList[int] = sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayFrom[int](sortedlist.Asc, []int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayClone[int](sortedlist.Asc, []int{1})
-	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayFromSeq[int](sortedlist.Asc, slices.Values([]int{1}))
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayFrom(sortedlist.Asc, []int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayClone(sortedlist.Asc, []int{1})
+	var _ sortedlist.SortedList[int] = sortedlist.OrderedArrayFromSeq(sortedlist.Asc, slices.Values([]int{1}))
 }
 
 func TestArrayConstructors_NilComparator(t *testing.T) {
@@ -33,7 +33,7 @@ func TestArrayConstructors_NilComparator(t *testing.T) {
 		"New":     func() { sortedlist.NewArray[int](nil, 0) },
 		"From":    func() { sortedlist.ArrayFrom[int](nil, nil) },
 		"Clone":   func() { sortedlist.ArrayClone[int](nil, nil) },
-		"FromSeq": func() { sortedlist.ArrayFromSeq[int](nil, slices.Values([]int(nil))) },
+		"FromSeq": func() { sortedlist.ArrayFromSeq(nil, slices.Values([]int(nil))) },
 	}
 	for name, construct := range constructors {
 		t.Run(name, func(t *testing.T) {
@@ -49,21 +49,21 @@ func TestNewArray(t *testing.T) {
 func TestArrayFrom(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.ArrayFrom(cmp.Compare[int], data)
+	l := sortedlist.ArrayFrom(cmp.Compare[int], data)
 
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 }
 
 func TestArrayClone(t *testing.T) {
 	data := []int{3, 1, 2}
 
-	list := sortedlist.ArrayClone(cmp.Compare[int], data)
+	l := sortedlist.ArrayClone(cmp.Compare[int], data)
 
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, data)
 	data[0] = 9
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
-	assert.NoError(t, list.Replace(0, 0))
+	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
+	assert.NoError(t, l.Replace(0, 0))
 	assert.Equal(t, []int{9, 1, 2}, data)
 }
 
@@ -71,30 +71,30 @@ func TestArrayFromSeq(t *testing.T) {
 	source := list.NewArray[int](0)
 	source.Append(3, 1, 2)
 
-	list := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
+	l := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
 
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	assert.Equal(t, []int{3, 1, 2}, source.ToSlice())
 }
 
 func TestOrderedArray(t *testing.T) {
 	t.Run("Ascending", func(t *testing.T) {
-		list := sortedlist.OrderedArrayClone[int](sortedlist.Asc, []int{3, 1, 2})
+		l := sortedlist.OrderedArrayClone(sortedlist.Asc, []int{3, 1, 2})
 
-		assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+		assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 	})
 
 	t.Run("Descending", func(t *testing.T) {
-		list := sortedlist.OrderedArrayClone[int](sortedlist.Desc, []int{3, 1, 2})
+		l := sortedlist.OrderedArrayClone(sortedlist.Desc, []int{3, 1, 2})
 
-		assert.Equal(t, []int{3, 2, 1}, list.ToSlice())
+		assert.Equal(t, []int{3, 2, 1}, l.ToSlice())
 	})
 
 	t.Run("FloatNaN", func(t *testing.T) {
 		nan := math.NaN()
 
-		ascending := sortedlist.OrderedArrayClone[float64](sortedlist.Asc, []float64{1, nan, 2})
-		descending := sortedlist.OrderedArrayClone[float64](sortedlist.Desc, []float64{1, nan, 2})
+		ascending := sortedlist.OrderedArrayClone(sortedlist.Asc, []float64{1, nan, 2})
+		descending := sortedlist.OrderedArrayClone(sortedlist.Desc, []float64{1, nan, 2})
 
 		ascendingValues := ascending.ToSlice()
 		descendingValues := descending.ToSlice()
@@ -107,9 +107,9 @@ func TestOrderedArray(t *testing.T) {
 }
 
 func TestArraySortedList_GetError(t *testing.T) {
-	list := sortedlist.NewArray(cmp.Compare[int], 0)
+	l := sortedlist.NewArray(cmp.Compare[int], 0)
 
-	_, err := list.Get(0)
+	_, err := l.Get(0)
 
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, sortedlist.ErrIndexOutOfBounds))
@@ -122,13 +122,13 @@ func TestArraySortedList_GetError(t *testing.T) {
 }
 
 func TestArraySortedList_ReplaceError(t *testing.T) {
-	list := sortedlist.NewArray(cmp.Compare[int], 0)
-	list.Add(1, 3, 5)
+	l := sortedlist.NewArray(cmp.Compare[int], 0)
+	l.Add(1, 3, 5)
 
-	err := list.Replace(1, 6)
+	err := l.Replace(1, 6)
 
 	assert.ErrorIs(t, err, sortedlist.ErrOrderViolation)
-	assert.Equal(t, []int{1, 3, 5}, list.ToSlice())
+	assert.Equal(t, []int{1, 3, 5}, l.ToSlice())
 }
 
 func TestEmptySliceConstructors(t *testing.T) {
@@ -219,80 +219,80 @@ func TestAsReadonly(t *testing.T) {
 	})
 }
 
-func assertSortedListBehavior(t *testing.T, list sortedlist.SortedList[int]) {
+func assertSortedListBehavior(t *testing.T, l sortedlist.SortedList[int]) {
 	t.Helper()
 
-	_, unmarshals := any(list).(json.Unmarshaler)
+	_, unmarshals := any(l).(json.Unmarshaler)
 	assert.False(t, unmarshals)
-	assert.True(t, list.IsEmpty())
+	assert.True(t, l.IsEmpty())
 
-	list.Add(3, 1, 2, 2)
+	l.Add(3, 1, 2, 2)
 
-	assert.Equal(t, []int{1, 2, 2, 3}, list.ToSlice())
-	assert.Equal(t, []int{1, 2, 2, 3}, slices.Collect(list.All()))
-	assert.Equal(t, []int{3, 2, 2, 1}, slices.Collect(list.Backward()))
+	assert.Equal(t, []int{1, 2, 2, 3}, l.ToSlice())
+	assert.Equal(t, []int{1, 2, 2, 3}, slices.Collect(l.All()))
+	assert.Equal(t, []int{3, 2, 2, 1}, slices.Collect(l.Backward()))
 
-	x, err := list.Get(2)
+	x, err := l.Get(2)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, x)
 
-	idx, ok := list.Find(2)
+	idx, ok := l.Find(2)
 	assert.True(t, ok)
 	assert.Equal(t, 1, idx)
-	assert.Equal(t, 1, list.LowerBound(2))
-	assert.Equal(t, 3, list.UpperBound(2))
-	start, end := list.EqualRange(2)
+	assert.Equal(t, 1, l.LowerBound(2))
+	assert.Equal(t, 3, l.UpperBound(2))
+	start, end := l.EqualRange(2)
 	assert.Equal(t, 1, start)
 	assert.Equal(t, 3, end)
-	assert.Equal(t, 2, list.Count(2))
-	assert.Equal(t, []int{2, 2}, slices.Collect(list.Range(2, 3)))
+	assert.Equal(t, 2, l.Count(2))
+	assert.Equal(t, []int{2, 2}, slices.Collect(l.Range(2, 3)))
 
-	value, idx, ok := list.Ceiling(2)
+	value, idx, ok := l.Ceiling(2)
 	assert.True(t, ok)
 	assert.Equal(t, 2, value)
 	assert.Equal(t, 1, idx)
 
-	value, idx, ok = list.Floor(2)
+	value, idx, ok = l.Floor(2)
 	assert.True(t, ok)
 	assert.Equal(t, 2, value)
 	assert.Equal(t, 2, idx)
 
-	value, idx, ok = list.Higher(2)
+	value, idx, ok = l.Higher(2)
 	assert.True(t, ok)
 	assert.Equal(t, 3, value)
 	assert.Equal(t, 3, idx)
 
-	value, idx, ok = list.Lower(2)
+	value, idx, ok = l.Lower(2)
 	assert.True(t, ok)
 	assert.Equal(t, 1, value)
 	assert.Equal(t, 0, idx)
 
-	err = list.Replace(2, 2)
+	err = l.Replace(2, 2)
 	assert.NoError(t, err)
 
-	first, ok := list.First()
+	first, ok := l.First()
 	assert.True(t, ok)
 	assert.Equal(t, 1, first)
 
-	last, ok := list.Last()
+	last, ok := l.Last()
 	assert.True(t, ok)
 	assert.Equal(t, 3, last)
 
-	assert.True(t, list.Contains(3))
-	assert.False(t, list.Contains(4))
+	assert.True(t, l.Contains(3))
+	assert.False(t, l.Contains(4))
 
-	ok = list.Remove(2)
+	ok = l.Remove(2)
 	assert.True(t, ok)
-	assert.Equal(t, []int{1, 2, 3}, list.ToSlice())
+	assert.Equal(t, []int{1, 2, 3}, l.ToSlice())
 
-	data, err := json.Marshal(list)
+	data, err := json.Marshal(l)
 	assert.NoError(t, err)
 	assert.JSONEq(t, `[1,2,3]`, string(data))
-	assert.Equal(t, "[1 2 3]", fmt.Sprint(list))
+	assert.Equal(t, "[1 2 3]", fmt.Sprint(l))
 
-	list.Clear()
-	assert.True(t, list.IsEmpty())
-	assert.Nil(t, list.ToSlice())
+	l.Clear()
+	assert.True(t, l.IsEmpty())
+	assert.Nil(t, l.ToSlice())
 }
 
 func collectIndexes(seq func(func(int, int) bool)) []int {

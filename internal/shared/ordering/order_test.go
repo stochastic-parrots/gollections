@@ -9,18 +9,18 @@ import (
 
 func TestMin_FloatNaN(t *testing.T) {
 	nan := math.NaN()
-	min := Min[float64]()
+	hasPriority := Min[float64]()
 
-	assert.True(t, min(nan, 1))
-	assert.False(t, min(1, nan))
-	assert.False(t, min(nan, nan))
+	assert.True(t, hasPriority(nan, 1))
+	assert.False(t, hasPriority(1, nan))
+	assert.False(t, hasPriority(nan, nan))
 }
 
 func TestMax_FloatNaN(t *testing.T) {
 	nan := math.NaN()
-	max := Max[float64]()
+	hasPriority := Max[float64]()
 
-	assert.True(t, max(1, nan))
-	assert.False(t, max(nan, 1))
-	assert.False(t, max(nan, nan))
+	assert.True(t, hasPriority(1, nan))
+	assert.False(t, hasPriority(nan, 1))
+	assert.False(t, hasPriority(nan, nan))
 }

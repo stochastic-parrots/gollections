@@ -210,7 +210,7 @@ func (set *HashSet[T]) Remove(xs ...T) (removed int) {
 
 // Clone returns an independent hash set containing the receiver's values.
 //
-// Complexity: O(N).
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *HashSet[T]) Clone() *HashSet[T] {
 	clone := NewHashSet[T](len(set.values))
 	maps.Copy(clone.values, set.values)
@@ -833,7 +833,7 @@ func toggleHashSources[T comparable, S Source[T]](
 
 // All returns a lazy iterator over the set in unspecified order.
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *HashSet[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for value := range set.values {
@@ -847,7 +847,7 @@ func (set *HashSet[T]) All() iter.Seq[T] {
 // Enumerate returns a lazy iterator over iteration positions and values in
 // unspecified order.
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *HashSet[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		idx := 0
@@ -862,14 +862,14 @@ func (set *HashSet[T]) Enumerate() iter.Seq2[int, T] {
 
 // Clear removes all values while keeping the set initialized for reuse.
 //
-// Complexity: O(N).
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *HashSet[T]) Clear() {
 	clear(set.values)
 }
 
 // MarshalJSON encodes the set as a JSON array in unspecified iteration order.
 //
-// Complexity: O(N).
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *HashSet[T]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(set)
 }

@@ -4,10 +4,10 @@ import "container/heap"
 
 type stdLibIntHeap []int
 
-func (h stdLibIntHeap) Len() int           { return len(h) }
-func (h stdLibIntHeap) Less(i, j int) bool { return h[i] < h[j] }
-func (h stdLibIntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-func (h *stdLibIntHeap) Push(x any)        { *h = append(*h, x.(int)) }
+func (h *stdLibIntHeap) Len() int           { return len(*h) }
+func (h *stdLibIntHeap) Less(i, j int) bool { return (*h)[i] < (*h)[j] }
+func (h *stdLibIntHeap) Swap(i, j int)      { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
+func (h *stdLibIntHeap) Push(x any)         { *h = append(*h, x.(int)) }
 func (h *stdLibIntHeap) Pop() any {
 	old := *h
 	n := len(old)

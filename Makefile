@@ -30,7 +30,7 @@ lint/golangci:
 
 .PHONY: lint/gopls
 lint/gopls:
-	@go_files="$$(go list -f '{{$$dir := .Dir}}{{range .GoFiles}}{{$$dir}}/{{.}} {{end}}{{range .TestGoFiles}}{{$$dir}}/{{.}} {{end}}' ./... 2>&1)"; \
+	@go_files="$$(go list -f '{{$$dir := .Dir}}{{range .GoFiles}}{{$$dir}}/{{.}} {{end}}{{range .TestGoFiles}}{{$$dir}}/{{.}} {{end}}{{range .XTestGoFiles}}{{$$dir}}/{{.}} {{end}}' ./... 2>&1)"; \
 	list_status=$$?; \
 	if [ $$list_status -ne 0 ]; then \
 		printf '%s\n' "$$go_files"; \

@@ -44,7 +44,7 @@ func TestUnmarshal(t *testing.T) {
 		jsonData := []byte("[4,5,6]")
 
 		clearCalled := false
-		clear := func() {
+		clearContents := func() {
 			currentData = nil
 			clearCalled = true
 		}
@@ -52,7 +52,7 @@ func TestUnmarshal(t *testing.T) {
 			currentData = append(currentData, xs...)
 		}
 
-		err := collection.Unmarshal(jsonData, clear, appender)
+		err := collection.Unmarshal(jsonData, clearContents, appender)
 
 		assert.NoError(t, err)
 		assert.True(t, clearCalled, "clear should be called before appending")

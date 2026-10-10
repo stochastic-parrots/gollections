@@ -173,9 +173,11 @@ func (heap *BinaryHeap[T]) Peek() (T, bool) {
 
 // Push inserts the given elements into the heap. Empty input leaves it unchanged.
 //
-// Complexity: O(log N) for one value; O(N + len(xs)) for multiple values when
+// Growing the backing slice adds O(N + len(xs)) work to an individual call.
+//
+// Complexity: O(log N) Amortized for one value; O(N + len(xs)) for multiple values when
 // the heap is empty or len(xs) exceeds both N and 64;
-// O(len(xs) log (N + len(xs))) otherwise.
+// O(len(xs) log (N + len(xs))) Amortized otherwise.
 func (heap *BinaryHeap[T]) Push(xs ...T) {
 	k := len(xs)
 	switch k {
@@ -295,6 +297,8 @@ func (heap *BinaryHeap[T]) Format(s fmt.State, verb rune) {
 // String returns a string representation of the heap.
 //
 // Complexity: O(1) as it respects a fixed display limit.
+//
+//goland:noinspection GoPrintFunctions
 func (heap *BinaryHeap[T]) String() string {
 	return fmt.Sprint(heap)
 }

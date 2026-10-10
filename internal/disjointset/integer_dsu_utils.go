@@ -2,12 +2,12 @@ package disjointset
 
 import "github.com/stochastic-parrots/gollections/internal/shared/constraint"
 
-func flatInterval[T constraint.Integer](min, max T) int {
-	if min > max {
+func flatInterval[T constraint.Integer](minimum, maximum T) int {
+	if minimum > maximum {
 		panic("disjointset: min must be <= max")
 	}
 
-	span := uint64(max) - uint64(min)
+	span := uint64(maximum) - uint64(minimum)
 	maxInt := uint64(^uint(0) >> 1)
 
 	if span >= maxInt {
@@ -17,10 +17,10 @@ func flatInterval[T constraint.Integer](min, max T) int {
 	return int(span) + 1
 }
 
-func flatIndex[T constraint.Integer](value, min T) int {
-	return int(uint64(value) - uint64(min))
+func flatIndex[T constraint.Integer](value, minimum T) int {
+	return int(uint64(value) - uint64(minimum))
 }
 
-func flatValue[T constraint.Integer](index int, min T) T {
-	return T(uint64(min) + uint64(index))
+func flatValue[T constraint.Integer](index int, minimum T) T {
+	return T(uint64(minimum) + uint64(index))
 }
