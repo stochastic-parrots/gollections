@@ -56,6 +56,34 @@ for title in 'chore(release): v1.0.0' 'release: v01.0.0' 'release: v1.0.0-beta.0
   expect_failure bash "$script" check "$invalid_file" "$repository"
 done
 bash "$script" check "$pr_file" "$repository"
+
+# Policy runs trusted code even when the proposed script accepts every PR.
+mkdir -p "$temporary/trusted" "$temporary/proposed/.github/scripts"
+cp "$script" "$temporary/trusted/release.sh"
+printf 'touch "%s"\nexit 0\n' "$temporary/untrusted-executed" > "$temporary/proposed/.github/scripts/release.sh"
+printf 'module github.com/%s/v2\n' "$repository" > "$temporary/proposed/go.mod"
+jq '.head.ref = "feature/bypass"' "$pr_file" > "$invalid_file"
+awk '
+  /^  pr-target:/ { policy = 1; next }
+  policy && /^  [a-zA-Z0-9_-]+:/ { exit }
+  policy && /^        run: \|/ { body = 1; next }
+  body && /^          / { sub(/^          /, ""); print; next }
+  body { exit }
+' "${script%/scripts/release.sh}/workflows/ci.yml" > "$temporary/branch-step.sh"
+[[ -s "$temporary/branch-step.sh" ]]
+(
+  cd "$temporary/proposed"
+  export PR_BASE=main PR_HEAD=feature/bypass PR_HEAD_REPOSITORY="$repository" REPOSITORY="$repository"
+  export GITHUB_EVENT_PATH="$invalid_file" GITHUB_REPOSITORY="$repository"
+  expect_failure bash "$temporary/branch-step.sh"
+)
+expect_failure bash "$temporary/trusted/release.sh" check "$invalid_file" "$repository" "$temporary/proposed/go.mod"
+expect_failure bash "$temporary/trusted/release.sh" check "$pr_file" "$repository" "$temporary/proposed/go.mod"
+jq '.title = "release: v2.0.0-beta.1"' "$pr_file" > "$invalid_file"
+bash "$temporary/trusted/release.sh" check "$invalid_file" "$repository" "$temporary/proposed/go.mod"
+[[ ! -e "$temporary/untrusted-executed" ]]
+expect_failure bash "$script" tag "$pr_file" "$repository" "$temporary/proposed/go.mod"
+
 jq '.merged = false' "$pr_file" > "$invalid_file"
 expect_failure bash "$script" tag "$invalid_file" "$repository"
 jq --arg commit "$(git rev-parse HEAD^1)" '.merge_commit_sha = $commit' "$pr_file" > "$invalid_file"

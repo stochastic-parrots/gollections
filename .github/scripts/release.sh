@@ -3,11 +3,12 @@ set -euo pipefail
 
 fail() { echo "$*" >&2; exit 1; }
 
-[[ $# == 3 ]] || fail "Usage: bash release.sh check|tag|publish PR_JSON REPOSITORY"
+[[ $# == 3 || $# == 4 ]] || fail "Usage: bash release.sh check|tag|publish PR_JSON REPOSITORY [GO_MOD]"
 command=$1
 pr=$(jq '.pull_request // .' "$2")
 repository=$3
 [[ "$command" == check || "$command" == tag || "$command" == publish ]] || fail "Unknown command: $command"
+[[ "$command" == check || $# == 3 ]] || fail "Only check accepts a proposed go.mod path"
 
 base=$(jq -er '.base.ref' <<< "$pr")
 if [[ "$command" == check && "$base" == develop ]]; then
@@ -40,7 +41,7 @@ if [[ "$command" != check ]]; then
   [[ ${#parents[@]} == 3 ]] || fail "Releases must use a merge commit"
   go_mod=$(git show "$commit:go.mod")
 else
-  go_mod=$(cat go.mod)
+  go_mod=$(cat "${4:-go.mod}")
 fi
 
 module=$(awk '$1 == "module" { gsub(/"/, "", $2); print $2; exit }' <<< "$go_mod")
