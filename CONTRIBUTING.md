@@ -53,67 +53,28 @@ and data-structure invariants.
 - Use a Conventional Commit style PR title with a concise scope, for example
   `feat(set): add set algebra operations` or
   `refactor(api)!: replace collection factories with direct constructors`.
-- The **Pull request target** check validates the branches, release title, and
-  compatibility between the version and the module path in `go.mod`.
-
-The **Pull request policy** workflow uses `pull_request_target` and executes
-only the policy from the default branch. It reads the proposed `go.mod` through
-the API as data and reports a commit status named **Pull request target**. This
-status and the CI check with the same name must both pass. Changing the release
-script in a PR does not replace the trusted validation. The policy workflow has
-read access to contents and write access only to commit statuses; it never
-checks out or executes the proposed code.
-
-CI also validates branch metadata inline without checking out PR code. This
-keeps the existing required check available while the trusted policy workflow
-is first introduced. The additional trusted status becomes active once that
-workflow reaches the default branch (`main`); future policy changes apply only
-after they reach that branch. CI tests the proposed release script separately
-so policy changes can be reviewed before publication.
+- The **Pull request target** check validates the base branch, source branch,
+  and source repository inline in the workflow, without checking out code or
+  executing repository scripts.
 
 CI runs when a pull request is opened, reopened, or receives new commits, and
-on pushes to `main`. Editing a PR title, base, or description runs only the
-policy workflow, which validates the current metadata without rerunning Go
-tests, lint, or coverage. The workflows do not create pull requests or change
-their titles and descriptions.
+on pushes to `main`. Editing a PR title or description does not rerun CI.
 
 For CLI merges, use `gh pr merge --squash` when the target is `develop` and
 `gh pr merge --merge` when the target is `main`.
 
 ## Release Tags
 
-After a release PR merges into `main`, **Publish release** creates an annotated
-tag using the version in its title and publishes a GitHub Release. The tag
-points to that PR's merge commit, even if `main` has advanced before the
-workflow starts. This publishes a Go module version; review the version and
-release contents before merging.
+After a release PR merges into `main`, create an annotated version tag at that
+PR's merge commit and publish the GitHub Release manually. Use the version from
+the PR title and its `Summary` section for the release notes. Review the version
+and release contents before publishing the tag.
 
 Use canonical versions such as `v1.0.0-beta.2` or `v1.0.0`, without build
 metadata. Go requires a `/vN` module path suffix for major versions 2 and above,
 including prereleases. The current module path has no suffix, so releases use
 major version 0 or 1. A v2 release requires migrating the module path and imports
 to `/v2` first.
-
-The workflow runs the automation from `main`, validates the merged PR and the
-module at its merge commit, and uses `GITHUB_TOKEN` with `contents: write` to
-push the tag. It does not need permission to create or approve pull requests.
-An existing tag at the same commit makes a retry a no-op; an existing tag at a
-different commit fails without overwriting it. If a run fails, rerun it or
-dispatch **Publish release** from `main` with the already-merged PR number.
-Release notes use the PR's `Summary` section and link back to the PR. Versions
-with a prerelease suffix are marked **Pre-release**, without **Latest**; stable
-versions are marked **Latest**. GitHub does not allow prereleases to be marked
-as latest. Retries preserve an existing published release's notes and settings.
-The tag push and release publication use `GITHUB_TOKEN` and do not trigger
-additional workflows.
-
-The automation uses Bash, Git, `jq`, and GitHub CLI, already available on the
-GitHub-hosted Ubuntu runner. Test validation and tagging locally with temporary
-Git repositories:
-
-```bash
-bash .github/scripts/test-release.sh
-```
 
 ## Dependencies
 

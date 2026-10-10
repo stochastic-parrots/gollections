@@ -85,8 +85,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-      - name: Test release automation
-        run: bash .github/scripts/test-release.sh
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
