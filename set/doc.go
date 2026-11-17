@@ -97,7 +97,9 @@
 //
 // All and Enumerate iterate in unspecified order. Enumerate assigns consecutive
 // positions starting at zero for that traversal only; those positions are not
-// stable set indexes. Iterators are lazy and callers must not mutate the set
+// stable set indexes. Full traversal, Clear, and JSON marshaling depend on
+// allocated map slots (C), which can exceed Len() after preallocation or
+// removals. Iterators are lazy and callers must not mutate the set
 // while iteration is running.
 //
 // HashSet and KeyedHashSet marshal as JSON arrays in unspecified iteration

@@ -13,11 +13,11 @@ type IntsRangeByRank[T constraint.Integer] = disjointset.FlatDisjointSetUnionByR
 
 var _ RankDisjointSet[int] = (*disjointset.FlatDisjointSetUnionByRank[int])(nil)
 
-// NewIntsRangeByRank creates singleton sets for every integer from min through
-// max, inclusive. Choose it when union by rank is preferred and set sizes are
-// not needed. It panics when min > max or the interval length cannot fit in an
-// int. Allocation may also fail if the requested interval exceeds available
-// memory.
+// NewIntsRangeByRank creates singleton sets for every integer from minimum
+// through maximum, inclusive. Choose it when union by rank is preferred and set
+// sizes are not needed. It panics when minimum > maximum or the interval length
+// cannot fit in an int. Allocation may also fail if the requested interval
+// exceeds available memory.
 // N is the number of values in the range, and α is the inverse Ackermann
 // function. The amortized bounds apply to a sequence of operations between
 // resets; an individual path traversal can take O(log N) time.
@@ -38,6 +38,6 @@ var _ RankDisjointSet[int] = (*disjointset.FlatDisjointSetUnionByRank[int])(nil)
 //	Rank(x)            O(α(N)) Amortized
 //
 // Complexity: O(N).
-func NewIntsRangeByRank[T constraint.Integer](min, max T) *IntsRangeByRank[T] {
-	return disjointset.NewFlatDisjointSetUnionByRank(min, max)
+func NewIntsRangeByRank[T constraint.Integer](minimum, maximum T) *IntsRangeByRank[T] {
+	return disjointset.NewFlatDisjointSetUnionByRank(minimum, maximum)
 }

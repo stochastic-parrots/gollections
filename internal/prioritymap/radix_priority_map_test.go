@@ -1,6 +1,7 @@
 package prioritymap
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/constraint"
@@ -23,6 +24,27 @@ func TestNewRadixPriorityMap(t *testing.T) {
 }
 
 func TestRadixPriorityMap_Set(t *testing.T) {
+	t.Run("NonReflexiveKey", func(t *testing.T) {
+		pm := NewRadixPriorityMap[float64, int](4)
+		assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+			pm.Set(math.NaN(), 1)
+		})
+		assert.Zero(t, pm.Len())
+		assert.True(t, pm.IsEmpty())
+		assert.Empty(t, pm.entries)
+		assert.Equal(t, 4, pm.freeLen)
+		assert.Zero(t, pm.last)
+		for _, bucket := range pm.buckets {
+			assert.Nil(t, bucket)
+		}
+		pm.Set(1, 2)
+		key, priority, ok := pm.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, float64(1), key)
+		assert.Equal(t, 2, priority)
+		assert.True(t, pm.IsEmpty())
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewRadixPriorityMap[string, uint64](0)
 		pm.Set("A", 10)
@@ -77,6 +99,27 @@ func TestRadixPriorityMap_Update(t *testing.T) {
 }
 
 func TestRadixPriorityMap_Improve(t *testing.T) {
+	t.Run("NonReflexiveKey", func(t *testing.T) {
+		pm := NewRadixPriorityMap[float64, int](4)
+		assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+			pm.Improve(math.NaN(), 1)
+		})
+		assert.Zero(t, pm.Len())
+		assert.True(t, pm.IsEmpty())
+		assert.Empty(t, pm.entries)
+		assert.Equal(t, 4, pm.freeLen)
+		assert.Zero(t, pm.last)
+		for _, bucket := range pm.buckets {
+			assert.Nil(t, bucket)
+		}
+		pm.Set(1, 2)
+		key, priority, ok := pm.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, float64(1), key)
+		assert.Equal(t, 2, priority)
+		assert.True(t, pm.IsEmpty())
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewRadixPriorityMap[string, uint64](0)
 

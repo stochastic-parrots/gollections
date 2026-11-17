@@ -44,6 +44,7 @@ func (f *FakeCollection[T]) Format(s fmt.State, verb rune) {
 	collection.Format(s, verb, f, cap(f.data))
 }
 
+//goland:noinspection GoPrintFunctions
 func (f *FakeCollection[T]) String() string {
 	return fmt.Sprint(f)
 }

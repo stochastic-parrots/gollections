@@ -182,8 +182,15 @@ func (pm *RadixPriorityMap[K, P]) refillFirstBucket() {
 // is initially zero and is advanced by Pop. Supplying a lower priority violates
 // the radix heap contract and causes the heap ordering guarantees to be lost.
 //
+// It panics before mutation if key does not equal itself (for example, NaN).
+//
 // Complexity: O(1).
+//
+//goland:noinspection GoDfaConstantCondition
 func (pm *RadixPriorityMap[K, P]) Set(key K, priority P) {
+	if key != key {
+		panic("prioritymap: non-reflexive key")
+	}
 	if entry, ok := pm.entries[key]; ok {
 		pm.detach(entry)
 		entry.priority = priority
@@ -225,6 +232,8 @@ func (pm *RadixPriorityMap[K, P]) Update(key K, priority P) bool {
 // It returns true if the map was modified (either by insertion or update).
 //
 // Priority must still be at least the current monotone lower bound.
+//
+// It panics before mutation if key does not equal itself (for example, NaN).
 //
 // Complexity: O(1).
 func (pm *RadixPriorityMap[K, P]) Improve(key K, priority P) bool {
@@ -333,7 +342,7 @@ func (pm *RadixPriorityMap[K, P]) Contains(key K) bool {
 
 // Keys returns an iterator for all keys in the collection.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the allocated key-index slots.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *RadixPriorityMap[K, P]) Keys() iter.Seq[K] {
 	return func(yield func(K) bool) {
@@ -347,7 +356,7 @@ func (pm *RadixPriorityMap[K, P]) Keys() iter.Seq[K] {
 
 // Values returns an iterator for all values (priorities/data).
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the allocated key-index slots.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *RadixPriorityMap[K, P]) Values() iter.Seq[P] {
 	return func(yield func(P) bool) {
@@ -361,7 +370,7 @@ func (pm *RadixPriorityMap[K, P]) Values() iter.Seq[P] {
 
 // All returns an iterator for key-value pairs.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the allocated key-index slots.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *RadixPriorityMap[K, P]) All() iter.Seq2[K, P] {
 	return func(yield func(K, P) bool) {
@@ -398,7 +407,7 @@ func (pm *RadixPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
 // monotone lower bound will be reset to zero. This operation is typically more
 // efficient than creating a new map as it may reuse the pre-allocated entries.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(C + radixBucketsCount), where C is the allocated key-index slots.
 func (pm *RadixPriorityMap[K, P]) Clear() {
 	for i := range pm.buckets {
 		pm.buckets[i] = nil

@@ -27,14 +27,14 @@ func TestNewHashSet(t *testing.T) {
 
 func TestHashSetFrom(t *testing.T) {
 	data := []int{1, 2, 1}
-	values := set.HashSetFrom[int](data)
+	values := set.HashSetFrom(data)
 	data[0] = 3
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
 
 func TestHashSetFromSeq(t *testing.T) {
-	values := set.HashSetFromSeq[int](slices.Values([]int{1, 2, 1}))
+	values := set.HashSetFromSeq(slices.Values([]int{1, 2, 1}))
 
 	assert.ElementsMatch(t, []int{1, 2}, slices.Collect(values.All()))
 }
@@ -51,7 +51,7 @@ func TestHashSet_UnionCollectionSource(t *testing.T) {
 	values := list.ArrayFrom([]int{2, 3, 3})
 	for name, source := range map[string]set.Source[int]{
 		"Collection": values,
-		"Readonly":   list.AsReadonly[int](values),
+		"Readonly":   list.AsReadonly(values),
 	} {
 		t.Run(name, func(t *testing.T) {
 			left := set.HashSetFrom([]int{1, 2})

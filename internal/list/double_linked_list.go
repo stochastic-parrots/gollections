@@ -10,7 +10,7 @@ import (
 
 // DoubleLinkedList represents a doubly linked list data structure.
 // It stores elements in a series of nodes where each node points to both
-// its predecessor and its successor, allowing for efficient bi-directional traversal.
+// its predecessor and its successor, allowing for efficient bidirectional traversal.
 type DoubleLinkedList[T any] struct {
 	first, last *node.DoubleLinkedNode[T]
 	length      int
@@ -169,17 +169,17 @@ func (l *DoubleLinkedList[T]) Set(idx int, x T) error {
 // Complexity: O(len(xs)).
 func (l *DoubleLinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
-		new := node.NewDoubleLinkedNode(x)
+		newNode := node.NewDoubleLinkedNode(x)
 		if l.IsEmpty() {
-			l.first = new
+			l.first = newNode
 		} else if l.reversed {
-			l.last.Previous = new
-			new.Next = l.last
+			l.last.Previous = newNode
+			newNode.Next = l.last
 		} else {
-			l.last.Next = new
-			new.Previous = l.last
+			l.last.Next = newNode
+			newNode.Previous = l.last
 		}
-		l.last = new
+		l.last = newNode
 		l.length++
 	}
 }
@@ -192,15 +192,15 @@ func (l *DoubleLinkedList[T]) prepend(x T) {
 		return
 	}
 
-	new := node.NewDoubleLinkedNode(x)
+	newNode := node.NewDoubleLinkedNode(x)
 	if !l.reversed {
-		new.Next = l.first
-		l.first.Previous = new
+		newNode.Next = l.first
+		l.first.Previous = newNode
 	} else {
-		new.Previous = l.first
-		l.first.Next = new
+		newNode.Previous = l.first
+		l.first.Next = newNode
 	}
-	l.first = new
+	l.first = newNode
 	l.length++
 }
 
@@ -228,24 +228,24 @@ func (l *DoubleLinkedList[T]) Insert(idx int, x T) error {
 	}
 
 	target := l.get(idx)
-	node := node.NewDoubleLinkedNode(x)
+	n := node.NewDoubleLinkedNode(x)
 
 	if !l.reversed {
 		prev := target.Previous
-		node.Next = target
-		node.Previous = prev
+		n.Next = target
+		n.Previous = prev
 		if prev != nil {
-			prev.Next = node
+			prev.Next = n
 		}
-		target.Previous = node
+		target.Previous = n
 	} else {
 		nxt := target.Next
-		node.Previous = target
-		node.Next = nxt
+		n.Previous = target
+		n.Next = nxt
 		if nxt != nil {
-			nxt.Previous = node
+			nxt.Previous = n
 		}
-		target.Next = node
+		target.Next = n
 	}
 
 	l.length++
@@ -435,6 +435,8 @@ func (l *DoubleLinkedList[T]) Format(s fmt.State, verb rune) {
 // String returns a string representation of the list.
 //
 // Complexity: O(1) as it respects a fixed display limit.
+//
+//goland:noinspection GoPrintFunctions
 func (l *DoubleLinkedList[T]) String() string {
 	return fmt.Sprint(l)
 }

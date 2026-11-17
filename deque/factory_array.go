@@ -14,6 +14,9 @@ var _ Deque[int] = &deque.RingBufferDeque[int]{}
 // NewArray creates an empty circular-array deque. Choose it for memory-local
 // traversal and amortized O(1) insertion or removal at either end.
 //
+// C is the retained ring-buffer capacity, which can exceed Len(). Clear zeros
+// all C slots, and successful UnmarshalJSON calls Clear before appending.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation             Time Complexity
@@ -27,8 +30,8 @@ var _ Deque[int] = &deque.RingBufferDeque[int]{}
 //	ToSlice()             O(N)
 //	Shift()               O(1)
 //	Pop()                 O(1)
-//	Clear()               O(N)
-//	UnmarshalJSON(data)   O(N + len(data))
+//	Clear()               O(C)
+//	UnmarshalJSON(data)   O(C + len(data))
 //	Prepend(xs... T)      O(len(xs)) Amortized
 //	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
@@ -39,6 +42,9 @@ func NewArray[T any](capacity int) *ArrayDeque[T] { return deque.NewRingBufferDe
 
 // ArrayFrom transfers ownership of data and its backing array; the caller must stop using the slice and every alias afterward. Use [ArrayClone] to preserve the source.
 //
+// C is the retained ring-buffer capacity, which can exceed Len(). Clear zeros
+// all C slots, and successful UnmarshalJSON calls Clear before appending.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation             Time Complexity
@@ -52,8 +58,8 @@ func NewArray[T any](capacity int) *ArrayDeque[T] { return deque.NewRingBufferDe
 //	ToSlice()             O(N)
 //	Shift()               O(1)
 //	Pop()                 O(1)
-//	Clear()               O(N)
-//	UnmarshalJSON(data)   O(N + len(data))
+//	Clear()               O(C)
+//	UnmarshalJSON(data)   O(C + len(data))
 //	Prepend(xs... T)      O(len(xs)) Amortized
 //	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
@@ -64,6 +70,9 @@ func ArrayFrom[T any](data []T) *ArrayDeque[T] { return deque.NewRingBufferDeque
 
 // ArrayClone makes an independent shallow copy of data without modifying or retaining its backing array.
 //
+// C is the retained ring-buffer capacity, which can exceed Len(). Clear zeros
+// all C slots, and successful UnmarshalJSON calls Clear before appending.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation             Time Complexity
@@ -77,8 +86,8 @@ func ArrayFrom[T any](data []T) *ArrayDeque[T] { return deque.NewRingBufferDeque
 //	ToSlice()             O(N)
 //	Shift()               O(1)
 //	Pop()                 O(1)
-//	Clear()               O(N)
-//	UnmarshalJSON(data)   O(N + len(data))
+//	Clear()               O(C)
+//	UnmarshalJSON(data)   O(C + len(data))
 //	Prepend(xs... T)      O(len(xs)) Amortized
 //	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
@@ -89,6 +98,9 @@ func ArrayClone[T any](data []T) *ArrayDeque[T] { return deque.NewRingBufferDequ
 
 // ArrayFromSeq consumes seq once into new storage in iteration order.
 //
+// C is the retained ring-buffer capacity, which can exceed Len(). Clear zeros
+// all C slots, and successful UnmarshalJSON calls Clear before appending.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation             Time Complexity
@@ -102,8 +114,8 @@ func ArrayClone[T any](data []T) *ArrayDeque[T] { return deque.NewRingBufferDequ
 //	ToSlice()             O(N)
 //	Shift()               O(1)
 //	Pop()                 O(1)
-//	Clear()               O(N)
-//	UnmarshalJSON(data)   O(N + len(data))
+//	Clear()               O(C)
+//	UnmarshalJSON(data)   O(C + len(data))
 //	Prepend(xs... T)      O(len(xs)) Amortized
 //	Append(xs... T)       O(len(xs)) Amortized
 //	MarshalJSON()         O(N)
