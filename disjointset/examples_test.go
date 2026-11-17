@@ -35,7 +35,7 @@ func ExampleNewIntsRangeBySize() {
 
 func ExampleAsReadonly() {
 	groups := disjointset.NewIntsRangeBySize(1, 2)
-	view := disjointset.AsReadonly[int](groups)
+	view := disjointset.AsReadonly(groups)
 	fmt.Println(view.Disjoints())
 	groups.Union(1, 2)
 	fmt.Println(view.Disjoints())

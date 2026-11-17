@@ -37,19 +37,19 @@ func ExampleNewArray() {
 }
 
 func ExampleNewLinked() {
-	deque := deque.NewLinked[string]()
-	deque.Append("middle", "back")
-	deque.Prepend("front")
+	d := deque.NewLinked[string]()
+	d.Append("middle", "back")
+	d.Prepend("front")
 
-	fmt.Println(slices.Collect(deque.All()))
+	fmt.Println(slices.Collect(d.All()))
 
-	front, _ := deque.Front()
-	back, _ := deque.Back()
+	front, _ := d.Front()
+	back, _ := d.Back()
 	fmt.Println(front, back)
 
-	_, _ = deque.Shift()
-	deque.Append("tail")
-	fmt.Println(slices.Collect(deque.All()))
+	_, _ = d.Shift()
+	d.Append("tail")
+	fmt.Println(slices.Collect(d.All()))
 
 	// Output:
 	// [front middle back]
@@ -59,11 +59,11 @@ func ExampleNewLinked() {
 
 func ExampleArrayFrom() {
 	values := []int{10, 20, 30}
-	deque := deque.ArrayFrom[int](values)
-	deque.Prepend(5)
-	deque.Append(40)
+	d := deque.ArrayFrom(values)
+	d.Prepend(5)
+	d.Append(40)
 
-	fmt.Println(deque.ToSlice())
+	fmt.Println(d.ToSlice())
 
 	// Output:
 	// [5 10 20 30 40]
@@ -71,10 +71,10 @@ func ExampleArrayFrom() {
 
 func ExampleArrayClone() {
 	values := []int{10, 20, 30}
-	deque := deque.ArrayClone[int](values)
-	_, _ = deque.Shift()
+	d := deque.ArrayClone(values)
+	_, _ = d.Shift()
 
-	fmt.Println(deque.ToSlice())
+	fmt.Println(d.ToSlice())
 	fmt.Println(values)
 
 	// Output:
@@ -83,9 +83,9 @@ func ExampleArrayClone() {
 }
 
 func ExampleLinkedFromSeq() {
-	deque := deque.LinkedFromSeq[int](slices.Values([]int{10, 20, 30}))
+	d := deque.LinkedFromSeq(slices.Values([]int{10, 20, 30}))
 
-	fmt.Println(deque.ToSlice())
+	fmt.Println(d.ToSlice())
 
 	// Output:
 	// [10 20 30]

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"slices"
 	"testing"
 
@@ -336,6 +337,53 @@ func TestArraySortedList_Add(t *testing.T) {
 			assert.Equal(t, []int{1, 2, 2, 3}, l.ToSlice())
 		})
 	})
+}
+
+func TestArraySortedList_Model(t *testing.T) {
+	random := rand.New(rand.NewSource(1))
+	valueList := NewArraySortedList(0, cmp.Compare[int])
+	var model []int
+
+	for step := range 500 {
+		switch random.Intn(4) {
+		case 0, 1:
+			values := make([]int, random.Intn(4))
+			for idx := range values {
+				values[idx] = random.Intn(21) - 10
+			}
+			valueList.Add(values...)
+			model = append(model, values...)
+			slices.Sort(model)
+		case 2:
+			value := random.Intn(21) - 10
+			modelIdx, found := slices.BinarySearch(model, value)
+			assert.Equal(t, found, valueList.Remove(value), "step %d: Remove(%d)", step, value)
+			if found {
+				model = slices.Delete(model, modelIdx, modelIdx+1)
+			}
+		case 3:
+			idx := random.Intn(len(model)+2) - 1
+			value := random.Intn(21) - 10
+			var wantErr error
+			if idx < 0 || idx >= len(model) {
+				wantErr = list.ErrIndexOutOfBounds
+			} else if (idx > 0 && model[idx-1] > value) || (idx+1 < len(model) && value > model[idx+1]) {
+				wantErr = ErrOrderViolation
+			} else {
+				model[idx] = value
+			}
+			err := valueList.Replace(idx, value)
+			if wantErr == nil {
+				assert.NoError(t, err, "step %d: Replace(%d, %d)", step, idx, value)
+			} else {
+				assert.ErrorIs(t, err, wantErr, "step %d: Replace(%d, %d)", step, idx, value)
+			}
+		}
+
+		assert.Equal(t, model, valueList.ToSlice(), "step %d", step)
+		assert.Equal(t, len(model), valueList.Len(), "step %d", step)
+		assert.Equal(t, len(model) == 0, valueList.IsEmpty(), "step %d", step)
+	}
 }
 
 func TestArraySortedList_Replace(t *testing.T) {

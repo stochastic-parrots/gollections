@@ -128,8 +128,8 @@ func BenchmarkHeaps_TopK(b *testing.B) {
 		b.Run("Library="+implementation.Name, func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
-				heap := implementation.Factory()
-				algorithms.TopK(data, K, heap, func(some, other int) bool { return some > other })
+				h := implementation.Factory()
+				algorithms.TopK(data, K, h, func(some, other int) bool { return some > other })
 			}
 		})
 	}

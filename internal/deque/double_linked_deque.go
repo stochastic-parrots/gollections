@@ -63,14 +63,14 @@ func (d *DoubleLinkedDeque[T]) IsEmpty() bool {
 // Complexity: O(len(xs)).
 func (d *DoubleLinkedDeque[T]) Append(xs ...T) {
 	for _, x := range xs {
-		new := node.NewDoubleLinkedNode(x)
+		newNode := node.NewDoubleLinkedNode(x)
 		if d.IsEmpty() {
-			d.first = new
+			d.first = newNode
 		} else {
-			new.Previous = d.last
-			d.last.Next = new
+			newNode.Previous = d.last
+			d.last.Next = newNode
 		}
-		d.last = new
+		d.last = newNode
 		d.length++
 	}
 }
@@ -81,14 +81,14 @@ func (d *DoubleLinkedDeque[T]) Append(xs ...T) {
 // Complexity: O(len(xs)).
 func (d *DoubleLinkedDeque[T]) Prepend(xs ...T) {
 	for _, x := range slices.Backward(xs) {
-		new := node.NewDoubleLinkedNode(x)
+		newNode := node.NewDoubleLinkedNode(x)
 		if d.IsEmpty() {
-			d.last = new
+			d.last = newNode
 		} else {
-			new.Next = d.first
-			d.first.Previous = new
+			newNode.Next = d.first
+			d.first.Previous = newNode
 		}
-		d.first = new
+		d.first = newNode
 		d.length++
 	}
 }
@@ -258,6 +258,8 @@ func (d *DoubleLinkedDeque[T]) Format(s fmt.State, verb rune) {
 // String returns a string representation of the deque.
 //
 // Complexity: O(1) as it respects a fixed display limit.
+//
+//goland:noinspection GoPrintFunctions
 func (d *DoubleLinkedDeque[T]) String() string {
 	return fmt.Sprint(d)
 }

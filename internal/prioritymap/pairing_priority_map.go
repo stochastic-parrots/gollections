@@ -240,8 +240,15 @@ func (pm *PairingPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 // key's priority. Insertion and improvement do O(1) immediate heap work;
 // worsening may consolidate O(N) children in one call.
 //
+// It panics before mutation if key does not equal itself (for example, NaN).
+//
 // Complexity: O(log N) Amortized.
+//
+//goland:noinspection GoDfaConstantCondition
 func (pm *PairingPriorityMap[K, P]) Set(key K, priority P) {
+	if key != key {
+		panic("prioritymap: non-reflexive key")
+	}
 	_, exists := pm.indexes[key]
 	if !exists {
 		newNode := pm.allocate(key, priority)
@@ -306,6 +313,8 @@ func (pm *PairingPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 // An improvement performs at most one cut and one heap link, with O(1)
 // immediate heap work. The bound below is a conservative amortized upper bound
 // for mixed operation sequences.
+//
+// It panics before mutation if key does not equal itself (for example, NaN).
 //
 // Complexity: O(log N) Amortized.
 func (pm *PairingPriorityMap[K, P]) Improve(key K, priority P) bool {

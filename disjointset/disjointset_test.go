@@ -13,7 +13,7 @@ import (
 type integerID int
 
 func TestNewIntsRangeByRank(t *testing.T) {
-	var _ *disjointset.IntsRangeByRank[int] = disjointset.NewIntsRangeByRank(0, 2)
+	assert.IsType(t, (*disjointset.IntsRangeByRank[int])(nil), disjointset.NewIntsRangeByRank(0, 2))
 	var _ disjointset.RankDisjointSet[int] = disjointset.NewIntsRangeByRank(0, 2)
 	var _ gollections.Collection[int] = disjointset.NewIntsRangeByRank(0, 2)
 
@@ -25,7 +25,7 @@ func TestNewIntsRangeByRank(t *testing.T) {
 }
 
 func TestNewIntsRangeBySize(t *testing.T) {
-	var _ *disjointset.IntsRangeBySize[int] = disjointset.NewIntsRangeBySize(0, 2)
+	assert.IsType(t, (*disjointset.IntsRangeBySize[int])(nil), disjointset.NewIntsRangeBySize(0, 2))
 	var _ disjointset.SizeDisjointSet[int] = disjointset.NewIntsRangeBySize(0, 2)
 	var _ gollections.Collection[int] = disjointset.NewIntsRangeBySize(0, 2)
 
@@ -117,7 +117,7 @@ func TestAsReadonly(t *testing.T) {
 	assert.Nil(t, disjointset.AsReadonly[int](nil))
 
 	mutable := disjointset.NewIntsRangeBySize(1, 3)
-	view := disjointset.AsReadonly[int](mutable)
+	view := disjointset.AsReadonly(mutable)
 	_, mutableView := any(view).(disjointset.DisjointSet[int])
 	_, sizeView := any(view).(disjointset.SizeDisjointSet[int])
 	assert.False(t, mutableView)

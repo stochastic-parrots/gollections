@@ -2,6 +2,7 @@ package list
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,6 +40,25 @@ func TestNewIndexOutOfBoundsError(t *testing.T) {
 			assert.Equal(t, tt.limit, err.Limit())
 		})
 	}
+}
+
+func TestIndexOutOfBoundsError_Is(t *testing.T) {
+	err := NewIndexOutOfBoundsError(OperationGet, 4, 3)
+
+	t.Run("Sentinel", func(t *testing.T) {
+		assert.True(t, err.Is(ErrIndexOutOfBounds))
+	})
+	t.Run("OtherType", func(t *testing.T) {
+		assert.False(t, err.Is(errors.New("other error")))
+	})
+	t.Run("WrappedError", func(t *testing.T) {
+		assert.ErrorIs(t, fmt.Errorf("wrapped: %w", err), ErrIndexOutOfBounds)
+	})
+	t.Run("WrappedTarget", func(t *testing.T) {
+		target := fmt.Errorf("wrapped: %w", ErrIndexOutOfBounds)
+		assert.False(t, err.Is(target))
+		assert.NotErrorIs(t, err, target)
+	})
 }
 
 func TestErrIndexOutOfBounds(t *testing.T) {

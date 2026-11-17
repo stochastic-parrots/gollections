@@ -1,6 +1,7 @@
 package prioritymap
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
@@ -95,7 +96,7 @@ func TestPairingPriorityMap_Combine(t *testing.T) {
 		pm.Set(4, 40)
 		pm.Set(5, 50)
 
-		pm.Pop() // Dispach combine with 4 children (even)
+		pm.Pop() // Dispatch combine with 4 children (even)
 		assert.Equal(t, 4, pm.Len())
 	})
 
@@ -107,7 +108,7 @@ func TestPairingPriorityMap_Combine(t *testing.T) {
 		pm.Set(3, 30)
 		pm.Set(4, 40)
 
-		pm.Pop() // Dispach combine with 3 children (odd)
+		pm.Pop() // Dispatch combine with 3 children (odd)
 		assert.Equal(t, 3, pm.Len())
 	})
 
@@ -123,6 +124,24 @@ func TestPairingPriorityMap_Combine(t *testing.T) {
 }
 
 func TestPairingPriorityMap_Set(t *testing.T) {
+	t.Run("NonReflexiveKey", func(t *testing.T) {
+		pm := NewPairingPriorityMapWithCapacity[float64](4, ordering.Min[int]())
+		assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+			pm.Set(math.NaN(), 1)
+		})
+		assert.Zero(t, pm.Len())
+		assert.True(t, pm.IsEmpty())
+		assert.Nil(t, pm.root)
+		assert.Empty(t, pm.indexes)
+		assert.Equal(t, 4, pm.freeLen)
+		pm.Set(1, 2)
+		key, priority, ok := pm.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, float64(1), key)
+		assert.Equal(t, 2, priority)
+		assert.True(t, pm.IsEmpty())
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](ordering.Min[int]())
 		pm.Set("A", 10)
@@ -235,6 +254,24 @@ func TestPairingPriorityMap_Update(t *testing.T) {
 }
 
 func TestPairingPriorityMap_Improve(t *testing.T) {
+	t.Run("NonReflexiveKey", func(t *testing.T) {
+		pm := NewPairingPriorityMapWithCapacity[float64](4, ordering.Min[int]())
+		assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+			pm.Improve(math.NaN(), 1)
+		})
+		assert.Zero(t, pm.Len())
+		assert.True(t, pm.IsEmpty())
+		assert.Nil(t, pm.root)
+		assert.Empty(t, pm.indexes)
+		assert.Equal(t, 4, pm.freeLen)
+		pm.Set(1, 2)
+		key, priority, ok := pm.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, float64(1), key)
+		assert.Equal(t, 2, priority)
+		assert.True(t, pm.IsEmpty())
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewPairingPriorityMap[string](ordering.Min[int]())
 

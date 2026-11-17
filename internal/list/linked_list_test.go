@@ -436,7 +436,7 @@ func TestLinkedList_All(t *testing.T) {
 		}
 	})
 
-	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
+	t.Run("PartialIteration_Reversed", func(t *testing.T) {
 		l := NewLinkedList[int]()
 		items := []int{1, 2, 3}
 		l.Append(items...)
@@ -514,7 +514,7 @@ func TestLinkedList_Enumerate(t *testing.T) {
 		assert.Equal(t, 3, l.Len())
 	})
 
-	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
+	t.Run("PartialIteration_Reversed", func(t *testing.T) {
 		l := NewLinkedList[int]()
 		items := []int{1, 2, 3}
 		l.Append(items...)

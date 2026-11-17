@@ -12,28 +12,28 @@ import (
 // where N is the range length and α is the inverse Ackermann function. A single
 // call can traverse O(log N) nodes.
 type FlatDisjointSetUnionBySize[T constraint.Integer] struct {
-	min, max  T
-	disjoints int
-	parents   []int
+	minimum, maximum T
+	disjoints        int
+	parents          []int
 }
 
 // NewFlatDisjointSetUnionBySize allocates singleton sets for the range.
-func NewFlatDisjointSetUnionBySize[T constraint.Integer](min, max T) *FlatDisjointSetUnionBySize[T] {
-	interval := flatInterval(min, max)
+func NewFlatDisjointSetUnionBySize[T constraint.Integer](minimum, maximum T) *FlatDisjointSetUnionBySize[T] {
+	interval := flatInterval(minimum, maximum)
 	parents := make([]int, interval)
 	disjoints := interval
 
 	for idx := range interval {
 		parents[idx] = -1
 	}
-	return &FlatDisjointSetUnionBySize[T]{min, max, disjoints, parents}
+	return &FlatDisjointSetUnionBySize[T]{minimum, maximum, disjoints, parents}
 }
 
 func (dsu *FlatDisjointSetUnionBySize[T]) normalize(x T) (int, bool) {
-	if x < dsu.min || x > dsu.max {
+	if x < dsu.minimum || x > dsu.maximum {
 		return 0, false
 	}
-	return flatIndex(x, dsu.min), true
+	return flatIndex(x, dsu.minimum), true
 }
 
 func (dsu *FlatDisjointSetUnionBySize[T]) find(normalized int) int {
@@ -68,7 +68,7 @@ func (dsu *FlatDisjointSetUnionBySize[T]) Find(x T) (T, bool) {
 	}
 
 	root := dsu.find(normalized)
-	return flatValue(root, dsu.min), true
+	return flatValue(root, dsu.minimum), true
 }
 
 // Connected reports membership in the same set, with ok false for invalid
@@ -136,7 +136,7 @@ func (dsu *FlatDisjointSetUnionBySize[T]) IsEmpty() bool { return len(dsu.parent
 func (dsu *FlatDisjointSetUnionBySize[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for idx := range dsu.parents {
-			if !yield(flatValue(idx, dsu.min)) {
+			if !yield(flatValue(idx, dsu.minimum)) {
 				return
 			}
 		}
@@ -149,7 +149,7 @@ func (dsu *FlatDisjointSetUnionBySize[T]) All() iter.Seq[T] {
 func (dsu *FlatDisjointSetUnionBySize[T]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		for idx := range dsu.parents {
-			if !yield(idx, flatValue(idx, dsu.min)) {
+			if !yield(idx, flatValue(idx, dsu.minimum)) {
 				return
 			}
 		}

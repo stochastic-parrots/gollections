@@ -13,15 +13,15 @@ type stdPriorityMapHeap[K comparable, V any] struct {
 	indexes map[K]int
 }
 
-func (h stdPriorityMapHeap[K, V]) Len() int {
+func (h *stdPriorityMapHeap[K, V]) Len() int {
 	return len(h.data)
 }
 
-func (h stdPriorityMapHeap[K, V]) Less(i, j int) bool {
+func (h *stdPriorityMapHeap[K, V]) Less(i, j int) bool {
 	return h.less(h.data[i].priority, h.data[j].priority)
 }
 
-func (h stdPriorityMapHeap[K, V]) Swap(i, j int) {
+func (h *stdPriorityMapHeap[K, V]) Swap(i, j int) {
 	h.data[i], h.data[j] = h.data[j], h.data[i]
 	h.indexes[h.data[i].key] = i
 	h.indexes[h.data[j].key] = j

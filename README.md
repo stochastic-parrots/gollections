@@ -20,15 +20,15 @@ The module uses Go's standard iterator APIs and targets Go 1.24+.
 
 ## Collections
 
-| Package | Structures | Use when you need |
-| --- | --- | --- |
-| `list` | `ArrayList`, `LinkedList` | Indexed, ordered sequences with forward/backward traversal |
-| `sortedlist` | `ArraySortedList` | Sorted sequences that allow duplicate values |
-| `deque` | `ArrayDeque`, `LinkedDeque` | Fast insertion and removal at both ends |
-| `set` | `HashSet`, `KeyedHashSet` | Unique values using Go equality or a derived identity key |
-| `heap` | `BinaryHeap` | Priority queue behavior with min, max, or custom ordering |
-| `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads |
-| `disjointset` | `IntsRangeByRank`, `IntsRangeBySize` | Track connectivity among all integers in a fixed inclusive range |
+| Package       | Structures                                                                | Use when you need                                                |
+|---------------|---------------------------------------------------------------------------|------------------------------------------------------------------|
+| `list`        | `ArrayList`, `LinkedList`                                                 | Indexed, ordered sequences with forward/backward traversal       |
+| `sortedlist`  | `ArraySortedList`                                                         | Sorted sequences that allow duplicate values                     |
+| `deque`       | `ArrayDeque`, `LinkedDeque`                                               | Fast insertion and removal at both ends                          |
+| `set`         | `HashSet`, `KeyedHashSet`                                                 | Unique values using Go equality or a derived identity key        |
+| `heap`        | `BinaryHeap`                                                              | Priority queue behavior with min, max, or custom ordering        |
+| `prioritymap` | `BinaryHeapPriorityMap`, `PairingHeapPriorityMap`, `RadixHeapPriorityMap` | Keyed priority queues, including monotone integer workloads      |
+| `disjointset` | `IntsRangeByRank`, `IntsRangeBySize`                                      | Track connectivity among all integers in a fixed inclusive range |
 
 Package-level examples live alongside each public package and are rendered by
 Go documentation tools.
@@ -76,11 +76,11 @@ their optional formatting and JSON methods, and standard `fmt` and
 This is a breaking change for direct optional method calls and assignments
 through structural interfaces:
 
-| Structural interface | Capability no longer required |
-| --- | --- |
-| `list.Readonly`, `deque.Readonly`, `sortedlist.Readonly`, `heap.Heap` | `fmt.Stringer`, `json.Marshaler` |
-| `set.Readonly` | `json.Marshaler` |
-| `list.List`, `deque.Deque` | `json.Unmarshaler`, plus inherited readonly capabilities |
+| Structural interface                                                  | Capability no longer required                            |
+|-----------------------------------------------------------------------|----------------------------------------------------------|
+| `list.Readonly`, `deque.Readonly`, `sortedlist.Readonly`, `heap.Heap` | `fmt.Stringer`, `json.Marshaler`                         |
+| `set.Readonly`                                                        | `json.Marshaler`                                         |
+| `list.List`, `deque.Deque`                                            | `json.Unmarshaler`, plus inherited readonly capabilities |
 
 Constructors return concrete types, so direct calls such as `items.String()`
 remain available. For built-in collections stored behind a structural interface,
@@ -141,23 +141,23 @@ copy values into map storage. `FromSeq` functions consume an iterator once.
 
 ### Migration from factories
 
-| Package | Previous factory calls | Direct constructors |
-| --- | --- | --- |
-| `list` | `Array[T]().New/Clone/From/FromSeq` | `NewArray[T]` / `ArrayClone` / `ArrayFrom` / `ArrayFromSeq` |
-| `list` | `Linked[T]().New/From/FromSeq` | `NewLinked[T]` / `LinkedFrom` / `LinkedFromSeq` |
-| `deque` | `Array[T]().New/Clone/From/FromSeq` | `NewArray[T]` / `ArrayClone` / `ArrayFrom` / `ArrayFromSeq` |
-| `deque` | `Linked[T]().New/From/FromSeq` | `NewLinked[T]` / `LinkedFrom` / `LinkedFromSeq` |
-| `sortedlist` | `Array(cmp).New/Clone/From/FromSeq` | `NewArray(cmp, cap)` / `ArrayClone(cmp, xs)` / `ArrayFrom(cmp, xs)` / `ArrayFromSeq(cmp, seq)` |
-| `sortedlist` | `OrderedArray[T](order).New/Clone/From/FromSeq` | `NewOrderedArray[T](order, cap)` / `OrderedArrayClone(order, xs)` / `OrderedArrayFrom(order, xs)` / `OrderedArrayFromSeq(order, seq)` |
-| `heap` | `Binary(hasPriority).New/Clone/From` | `NewBinary(hasPriority, cap)` / `BinaryClone(hasPriority, xs)` / `BinaryFrom(hasPriority, xs)` |
-| `heap` | `OrderedBinary[T](order).New/Clone/From` | `NewOrderedBinary[T](order, cap)` / `OrderedBinaryClone(order, xs)` / `OrderedBinaryFrom(order, xs)` |
-| `prioritymap` | `BinaryHeap[K, P](hasPriority).New` | `NewBinaryHeap[K, P](hasPriority, cap)` |
-| `prioritymap` | `OrderedBinaryHeap[K, P](order).New` | `NewOrderedBinaryHeap[K, P](order, cap)` |
-| `prioritymap` | `PairingHeap[K, P](hasPriority).New` | `NewPairingHeap[K, P](hasPriority, cap)` |
-| `prioritymap` | `OrderedPairingHeap[K, P](order).New` | `NewOrderedPairingHeap[K, P](order, cap)` |
-| `prioritymap` | `RadixHeap[K, P]().New` | `NewRadixHeap[K, P](cap)` |
-| `set` | `HashSetOf[T]().New/From/FromSeq` | `NewHashSet[T]` / `HashSetFrom` / `HashSetFromSeq` |
-| `set` | `HashSetBy(keyOf).New/From/FromSeq` | `NewKeyedHashSet(keyOf, cap)` / `KeyedHashSetFrom(keyOf, xs)` / `KeyedHashSetFromSeq(keyOf, seq)` |
+| Package       | Previous factory calls                          | Direct constructors                                                                                                                   |
+|---------------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `list`        | `Array[T]().New/Clone/From/FromSeq`             | `NewArray[T]` / `ArrayClone` / `ArrayFrom` / `ArrayFromSeq`                                                                           |
+| `list`        | `Linked[T]().New/From/FromSeq`                  | `NewLinked[T]` / `LinkedFrom` / `LinkedFromSeq`                                                                                       |
+| `deque`       | `Array[T]().New/Clone/From/FromSeq`             | `NewArray[T]` / `ArrayClone` / `ArrayFrom` / `ArrayFromSeq`                                                                           |
+| `deque`       | `Linked[T]().New/From/FromSeq`                  | `NewLinked[T]` / `LinkedFrom` / `LinkedFromSeq`                                                                                       |
+| `sortedlist`  | `Array(cmp).New/Clone/From/FromSeq`             | `NewArray(cmp, cap)` / `ArrayClone(cmp, xs)` / `ArrayFrom(cmp, xs)` / `ArrayFromSeq(cmp, seq)`                                        |
+| `sortedlist`  | `OrderedArray[T](order).New/Clone/From/FromSeq` | `NewOrderedArray[T](order, cap)` / `OrderedArrayClone(order, xs)` / `OrderedArrayFrom(order, xs)` / `OrderedArrayFromSeq(order, seq)` |
+| `heap`        | `Binary(hasPriority).New/Clone/From`            | `NewBinary(hasPriority, cap)` / `BinaryClone(hasPriority, xs)` / `BinaryFrom(hasPriority, xs)`                                        |
+| `heap`        | `OrderedBinary[T](order).New/Clone/From`        | `NewOrderedBinary[T](order, cap)` / `OrderedBinaryClone(order, xs)` / `OrderedBinaryFrom(order, xs)`                                  |
+| `prioritymap` | `BinaryHeap[K, P](hasPriority).New`             | `NewBinaryHeap[K, P](hasPriority, cap)`                                                                                               |
+| `prioritymap` | `OrderedBinaryHeap[K, P](order).New`            | `NewOrderedBinaryHeap[K, P](order, cap)`                                                                                              |
+| `prioritymap` | `PairingHeap[K, P](hasPriority).New`            | `NewPairingHeap[K, P](hasPriority, cap)`                                                                                              |
+| `prioritymap` | `OrderedPairingHeap[K, P](order).New`           | `NewOrderedPairingHeap[K, P](order, cap)`                                                                                             |
+| `prioritymap` | `RadixHeap[K, P]().New`                         | `NewRadixHeap[K, P](cap)`                                                                                                             |
+| `set`         | `HashSetOf[T]().New/From/FromSeq`               | `NewHashSet[T]` / `HashSetFrom` / `HashSetFromSeq`                                                                                    |
+| `set`         | `HashSetBy(keyOf).New/From/FromSeq`             | `NewKeyedHashSet(keyOf, cap)` / `KeyedHashSetFrom(keyOf, xs)` / `KeyedHashSetFromSeq(keyOf, seq)`                                     |
 
 `heap.BinaryFromSeq(hasPriority, seq)` and
 `heap.OrderedBinaryFromSeq(order, seq)` are new O(N) constructors.
@@ -256,7 +256,7 @@ the constructors; initialized set structs must not be copied.
 
 ## Choosing a disjoint set
 
-Use `disjointset` when every integer in an inclusive range is known up front
+Use `disjointset` when every integer in an inclusive range is known up front,
 and you need to merge groups or test connectivity, such as components of a
 graph whose vertices have contiguous integer IDs. `IntsRangeByRank` exposes
 the rank heuristic; `IntsRangeBySize` reports how many integers belong to a

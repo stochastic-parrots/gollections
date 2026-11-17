@@ -67,7 +67,7 @@ func ExampleNewOrderedBinary_min() {
 func ExampleBinaryFrom_min() {
 	data := []int{42, 7, 13, 1, 99}
 
-	h := heap.OrderedBinaryFrom[int](heap.Min, data)
+	h := heap.OrderedBinaryFrom(heap.Min, data)
 
 	val, _ := h.Pop()
 	fmt.Printf("Pop: %d\n", val)
@@ -81,7 +81,7 @@ func ExampleBinaryFrom_min() {
 func ExampleBinaryClone_min() {
 	data := []int{42, 7, 13, 1, 99}
 
-	h := heap.OrderedBinaryClone[int](heap.Min, data)
+	h := heap.OrderedBinaryClone(heap.Min, data)
 	h.Pop()
 
 	fmt.Printf("Len: %d\n", h.Len())
@@ -107,7 +107,7 @@ func ExampleNewOrderedBinary_max() {
 func ExampleBinaryFrom_max() {
 	data := []int{1, 13, 7, 42, 99}
 
-	h := heap.OrderedBinaryFrom[int](heap.Max, data)
+	h := heap.OrderedBinaryFrom(heap.Max, data)
 
 	val, _ := h.Pop()
 	fmt.Printf("Pop: %d\n", val)
@@ -121,7 +121,7 @@ func ExampleBinaryFrom_max() {
 func ExampleBinaryClone_max() {
 	data := []int{1, 13, 7, 42, 99}
 
-	h := heap.OrderedBinaryClone[int](heap.Max, data)
+	h := heap.OrderedBinaryClone(heap.Max, data)
 	h.Pop()
 
 	fmt.Printf("Len: %d\n", h.Len())

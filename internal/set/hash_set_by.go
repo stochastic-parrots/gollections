@@ -221,7 +221,7 @@ func (set *KeyedHashSet[T, K]) Remove(xs ...T) (removed int) {
 // Clone returns an independent keyed hash set containing the receiver's
 // representative values and preserving its identity function.
 //
-// Complexity: O(N).
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *KeyedHashSet[T, K]) Clone() *KeyedHashSet[T, K] {
 	clone := NewKeyedHashSet(len(set.values), set.keyOf)
 	maps.Copy(clone.values, set.values)
@@ -853,7 +853,7 @@ func toggleKeyedSources[T any, K comparable, S Source[T]](
 // All returns a lazy iterator over the representative values in unspecified
 // order.
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *KeyedHashSet[T, K]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range set.values {
@@ -867,7 +867,7 @@ func (set *KeyedHashSet[T, K]) All() iter.Seq[T] {
 // Enumerate returns a lazy iterator over iteration positions and representative
 // values in unspecified order.
 //
-// Complexity: O(N) for a full traversal, O(1) per step.
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *KeyedHashSet[T, K]) Enumerate() iter.Seq2[int, T] {
 	return func(yield func(int, T) bool) {
 		idx := 0
@@ -883,7 +883,7 @@ func (set *KeyedHashSet[T, K]) Enumerate() iter.Seq2[int, T] {
 // Clear removes all values while preserving the identity function and keeping
 // the set initialized for reuse.
 //
-// Complexity: O(N).
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *KeyedHashSet[T, K]) Clear() {
 	clear(set.values)
 }
@@ -891,7 +891,7 @@ func (set *KeyedHashSet[T, K]) Clear() {
 // MarshalJSON encodes the representative values as a JSON array in unspecified
 // iteration order.
 //
-// Complexity: O(N).
+// Complexity: O(C), where C is the number of allocated map slots.
 func (set *KeyedHashSet[T, K]) MarshalJSON() ([]byte, error) {
 	return collection.Marshal(set)
 }

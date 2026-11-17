@@ -17,7 +17,7 @@ func NewLinkedNode[T any](value T) *LinkedNode[T] {
 // HasNext returns true if there is a node following the current one.
 //
 // Complexity: O(1).
-func (node LinkedNode[T]) HasNext() bool {
+func (node *LinkedNode[T]) HasNext() bool {
 	return node.Next != nil
 }
 
@@ -26,7 +26,7 @@ func (node LinkedNode[T]) HasNext() bool {
 //
 // Complexity: O(1).
 func (node *LinkedNode[T]) Append(x T) *LinkedNode[T] {
-	new := NewLinkedNode(x)
-	node.Next = new
-	return new
+	newNode := NewLinkedNode(x)
+	node.Next = newNode
+	return newNode
 }

@@ -26,19 +26,22 @@ func checkKeyOf[T any, K comparable](keyOf func(T) K) {
 // NewKeyedHashSet creates an empty keyed set. keyOf must be non-nil and stable
 // for every stored value's lifetime in the set.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average + keyOf
 //	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
 //	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(capacity).
 func NewKeyedHashSet[T any, K comparable](keyOf func(T) K, capacity int) *KeyedHashSet[T, K] {
@@ -49,19 +52,22 @@ func NewKeyedHashSet[T any, K comparable](keyOf func(T) K, capacity int) *KeyedH
 // KeyedHashSetFrom copies values from data into map storage without retaining the slice.
 // The first value for each derived key is preserved. keyOf must be non-nil and stable.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average + keyOf
 //	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
 //	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(len(data)) on average plus len(data) keyOf calls.
 func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHashSet[T, K] {
@@ -72,19 +78,22 @@ func KeyedHashSetFrom[T any, K comparable](keyOf func(T) K, data []T) *KeyedHash
 // KeyedHashSetFromSeq consumes seq once into map storage without guaranteeing iteration order. The first value for each
 // derived key is preserved. keyOf must be non-nil and stable.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average + keyOf
 //	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
 //	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(N) on average plus N keyOf calls, where N is the number of values yielded by seq.
 func KeyedHashSetFromSeq[T any, K comparable](keyOf func(T) K, seq iter.Seq[T]) *KeyedHashSet[T, K] {
@@ -98,19 +107,22 @@ func KeyedHashSetFromSeq[T any, K comparable](keyOf func(T) K, seq iter.Seq[T]) 
 // keyOf must be non-nil and remain stable while values belong to the set. It
 // panics if keyOf is nil.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average + keyOf
 //	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
 //	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
 // Complexity: O(1).
 func KeyedHashSetFromMap[T any, K comparable](keyOf func(T) K, values map[K]T) *KeyedHashSet[T, K] {
@@ -123,21 +135,24 @@ func KeyedHashSetFromMap[T any, K comparable](keyOf func(T) K, values map[K]T) *
 // not retain the input map. keyOf must be non-nil and remain stable while
 // values belong to the set. It panics if keyOf is nil.
 //
+// N is the current number of values (Len()). C is the number of allocated
+// map slots, which can exceed N after preallocation or removals.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation          Time Complexity
 //	----------------   ---------------
 //	IsEmpty()          O(1)
 //	Len()              O(1)
-//	All()              O(N)
-//	Enumerate()        O(N)
+//	All()              O(C)
+//	Enumerate()        O(C)
 //	Contains(x)        O(1) on average + keyOf
 //	Add(xs... T)       O(len(xs)) on average + len(xs) keyOf calls
 //	Remove(xs... T)    O(len(xs)) on average + len(xs) keyOf calls
-//	Clear()            O(N)
-//	MarshalJSON()      O(N)
+//	Clear()            O(C)
+//	MarshalJSON()      O(C)
 //
-// Complexity: O(len(values)).
+// Complexity: O(number of allocated slots in values).
 func KeyedHashSetCloneMap[T any, K comparable](keyOf func(T) K, values map[K]T) *KeyedHashSet[T, K] {
 	checkKeyOf(keyOf)
 	return set.NewKeyedHashSetCloneMap(values, keyOf)
