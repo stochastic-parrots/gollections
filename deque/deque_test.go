@@ -10,13 +10,13 @@ import (
 )
 
 func TestConstructorsImplementDeque(t *testing.T) {
-	var _ *deque.ArrayDeque[int] = deque.NewArray[int](0)
-	var _ *deque.ArrayDeque[int] = deque.ArrayFrom[int]([]int{1})
-	var _ *deque.ArrayDeque[int] = deque.ArrayClone[int]([]int{1})
-	var _ *deque.ArrayDeque[int] = deque.ArrayFromSeq[int](slices.Values([]int{1}))
-	var _ *deque.LinkedDeque[int] = deque.NewLinked[int]()
-	var _ *deque.LinkedDeque[int] = deque.LinkedFrom[int]([]int{1})
-	var _ *deque.LinkedDeque[int] = deque.LinkedFromSeq[int](slices.Values([]int{1}))
+	assert.IsType(t, (*deque.ArrayDeque[int])(nil), deque.NewArray[int](0))
+	assert.IsType(t, (*deque.ArrayDeque[int])(nil), deque.ArrayFrom([]int{1}))
+	assert.IsType(t, (*deque.ArrayDeque[int])(nil), deque.ArrayClone([]int{1}))
+	assert.IsType(t, (*deque.ArrayDeque[int])(nil), deque.ArrayFromSeq(slices.Values([]int{1})))
+	assert.IsType(t, (*deque.LinkedDeque[int])(nil), deque.NewLinked[int]())
+	assert.IsType(t, (*deque.LinkedDeque[int])(nil), deque.LinkedFrom([]int{1}))
+	assert.IsType(t, (*deque.LinkedDeque[int])(nil), deque.LinkedFromSeq(slices.Values([]int{1})))
 	var _ deque.Deque[int] = deque.NewArray[int](0)
 	var _ deque.Deque[int] = deque.NewLinked[int]()
 }
@@ -39,39 +39,39 @@ func TestConcreteZeroValues(t *testing.T) {
 
 func TestArrayFrom(t *testing.T) {
 	data := []int{1, 2}
-	deque := deque.ArrayFrom[int](data)
+	d := deque.ArrayFrom(data)
 
-	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+	assert.Equal(t, []int{1, 2}, d.ToSlice())
 }
 
 func TestArrayClone(t *testing.T) {
 	data := []int{1, 2}
-	deque := deque.ArrayClone[int](data)
+	d := deque.ArrayClone(data)
 
-	_, _ = deque.Shift()
+	_, _ = d.Shift()
 	assert.Equal(t, []int{1, 2}, data)
 	data[1] = 20
-	assert.Equal(t, []int{2}, deque.ToSlice())
+	assert.Equal(t, []int{2}, d.ToSlice())
 }
 
 func TestArrayFromSeq(t *testing.T) {
-	deque := deque.ArrayFromSeq[int](slices.Values([]int{1, 2}))
+	d := deque.ArrayFromSeq(slices.Values([]int{1, 2}))
 
-	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+	assert.Equal(t, []int{1, 2}, d.ToSlice())
 }
 
 func TestLinkedFrom(t *testing.T) {
 	data := []int{1, 2}
-	deque := deque.LinkedFrom[int](data)
+	d := deque.LinkedFrom(data)
 	data[0] = 10
 
-	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+	assert.Equal(t, []int{1, 2}, d.ToSlice())
 }
 
 func TestLinkedFromSeq(t *testing.T) {
-	deque := deque.LinkedFromSeq[int](slices.Values([]int{1, 2}))
+	d := deque.LinkedFromSeq(slices.Values([]int{1, 2}))
 
-	assert.Equal(t, []int{1, 2}, deque.ToSlice())
+	assert.Equal(t, []int{1, 2}, d.ToSlice())
 }
 
 func TestNewArray(t *testing.T) {
@@ -109,7 +109,7 @@ func TestAsReadonly(t *testing.T) {
 		mutable := deque.NewArray[int](0)
 		mutable.Append(1, 2)
 
-		view := deque.AsReadonly[int](mutable)
+		view := deque.AsReadonly(mutable)
 		_, unmarshals := any(view).(json.Unmarshaler)
 		assert.False(t, unmarshals)
 

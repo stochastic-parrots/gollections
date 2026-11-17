@@ -1,6 +1,7 @@
 package prioritymap
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stochastic-parrots/gollections/internal/shared/ordering"
@@ -17,6 +18,23 @@ func TestNewBinaryPriorityMap(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Set(t *testing.T) {
+	t.Run("NonReflexiveKey", func(t *testing.T) {
+		pm := NewBinaryPriorityMap[float64](4, ordering.Min[int]())
+		assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+			pm.Set(math.NaN(), 1)
+		})
+		assert.Zero(t, pm.Len())
+		assert.True(t, pm.IsEmpty())
+		assert.Empty(t, pm.data)
+		assert.Empty(t, pm.indexes)
+		pm.Set(1, 2)
+		key, priority, ok := pm.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, float64(1), key)
+		assert.Equal(t, 2, priority)
+		assert.True(t, pm.IsEmpty())
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 		pm.Set("A", 10)
@@ -75,6 +93,23 @@ func TestBinaryPriorityMap_Update(t *testing.T) {
 }
 
 func TestBinaryPriorityMap_Improve(t *testing.T) {
+	t.Run("NonReflexiveKey", func(t *testing.T) {
+		pm := NewBinaryPriorityMap[float64](4, ordering.Min[int]())
+		assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+			pm.Improve(math.NaN(), 1)
+		})
+		assert.Zero(t, pm.Len())
+		assert.True(t, pm.IsEmpty())
+		assert.Empty(t, pm.data)
+		assert.Empty(t, pm.indexes)
+		pm.Set(1, 2)
+		key, priority, ok := pm.Pop()
+		assert.True(t, ok)
+		assert.Equal(t, float64(1), key)
+		assert.Equal(t, 2, priority)
+		assert.True(t, pm.IsEmpty())
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		pm := NewBinaryPriorityMap[string](0, ordering.Min[int]())
 

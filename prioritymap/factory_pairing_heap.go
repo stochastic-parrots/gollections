@@ -9,6 +9,7 @@ import (
 
 // PairingHeapPriorityMap is an indexed, pointer-based pairing heap. Its zero value is invalid;
 // use NewPairingHeap or NewOrderedPairingHeap.
+// Keys must equal themselves; Set and Improve panic for non-reflexive keys.
 type PairingHeapPriorityMap[K comparable, P any] = prioritymap.PairingPriorityMap[K, P]
 
 var _ PriorityMap[int, any] = &prioritymap.PairingPriorityMap[int, any]{}

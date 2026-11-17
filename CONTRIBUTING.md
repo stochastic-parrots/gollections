@@ -42,19 +42,53 @@ and data-structure invariants.
 
 ## Branch And Pull Request Flow
 
-- Open all change pull requests against `develop`.
-- The only pull request to `main` is the release promotion from `develop`.
-  GitHub Actions opens or updates it after pushes to `develop`.
+- Open all change pull requests against `develop` and merge them using squash.
+  This keeps each feature or fix in a single commit.
+- Pull requests to `main` must come from `develop` or a `release/*` branch in
+  this repository and use merge commits to preserve the release history.
+  Open release pull requests manually with the title
+  `release: vMAJOR.MINOR.PATCH[-prerelease]`, for example `release: v1.0.0-beta.2`.
 - Keep `develop` current with `main` after release promotions. Start a new
   change branch from `develop`.
 - Use a Conventional Commit style PR title with a concise scope, for example
   `feat(set): add set algebra operations` or
   `refactor(api)!: replace collection factories with direct constructors`.
-- A CI check rejects pull requests with any other base/head combination.
+- The **Pull request target** check validates the base branch, source branch,
+  and source repository inline in the workflow, without checking out code or
+  executing repository scripts.
 
-The release promotion workflow needs GitHub Actions' **Allow GitHub Actions to
-create and approve pull requests** repository setting. It grants the workflow
-only `contents: read` and `pull-requests: write`.
+CI runs when a pull request is opened, reopened, or receives new commits, and
+on pushes to `main`. Editing a PR title or description does not rerun CI.
+
+For CLI merges, use `gh pr merge --squash` when the target is `develop` and
+`gh pr merge --merge` when the target is `main`.
+
+## Release Tags
+
+After a release PR merges into `main`, create an annotated version tag at that
+PR's merge commit and publish the GitHub Release manually. Use the version from
+the PR title and its `Summary` section for the release notes. Review the version
+and release contents before publishing the tag.
+
+Use canonical versions such as `v1.0.0-beta.2` or `v1.0.0`, without build
+metadata. Go requires a `/vN` module path suffix for major versions 2 and above,
+including prereleases. The current module path has no suffix, so releases use
+major version 0 or 1. A v2 release requires migrating the module path and imports
+to `/v2` first.
+
+## Dependencies
+
+Production Go files in every package may import only the standard library and
+packages from this module. This also applies to the benchmark harness.
+Third-party testing libraries are allowed only in `*_test.go` files; the
+current allowlist contains `github.com/stretchr/testify/`. Approve any additional
+testing library by updating the test allowlist in `.golangci.yml`.
+
+Packages under `internal/...`, including their tests, may import other packages
+from this module only under `internal/...`.
+
+The `depguard` rules in `.golangci.yml` enforce both boundaries through
+`make lint` locally and the **Lint** check in CI.
 
 ## Testing
 
@@ -88,7 +122,16 @@ go test -race ./...
 ```
 
 Use `make lint` when changing public APIs, docs, or broad implementation
-behavior.
+behavior. It installs the latest golangci-lint v2 release before each run and
+runs gopls hint diagnostics. CI and the pre-commit lint hook also follow the
+latest linter release. Local lint needs network access to check for updates;
+a new release may introduce diagnostics that need configuration or source
+changes. CI uses Go 1.24 for lint and tests both Go 1.24 and stable Go.
+CI enforces at least 95% statement coverage across library packages, excluding
+`internal/benchmarks`. Codecov checks 100% coverage of changed lines. Branch
+rules require both Go test jobs, lint, coverage upload, PR validation, and the
+Codecov patch check; `main` also requires the managed Code Quality analysis.
+The pre-commit test hook and `make test` keep the race detector enabled.
 
 ## Pull Requests
 

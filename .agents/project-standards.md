@@ -527,10 +527,14 @@ alias and constructor from the public package.
   breaking change.
 - Imports are grouped as standard library first, then blank line, then project
   imports.
-- Packages under `internal/...` may import the standard library and external
-  modules, but every import from this module must also remain under
-  `internal/...`. The `depguard` configuration in `.golangci.yml` enforces this
-  boundary.
+- Production Go files in every package, including the benchmark harness, may
+  import only the standard library and packages from this module. Third-party
+  testing libraries are allowed only in `*_test.go` files; the current allowlist
+  contains `github.com/stretchr/testify/`. Update the test allowlist in
+  `.golangci.yml` when approving another testing library.
+- Packages under `internal/...`, including their tests, may import packages from
+  this module only under `internal/...`. The `depguard` configuration in
+  `.golangci.yml` enforces both boundaries locally and in CI.
 - Do not use explicit import aliases. Prefer the imported package's declared
   name, even for the root `gollections` package and internal implementation
   packages.
@@ -570,6 +574,11 @@ alias and constructor from the public package.
 
 ## Commits And Tags
 
+- Always use [.github/pull_request_template.md](../.github/pull_request_template.md)
+  when creating or editing a pull request description. Preserve every section
+  in its original order, fill in the final scope and verification results, and
+  explain items that do not apply. Mark checkboxes only when supported by the
+  changes or completed verification.
 - Commit messages follow Conventional Commits with concise scopes:
   - `feat(priority map): add radix heap priority map`
   - `test(priority map): cover radix heap priority map`
@@ -578,4 +587,11 @@ alias and constructor from the public package.
   - `fix(priority map): clear stale priority state`
 - Keep commits reviewable and grouped by intent: feature, tests, docs,
   benchmarks, and cleanup should be separate when practical.
-- Tags are annotated and currently follow `v0.0.N-alpha`.
+- Open release PRs manually from `develop` or a same-repository `release/*`
+  branch to `main`, with the title `release: vMAJOR.MINOR.PATCH[-prerelease]`.
+  Merge releases using merge commits.
+- Publish annotated version tags and GitHub Releases manually after a release
+  PR merges into `main`. Tag the merge commit of the release PR.
+- Release versions must match the module path: major versions 2 and above
+  require the corresponding `/vN` suffix, including prereleases. The current
+  unsuffixed module supports major versions 0 and 1.

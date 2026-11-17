@@ -28,12 +28,12 @@ func Format[T any](s fmt.State, verb rune, collection formattedCollection[T], ca
 	t := reflect.TypeOf(collection)
 
 	if verb == 'v' && s.Flag('#') {
-		fmt.Fprintf(s, "%v{size:%d, cap:%d}", t, collection.Len(), capacity)
+		_, _ = fmt.Fprintf(s, "%v{size:%d, cap:%d}", t, collection.Len(), capacity)
 		return
 	}
 
 	if s.Flag('+') {
-		fmt.Fprintf(s, "%v{len:%d, cap:%d} ", t, collection.Len(), capacity)
+		_, _ = fmt.Fprintf(s, "%v{len:%d, cap:%d} ", t, collection.Len(), capacity)
 	}
 
 	if collection.Len() == 0 {
@@ -44,13 +44,13 @@ func Format[T any](s fmt.State, verb rune, collection formattedCollection[T], ca
 	_, _ = io.WriteString(s, "[")
 	for idx, val := range collection.Enumerate() {
 		if idx >= 5 {
-			fmt.Fprintf(s, " ...(+%d more)", collection.Len()-displayLimit)
+			_, _ = fmt.Fprintf(s, " ...(+%d more)", collection.Len()-displayLimit)
 			break
 		}
 		if idx > 0 {
 			_, _ = io.WriteString(s, " ")
 		}
-		fmt.Fprint(s, val)
+		_, _ = fmt.Fprint(s, val)
 	}
 	_, _ = io.WriteString(s, "]")
 }

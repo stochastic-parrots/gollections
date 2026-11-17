@@ -38,8 +38,8 @@ func ExampleNewArray() {
 }
 
 func ExampleNewOrderedArray() {
-	ascending := sortedlist.OrderedArrayClone[int](sortedlist.Asc, []int{3, 1, 2, 2})
-	descending := sortedlist.OrderedArrayClone[int](sortedlist.Desc, []int{3, 1, 2, 2})
+	ascending := sortedlist.OrderedArrayClone(sortedlist.Asc, []int{3, 1, 2, 2})
+	descending := sortedlist.OrderedArrayClone(sortedlist.Desc, []int{3, 1, 2, 2})
 
 	fmt.Println(slices.Collect(ascending.All()))
 	fmt.Println(slices.Collect(descending.All()))
@@ -50,15 +50,15 @@ func ExampleNewOrderedArray() {
 }
 
 func ExampleArraySortedList_bounds() {
-	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	list.Add(1, 2, 2, 2, 3)
+	l := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	l.Add(1, 2, 2, 2, 3)
 
-	start, end := list.EqualRange(2)
+	start, end := l.EqualRange(2)
 
-	fmt.Println("LowerBound:", list.LowerBound(2))
-	fmt.Println("UpperBound:", list.UpperBound(2))
+	fmt.Println("LowerBound:", l.LowerBound(2))
+	fmt.Println("UpperBound:", l.UpperBound(2))
 	fmt.Println("EqualRange:", start, end)
-	fmt.Println("Count:", list.Count(2))
+	fmt.Println("Count:", l.Count(2))
 
 	// Output:
 	// LowerBound: 1
@@ -68,13 +68,13 @@ func ExampleArraySortedList_bounds() {
 }
 
 func ExampleArraySortedList_navigate() {
-	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	list.Add(10, 20, 30)
+	l := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	l.Add(10, 20, 30)
 
-	ceiling, ceilingIdx, _ := list.Ceiling(25)
-	floor, floorIdx, _ := list.Floor(25)
-	higher, higherIdx, _ := list.Higher(20)
-	lower, lowerIdx, _ := list.Lower(20)
+	ceiling, ceilingIdx, _ := l.Ceiling(25)
+	floor, floorIdx, _ := l.Floor(25)
+	higher, higherIdx, _ := l.Higher(20)
+	lower, lowerIdx, _ := l.Lower(20)
 
 	fmt.Println("Ceiling:", ceiling, ceilingIdx)
 	fmt.Println("Floor:", floor, floorIdx)
@@ -89,10 +89,10 @@ func ExampleArraySortedList_navigate() {
 }
 
 func ExampleArraySortedList_Range() {
-	list := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
-	list.Add(1, 2, 2, 3, 4)
+	l := sortedlist.NewOrderedArray[int](sortedlist.Asc, 0)
+	l.Add(1, 2, 2, 3, 4)
 
-	fmt.Println(slices.Collect(list.Range(2, 4)))
+	fmt.Println(slices.Collect(l.Range(2, 4)))
 
 	// Output:
 	// [2 2 3]
@@ -100,9 +100,9 @@ func ExampleArraySortedList_Range() {
 
 func ExampleArrayFrom() {
 	data := []int{3, 1, 2}
-	list := sortedlist.ArrayFrom(cmp.Compare[int], data)
+	l := sortedlist.ArrayFrom(cmp.Compare[int], data)
 
-	fmt.Println(slices.Collect(list.All()))
+	fmt.Println(slices.Collect(l.All()))
 	fmt.Println(data)
 
 	// Output:
@@ -112,9 +112,9 @@ func ExampleArrayFrom() {
 
 func ExampleArrayClone() {
 	data := []int{3, 1, 2}
-	list := sortedlist.ArrayClone(cmp.Compare[int], data)
+	l := sortedlist.ArrayClone(cmp.Compare[int], data)
 
-	fmt.Println(slices.Collect(list.All()))
+	fmt.Println(slices.Collect(l.All()))
 	fmt.Println(data)
 
 	// Output:
@@ -126,9 +126,9 @@ func ExampleArrayFromSeq() {
 	source := list.NewArray[int](0)
 	source.Append(3, 1, 2)
 
-	list := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
+	l := sortedlist.ArrayFromSeq(cmp.Compare[int], source.All())
 
-	fmt.Println(slices.Collect(list.All()))
+	fmt.Println(slices.Collect(l.All()))
 	fmt.Println(source.ToSlice())
 
 	// Output:

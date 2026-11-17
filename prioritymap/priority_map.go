@@ -48,11 +48,13 @@ type Readonly[K comparable, P any] interface {
 // It allows efficient insertion, update, and removal of key-priority pairs,
 // as well as extraction of the highest-priority element according to the
 // implementation's ordering contract.
-// K must be comparable for map operations, and P is the priority type.
+// Keys must be comparable and equal to themselves; P is the priority type.
+// When K is an interface, its dynamic keys must also be comparable.
 type PriorityMap[K comparable, P any] interface {
 	// Set inserts or updates the priority for the given key.
 	//
 	// If the key already exists, its priority is updated to the new value.
+	// It panics before mutation if key does not equal itself (for example, NaN).
 	Set(key K, priority P)
 
 	// Update changes the priority of an existing key.
@@ -68,6 +70,7 @@ type PriorityMap[K comparable, P any] interface {
 	// priority is "better" than the current one according to the comparator.
 	//
 	// It returns true if the map was modified (either by insertion or update).
+	// It panics before mutation if key does not equal itself (for example, NaN).
 	//
 	// This method is useful for algorithms like Dijkstra or A*.
 	Improve(key K, priority P) (ok bool)

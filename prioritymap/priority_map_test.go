@@ -2,6 +2,7 @@ package prioritymap_test
 
 import (
 	"cmp"
+	"math"
 	"slices"
 	"testing"
 
@@ -10,9 +11,9 @@ import (
 )
 
 func TestFactoriesImplementPriorityMap(t *testing.T) {
-	var _ *prioritymap.BinaryHeapPriorityMap[string, int] = prioritymap.NewBinaryHeap[string](cmp.Less[int], 0)
-	var _ *prioritymap.PairingHeapPriorityMap[string, int] = prioritymap.NewPairingHeap[string](cmp.Less[int], 0)
-	var _ *prioritymap.RadixHeapPriorityMap[string, uint64] = prioritymap.NewRadixHeap[string, uint64](0)
+	assert.IsType(t, (*prioritymap.BinaryHeapPriorityMap[string, int])(nil), prioritymap.NewBinaryHeap[string](cmp.Less[int], 0))
+	assert.IsType(t, (*prioritymap.PairingHeapPriorityMap[string, int])(nil), prioritymap.NewPairingHeap[string](cmp.Less[int], 0))
+	assert.IsType(t, (*prioritymap.RadixHeapPriorityMap[string, uint64])(nil), prioritymap.NewRadixHeap[string, uint64](0))
 	var _ prioritymap.PriorityMap[string, int] = prioritymap.NewBinaryHeap[string](cmp.Less[int], 0)
 	var _ prioritymap.PriorityMap[string, int] = prioritymap.NewOrderedBinaryHeap[string, int](prioritymap.Min, 0)
 	var _ prioritymap.PriorityMap[string, int] = prioritymap.NewOrderedBinaryHeap[string, int](prioritymap.Max, 0)
@@ -34,6 +35,79 @@ func TestComparatorConstructors_NilComparator(t *testing.T) {
 			prioritymap.NewPairingHeap[string, int](nil, 0)
 		})
 	})
+}
+
+func TestPriorityMap_NonReflexiveKeys(t *testing.T) {
+	factories := []struct {
+		name   string
+		create func() prioritymap.PriorityMap[any, int]
+	}{
+		{"Binary", func() prioritymap.PriorityMap[any, int] {
+			return prioritymap.NewOrderedBinaryHeap[any, int](prioritymap.Min, 4)
+		}},
+		{"Pairing", func() prioritymap.PriorityMap[any, int] {
+			return prioritymap.NewOrderedPairingHeap[any, int](prioritymap.Min, 4)
+		}},
+		{"Radix", func() prioritymap.PriorityMap[any, int] {
+			return prioritymap.NewRadixHeap[any, int](4)
+		}},
+	}
+	keys := []struct {
+		name string
+		key  any
+	}{
+		{"Float64", math.NaN()},
+		{"Float32", float32(math.NaN())},
+		{"Complex", complex(1, math.NaN())},
+		{"Array", [1]float64{math.NaN()}},
+		{"Struct", struct{ value float64 }{math.NaN()}},
+	}
+	for _, factory := range factories {
+		t.Run(factory.name, func(t *testing.T) {
+			for _, key := range keys {
+				t.Run(key.name, func(t *testing.T) {
+					for _, method := range []string{"Set", "Improve"} {
+						t.Run(method, func(t *testing.T) {
+							pm := factory.create()
+							pm.Set("first", 2)
+							pm.Set("second", 3)
+							assert.PanicsWithValue(t, "prioritymap: non-reflexive key", func() {
+								if method == "Set" {
+									pm.Set(key.key, 1)
+								} else {
+									pm.Improve(key.key, 1)
+								}
+							})
+							assert.Equal(t, 2, pm.Len())
+							assert.ElementsMatch(t, []any{"first", "second"}, slices.Collect(pm.Keys()))
+							assert.ElementsMatch(t, []int{2, 3}, slices.Collect(pm.Values()))
+							assert.Equal(t, 2, countAll(pm.All()))
+							assert.False(t, pm.Contains(key.key))
+							_, ok := pm.Get(key.key)
+							assert.False(t, ok)
+							assert.False(t, pm.Update(key.key, 1))
+							assert.False(t, pm.Remove(key.key))
+
+							poppedKey, priority, ok := pm.Pop()
+							assert.True(t, ok)
+							assert.Equal(t, "first", poppedKey)
+							assert.Equal(t, 2, priority)
+							assert.Equal(t, []int{3}, slices.Collect(pm.Values()))
+							assert.Equal(t, 1, countAll(pm.Drain()))
+							_, _, ok = pm.Pop()
+							assert.False(t, ok)
+							assert.True(t, pm.IsEmpty())
+							assert.Empty(t, slices.Collect(pm.Values()))
+							pm.Clear()
+							pm.Set("reused", 1)
+							assert.True(t, pm.Remove("reused"))
+							assert.Zero(t, pm.Len())
+						})
+					}
+				})
+			}
+		})
+	}
 }
 
 func TestNewBinaryHeap(t *testing.T) {
@@ -174,7 +248,7 @@ func assertPriorityMapBehavior(
 	assert.True(t, pm.IsEmpty())
 }
 
-func countAll(seq func(func(string, int) bool)) int {
+func countAll[K, P any](seq func(func(K, P) bool)) int {
 	count := 0
 	for range seq {
 		count++

@@ -460,7 +460,7 @@ func TestArrayList_All(t *testing.T) {
 		}
 	})
 
-	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
+	t.Run("PartialIteration_Reversed", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
 		list.Append(items...)
@@ -538,7 +538,7 @@ func TestArrayList_Enumerate(t *testing.T) {
 		assert.Equal(t, 3, list.Len())
 	})
 
-	t.Run("PartialIteration_Reverserd", func(t *testing.T) {
+	t.Run("PartialIteration_Reversed", func(t *testing.T) {
 		list := NewArrayList[int](3)
 		items := []int{1, 2, 3}
 		list.Append(items...)

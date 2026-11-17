@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleNewHashSet() {
-	values := set.HashSetFrom[string]([]string{"go", "collections", "go"})
+	values := set.HashSetFrom([]string{"go", "collections", "go"})
 	fmt.Println("added:", values.Add("iterators"))
 	fmt.Println("added:", values.Add("go"))
 	fmt.Println("removed:", values.Remove("collections", "missing", "collections"))
@@ -109,8 +109,8 @@ func ExampleHashSet_IntersectWith() {
 }
 
 func ExampleAsReadonly() {
-	mutable := set.HashSetFrom[int]([]int{1, 2})
-	view := set.AsReadonly[int](mutable)
+	mutable := set.HashSetFrom([]int{1, 2})
+	view := set.AsReadonly(mutable)
 
 	fmt.Println(slices.Sorted(view.All()))
 	mutable.Add(3)

@@ -9,8 +9,8 @@ type entry[K comparable, P any] struct {
 }
 
 // BinaryPriorityMap implements a priority‑map on top of a binary heap.
-// It maintains a map from keys to positions, allowing O(log n) insertion,
-// update and removal by key, and O(1) lookups.
+// It maintains a map from keys to positions, allowing O(log N) amortized
+// insertion, O(log N) update and removal by key, and O(1) lookups.
 //
 // K must be comparable (so it can be used as a map key). V is the
 // priority type; ordering among values is determined by the comparator
@@ -139,8 +139,17 @@ func (pm *BinaryPriorityMap[K, P]) Get(key K) (priority P, ok bool) {
 // Set inserts a new key with the given priority or updates an existing
 // key’s priority.  The heap is adjusted accordingly.
 //
-// Complexity: O(log n).
+// It panics before mutation if key does not equal itself (for example, NaN).
+//
+// Inserting a new key may grow the backing slice, adding O(N) work.
+//
+// Complexity: O(log N) Amortized.
+//
+//goland:noinspection GoDfaConstantCondition
 func (pm *BinaryPriorityMap[K, P]) Set(key K, priority P) {
+	if key != key {
+		panic("prioritymap: non-reflexive key")
+	}
 	if idx, ok := pm.indexes[key]; ok {
 		pm.data[idx].priority = priority
 		parent := (idx - 1) / 2
@@ -187,7 +196,11 @@ func (pm *BinaryPriorityMap[K, P]) Update(key K, priority P) (ok bool) {
 //
 // It returns true if the map was modified (either by insertion or update).
 //
-// Complexity: O(log n).
+// It panics before mutation if key does not equal itself (for example, NaN).
+//
+// Inserting a new key may grow the backing slice, adding O(N) work.
+//
+// Complexity: O(log N) Amortized.
 func (pm *BinaryPriorityMap[K, P]) Improve(key K, priority P) bool {
 	idx, exists := pm.indexes[key]
 	if !exists {
@@ -284,7 +297,7 @@ func (pm *BinaryPriorityMap[K, P]) Contains(key K) bool {
 
 // Keys returns an iterator for all keys in the collection.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the allocated key-index slots.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *BinaryPriorityMap[K, P]) Keys() iter.Seq[K] {
 	return func(yield func(K) bool) {
@@ -298,7 +311,7 @@ func (pm *BinaryPriorityMap[K, P]) Keys() iter.Seq[K] {
 
 // Values returns an iterator for all values (priorities/data).
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the allocated key-index slots.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *BinaryPriorityMap[K, P]) Values() iter.Seq[P] {
 	return func(yield func(P) bool) {
@@ -312,7 +325,7 @@ func (pm *BinaryPriorityMap[K, P]) Values() iter.Seq[P] {
 
 // All returns an iterator for key-value pairs.
 //
-// Complexity: O(n) for a full traversal, O(1) per step.
+// Complexity: O(C) for a full traversal, where C is the allocated key-index slots.
 // Note: This does not guarantee priority order; use Drain for priority-ordered traversal.
 func (pm *BinaryPriorityMap[K, P]) All() iter.Seq2[K, P] {
 	return func(yield func(K, P) bool) {
@@ -352,7 +365,7 @@ func (pm *BinaryPriorityMap[K, P]) Drain() iter.Seq2[K, P] {
 // This operation is typically more efficient than creating a new map
 // as it may reuse the underlying storage.
 //
-// Complexity: O(n) to zero out elements (avoiding memory leaks).
+// Complexity: O(C), where C is the allocated key-index slots.
 func (pm *BinaryPriorityMap[K, P]) Clear() {
 	clear(pm.indexes)
 	clear(pm.data)

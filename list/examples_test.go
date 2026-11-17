@@ -86,10 +86,10 @@ func ExampleNewLinked() {
 
 func ExampleArrayFrom() {
 	values := []int{10, 20, 30}
-	list := list.ArrayFrom[int](values)
+	l := list.ArrayFrom(values)
 
-	list.Append(40)
-	fmt.Println(list.ToSlice())
+	l.Append(40)
+	fmt.Println(l.ToSlice())
 
 	// Output:
 	// [10 20 30 40]
@@ -97,10 +97,10 @@ func ExampleArrayFrom() {
 
 func ExampleArrayClone() {
 	values := []int{10, 20, 30}
-	list := list.ArrayClone[int](values)
-	_ = list.Set(0, 100)
+	l := list.ArrayClone(values)
+	_ = l.Set(0, 100)
 
-	fmt.Println(list.ToSlice())
+	fmt.Println(l.ToSlice())
 	fmt.Println(values)
 
 	// Output:
@@ -109,9 +109,9 @@ func ExampleArrayClone() {
 }
 
 func ExampleLinkedFromSeq() {
-	list := list.LinkedFromSeq[int](slices.Values([]int{10, 20, 30}))
+	l := list.LinkedFromSeq(slices.Values([]int{10, 20, 30}))
 
-	fmt.Println(list.ToSlice())
+	fmt.Println(l.ToSlice())
 
 	// Output:
 	// [10 20 30]

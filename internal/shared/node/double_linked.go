@@ -43,16 +43,16 @@ func (node *DoubleLinkedNode[T]) Unlink() {
 //
 // Complexity: O(1).
 func (node *DoubleLinkedNode[T]) Append(x T) *DoubleLinkedNode[T] {
-	new := NewDoubleLinkedNode(x)
-	node.Next = new
-	new.Previous = node
-	return new
+	newNode := NewDoubleLinkedNode(x)
+	node.Next = newNode
+	newNode.Previous = node
+	return newNode
 }
 
 // HasNext returns true if there is a node following the current one.
 //
 // Complexity: O(1).
-func (node DoubleLinkedNode[T]) HasNext() bool {
+func (node *DoubleLinkedNode[T]) HasNext() bool {
 	return node.Next != nil
 }
 
@@ -61,15 +61,15 @@ func (node DoubleLinkedNode[T]) HasNext() bool {
 //
 // Complexity: O(1).
 func (node *DoubleLinkedNode[T]) Prepend(x T) *DoubleLinkedNode[T] {
-	new := NewDoubleLinkedNode(x)
-	node.Previous = new
-	new.Next = node
-	return new
+	newNode := NewDoubleLinkedNode(x)
+	node.Previous = newNode
+	newNode.Next = node
+	return newNode
 }
 
 // HasPrevious returns true if there is a node preceding the current one.
 //
 // Complexity: O(1).
-func (node DoubleLinkedNode[T]) HasPrevious() bool {
+func (node *DoubleLinkedNode[T]) HasPrevious() bool {
 	return node.Previous != nil
 }

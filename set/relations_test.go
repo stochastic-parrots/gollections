@@ -53,7 +53,7 @@ func TestRelationsBy_ReadonlyOperands(t *testing.T) {
 	byName := func(value member) string { return value.Name }
 	byID := func(value member) int { return value.ID }
 	asReadonly := func(values set.Set[member]) set.Readonly[member] {
-		return set.AsReadonly[member](values)
+		return set.AsReadonly(values)
 	}
 
 	subset := set.KeyedHashSetFrom(byName, []member{{ID: 1, Name: "a"}})

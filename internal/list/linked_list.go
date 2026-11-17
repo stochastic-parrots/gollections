@@ -116,13 +116,13 @@ func (l *LinkedList[T]) Set(index int, x T) error {
 // Complexity: O(len(xs)).
 func (l *LinkedList[T]) Append(xs ...T) {
 	for _, x := range xs {
-		new := node.NewLinkedNode(x)
+		newNode := node.NewLinkedNode(x)
 		if l.first == nil {
-			l.first = new
+			l.first = newNode
 		} else {
-			l.last.Next = new
+			l.last.Next = newNode
 		}
-		l.last = new
+		l.last = newNode
 		l.length++
 	}
 }
@@ -145,11 +145,11 @@ func (l *LinkedList[T]) Insert(idx int, x T) error {
 		return nil
 	}
 
-	node := node.NewLinkedNode(x)
+	n := node.NewLinkedNode(x)
 
 	if idx == 0 {
-		node.Next = l.first
-		l.first = node
+		n.Next = l.first
+		l.first = n
 		l.length++
 		return nil
 	}
@@ -159,8 +159,8 @@ func (l *LinkedList[T]) Insert(idx int, x T) error {
 		current = current.Next
 	}
 
-	node.Next = current.Next
-	current.Next = node
+	n.Next = current.Next
+	current.Next = n
 
 	l.length++
 	return nil
@@ -344,6 +344,8 @@ func (l *LinkedList[T]) Format(s fmt.State, verb rune) {
 // String returns a string representation of the list.
 //
 // Complexity: O(1) as it respects a fixed display limit.
+//
+//goland:noinspection GoPrintFunctions
 func (l *LinkedList[T]) String() string {
 	return fmt.Sprint(l)
 }

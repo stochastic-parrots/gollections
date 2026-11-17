@@ -179,6 +179,8 @@ func (rb *RingBufferDeque[T]) Format(s fmt.State, verb rune) {
 // String returns a string representation of the deque.
 //
 // Complexity: O(1) as it respects a fixed display limit.
+//
+//goland:noinspection GoPrintFunctions
 func (rb *RingBufferDeque[T]) String() string {
 	return fmt.Sprint(rb)
 }
@@ -198,7 +200,7 @@ func (rb *RingBufferDeque[T]) MarshalJSON() ([]byte, error) {
 // This operation is typically more efficient than creating a new deque
 // as it may reuse the underlying storage.
 //
-// Complexity: O(N) to zero out elements (avoiding memory leaks).
+// Complexity: O(C), where C is the retained ring-buffer capacity.
 func (rb *RingBufferDeque[T]) Clear() {
 	clear(rb.data)
 	rb.count = 0
@@ -287,7 +289,7 @@ func (rb *RingBufferDeque[T]) Pop() (T, bool) {
 // Note: This operation is destructive; it calls Clear() to remove all existing
 // elements before appending the ones from the JSON data.
 //
-// Complexity: O(N + len(data)).
+// Complexity: O(C + len(data)), where C is the retained ring-buffer capacity.
 func (rb *RingBufferDeque[T]) UnmarshalJSON(data []byte) error {
 	return collection.Unmarshal(data, rb.Clear, rb.Append)
 }

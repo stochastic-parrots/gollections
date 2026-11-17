@@ -9,6 +9,7 @@ import (
 
 // BinaryHeapPriorityMap is an indexed, slice-backed binary heap. Its zero value is invalid;
 // use NewBinaryHeap or NewOrderedBinaryHeap.
+// Keys must equal themselves; Set and Improve panic for non-reflexive keys.
 type BinaryHeapPriorityMap[K comparable, P any] = prioritymap.BinaryPriorityMap[K, P]
 
 var _ PriorityMap[int, any] = &prioritymap.BinaryPriorityMap[int, any]{}
@@ -17,25 +18,31 @@ var _ PriorityMap[int, any] = &prioritymap.BinaryPriorityMap[int, any]{}
 // strict-weak-order predicate. Choose it for predictable O(log N) updates.
 // It panics for a nil predicate. Lookup and Peek are O(1); updates and Pop are O(log N).
 //
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which can exceed N after preallocation or removals.
+//
+// Inserting a new key with Set or Improve is O(log N) amortized. Growing the
+// backing slice adds O(N) work to an individual insertion.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation                Time Complexity
 //	----------------------   ---------------
 //	Get(key)                 O(1)
 //	Contains(key)            O(1)
-//	Keys()                   O(N)
-//	Values()                 O(N)
-//	All()                    O(N)
+//	Keys()                   O(C)
+//	Values()                 O(C)
+//	All()                    O(C)
 //	IsEmpty()                O(1)
 //	Len()                    O(1)
 //	Peek()                   O(1)
-//	Set(key, priority)       O(log N)
+//	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N)
-//	Improve(key, priority)   O(log N)
+//	Improve(key, priority)   O(log N) Amortized
 //	Remove(key)              O(log N)
 //	Pop()                    O(log N)
 //	Drain()                  O(N log N)
-//	Clear()                  O(N)
+//	Clear()                  O(C)
 //
 // Complexity: O(capacity).
 func NewBinaryHeap[K comparable, P any](hasPriority func(P, P) bool, capacity int) *BinaryHeapPriorityMap[K, P] {
@@ -47,25 +54,31 @@ func NewBinaryHeap[K comparable, P any](hasPriority func(P, P) bool, capacity in
 
 // NewOrderedBinaryHeap creates an empty priority map using P's natural order.
 //
+// N is the current number of entries (Len()). C is the number of allocated
+// key-index slots, which can exceed N after preallocation or removals.
+//
+// Inserting a new key with Set or Improve is O(log N) amortized. Growing the
+// backing slice adds O(N) work to an individual insertion.
+//
 // Performance Summary (Time Complexity):
 //
 //	Operation                Time Complexity
 //	----------------------   ---------------
 //	Get(key)                 O(1)
 //	Contains(key)            O(1)
-//	Keys()                   O(N)
-//	Values()                 O(N)
-//	All()                    O(N)
+//	Keys()                   O(C)
+//	Values()                 O(C)
+//	All()                    O(C)
 //	IsEmpty()                O(1)
 //	Len()                    O(1)
 //	Peek()                   O(1)
-//	Set(key, priority)       O(log N)
+//	Set(key, priority)       O(log N) Amortized
 //	Update(key, priority)    O(log N)
-//	Improve(key, priority)   O(log N)
+//	Improve(key, priority)   O(log N) Amortized
 //	Remove(key)              O(log N)
 //	Pop()                    O(log N)
 //	Drain()                  O(N log N)
-//	Clear()                  O(N)
+//	Clear()                  O(C)
 //
 // Complexity: O(capacity).
 func NewOrderedBinaryHeap[K comparable, P cmp.Ordered](order Order, capacity int) *BinaryHeapPriorityMap[K, P] {

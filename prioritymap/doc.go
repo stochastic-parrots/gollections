@@ -8,9 +8,14 @@
 //
 // # Implementations
 //
-// [BinaryHeapPriorityMap] provides predictable O(log N) insertion, update,
-// removal, and Pop, with O(1) key lookup and Peek. Select it with [NewBinaryHeap]
+// [BinaryHeapPriorityMap] provides O(log N) amortized insertion and O(log N)
+// update, removal, and Pop, with O(1) key lookup and Peek. Growing the backing
+// slice adds O(N) work to an individual insertion. Select it with [NewBinaryHeap]
 // or [NewOrderedBinaryHeap].
+//
+// Keys must be comparable and equal to themselves. Set and Improve panic before
+// mutation for non-reflexive keys, including NaN and arrays or structs containing
+// NaN. When the key type is an interface, every dynamic key must be comparable.
 //
 // [PairingHeapPriorityMap] cuts and links a node in O(1) immediate heap work
 // when its priority improves. It defers child consolidation to Pop, removal, or
@@ -52,7 +57,7 @@
 // Keys, Values, and All do not guarantee priority order. Separate Keys and
 // Values iterations are not positionally related. Use All to retain key-priority
 // association and Drain for destructive priority-ordered traversal.
-// For a pairing heap, full map iteration and Clear depend on the key index's
+// Full map iteration and Clear depend on the key index's
 // allocated slots (C), which can exceed the number of current entries
 // (N = Len()) after preallocation or removals.
 //
