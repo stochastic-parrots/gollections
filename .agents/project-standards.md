@@ -587,4 +587,11 @@ alias and constructor from the public package.
   - `fix(priority map): clear stale priority state`
 - Keep commits reviewable and grouped by intent: feature, tests, docs,
   benchmarks, and cleanup should be separate when practical.
-- Tags are annotated and currently follow `v0.0.N-alpha`.
+- Open release PRs manually from `develop` or a same-repository `release/*`
+  branch to `main`, with the title `release: vMAJOR.MINOR.PATCH[-prerelease]`.
+  Merge releases using merge commits.
+- Publish annotated version tags and GitHub Releases manually after a release
+  PR merges into `main`. Tag the merge commit of the release PR.
+- Release versions must match the module path: major versions 2 and above
+  require the corresponding `/vN` suffix, including prereleases. The current
+  unsuffixed module supports major versions 0 and 1.

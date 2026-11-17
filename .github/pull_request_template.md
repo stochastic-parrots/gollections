@@ -1,5 +1,6 @@
-> Target this pull request at `develop`. The `develop` to `main` release
-> promotion is opened automatically by GitHub Actions.
+> Target change pull requests at `develop`. Open release pull requests to `main`
+> manually from `develop` or a same-repository `release/*` branch, with the title
+> `release: vMAJOR.MINOR.PATCH[-prerelease]`.
 
 ## Summary
 
